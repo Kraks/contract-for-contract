@@ -1,0 +1,52 @@
+## Possible title
+  Contracts for Contracts
+  Contracts meet Contracts
+
+Subtitle?
+- Adding Higher-Order Contracts for Blockchain Languages
+
+## motiviation
+- reliability and security of smart contract programs
+- contracts enforce properties/check invariants at runtime
+  Effiel, Design by Contract https://se.inf.ethz.ch/~meyer/publications/old/dbc_chapter.pdf
+  Racket, higher-order contracts https://users.cs.northwestern.edu/~robby/pubs/papers/ho-contracts-techreport.pdf
+- smart contracts use callback, need for higher-order contract
+
+- compared to formal verification
+  + less cost
+  + low barrier to write
+  + flexible
+  + can be used as specification of formal verification
+    look at David van Horn - contract verification
+- compared to simple assertions
+  + more systematic
+  + better support of idioms eg callback
+
+## contribution
+- adding higher-order contract to a production blockchain language
+  (if this goes to a PL conf, need to articulate the semantics)
+- it is effective
+  cases
+- it is efficient
+  how much?
+- it is easy to use
+  what's the evidence? user study?
+
+## what needs to be done?
+- collect cases
+- modify Solidty compiler
+- decide the surface syntax (look at Racket?)
+  convinent ways to write/combine contract
+- generate code that insert assertions at right places
+  higher-order contract has a subtle monitor semantics
+  https://users.cs.northwestern.edu/~robby/pubs/papers/ho-contracts-techreport.pdf
+  https://users.soe.ucsc.edu/~cormac/papers/popl11.pdf
+- what's the behavior when violated?
+  exception and termination?
+
+## evaluation
+- if we have modified the Solidty compiler, how should we evaluate?
+  can we run it on the real chain?
+- cases that can be prevented if with contract
+- performance overhead?
+
