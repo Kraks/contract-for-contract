@@ -181,9 +181,22 @@ smart contracts use callback, need for higher-order contract,
   Solidty already has "require" and "assert", but it doesn't deal with function values (NEED DOUBLE CHECK)
   %https://docs.soliditylang.org/en/v0.8.17/control-structures.html?highlight=require#panic-via-assert-and-error-via-require
 
+\paragraph{Contributions}
+\begin{itemize}
+  \item We propose to add higher-order contracts to programs running on blockchains for
+    safer and more reliable smart contracts.
+  \item We present a core model that extends the Solidity language with higher-order contracts,
+    including its syntax, semantics, and soundness.
+  \item We examine a number of real-world cases and shows that our proposed approach
+    is effective in ...
+  \item We implement our approach on top of the Solidity compiler and shows
+    that its runtime overhead is marginal(?) ...
+\end{itemize}
+
 \section{Motivation}
 
-an interesting case that shows with contracts for contracts the world will be better; how much money it could save for people
+an interesting case that shows with contracts for contracts the world will be better;
+how much money it could save for people
 
 \section{Contract Solidity}
 
@@ -191,7 +204,7 @@ informal description and examples of the language dubbed ``Contract Solidity''
 
 \section{Formal Model}
 
-the core model of the language
+the core model of the language (TODO named?)
 
 \subsection{Syntax}
 
@@ -201,14 +214,17 @@ the core model of the language
 
 what does it guarantee
 
+\section{Case Studies}
+
+examining 3-4 cases, they are the proof that the approach works
+
+perhaps also performance evaluation?
+
 \section{Implementation}
 
 the implemention that modidifies the off-the-shelf Solidity compiler that
 supports contracts and generates code with correct contracts checking
 
-\section{Case Studies}
-
-examining 3-4 cases
 
 \section{Related Work}
 
