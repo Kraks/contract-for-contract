@@ -53,6 +53,28 @@
 \usepackage{subcaption} %% For complex figures with subfigures/subcaptions
                         %% http://ctan.org/pkg/subcaption
 
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[scaled=0.8]{beramono}
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{xcolor,colortbl}
+\usepackage{url}
+\usepackage{listings}
+\usepackage{paralist}
+%\usepackage[compact]{titlesec}
+\usepackage{caption}
+\usepackage{wrapfig}
+\usepackage{enumitem}
+\usepackage{multicol}
+\usepackage{flushend}
+\usepackage{textcomp}
+\usepackage{pdfpages}
+\usepackage{cleveref}
+\usepackage{xspace}
+\definecolor{light-gray}{gray}{0.85}
+
+\input{macros}
 
 \begin{document}
 
@@ -125,6 +147,11 @@
 }
 \email{first2.last2@inst2b.org}         %% \email is recommended
 
+\lstMakeShortInline[keywordstyle=,%
+                    flexiblecolumns=false,%
+                    %basewidth={0.56em, 0.52em},%
+                    mathescape=false,%
+                    basicstyle=\ttfamily]@
 
 %% Abstract
 %% Note: \begin{abstract}...\end{abstract} environment must come
@@ -177,20 +204,31 @@ contracts enforce properties/check invariants at runtime
   %https://se.inf.ethz.ch/~meyer/publications/old/dbc_chapter.pdf
   Racket, higher-order contracts
 
+%https://docs.soliditylang.org/en/v0.8.17/control-structures.html?highlight=require#panic-via-assert-and-error-via-require
 smart contracts use callback, need for higher-order contract,
-  Solidty already has "require" and "assert", but it doesn't deal with function values (NEED DOUBLE CHECK)
-  %https://docs.soliditylang.org/en/v0.8.17/control-structures.html?highlight=require#panic-via-assert-and-error-via-require
 
-\paragraph{Contributions}
+One of the most adopted smart contract language Solidity indeed provides
+linguistic mechanisms such as @require@ and @assert@ to enforce first-order
+properties, however they does not deal with function values.
+\todo{need double check}
+
+Static verification cannot completely address the issue here since
+transaction developers are oblivious to the user-provided callback.
+
+It is unfortunate or even surprising that smart contract languages have not
+adopted full-blown software contracts, especially higher-order contracts.
+
+\subsubsection*{Contributions} This paper makes the following contributions:
 \begin{itemize}
-  \item We propose to add higher-order contracts to programs running on blockchains for
-    safer and more reliable smart contracts.
-  \item We present a core model that extends the Solidity language with higher-order contracts,
-    including its syntax, semantics, and soundness.
-  \item We examine a number of real-world cases and shows that our proposed approach
-    is effective in ...
-  \item We implement our approach on top of the Solidity compiler and shows
-    that its runtime overhead is marginal(?) ...
+  \item We propose to add higher-order contracts to smart contract languages to
+    improve the safety and reliability. We use Solidity to demonstrate our
+    proposal.
+  \item We present the core language ``Contract Solidity'' with higher-order
+    contracts, including its syntax, formal semantics, and soundness.
+  \item We examine a number of real-world cases and show that our proposal
+    is effective in improving safety and reliability.
+  \item We implement our approach on top of the existing Solidity compiler and shows
+    that its runtime overhead is marginal.
 \end{itemize}
 
 \section{Motivation}
@@ -202,9 +240,14 @@ how much money it could save for people
 
 informal description and examples of the language dubbed ``Contract Solidity''
 
+\begin{lstlisting}
+  def test(x: Int): Int = x + 1
+\end{lstlisting}
+
 \section{Formal Model}
 
 the core model of the language (TODO named?)
+\todo{there must be some interesting points/trade-offs about the design}
 
 \subsection{Syntax}
 
