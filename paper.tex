@@ -86,7 +86,8 @@
 \titlenote{with title note}             %% \titlenote is optional;
                                         %% can be repeated if necessary;
                                         %% contents suppressed with 'anonymous'
-\subtitle{Adding Higher-Order Contracts for Smart Contract}                     %% \subtitle is optional
+%\subtitle{Adding Higher-Order Contracts for Smart Contracts}                     %% \subtitle is optional
+\subtitle{Expressive Assertion Monitoring System for Safer Smart Contracts}                     %% \subtitle is optional
 \subtitlenote{with subtitle note}       %% \subtitlenote is optional;
                                         %% can be repeated if necessary;
                                         %% contents suppressed with 'anonymous'
@@ -197,21 +198,34 @@ Text of abstract \ldots.
 
 \section{Introduction}
 
-reliability and security of smart contract programs
+\todo{exciting intro of smart contract}
 
-contracts enforce properties/check invariants at runtime
-  Effiel, Design by Contract
+Building trustworthy and secure smart contract programs requires solid
+understanding and reliable enforcement of program invariants.
+\todo{why? solidity is rather flexible, unsatisfying/weaker type system,
+not all invariants can be checked statically, e.g. the status of the chain}
+
+contracts enforce properties/check invariants at runtime pioneered by the
+Effiel language and the Design by Contract methodology.
   %https://se.inf.ethz.ch/~meyer/publications/old/dbc_chapter.pdf
-  Racket, higher-order contracts
+
+One of the most adopted smart contract language Solidity indeed provides a
+simple assertion mechanism such as @require@ to enforce properties.
+However, the provided mechanism only handles first-order properties and does
+not deal with function values.  \todo{GW: need double check}
+
+Solidity supports higher-order functions (\todo{GW: does it support returning
+functions?}, however, the lack of reliable means to enforce properties
+for higher-order programs discourages programmers to use these powerful
+abstractions. It also leads to unfortunate real-world hazards.
 
 %https://docs.soliditylang.org/en/v0.8.17/control-structures.html?highlight=require#panic-via-assert-and-error-via-require
-smart contracts use callback, need for higher-order contract,
+One \note{common} use case of higher-order functions in smart contracts is
+to express callback \todo{explain how it is used}.
+\todo{need for richer mechanisms to enforce invariants of HO functions}
+Racket, higher-order contracts
 
-One of the most adopted smart contract language Solidity indeed provides
-linguistic mechanisms such as @require@ and @assert@ to enforce first-order
-properties, however they does not deal with function values.
-\todo{need double check}
-
+\todo{it is hard to enforce properties when callbacks exist}
 Static verification cannot completely address the issue here since
 transaction developers are oblivious to the user-provided callback.
 
