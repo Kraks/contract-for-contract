@@ -86,8 +86,12 @@
 \titlenote{with title note}             %% \titlenote is optional;
                                         %% can be repeated if necessary;
                                         %% contents suppressed with 'anonymous'
+<<<<<<< HEAD
 %\subtitle{Adding Higher-Order Contracts for Smart Contracts}                     %% \subtitle is optional
 \subtitle{Expressive Assertion Monitoring System for Safer Smart Contracts}                     %% \subtitle is optional
+=======
+\subtitle{Adding Temporal Higher-Order Behavioral Contracts for Smart Contract Languages}                     %% \subtitle is optional
+>>>>>>> 75c60af (misc intro)
 \subtitlenote{with subtitle note}       %% \subtitlenote is optional;
                                         %% can be repeated if necessary;
                                         %% contents suppressed with 'anonymous'
@@ -231,6 +235,25 @@ transaction developers are oblivious to the user-provided callback.
 
 It is unfortunate or even surprising that smart contract languages have not
 adopted full-blown software contracts, especially higher-order contracts.
+
+smart contracts use callback, need for higher-order contract,
+  Solidty already has "require" and "assert", but it doesn't deal with function
+  values (NEED DOUBLE CHECK)
+  %https://docs.soliditylang.org/en/v0.8.17/control-structures.html?highlight=require#panic-via-assert-and-error-via-require
+
+The lack of sufficient linguistic means to enforce subtle behaviors discourages
+programmers to use higher-level abstractions when writing smart contract code.
+Instead, programmers are imposed to write code with lower-level or little
+abstractions, which conflates the main business logic and behavioral checks,
+leading to poor readability and maintainability, and often worse, vulnerable
+and insecure code.
+
+In this paper, we argue that advanced \emph{behavioral contracts} provide a lightweight
+linguistic solution for many security issues found in smart contract programs.
+
+We design and implement an extension of Solidity, a popular language for building
+smart contract programs. The extension enriches the language with temporal
+and higher-order behavioral contracts, which checks \todo{...}
 
 \subsubsection*{Contributions} This paper makes the following contributions:
 \begin{itemize}
