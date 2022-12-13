@@ -231,6 +231,12 @@ For example, Solidity provides first-order assertion primitives @require@ and
 @assert@, but they cannot check function values (e.g. used as callbacks), which are a
 common pattern used in smart contract programs. Attackers are able to utilize
 the callback mechanism to \note{do crazy things and steal money}
+Solidity also provides the @modifier@ mechanism that intercepts
+before and after a function call, thus can be used to check
+pre- and post-conditions.
+\todo{can we compose modifier?}
+\todo{can we attach modifier to callbacks?}
+\todo{can we use modifier to check function's argument?}
 
 The lack of sufficient linguistic means to specify and enforce subtle behaviors
 discourages programmers to use higher-level abstractions when writing smart
@@ -252,7 +258,7 @@ In this paper, we argue that advanced \emph{behavioral contracts} provide a
 lightweight linguistic solution for many security issues found in smart
 contract programs.
 
-\paragraph{\textbf{Behavioral Contracts for Smart Contracts}}
+\subsubsection*{\textbf{Behavioral Contracts for Smart Contracts}}
 Behavioral contracts provide a mechanism for programmers to specify assumptions
 and guarantees of software components. The specified assumptions and guarantees
 will be monitored and reported when violated.
@@ -262,7 +268,7 @@ contracts have been widely adopted in Java, Haskell, C\#, Python, Racket, etc. \
 
 \todo{why BC is good here?}
 
-At the concetual level, behavioral contracts is complementary to smart
+At the conceptual level, behavioral contracts is complementary to smart
 contracts, in this sense that they are both agreement -- between software
 components for the former, and between transactional parties for the later.
 Thus, the two ``contracts'' indeed mean the same thing but just different levels
@@ -281,7 +287,7 @@ our approach is effective in preventing these attacks.
 
 \todo{discuss performance/gas consumption}
 
-\subsubsection*{Contributions} This paper makes the following contributions:
+\subsubsection*{\textbf{Contributions}} This paper makes the following contributions:
 \begin{itemize}
   \item We propose to add temporal and higher-order contracts to smart contract
     languages to improve the safety and reliability. We use Solidity to
@@ -328,22 +334,50 @@ examining 3-4 cases, they are the proof that the approach works
 
 \subsection{Callback}
 
+\subsection{Comparison with \texttt{modifier}}
+
 \todo{what else?}
 
 \section{Implementation}
 
-the implementation that modidifies the off-the-shelf Solidity compiler that
+the implementation that modifies the off-the-shelf Solidity compiler that
 supports contracts and generates code with correct contracts checking
 
 \section{Performance Evaluation}
 
 \section{Related Work}
 
-\section{Conclusion}
+\subsubsection*{\textbf{Behavioral Contracts}}
+
+Eiffel the ``design-by-contract'' methodology \cite{DBLP:books/ph/Meyer91, DBLP:conf/tools/Meyer98a}
 
 higher-order contract \cite{DBLP:conf/icfp/FindlerF02}
 
-Eiffel the ``design-by-contract'' methodology \cite{DBLP:books/ph/Meyer91, DBLP:conf/tools/Meyer98a}
+temporal higher-order contract \cite{DBLP:conf/icfp/DisneyFM11}
+
+\subsubsection*{\textbf{Smart Contracts}}
+
+runtime validation, reduce overhead of runtime checks \cite{DBLP:conf/pldi/LiCL20}
+
+security analyzer \cite{DBLP:conf/pldi/BrentGLSS20}
+
+nondeterminisitic payment bugs \cite{DBLP:journals/pacmpl/WangZS19}
+
+behavioral simulation to verify smart contracts \cite{DBLP:conf/pldi/BeillahiCEE20}
+
+formal and modular specification of smart contracts \cite{DBLP:journals/pacmpl/BramEMSS21}
+
+static analysis to infer ownership and commutativity summaries, for parallelism
+\cite{DBLP:conf/pldi/Pirlea0S21}
+
+callbacks \cite{DBLP:journals/pacmpl/AlbertGRRRS20, DBLP:journals/pacmpl/GrossmanAGMRSZ18}
+
+reduce gas consumption \cite{DBLP:journals/pacmpl/GrechKJBSS18}
+
+static analysis of Ethereum \cite{DBLP:journals/pacmpl/SmaragdakisGLTT21}
+
+\section{Conclusion}
+
 
 %% Acknowledgments
 \begin{acks}                            %% acks environment is optional
