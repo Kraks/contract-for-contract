@@ -288,17 +288,19 @@ our approach is effective in preventing these attacks.
 
 \todo{discuss performance/gas consumption}
 
+\todo{allows interesting programming idioms to be expressed}
+
 \subsubsection*{\textbf{Contributions}} This paper makes the following contributions:
 \begin{itemize}
-  \item We propose to add temporal and higher-order contracts to smart contract
-    languages to improve the safety and reliability. We use Solidity to
-    demonstrate our proposal.
+  \item We propose an conservative linguistic extension to Solidty,
+    namely the temporal and higher-order contracts to improve the safety and
+    reliability.
   \item We present the core language ``Contract Solidity'' with our
     proposed extension, including its syntax, formal semantics, and soundness.
   \item We examine a number of real-world cases and show that our proposal is
     effective in improving safety and reliability.
   \item We implement our approach on top of the existing Solidity compiler and shows
-    that its runtime overhead is marginal.
+    that its runtime overhead is marginal, therefore practical to use.
 \end{itemize}
 
 \section{Motivation}
@@ -359,6 +361,8 @@ higher-order contract \cite{DBLP:conf/icfp/FindlerF02}
 temporal higher-order contract \cite{DBLP:conf/icfp/DisneyFM11}
 
 \subsubsection*{\textbf{Smart Contracts}}
+
+core calculus of Solidity-like languages \cite{Sergey2021, DBLP:conf/esorics/BartolettiGM19, DBLP:conf/fc/CrafaPZ19}
 
 runtime validation, reduce overhead of runtime checks \cite{DBLP:conf/pldi/LiCL20}
 
