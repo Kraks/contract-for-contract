@@ -218,8 +218,8 @@ parties involved in the agreement can be certain about the outcome.
 Smart contracts are ``smart'' since by using blockchains they provide a
 mechanism to \emph{ensure the economic outcome of transactions} without a
 central authority.
-A blockchain implements a consensus protocol of Byzantine-fault-tolerant
-distributed ledgers.
+A blockchain is a \note{XXX} that implements a consensus protocol of
+Byzantine-fault-tolerant distributed ledgers.
 
 It is however ironic that many popular smart contract languages, which hold the
 great promise to ensure transactional outcomes via consensus and distributed
@@ -227,6 +227,8 @@ ledgers, do not provide enough means to \emph{ensure the quality of programs}.
 Without ensuring the quality of programs, it is impossible to ensure
 the economic outcome of transactions.
 
+Indeed, we have seen a great number of notorious attacks to smart contract
+systems in recent years.
 For example, Solidity provides first-order assertion primitives @require@ and
 @assert@, but they cannot check function values (e.g. used as callbacks), which are a
 common pattern used in smart contract programs. Attackers are able to utilize
@@ -239,8 +241,8 @@ pre- and post-conditions.
 \todo{can we use modifier to check function's argument?}
 
 The lack of sufficient linguistic means to specify and enforce subtle behaviors
-discourages programmers to use higher-level abstractions when writing smart
-contract code.
+discourages programmers to use concise higher-level abstractions when writing
+smart contract code.
 Instead, to be secure, programmers are obliged to write verbose code with
 lower-level abstractions, which conflates the main business logic and
 behavioral checks, leading to poor readability and maintainability.
@@ -253,9 +255,9 @@ causing real monetary lose.
 
 Apart from investigating effort to audit, certify, or verify smart contract programs,
 language designers are responsible to empower programmers with better
-linguistic solution to write invulnerable smart contracts in the first place.
-In this paper, we argue that advanced \emph{behavioral contracts} provide a
-lightweight solution for many security issues found in smart contract programs.
+linguistic solutions to write invulnerable smart contracts in the first place.
+In this paper, we show that advanced \emph{behavioral software contracts} provide a
+lightweight solution for securing \emph{smart contracts}.
 
 \subsubsection*{\textbf{Behavioral Contracts for Smart Contracts}}
 Behavioral contracts provide a mechanism for programmers to specify assumptions
