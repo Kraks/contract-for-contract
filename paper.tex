@@ -291,14 +291,18 @@ our approach is effective in preventing these attacks.
 
 \todo{allows interesting programming idioms to be expressed}
 
+% second-class contracts
+
 \subsubsection*{\textbf{Contributions}} This paper makes the following contributions:
 \begin{itemize}
-  \item We propose an conservative linguistic extension to Solidty,
-    namely the temporal and higher-order contracts to improve the safety and
-    reliability.
-  \item We present the core language ``Contract Solidity'' with our
-    proposed extension, including its syntax, formal semantics, and soundness.
-  \item We examine a number of real-world cases and show that our proposal is
+  \item We propose a specification of behavior contracts for expressing and
+    enforcing higher-order and temporal properties for smart contracts.
+  \item We design a language extension of behavior contracts for Solidty,
+    demonstrate its use cases through extensive examples,
+    and how it can improve the safety and reliability.
+  \item We present the core language ``Contract Solidity'' with our proposed
+    extension, including its syntax, formal semantics, and soundness.
+  \item We examine a number of real-world attacks and show that our proposal is
     effective in improving safety and reliability.
   \item We implement our approach on top of the existing Solidity compiler and shows
     that its runtime overhead is marginal, therefore practical to use.
