@@ -291,6 +291,9 @@ our approach is effective in preventing these attacks.
 
 \todo{allows interesting programming idioms to be expressed}
 
+\todo{allows furthermore downstream tasks, fuzzing, static verification,
+natural language to formal spec etc.}
+
 % second-class contracts
 
 \subsubsection*{\textbf{Contributions}} This paper makes the following contributions:
@@ -317,11 +320,23 @@ how much money it could save for people
 
 \section{Contract Solidity}
 
+\subsection{Describing Higher-Order Temporal Properties}
+
 informal description and examples of the language dubbed \lang
+
+\subsection{First-Order Values}
+
+\subsection{Callbacks/Addresses}
 
 \begin{lstlisting}
   def test(x: Int): Int = x + 1
 \end{lstlisting}
+
+\subsection{Temporal Properties}
+
+after, before, eventually, non-reentrancy
+
+linear (must call once), affine (at most call once), relevant (at least call once)
 
 \section{Formal Model}
 
