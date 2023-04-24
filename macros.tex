@@ -5,27 +5,19 @@
 \definecolor{ccomment}{HTML}{3F7F5F}
 \definecolor{cstring}{HTML}{2A0099}
 
-\lstdefinelanguage{Scala}%
+\lstdefinelanguage{Solidity}%
 {morekeywords={
-  abstract, sealed, lazy,
-  case,catch,char,class,%
-  def,do,else,extends,final,finally,for,%
-  if,import,implicit,%
-  match,module,%
-  new,null,undefined,%
-  %fun,
-  array,
-  override,%
-  package,private,protected,public,%
-  for,public,return,super,%
-  this,throw,trait,try,type,%
-  val,var,%
-  with,while,%
-  object,
-  let,skip,assert,then,fst,snd,idx,sum,prod,exists,forall,%
-  yield,%
-  % some scheme keywords
-  define, null?, car, cdr
+  abstract, contracts, is,
+  function, constructor, memory,
+  for, if, new
+  mapping,
+  internal, external, pure, view, payable, return, returns,
+  public, private, virtual, override,
+  true, false, bool,
+  bytes, bytes32,
+  uint, uint8, uint16, uint32, uint64, uint128, uint256,
+  address, string,
+  require, assert, revert, try, catch
   },%
   sensitive,%
   moredelim=*[il][\bfseries]{\#\#\ },
@@ -37,7 +29,7 @@
 }[keywords,comments,strings]%
 
 \lstset{
-  language=Scala,%
+  language=Solidity,%
   mathescape=true,%
 %  columns=[c]fixed,%
   aboveskip=2pt,%\smallskipamount,
@@ -55,10 +47,6 @@
            {<-}{{$\leftarrow$}}2
            {=>}{{$\Rightarrow ~$}}2
            {|-}{{$\ts$}}2
-           {fun}{{$\lambda$}}1
-           {idx}{{$\#$}}1
-           {sum}{{$\Sigma$}}1
-           {array(}{{$\langle.\rangle$(}}3
            {σ}{{$\sigma$}}1
            {ρ}{{$\rho$}}1
            {→}{{$\to$}}1
@@ -83,56 +71,16 @@
            %{…}{{$\!...$}}1
 }
 
-\lstdefinestyle{small}{
-  language=Scala,%
-  mathescape=true,%
-%  columns=[c]fixed,%
-  aboveskip=2pt,%\smallskipamount,
-  belowskip=1pt,%\negsmallskipamount,
-  lineskip=-1pt,
-  basewidth={0.6em, 0.45em},%
-%  backgroundcolor=\color{listingbg},
-  basicstyle=\fontsize{7}{9}\selectfont\ttfamily,
-  keywordstyle=\keywordstyle,
-  commentstyle=\commentstyle,
-  stringstyle=\stringstyle,
-%  xleftmargin=0.5cm
-  literate={-->}{{$\to$}}3
-           {->}{{$\mapsto$}}3
-           {=>}{{$\Rightarrow ~$}}2
-           {|-}{{$\ts$}}2
-           %{fun}{{$\lambda$}}1
-           {idx}{{$\#$}}1
-           {sum}{{$\Sigma$}}1
-           {array(}{{$\langle.\rangle$(}}3
-           {σ}{{$\sigma$}}1
-           {ρ}{{$\rho$}}1
-           {→}{{$\to$}}1
-           {λ}{{$\lambda$}}1
-           {α}{{$\alpha$}}1
-           {⊔}{{$\sqcup$}}1
-           {⊓}{{$\sqcap$}}1
-           {⊑}{{$\sqsubseteq$}}1
-           {⊤}{{$\top$}}1
-           {⊥}{{$\bot$}}1
-           {×}{{$\times$}}1
-           {τ}{{$\tau$}}1
-           {ψ}{{$\psi$}}1
-           %{[[}{{$[\![$}}1
-           %{]]}{{$]\!]$}}1
-           %{…}{{$\!...$}}1
-}
-
 \definecolor{listingbg}{RGB}{240, 240, 240}
 
 \newcommand{\commentstyle}[1]{\color{ccomment}\itshape{#1}}
 \newcommand{\keywordstyle}[1]{\color{ckeyword}\bfseries{#1}}
 \newcommand{\stringstyle}[1]{\color{cstring}\text{#1}}
 
-\lstnewenvironment{listing}{\lstset{language=Scala}}{}
-\lstnewenvironment{listingtiny}{\lstset{language=Scala,basicstyle=\scriptsize\ttfamily}}{}
+\lstnewenvironment{listing}{\lstset{language=Solidity}}{}
+\lstnewenvironment{listingtiny}{\lstset{language=Solidity,basicstyle=\scriptsize\ttfamily}}{}
 
-\newcommand{\code}[1]{\lstinline[language=Scala,columns=fixed,basicstyle=\ttfamily]|#1|}
+\newcommand{\code}[1]{\lstinline[language=Solidity,columns=fixed,basicstyle=\ttfamily]|#1|}
 
 % ----- formal
 
