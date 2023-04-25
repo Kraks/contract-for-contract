@@ -125,9 +125,18 @@ the data:
 function f(address a) { ... }
 ```
 
+Address call can designate the callee function, therefore it is necessary
+to specify the spec for possible callees.
+
+```
+# { a.f | pre-cond -> post-cond }
+# { a.g | pre-cond -> post-cond }
+function f(address a) { ... }
+```
+
 ### Control-Flow Integrity
 
-TODO
+TODO: optional, might be another work...
 
 ### Limitations
 
@@ -219,10 +228,14 @@ Simply requiring `f` happens before `g`:
 function f(...) { ... }
 ```
 
+TODO: need to think about quantification.
+
 Note: `f => g` matches the most recent call of `f`, or any prior call of `f` (if
 there are multiple calls of `f`)?
 
-Note: need to think about interactions with compiler optimization (eg inlining).
+TODO: need to think about interactions with compiler optimization (eg inlining).
+
+TODO: need to think about how temporal contracts interact with address calls.
 
 ### Negative temporal properties
 
@@ -255,6 +268,32 @@ of EVM, but simply record a shadow stack for necessary metadata. Is that enough?
 
 ### Positive contextual properties
 
+For example, the following spec enforces that `g` can only be invoked
+under the calling context of `h`, and the return value of `h` must be
+the same as the argument of `g`:
+
+```
+function h(int x) returns int { ... }
+# h(x) returns y ~> g(y) returns r
+function g(int y) returns int { ... }
+```
+
+To enforce this behavior, we must check
+- when `g` is invoked, there is a frame of `h` on the stack,
+- when `h` returns (which happens after `g` returns), the return value
+  is the same as the argument of `g`.
+
+Question: what if `g` is invoked multiple times under the same calling context of
+`h`?
+
+Solution: need quantifier. A simple/default solution is to check all
+invocations of `g`.
+
+Question: what if there are multiple call frames of `h` on the stack?
+
+Solution: need quantifier. A simple/default solution is to only check the most recent
+call frame of `h` on the stack.
+
 ### Negative contextual properties
 
 The following program is a violation of non-reentrancy:
@@ -283,6 +322,7 @@ For two pairs of before-after function invocations `f-call`/`f-ret` and
 However, for contextual contracts, some observations are only available
 and can be checked at event `f-ret` (which is temporally happening later).
 
+Example of event sequences and their contextual visualization (by indentation):
 ```
 ts1@call[f](x1,...) from sd1
 ts1@ret[f](v1) from sd1
