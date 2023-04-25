@@ -222,6 +222,8 @@ function f(...) { ... }
 Note: `f => g` matches the most recent call of `f`, or any prior call of `f` (if
 there are multiple calls of `f`)?
 
+Note: need to think about interactions with compiler optimization (eg inlining).
+
 ### Negative temporal properties
 
 Negative temporal properties enforces that an event must **not**
