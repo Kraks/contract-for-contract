@@ -8,9 +8,9 @@ before, after ::= ts @ f(arg_1, ...) returns r
 spec ::=
   | dom ... -> range                -- function contracts
   | before => after /\ side-cond    -- pos temporal contracts
-  | before =/=> after /\ side-cond  -- neg temporal contracts
+  | before =/> after /\ side-cond   -- neg temporal contracts
   | before ~> after /\ side-cond    -- pos contextual contracts
-  | before ~/~> after /\ side-cond  -- neg contextual contracts
+  | before ~/> after /\ side-cond   -- neg contextual contracts
 ```
 
 `dom`, `range` can be arbitrary expressions that evaluate to either
@@ -219,13 +219,16 @@ Simply requiring `f` happens before `g`:
 function f(...) { ... }
 ```
 
+Note: `f => g` matches the most recent call of `f`, or any prior call of `f` (if
+there are multiple calls of `f`)?
+
 ### Negative temporal properties
 
 Negative temporal properties enforces that an event must **not**
 happen after another event.
 
 ```
-# ts1 @ f(x) returns z =/=> ts2 @ g(a) returns c /\ side-cond
+# ts1 @ f(x) returns z =/> ts2 @ g(a) returns c /\ side-cond
 ```
 
 - when invoke `g`, check `f` has not invoked **and** `side-cond` is true
@@ -234,9 +237,9 @@ happen after another event.
 For example, the following spec enforces that `g` cannot be
 invoked after `f` using `z` as the argument:
 ```
-# ts1 @ f(x) returns z =/=> ts2 @ g(z) returns c
+# ts1 @ f(x) returns z =/> ts2 @ g(z) returns c
 or equivalently
-# ts1 @ f(x) returns z =/=> ts2 @ g(y) returns c /\ x == y
+# ts1 @ f(x) returns z =/> ts2 @ g(y) returns c /\ x == y
 ```
 However it is okay to call `g` after `f` with an argument different from `z`.
 
@@ -245,5 +248,44 @@ However it is okay to call `g` after `f` with an argument different from `z`.
 Contextual contracts inspect the calling-context/stack within the
 current smart contract.
 
+Related work: stack inspection. But we don't need to modify the runtime
+of EVM, but simply record a shadow stack for necessary metadata. Is that enough?
 
+### Positive contextual properties
 
+### Negative contextual properties
+
+The following program is a violation of non-reentrancy:
+
+```
+# non-reentrant
+function f(uint x) { f(n) }
+```
+
+This is an example of negative contextual properties, i.e. something cannot happen
+under the current calling context. Under the neath, this spec is equivalent to
+
+```
+# f ~/> f
+function f(uint x) { f(n) }
+```
+
+## Unifying Temporal and Contextual Contracts
+
+Each function invocation induces a call event and a return event.
+For example, `f(a)` induces `f-call(a)` and `f(a)-ret(v)`, where `v` is the
+returned value.
+For two pairs of before-after function invocations `f-call`/`f-ret` and
+`g-call`/`g-ret`, our temporal contracts enforce properties at event
+`g-call` and `g-ret`.
+However, for contextual contracts, some observations are only available
+and can be checked at event `f-ret` (which is temporally happening later).
+
+```
+ts1@call[f](x1,...) from sd1
+ts1@ret[f](v1) from sd1
+ts2@call[g](x2,...) from sd2
+  ts2@call[h](x3,...) from sd2
+  ts2@ret[h](v3) from sd2
+ts2@ret[g](v2) from sd2
+```
