@@ -6,7 +6,7 @@
 \definecolor{cstring}{HTML}{2A0099}
 
 \lstdefinelanguage{Solidity}%
-{morekeywords={
+{morekeywords = {
   abstract, contracts, is,
   function, constructor, memory,
   for, if, new
@@ -16,16 +16,18 @@
   true, false, bool,
   bytes, bytes32,
   uint, uint8, uint16, uint32, uint64, uint128, uint256,
+  int, int8, int16, int32, int64, int128, int256,
   address, string,
   require, assert, revert, try, catch
   },%
   sensitive,%
-  moredelim=*[il][\bfseries]{\#\#\ },
-  morecomment=[l]//,%
-  morecomment=[s]{/*}{*/},%
-  morestring=[b]",%
+  %identifierstyle = \color{blue},
+  moredelim = *[l][\itshape]{\#},
+  morecomment = [l]//,%
+  morecomment = [s]{/*}{*/},%
+  morestring = [b]",%
   %morestring=[b]',%
-  showstringspaces=false%
+  showstringspaces = false%
 }[keywords,comments,strings]%
 
 \lstset{
