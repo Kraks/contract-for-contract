@@ -604,6 +604,22 @@ invoked after @f@ using @z@ as the argument:
 \end{lstlisting}
 However it is okay to call @g@ after @f@ with an argument different from @z@.
 
+\subsubsection*{Affine Use}
+
+Using negative temporal contracts, we can enforce affine use, i.e.
+a function can be called at most once.
+\begin{lstlisting}
+  # f =/> f
+  function f(int x) { ... }
+\end{lstlisting}
+If @f@ has been called before (and the call is finished), any
+call to @f@ afterwards is prohibited.
+
+\note{could further discern different timestamps/senders}
+
+%linear (must call once),
+%relevant (at least call once)
+
 \subsection{Contextual Properties}
 
 Contextual contracts inspect the calling-context/stack within the
@@ -659,12 +675,6 @@ equivalent to
   # f ~/> f
   function f(uint x) { f(n) }
 \end{lstlisting}
-
-\subsection{Substructural Properties}
-
-affine (at most call once)
-%linear (must call once),
-%relevant (at least call once)
 
 \section{Formal Model}
 
