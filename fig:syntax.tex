@@ -1,0 +1,31 @@
+\begin{figure}
+  \begin{alignat*}{3}
+    \Typ{Variables}  \qquad & x,&&y,z,f,g \\
+    \Typ{Types}      \qquad & t && ::=
+      \Keywd{address} \mid
+      \Keywd{uint} \mid
+      \Keywd{function}(t, \dots)~\Keywd{returns}~t \mid
+      \dots \\
+    \Typ{Literals}    \qquad & v && \in
+      \mathbb{Z} \mid
+      \todo{whatelse} \\
+    \Typ{Keywditives} \qquad & o && ::=
+      + \mid
+      - \mid
+      \times \mid
+      \dots \\
+    \Typ{Expressions}\qquad & e && ::=
+      v \mid
+      x \mid
+      o(e, \dots) \mid
+      f(e, \dots) \mid
+      \todo{} \\
+    \Typ{Statements} \qquad & s && ::=
+      x ~\mathsf{:=}~ e \mid
+      \dots \\
+    \Typ{Function Def} \qquad & f && ::=
+      \Keywd{function}~f(x ~ t, \dots)~\Keywd{returns}~t~\{ s \}
+  \end{alignat*}
+  \caption{The abstract syntax of \lang.}
+  \label{fig:syntax}
+\end{figure}

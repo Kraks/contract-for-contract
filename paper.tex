@@ -350,28 +350,67 @@ The extension should be
 \todo{non-intrusive, easy to use, expressive, gradual (you do not need to pay the overhead
 if you don't use contracts), efficient (little overhead)}
 
-\subsection{First-Order Values}
+\subsection{Flat Contracts for First-Order Values}
 
-enforce that argument @amount@ must be smaller than 100:
-\begin{lstlisting}
-  # amount < 100
-  function transfer(uint amount) { ... }
+Specifying the pre-condition and post-condition, where the post-condition
+can depend on the argument value:
+
+\begin{lstlisting}[language=Solidity]
+  # {x | x > 0}
+  # {y | y > x + 1}
+  function f(uint x) returns y { ... }
 \end{lstlisting}
-Users can also write a boolean function that serves as the condition:
+It is also equivalent to core syntax:
+\begin{lstlisting}
+  # {x | x > 0} -> {y | y > x + 1}
+\end{lstlisting}
+
+We can omit any part of the argument or return value contracts:
+
+\begin{lstlisting}[language=Solidity]
+  # {x | x > 0}
+  function f(uint x) returns y { ... }
+\end{lstlisting}
+It is equivalent to core syntax where the omitted part is simply \code{true}:
 
 \begin{lstlisting}
-  function checkAmount(uint amount) bool { return amount < 100; }
-  # checkAmount(amount)
-  function transfer(uint amount) { ... }
+  # {x | x > 0} -> {y | true}
 \end{lstlisting}
-\todo{need an example for post-condition}
+Another way is to use the `any` flat contract, which is defined as
+\code{any = { _ | true }}:
+\begin{lstlisting}
+  # {x | x > 0} -> any
+\end{lstlisting}
+
+For multi-argument functions, we use multiple \code{->} to compose larger function
+contracts:
+\begin{lstlisting}
+  # {x | x > 0} -> {y | y < 100} -> {z | z == x + y }
+  function f(int x, int y) returns (int) { returns x + y; }
+\end{lstlisting}
+Or, we could write a single flat contract for the argument introducing
+multiple argument binders:
+\begin{lstlisting}
+  # { (x, y) | x > 0 && y < 100 } -> {z | z == x + y }
+  function f(int x, int y) returns int { returns x + y; }
+\end{lstlisting}
+
+When specifying the spec of functions, two special variables are available
+`msg.sender` the address of the caller and `block.timestamp` the current
+block timestamp.
+
+\begin{lstlisting}
+  # { msg.sender ... }
+  NEED AN EXAMPLE USING THEM
+\end{lstlisting}
 
 Behavioral contracts for first-order values are straightforward,
 and can be directly mapped to \code{assert} or \code{require} statements
 appearing at the beginning of the function.
 
-\subsection{Higher-Order Functions}
+\subsection{Contracts for Higher-Order Functions}
 
+\iffalse
 \begin{lstlisting}
 function map(uint[] memory data, function (uint) pure returns (uint) f)
   internal pure returns (uint[] memory r)
@@ -382,20 +421,250 @@ function map(uint[] memory data, function (uint) pure returns (uint) f)
   }
 }
 \end{lstlisting}
+\fi
 
-\subsection{Callbacks/Addresses}
+We can specify the contract for function arguments too:
+\begin{lstlisting}
+  # { f | {x | x < 0} -> {y | y > 0} }
+  function map(int[] memory data, function (int) pure returns (int) f) { ... }
+\end{lstlisting}
+It might be too verbose -- so we can define those predicates separately for better readability/maintainability:
+\begin{lstlisting}
+  function greaterThanZero(int x) returns (bool) {
+    return x > 0;
+  }
+  function smallerThanZero(int x) returns (bool) {
+    return x < 0;
+  }
+  # { f | smallerThanZero -> greaterThanZero }
+  function map(int[] memory data, function (int) pure returns (int) f) { ... }
+\end{lstlisting}
 
-\todo{why modifier isn't enough}
+Functions contracts can be higher-order -- it can take other function contracts
+as part of the spec. For example
+\begin{lstlisting}
+  # TODO
+  function f(function (function (int) returns (int) g) h) { ... }
+\end{lstlisting}
 
-\todo{msg.sender}
+Function contracts are first-class -- so if this guarded function is escaped
+(e.g. by returning), the contract is still enforced:
+\begin{lstlisting}
+NEED AN EXAMPLE
+\end{lstlisting}
+
+
+\subsection{Contracts for Addresses}
+
+Address contracts share similar syntax as function contracts, but introduces
+additionally more binders for the arguments and returned values:
+
+\begin{lstlisting}
+  # { a | { {value, gas, ...} | <pre-cond-value-gas> }
+      -> { arg | <pre-cond-arg> }
+      -> { (res, data) | <post-cond> } }
+  function f(address a) {
+    (bool success, bytes memory data) = a.call{value: ...}(arg);
+  }
+\end{lstlisting}
+
+It would be convenient to directly enforces the success of the call and omit
+the data:
+\begin{lstlisting}
+  # { a | { {value, gas}(arg) | <pre-cond> } -> { (true, _) | true } }
+  function f(address a) { ... }
+\end{lstlisting}
+
+Address call can designate the callee function, therefore it is necessary to
+specify the spec for possible callees.
+
+\begin{lstlisting}
+  # { a.f | pre-cond -> post-cond }
+  # { a.g | pre-cond -> post-cond }
+  function f(address a) { ... }
+\end{lstlisting}
+
+\subsubsection*{Limitations}
+Address contracts are \emph{not} higher-order -- if an address takes another
+address as argument, then we cannot enforce the contract of the argument
+address.
+For example, in the following case, @b@ itself has an ``address contract''
+@<b-pre> -> <b-post>@ but there is no general way to enforce that.
+Because we do not have the control of the actual callee function of @a@,
+therefore no way to modify the code of @a@ to check the pre-condition
+and post-condition when @b@ is called in @a@.
+
+\begin{lstlisting}
+  # { a | { b | <b-pre> -> <b-post> } -> { (true, _) | true } }
+  function f(address a) {
+    address b = ...
+    (bool success, bytes memory data) = a.call(b);
+  }
+\end{lstlisting}
+
+Address contracts are \emph{second-class} -- we can only enforce the
+pre-condition and post-condition of addresses within the current calling
+context.  If the address escapes (e.g. by returning, or stored in a global
+variable), we cannot enforce the contract anymore.
+
+Why? Because in general we do not have the ability to insert checks around the
+computation of that address. We can indeed create a new contract (and a new address) that wraps the old address call with checks, but then calling
+the new address will not exhibit the same behavior as calling the old address
+for the caller.
+
+For example, the following identity function of addresses has a spec
+for the argument address. But the body of function does not invoke
+the address, instead, it directly returns @a@ to the caller.
+Once address @a@ escapes, we cannot enforce the condition anymore.
+
+\begin{lstlisting}
+  # { a | { {value, gas}(arg) | <pre-cond> } -> { (res, data) | <post-cond> } }
+  function f(address a) returns address { return a }
+\end{lstlisting}
 
 \subsection{Temporal Properties}
 
-after, before, eventually, non-reentrancy
+Temporal contracts relate two function calls (events) and enforces their
+relation.
+They can inspect the time-stamps, message sender, arguments, return values
+of the two function calls.
+
+\todo{where to add message sender? proposed syntax:}
+\begin{lstlisting}
+  # ts1 @ f(x) returns z from sdr1 => ts2 @ g(a) returns c from sdr2
+\end{lstlisting}
+
+\subsubsection{Positive Temporal Properties}
+
+Positive temporal properties enforces that an event must happen
+after another event. Syntax:
+\begin{lstlisting}
+  # ts1 @ f(x) returns z => ts2 @ g(a) returns c /\ side-cond
+\end{lstlisting}
+It enforces that when @g@ is invoked, we check @f@ has invoked \emph{and}
+the side-condition is evaluated to true.
+We do not enforce that @g@ will be invoked eventually after invoking @f@.
+
+Side conditions can be arbitrary expressions that uses the time-stamps, message
+sender, arguments, return values of the two function calls.
+For example, the following spec passes arguments of @f@ and @g@ into
+another function for checking:
+
+\begin{lstlisting}
+  # ts1 @ f(x) returns z => ts2 @ g(a) returns c /\ check(x, a)
+\end{lstlisting}
+
+If a variable occurs in both events, an additional equality constraint
+is synthesized.  For example,
+\begin{lstlisting}
+  # ts1 @ f(x) returns z => ts1 @ g(z) returns c
+\end{lstlisting}
+requires that both function @f@ and @g@ happen in the same transaction,
+and the return value of @f@ is the same as the argument of @g@.
+It will be translated to the core syntax as the following:
+\begin{lstlisting}
+  # ts1 @ f(x) returns z => ts2 @ g(y) returns c /\ ts1 == ts2 && x == y
+\end{lstlisting}
+
+It is totally fine to omit the time-stamp, arguments, or return values.
+Simply requiring @f@ happens before @g@:
+\begin{lstlisting}
+  # f => g
+  function f(...) { ... }
+\end{lstlisting}
+
+\todo{need to think about quantification.}
+
+Note: @f => g@ matches the most recent call of @f@,
+or any prior call of @f@ (if there are multiple calls of @f@)?
+
+\todo{need to think about interactions with compiler optimization (eg inlining).}
+
+\todo{need to think about how temporal contracts interact with address calls.}
+
+\subsubsection{Negative Temporal Properties}
+
+Negative temporal properties enforces that an event must \emph{not}
+happen after another event.
+
+\begin{lstlisting}
+  # ts1 @ f(x) returns z =/> ts2 @ g(a) returns c /\ side-cond
+\end{lstlisting}
+It enforces that when @g@ is invoked, we check that @f@ has not invoked
+\emph{and} the side condition is evaluated to true.
+We do not enforce that @g@ cannot be invoked eventually
+after invoking @f@.
+
+For example, the following spec enforces that @g@ cannot be
+invoked after @f@ using @z@ as the argument:
+\begin{lstlisting}
+  # ts1 @ f(x) returns z =/> ts2 @ g(z) returns c
+  //or equivalently
+  # ts1 @ f(x) returns z =/> ts2 @ g(y) returns c /\ x == y
+\end{lstlisting}
+However it is okay to call @g@ after @f@ with an argument different from @z@.
+
+\subsection{Contextual Properties}
+
+Contextual contracts inspect the calling-context/stack within the
+current smart contract.
+
+\note{Related work: stack inspection. But we don't need to modify the runtime
+of EVM, but simply record a shadow stack for necessary metadata. Is that enough?}
+
+\subsubsection{Positive Contextual Properties}
+
+For example, the following spec enforces that @g@ can only be invoked
+under the calling context of @h@, and the return value of @h@ must be
+the same as the argument of @g@:
+
+\begin{lstlisting}
+  function h(int x) returns int { ... }
+  # h(x) returns y ~> g(y) returns r
+  function g(int y) returns int { ... }
+\end{lstlisting}
+
+To enforce this behavioral contracts, we must check
+\begin{itemize}
+  \item when @g@ is invoked, there is a frame of @h@ on the stack,
+  \item when @h@ returns (which happens after @g@ returns), the return value
+  is the same as the argument of @g@.
+\end{itemize}
+
+Question: what if @g@ is invoked multiple times under the same calling context of
+@h@?
+
+Solution: need quantifier. A simple/default solution is to check all
+invocations of @g@.
+
+Question: what if there are multiple call frames of @h@ on the stack?
+
+Solution: need quantifier. A simple/default solution is to only check
+the most recent call frame of @h@ on the stack.
+
+\subsubsection{Negative Contextual Properties}
+
+The following program is a violation of non-reentrancy:
+
+\begin{lstlisting}
+  # non-reentrant
+  function f(uint x) { f(n) }
+\end{lstlisting}
+
+This is an example of negative contextual properties, i.e. something cannot
+happen under the current calling context. Under the neath, this spec is
+equivalent to
+
+\begin{lstlisting}
+  # f ~/> f
+  function f(uint x) { f(n) }
+\end{lstlisting}
 
 \subsection{Substructural Properties}
 
-linear (must call once), affine (at most call once), relevant (at least call once)
+affine (at most call once)
+%linear (must call once),
+%relevant (at least call once)
 
 \section{Formal Model}
 
