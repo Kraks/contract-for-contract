@@ -237,8 +237,17 @@ The root cause of this attack is \todo{explain}.
 
 Solidity does provide first-order assertion primitives (e.g. @require@ or
 @modifier@) but they cannot effectively check function values, which are a
-common pattern used in smart contract programs. Programmers have to
-manually insert such checks around relevant call-sites, \todo{which is bad}.
+common pattern used in smart contract programs. 
+\zz{
+On the other hand, assertion primitives are crucial for ensuring the accuracy and 
+integrity of a smart contract's business model.
+}
+\zz{
+I'm not sure if this statement applies to the PL community, but from my 
+understanding, assertions are typically used during testing rather than runtime. 
+However, in smart contracts, these assertions function as guard conditions and can cause reverts if violated, making them extremely important.
+}
+Programmers have to manually insert such checks around relevant call-sites, \todo{which is bad}.
 %Solidity also provides the @modifier@ mechanism that intercepts
 %before and after a function call, thus can be used to check
 %pre- and post-conditions.
@@ -295,6 +304,7 @@ post-conditions of untrusted functions. \todo{...}
 
 \todo{restrict possible call targets}
 \todo{why static verification fails}
+\zz{address vs. function call?}
 
 \subsubsection*{\textbf{Contracts for Temporal Properties}}
 Temporal contracts provides a way to \todo{...}.
@@ -305,7 +315,8 @@ We develop a core model of the extension, including its syntax,
 operational semantics, and discuss its soundness guarantee.
 With this extension of higher-order temporal behavioral contracts, we examine
 several cases of reported bugs and vulnerabilities and show that
-our approach is effective in preventing these attacks.
+our approach is effective in preventing these attacks. 
+\zz{Let's mention the amount of funds we could save if we can prevent these attacks.}
 We also evaluate the overhead (gas consumption) of our approach
 compared to manually inserted assertion checks, showing that \todo{...}
 
@@ -329,6 +340,7 @@ compared to manually inserted assertion checks, showing that \todo{...}
 	      effective in improving safety and reliability.
 	\item We implement our approach on top of the existing Solidity compiler and shows
 	      that its runtime overhead is marginal, therefore practical to use.
+	\item \zz{Would open-sourcing be considered a contribution? Lol}
 \end{itemize}
 
 \section{Contract Solidity by Examples}
@@ -397,7 +409,8 @@ multiple argument binders:
 
 When specifying the spec of functions, two special variables are available
 `msg.sender` the address of the caller and `block.timestamp` the current
-block timestamp.
+block timestamp. 
+\zz{How about other special variables, such as `block.chainid` and `tx.origin`?. Perhaps we could redesign a universal syntax for these variables in Section 2.5, where we discuss where to add the message sender}
 
 \begin{lstlisting}
   # { msg.sender ... }
@@ -534,6 +547,9 @@ of the two function calls.
 \todo{where to add message sender? proposed syntax:}
 \begin{lstlisting}
   # ts1 @ f(x) returns z from sdr1 => ts2 @ g(a) returns c from sdr2
+\end{lstlisting}
+\begin{lstlisting}
+  # f(x) returns z => g(a) returns c /\ f.msg.sender == g.msg.sender
 \end{lstlisting}
 
 \subsubsection{Positive Temporal Properties}

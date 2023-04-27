@@ -5,3 +5,11 @@ build/
 .DS_Store
 .nvim/
 *.log
+**/paper.aux
+**/paper.bbl
+**/paper.blg
+**/paper.fdb_latexmk
+**/paper.fls
+**/paper.out
+**/paper.pdf
+**/paper.synctex.gz
