@@ -237,14 +237,14 @@ The root cause of this attack is \todo{explain}.
 
 Solidity does provide first-order assertion primitives (e.g. @require@ or
 @modifier@) but they cannot effectively check function values, which are a
-common pattern used in smart contract programs. 
+common pattern used in smart contract programs.
 \zz{
-On the other hand, assertion primitives are crucial for ensuring the accuracy and 
+On the other hand, assertion primitives are crucial for ensuring the accuracy and
 integrity of a smart contract's business model.
 }
 \zz{
-I'm not sure if this statement applies to the PL community, but from my 
-understanding, assertions are typically used during testing rather than runtime. 
+I'm not sure if this statement applies to the PL community, but from my
+understanding, assertions are typically used during testing rather than runtime.
 However, in smart contracts, these assertions function as guard conditions and can cause reverts if violated, making them extremely important.
 }
 Programmers have to manually insert such checks around relevant call-sites, \todo{which is bad}.
@@ -315,7 +315,7 @@ We develop a core model of the extension, including its syntax,
 operational semantics, and discuss its soundness guarantee.
 With this extension of higher-order temporal behavioral contracts, we examine
 several cases of reported bugs and vulnerabilities and show that
-our approach is effective in preventing these attacks. 
+our approach is effective in preventing these attacks.
 \zz{Let's mention the amount of funds we could save if we can prevent these attacks.}
 We also evaluate the overhead (gas consumption) of our approach
 compared to manually inserted assertion checks, showing that \todo{...}
@@ -409,7 +409,7 @@ multiple argument binders:
 
 When specifying the spec of functions, two special variables are available
 `msg.sender` the address of the caller and `block.timestamp` the current
-block timestamp. 
+block timestamp.
 \zz{How about other special variables, such as `block.chainid` and `tx.origin`?. Perhaps we could redesign a universal syntax for these variables in Section 2.5, where we discuss where to add the message sender}
 \url{https://docs.soliditylang.org/en/develop/units-and-global-variables.html#block-and-transaction-properties}
 
@@ -554,6 +554,7 @@ of the two function calls.
 \begin{lstlisting}
   # f(x) returns z => g(a) returns c /\ f.msg.sender == g.msg.sender
 \end{lstlisting}
+\wac{\texttt{msg.sender} is better tied with transaction. We can use ts1.msg.sender and I prefer to put the constraints in the side-cond. }
 
 \subsubsection{Positive Temporal Properties}
 
@@ -678,6 +679,9 @@ Question: what if there are multiple call frames of @h@ on the stack?
 
 Solution: need quantifier. A simple/default solution is to only check
 the most recent call frame of @h@ on the stack.
+
+\wac{I think the previous definition of contextual property $h ~> g$ means $\forall g, \exists h$ implicitly, i.e., for any $g$ called, there must exist one $h$ on the call stack. I cannot think of a use scenario where quantifiers on $h$ and $g$ are needed in practice.}
+\wac{If we want to distinguish different call frames of $h$ and $g$, maybe it's better to design activation constraints for the contextual properties, e.g., \texttt{cond -> h ~> g}, meaning $h ~> g$ is only enforced when $cond$ is true (imply). ps: the special arrow is broken outside the listing environment. :(}
 
 \subsubsection{Negative Contextual Properties}
 
