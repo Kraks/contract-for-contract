@@ -411,10 +411,11 @@ When specifying the spec of functions, two special variables are available
 `msg.sender` the address of the caller and `block.timestamp` the current
 block timestamp. 
 \zz{How about other special variables, such as `block.chainid` and `tx.origin`?. Perhaps we could redesign a universal syntax for these variables in Section 2.5, where we discuss where to add the message sender}
+\url{https://docs.soliditylang.org/en/develop/units-and-global-variables.html#block-and-transaction-properties}
 
 \begin{lstlisting}
-  # { msg.sender ... }
-  NEED AN EXAMPLE USING THEM
+  # { n | msg.value >= 1e15 * n }
+  function buyTickets(int n) payable { ... }
 \end{lstlisting}
 
 Behavioral contracts for first-order values are straightforward,
@@ -443,10 +444,10 @@ We can specify the contract for function arguments too:
 \end{lstlisting}
 It might be too verbose -- so we can define those predicates separately for better readability/maintainability:
 \begin{lstlisting}
-  function greaterThanZero(int x) returns (bool) {
+  function greaterThanZero(int x) pure returns (bool) {
     return x > 0;
   }
-  function smallerThanZero(int x) returns (bool) {
+  function smallerThanZero(int x) pure returns (bool) {
     return x < 0;
   }
   # { f | smallerThanZero -> greaterThanZero }
@@ -455,6 +456,7 @@ It might be too verbose -- so we can define those predicates separately for bett
 
 Functions contracts can be higher-order -- it can take other function contracts
 as part of the spec. For example
+\zz{coooool!}
 \begin{lstlisting}
   # TODO
   function f(function (function (int) returns (int) g) h) { ... }
@@ -474,8 +476,8 @@ additionally more binders for the arguments and returned values:
 
 \begin{lstlisting}
   # { a | { {value, gas, ...} | <pre-cond-value-gas> }
-      -> { arg | <pre-cond-arg> }
-      -> { (res, data) | <post-cond> } }
+          -> { arg | <pre-cond-arg> }
+          -> { (res, data) | <post-cond> } }
   function f(address a) {
     (bool success, bytes memory data) = a.call{value: ...}(arg);
   }
@@ -498,6 +500,7 @@ specify the spec for possible callees.
 \end{lstlisting}
 
 \wac{We may need an example here since the necessity to designate the callee function may not be obvious to reviewers.}
+\zz{I guess we should educate the audience about the difference between low-level and high-level calls at the beginning of Section 2.4. I'll take care of this later.}
 
 \subsubsection*{Limitations}
 Address contracts are \emph{not} higher-order -- if an address takes another
