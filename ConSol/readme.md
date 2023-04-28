@@ -23,6 +23,8 @@ $ npm run lint:fix
 ## Run
 
 ```
+$ npm link          # required only for the initial run.
+
 $ consol <inputfile>
 ```
 

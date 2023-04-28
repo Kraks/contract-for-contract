@@ -2,6 +2,8 @@
 build/
 paper.aux
 paper.bbl
+paper.bcf
+paper.run.xml
 paper.blg
 paper.fdb_latexmk
 paper.fls
