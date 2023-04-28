@@ -6,19 +6,38 @@
 
 ## Install
 
-Follow the [official instruction](https://github.com/ConsenSys/solc-typed-ast/tree/master#installation).
+```
+$ npm install
 
-1. `npm install solc-typed-ast` 
-2. `npm install ts-node` or install typescript
+$ npm run build
+```
 
+## Lint
+
+Lint the code before committing.
+
+```
+$ npm run lint:fix
+```
 
 ## Run
 
 ```
-npx ts-node run.ts
+$ consol <inputfile>
 ```
 
-**Input file**: `Lock.sol`  (To compile other files, change the variable `filename` in `run.ts`)
+For example, 
+
+```
+$ consol Lock.sol
+
+$ ls 
+Lock.sol        # input file
+Lock.json       # output json
+Lock_out.sol    # solidity code after transformation.
+```
+
+### Explanation
 
 **Output file**: 
 - `Lock.json`
@@ -26,10 +45,6 @@ npx ts-node run.ts
     - print ast nodes: 
     > console.log(result.data.sources[ \` ${filename}.sol \` ].ast.nodes[1].nodes)
 - `Lock_out.sol`: Solidity code after transformation.
-
-
-
-Other way to compile: `sol-ast-compile Lock.sol --tree `
 
 
 ## Annotation
