@@ -4,7 +4,7 @@
     - Doc: https://consensys.github.io/solc-typed-ast/
 - ANTLR4: https://www.antlr.org/
 
-## Install
+## Install and Build
 
 ```
 $ npm install
@@ -32,9 +32,9 @@ For example,
 $ consol Lock.sol
 
 $ ls 
-Lock.sol        # input file
-Lock.json       # output json
-Lock_out.sol    # solidity code after transformation.
+    Lock.sol        # input file
+    Lock.json       # output json
+    Lock_out.sol    # solidity code after transformation.
 ```
 
 ### Explanation
