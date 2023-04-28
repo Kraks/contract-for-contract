@@ -1,51 +1,16 @@
-%% For double-blind review submission, w/o CCS and ACM Reference (max submission space)
-\documentclass[acmsmall,review,anonymous]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
-%% For double-blind review submission, w/ CCS and ACM Reference
-%\documentclass[acmsmall,review,anonymous]{acmart}\settopmatter{printfolios=true}
-%% For single-blind review submission, w/o CCS and ACM Reference (max submission space)
-%\documentclass[acmsmall,review]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
-%% For single-blind review submission, w/ CCS and ACM Reference
-%\documentclass[acmsmall,review]{acmart}\settopmatter{printfolios=true}
-%% For final camera-ready submission, w/ required CCS and ACM Reference
-%\documentclass[acmsmall]{acmart}\settopmatter{}
+% -*- coding: utf-8; -*-
+% vim: set fileencoding=utf-8 :
+\documentclass[english,submission]{programming}
+%% First parameter: the language is 'english'.
+%% Second parameter: use 'submission' for initial submission, remove it for camera-ready (see 5.1)
 
+\usepackage[backend=biber]{biblatex}
+\addbibresource{references.bib}
 
-%% Journal information
-%% Supplied to authors by publisher for camera-ready submission;
-%% use defaults for review submission.
-\acmJournal{PACMPL}
-\acmVolume{1}
-\acmNumber{CONF} % CONF = POPL or ICFP or OOPSLA
-\acmArticle{1}
-\acmYear{2018}
-\acmMonth{1}
-\acmDOI{} % \acmDOI{10.1145/nnnnnnn.nnnnnnn}
-\startPage{1}
-
-%% Copyright information
-%% Supplied to authors (based on authors' rights management selection;
-%% see authors.acm.org) by publisher for camera-ready submission;
-%% use 'none' for review submission.
-\setcopyright{none}
-%\setcopyright{acmcopyright}
-%\setcopyright{acmlicensed}
-%\setcopyright{rightsretained}
-%\copyrightyear{2018}           %% If different from \acmYear
-
-%% Bibliography style
-\bibliographystyle{ACM-Reference-Format}
-%% Citation style
-%% Note: author/year citations are required for papers published as an
-%% issue of PACMPL.
-\citestyle{acmauthoryear}   %% For author/year citations
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Note: Authors migrating a paper from PACMPL format to traditional
-%% SIGPLAN proceedings format must update the '\documentclass' and
-%% topmatter commands above; see 'acmart-sigplanproc-template.tex'.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%
+% Packages and Commands specific to article (see 3)
+%
+% These ones  are used in the guide, replace with your own.
 
 %% Some recommended packages.
 \usepackage{booktabs}   %% For formal tables:
@@ -53,9 +18,9 @@
 \usepackage{subcaption} %% For complex figures with subfigures/subcaptions
 %% http://ctan.org/pkg/subcaption
 
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[scaled=0.8]{beramono}
+%\usepackage[uft8]{inputenc}
+%\usepackage[T1]{fontenc}
+%\usepackage[scaled=0.8]{beramono}
 \usepackage{amsmath}
 \usepackage{color}
 \usepackage{xcolor,colortbl}
@@ -70,131 +35,106 @@
 \usepackage{flushend}
 \usepackage{textcomp}
 \usepackage{pdfpages}
-\usepackage{cleveref}
+%\usepackage{cleveref}
 \usepackage{xspace}
 \definecolor{light-gray}{gray}{0.85}
 
 \input{macros}
 
+\newcommand*{\CTAN}[1]{\href{http://ctan.org/tex-archive/#1}{\nolinkurl{CTAN:#1}}}
+%%
+
+%%%%%%%%%%%%%%%%%%
+%% These data MUST be filled for your submission. (see 5.3)
+\paperdetails{
+  %% perspective options are: art, sciencetheoretical, scienceempirical, engineering.
+  %% Choose exactly the one that best describes this work. (see 2.1)
+  perspective=art,
+  %% State one or more areas, separated by a comma. (see 2.2)
+  %% Please see list of areas in http://programming-journal.org/cfp/
+  %% The list is open-ended, so use other areas if yours is/are not listed.
+  area={Social Coding, General-purpose programming},
+  %% You may choose the license for your paper (see 3.)
+  %% License options include: cc-by (default), cc-by-nc
+  % license=cc-by,
+}
+%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%
+%% These data are provided by the editors. May be left out on submission.
+%\paperdetails{
+%  submitted=2016-08-10,
+%  published=2016-10-11,
+%  year=2016,
+%  volume=1,
+%  issue=1,
+%  articlenumber=1,
+%}
+%%%%%%%%%%%%%%%%%%
+
+
 \begin{document}
 
-%% Title information
-\title[Contracts for Contracts]{Contracts for Contracts}         %% [Short Title] is optional;
-%\title[Short Title]{Contracts meet Contracts}         %% [Short Title] is optional;
-%% when present, will be used in
-%% header instead of Full Title.
-%\titlenote{with title note}             %% \titlenote is optional;
-%% can be repeated if necessary;
-%% contents suppressed with 'anonymous'
-%\subtitle{Adding Higher-Order Contracts for Smart Contracts}                     %% \subtitle is optional
-%\subtitle{Expressive Assertion Monitoring System for Safer Smart Contracts}                     %% \subtitle is optional
-\subtitle{Securing Smart Contracts with Higher-Order Temporal Behavioral Contracts}                     %% \subtitle is optional
-%\subtitlenote{with subtitle note}       %% \subtitlenote is optional;
-%% can be repeated if necessary;
-%% contents suppressed with 'anonymous'
+\title{Contracts for Contracts}
+
+\subtitle{Securing Smart Contracts with Higher-Order Temporal Behavioral Contracts}% optional
+
+\titlerunning{Contracts for Contracts} %optional, in case that the title is too long; the running title should fit into the top page column
+
+\author[a]{Tobias Pape}
+\authorinfo{is the author of this {LaTeX} class. Contact him at
+  \email{tobias.pape@hpi.uni-potsdam.de}.}
+\affiliation[a]{Hasso Plattner Institute, University of Potsdam, Germany}
+
+\author{Cristina V. Lopes}
+\authorinfo{is associate editor for the first two issues of The Art, Science,
+  and Engineering of Programming. Contact her at \email{lopes@ics.uci.edu}.}
+\affiliation{University of California, Irvine, USA}
+
+\author[a]{Robert Hirschfeld}
+\authorinfo{is chair of the AOSA steering committee. The Art, Science,
+  and Engineering of Programming is published by AOSA. Contact Robert at \email{hirschfeld@hpi.uni-potsdam.de}.}
+
+% \authorrunning{T. Pape, C. Lopes, R. Hirschfeld} % Optional, for long author lists
+
+\keywords{programming journal, paper formatting, submission preparation} % please provide 1--5 keywords
 
 
-%% Author information
-%% Contents and number of authors suppressed with 'anonymous'.
-%% Each author should be introduced by \author, followed by
-%% \authornote (optional), \orcid (optional), \affiliation, and
-%% \email.
-%% An author may have multiple affiliations and/or emails; repeat the
-%% appropriate command.
-%% Many elements are not rendered, but should be provided for metadata
-%% extraction tools.
-
-%% Author with single affiliation.
-\author{First1 Last1}
-\authornote{with author1 note}          %% \authornote is optional;
-%% can be repeated if necessary
-\orcid{nnnn-nnnn-nnnn-nnnn}             %% \orcid is optional
-\affiliation{
-	\position{Position1}
-	\department{Department1}              %% \department is recommended
-	\institution{Institution1}            %% \institution is required
-	\streetaddress{Street1 Address1}
-	\city{City1}
-	\state{State1}
-	\postcode{Post-Code1}
-	\country{Country1}                    %% \country is recommended
-}
-\email{first1.last1@inst1.edu}          %% \email is recommended
-
-%% Author with two affiliations and emails.
-\author{First2 Last2}
-\authornote{with author2 note}          %% \authornote is optional;
-%% can be repeated if necessary
-\orcid{nnnn-nnnn-nnnn-nnnn}             %% \orcid is optional
-\affiliation{
-	\position{Position2a}
-	\department{Department2a}             %% \department is recommended
-	\institution{Institution2a}           %% \institution is required
-	\streetaddress{Street2a Address2a}
-	\city{City2a}
-	\state{State2a}
-	\postcode{Post-Code2a}
-	\country{Country2a}                   %% \country is recommended
-}
-\email{first2.last2@inst2a.com}         %% \email is recommended
-\affiliation{
-	\position{Position2b}
-	\department{Department2b}             %% \department is recommended
-	\institution{Institution2b}           %% \institution is required
-	\streetaddress{Street3b Address2b}
-	\city{City2b}
-	\state{State2b}
-	\postcode{Post-Code2b}
-	\country{Country2b}                   %% \country is recommended
-}
-\email{first2.last2@inst2b.org}         %% \email is recommended
-
-\lstMakeShortInline[keywordstyle=,%
-	flexiblecolumns=false,%
-	%basewidth={0.56em, 0.52em},%
-	mathescape=false,%
-	basicstyle=\ttfamily]@
-
-%% Abstract
-%% Note: \begin{abstract}...\end{abstract} environment must come
-%% before \maketitle command
-\begin{abstract}
-	Text of abstract \ldots.
-\end{abstract}
-
-
-%% 2012 ACM Computing Classification System (CSS) concepts
-%% Generate at 'http://dl.acm.org/ccs/ccs.cfm'.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Please go to https://dl.acm.org/ccs/ccs.cfm and generate your Classification
+% System [view CCS TeX Code] stanz and copy _all of it_ to this place.
+%% From HERE
 \begin{CCSXML}
-	<ccs2012>
-	<concept>
-	<concept_id>10011007.10011006.10011008</concept_id>
-	<concept_desc>Software and its engineering~General programming languages</concept_desc>
-	<concept_significance>500</concept_significance>
-	</concept>
-	<concept>
-	<concept_id>10003456.10003457.10003521.10003525</concept_id>
-	<concept_desc>Social and professional topics~History of programming languages</concept_desc>
-	<concept_significance>300</concept_significance>
-	</concept>
-	</ccs2012>
+<ccs2012>
+<concept>
+<concept_id>10002944.10011122.10003459</concept_id>
+<concept_desc>General and reference~Computing standards, RFCs and guidelines</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
+<concept>
+<concept_id>10010405.10010476.10010477</concept_id>
+<concept_desc>Applied computing~Publishing</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
+</ccs2012>
 \end{CCSXML}
 
-\ccsdesc[500]{Software and its engineering~General programming languages}
-\ccsdesc[300]{Social and professional topics~History of programming languages}
-%% End of generated code
+\ccsdesc[300]{General and reference~Computing standards, RFCs and guidelines}
+\ccsdesc[500]{Applied computing~Publishing}
 
+% To HERE
+%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Keywords
-%% comma separated list
-\keywords{keyword1, keyword2, keyword3}  %% \keywords are mandatory in final camera-ready submission
-
-
-%% \maketitle
-%% Note: \maketitle command must come after title commands, author
-%% commands, abstract environment, Computing Classification System
-%% environment and commands, and keywords command.
 \maketitle
+
+% Please always include the abstract.
+% The abstract MUST be written according to the directives stated in
+% http://programming-journal.org/submission/
+% Failure to adhere to the abstract directives may result in the paper
+% being returned to the authors.
+\begin{abstract}
+  abstract
+\end{abstract}
 
 \input{introduction}
 \input{contract_solidity}
@@ -205,34 +145,14 @@
 \input{related_work}
 \input{conclusion}
 
+\acks
+We want to thank you for using this class to prepare articles for The Art, Science, and Engineering of Programming.
 
-
-%% Acknowledgments
-\begin{acks}                            %% acks environment is optional
-	%% contents suppressed with 'anonymous'
-	%% Commands \grantsponsor{<sponsorID>}{<name>}{<url>} and
-	%% \grantnum[<url>]{<sponsorID>}{<number>} should be used to
-	%% acknowledge financial support and will be used by metadata
-	%% extraction tools.
-	This material is based upon work supported by the
-	\grantsponsor{GS100000001}{National Science
-		Foundation}{http://dx.doi.org/10.13039/100000001} under Grant
-	No.~\grantnum{GS100000001}{nnnnnnn} and Grant
-	No.~\grantnum{GS100000001}{mmmmmmm}.  Any opinions, findings, and
-	conclusions or recommendations expressed in this material are those
-	of the author and do not necessarily reflect the views of the
-	National Science Foundation.
-\end{acks}
-
-
-%% Bibliography
-\bibliography{references}
-
-
-%% Appendix
 %\appendix
-%\section{Appendix}
-
-Text of appendix \ldots
+\printbibliography
 
 \end{document}
+
+% Local Variables:
+% TeX-engine: luatex
+% End:
