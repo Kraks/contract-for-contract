@@ -1,0 +1,148 @@
+\section{Introduction}
+\label{sec:intro}
+
+%https://se.inf.ethz.ch/~meyer/publications/old/dbc_chapter.pdf
+%https://docs.soliditylang.org/en/v0.8.17/control-structures.html?highlight=require#panic-via-assert-and-error-via-require
+
+%\todo{why? solidity is rather flexible, unsatisfying/weaker type system,
+%not all invariants can be checked statically, e.g. the status of the chain}
+%One \note{common} use case of higher-order functions in smart contracts is
+%to express callback \todo{explain how it is used}.
+
+%\todo{it is hard to enforce properties when callbacks exist}
+%Static verification cannot completely address the issue here since
+%transaction developers are oblivious to the user-provided callback.
+
+%Building trustworthy and secure smart contract programs requires solid
+%understanding and reliable enforcement of program invariants.
+
+Smart contracts are programs to automate the execution of agreement so that all
+parties involved in the agreement can be certain about the outcome.
+Smart contracts are ``smart'' since by using blockchains they provide a
+mechanism to \emph{ensure the economic outcome of transactions} without a
+central authority.
+A blockchain is a \note{XXX} that implements a consensus protocol of
+Byzantine-fault-tolerant distributed ledgers.
+
+It is however ironic that many popular smart contract languages, which hold the
+great promise to ensure transactional outcomes via consensus and distributed
+ledgers, do not provide enough means to \emph{ensure the computational outcomes},
+leading to poor quality of programs.
+Without ensuring the quality of programs, it is impossible to ensure
+the economic outcome of transactions.
+
+Indeed, we have seen a great number of notorious attacks to smart contract
+systems in recent years.
+For example, \todo{explain attack using callback}.
+Attackers are able to utilize
+the callback mechanism to \note{do crazy things and steal money}
+The root cause of this attack is \todo{explain}.
+
+Solidity does provide first-order assertion primitives (e.g. @require@ or
+@modifier@) but they cannot effectively check function values, which are a
+common pattern used in smart contract programs.
+\zz{
+On the other hand, assertion primitives are crucial for ensuring the accuracy and
+integrity of a smart contract's business model.
+}
+\zz{
+I'm not sure if this statement applies to the PL community, but from my
+understanding, assertions are typically used during testing rather than runtime.
+However, in smart contracts, these assertions function as guard conditions and can cause reverts if violated, making them extremely important.
+}
+Programmers have to manually insert such checks around relevant call-sites, \todo{which is bad}.
+%Solidity also provides the @modifier@ mechanism that intercepts
+%before and after a function call, thus can be used to check
+%pre- and post-conditions.
+%\todo{can we compose modifier?}
+%\todo{can we attach modifier to callbacks?}
+%\todo{can we use modifier to check function's argument?}
+
+The lack of sufficient linguistic means to specify and enforce subtle behaviors
+discourages programmers to use concise higher-level abstractions when writing
+smart contract code.
+Instead, to be secure, programmers are obliged to write verbose code with
+lower-level abstractions, which conflates the main business logic and
+behavioral checks, leading to poor readability and maintainability.
+For instance, to defend the famous DAO attack \note{cite} caused by allowing
+``reentrancy'' via external functions, programmers have to be extra cautious
+about the execution order or maintain additional states to check if a call is
+allowed. Either way is not ideal.
+And often worse, defensive checks can be easily forgotten or disregarded,
+leading to vulnerable code causing real monetary lose.
+
+Apart from investigating effort to audit, certify, or verify smart contract programs,
+language designers are responsible to empower programmers with better
+linguistic solutions to secure smart contracts in the first place.
+In this paper, we show that advanced \emph{behavioral software contracts} provide a
+lightweight solution for securing \emph{smart contracts}.
+
+\subsubsection*{\textbf{Behavioral Contracts for Smart Contracts}}
+Behavioral contracts provide a mechanism for programmers to specify assumptions
+and guarantees of software components. The specified assumptions and guarantees
+will be monitored and reported when violated.
+Pioneered by the Eiffel language \cite{DBLP:books/ph/Meyer91} and the
+Design-by-Contract methodology \cite{DBLP:conf/tools/Meyer98a}, behavioral
+contracts have been widely adopted in Java, Haskell, C\#, Python, Racket,
+Elixir \cite{DBLP:conf/erlang/0001BBHMEF22}, etc. \todo{cite}
+
+\todo{why BC is good here?}
+
+At the conceptual level, behavioral contracts is complementary to smart
+contracts, in the sense that they are both agreement -- between software
+components for the former, and between transactional parties for the later.
+Thus, the two terms ``contract'' indeed mean the same thing but just different
+levels of enforcement.
+
+In this work, we design and implement a practical extension of Solidity, the
+most popular language for building smart contract programs. The extension
+enriches the Solidity language with \emph{higher-order} and \emph{temporal}
+behavioral contracts, which are absent in existing approaches.
+\todo{allows furthermore downstream tasks, fuzzing, static verification,
+	natural language to formal spec etc.}
+
+\subsubsection*{\textbf{Contracts for Higher-Order Functions}}
+Higher-order contracts provides a way to specify and enforce pre- and
+post-conditions of untrusted functions. \todo{...}
+
+\todo{restrict possible call targets}
+\todo{why static verification fails}
+\zz{address vs. function call?}
+
+\subsubsection*{\textbf{Contracts for Temporal Properties}}
+Temporal contracts provides a way to \todo{...}.
+\todo{why static verification fails}
+
+
+We develop a core model of the extension, including its syntax,
+operational semantics, and discuss its soundness guarantee.
+With this extension of higher-order temporal behavioral contracts, we examine
+several cases of reported bugs and vulnerabilities and show that
+our approach is effective in preventing these attacks.
+\zz{Let's mention the amount of funds we could save if we can prevent these attacks.}
+We also evaluate the overhead (gas consumption) of our approach
+compared to manually inserted assertion checks, showing that \todo{...}
+
+%\todo{discuss performance/gas consumption}
+
+%\todo{allows interesting programming idioms to be expressed}
+
+% second-class contracts
+
+\subsubsection*{\textbf{Contributions}} This paper makes the following contributions:
+\begin{itemize}
+	\item We propose a specification of behavioral contracts for expressing and
+	      enforcing higher-order and temporal properties for smart contracts.
+	\item We design \lang, an extension for Solidity with
+	      behavioral contracts, demonstrate its use cases through extensive examples,
+	      and how it can improve the safety and reliability.
+	\item We present the core formalization $\lambda_\lang$ for our proposed
+	      extension, including its syntax, formal semantics, compilation, and
+	      soundness.
+	\item We examine a number of real-world attacks and show that our proposal is
+	      effective in improving safety and reliability.
+	\item We implement our approach on top of the existing Solidity compiler and shows
+	      that its runtime overhead is marginal, therefore practical to use.
+	\item \zz{Would open-sourcing be considered a contribution? Lol}
+\end{itemize}
+
