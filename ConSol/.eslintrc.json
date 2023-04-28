@@ -7,7 +7,9 @@
     "project": "./tsconfig.json"
   },
   "plugins": [
-    "@typescript-eslint"
+    "@typescript-eslint",
+    "react",
+    "import"
   ],
   "rules": { }
 }
