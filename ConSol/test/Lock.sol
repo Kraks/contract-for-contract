@@ -18,12 +18,12 @@ contract Lock {
         owner = payable(msg.sender);
     }
 
+    /**
+    @custom:consol  
+    test multi-lines
+    second-line
+    */
     function withdraw() public {
-        /**
-        @custom:consol  test multi-lines
-        second-line
-        */
-
         require(block.timestamp >= unlockTime, "You can't withdraw yet");
         require(msg.sender == owner, "You aren't the owner");
 

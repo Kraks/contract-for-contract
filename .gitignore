@@ -124,3 +124,6 @@ dist
 .nvim/
 *.log
 
+# test
+Lock.json
+Lock_out.Sol
