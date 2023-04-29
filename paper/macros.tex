@@ -1,9 +1,12 @@
 % ----- listings
 
+\definecolor{light-gray}{gray}{0.85}
 %\definecolor{ckeyword}{HTML}{7F0055}
 \definecolor{ckeyword}{HTML}{000000}
 \definecolor{ccomment}{HTML}{3F7F5F}
 \definecolor{cstring}{HTML}{2A0099}
+
+\colorlet{shadecolor}{light-gray!40}
 
 \lstdefinelanguage{Solidity}%
 {morekeywords = {
@@ -34,6 +37,7 @@
 
 \lstset{
   language=Solidity,%
+  backgroundcolor=\color{shadecolor},%
   mathescape=true,%
 %  columns=[c]fixed,%
   aboveskip=2pt,%\smallskipamount,

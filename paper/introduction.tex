@@ -38,9 +38,9 @@ Attackers are able to utilize
 the callback mechanism to \note{do crazy things and steal money}
 The root cause of this attack is \todo{explain}.
 
-Solidity does provide first-order assertion primitives (e.g. @require@ or
-@modifier@) but they cannot effectively check function values, which are a
-common pattern used in smart contract programs.
+Solidity does provide first-order assertion primitives (e.g. @require@) but
+they cannot effectively check function values, which are a common pattern used
+in smart contract programs.
 \zz{
 On the other hand, assertion primitives are crucial for ensuring the accuracy and
 integrity of a smart contract's business model.
@@ -101,7 +101,7 @@ behavioral contracts, which are absent in existing approaches.
 \todo{allows furthermore downstream tasks, fuzzing, static verification,
 	natural language to formal spec etc.}
 
-\subsubsection*{\textbf{Contracts for Higher-Order Functions}}
+\subsubsection*{\textbf{Contracts for Callable Addresses and Higher-Order Functions}}
 Higher-order contracts provides a way to specify and enforce pre- and
 post-conditions of untrusted functions. \todo{...}
 
