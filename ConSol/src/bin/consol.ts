@@ -48,10 +48,10 @@ async function main() {
     // read the typed ast
     const reader = new ASTReader();
     const sourceUnits = reader.read(result.data);
-        
+
     console.log('Used compiler version: ' + result.compilerVersion);
     console.log(sourceUnits[0].print());
-        
+
     // TODO: conduct transformation
 
     // convert ast back to source
@@ -67,14 +67,14 @@ async function main() {
       const outFileContent =  writer.write(sourceUnit);
       try {
         // Use the writeFile method to save the content to a file
-        await fs.writeFile(outputSol, outFileContent); 
+        await fs.writeFile(outputSol, outFileContent);
         console.log(`File ${outputSol} saved successfully`);
       } catch (error) {
         console.error(`Error saving file ${outputSol}: ${error}`);
       }
     }
 
-        
+
   } catch (e) {
     if (e instanceof CompileFailedError) {
       console.error('Compile errors encounterd: ');
@@ -89,7 +89,6 @@ async function main() {
       console.error(e.message);
     }
   }
-
 
 }
 

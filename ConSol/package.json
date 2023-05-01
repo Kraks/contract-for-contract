@@ -9,10 +9,11 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "consol": "dist/bin/consol.js"
+    "consol": "dist/bin/consol.js",
+    "consol-test": "dist/bin/consol-test.js"
   },
   "scripts": {
-    "build": "npm run clean && tsc --build && chmod u+x dist/bin/consol.js",
+    "build": "npm run clean && tsc --build && chmod u+x dist/bin/*.js",
     "clean": "rm -rf dist/*",
     "lint": "eslint src/ --ext=ts",
     "lint:fix": "eslint src/ --ext=ts --fix"
@@ -29,6 +30,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "antlr4": "^4.12.0",
     "solc-typed-ast": "^14.0.0"
   }
 }
