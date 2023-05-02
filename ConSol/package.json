@@ -1,5 +1,6 @@
 {
   "name": "consol",
+  "type": "module",
   "version": "0.0.1",
   "description": "Implement higher-order temporal behavioral contracts in Solidity",
   "keywords": [],
