@@ -67,7 +67,7 @@ secondline
 
 ### Naming Convention
 
-+ Files with names ending in -test.ts are utilized for testing and are not subject to lint rule enforcement.
++ Files with names ending in `-test.ts` are utilized for testing and are not subject to lint rule enforcement.
 
 ### Pre-commit
 
