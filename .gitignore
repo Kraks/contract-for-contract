@@ -1,6 +1,7 @@
 # latex
 build/
 paper.aux
+paper.xdv
 paper.bbl
 paper.bcf
 paper.run.xml

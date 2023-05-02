@@ -64,3 +64,19 @@ Or
 secondline
 */
 ```
+
+### Naming Convention
+
++ Files with names ending in -test.ts are utilized for testing and are not subject to lint rule enforcement.
+
+### Pre-commit
+
+If you want a pre-commit lint check, place the following script in `.git/hooks/pre-commit`.
+
+```bash
+#!/bin/sh
+
+TOPLEVEL=$(git rev-parse --show-toplevel)
+
+cd "$TOPLEVEL/ConSol" && npm run lint
+```

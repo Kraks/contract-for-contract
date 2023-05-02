@@ -23,41 +23,69 @@ The extension should be
 Specifying the pre-condition and post-condition, where the post-condition
 can depend on the argument value:
 
+% \begin{lstlisting}[language=Solidity]
+%   # {x | x > 0}
+%   # {y | y > x + 1}
+%   function f(uint x) returns (uint y) { ... }
+% \end{lstlisting}
+
 \begin{lstlisting}[language=Solidity]
-  # {x | x > 0}
-  # {y | y > x + 1}
-  function f(uint x) returns (uint y) { ... }
+  # {x | x % 1e18 < 1e17}
+  # {y | y < type(uint).max / 1e18}
+  function toEther(uint x) returns (uint y) { ... }
 \end{lstlisting}
+
 It is also equivalent to core syntax:
-\begin{lstlisting}
-  # {x | x > 0} -> {y | y > x + 1}
+% \begin{lstlisting}
+%   # {x | x > 0} -> {y | y > x + 1}
+% \end{lstlisting}
+
+\begin{lstlisting}[language=Solidity]
+  # {x | x % 1e18 < 1e17} -> {y | y < type(uint).max / 1e18}
+  function toEther(uint x) returns (uint y) { ... }
 \end{lstlisting}
 
 We can omit any part of the argument or return value contracts:
 
+% \begin{lstlisting}[language=Solidity]
+%   # {x | x > 0}
+%   function f(uint x) returns (uint y) { ... }
+% \end{lstlisting}
+
 \begin{lstlisting}[language=Solidity]
-  # {x | x > 0}
-  function f(uint x) returns (uint y) { ... }
+  # {x | x < type(uint).max / 1e18}
+  function toWei(uint x) returns (uint y) { ... }
 \end{lstlisting}
+
 It is equivalent to core syntax where the omitted part is simply \code{true}:
 
-\begin{lstlisting}
-  # {x | x > 0} -> {y | true}
+\begin{lstlisting}[language=Solidity]
+  # {x | x < type(uint).max / 1e18} -> {y | true}
 \end{lstlisting}
+
 Another way is to use the `any` flat contract, which is defined as
 \code{any = { _ | true }}:
 \begin{lstlisting}
-  # {x | x > 0} -> any
+  # {x | x < type(uint).max / 1e18} -> any
 \end{lstlisting}
 
 For multi-argument functions, we use multiple \code{->} to compose larger function
 contracts:
+
 \begin{lstlisting}
   # {x | x > 0} -> {y | y < 100} -> {z | z == x + y }
   function f(int x, int y) returns (int z) { returns x + y; }
 \end{lstlisting}
+
+% \begin{lstlisting}[language=Solidity]
+% # {rate | rate > 0 && rate < 100}
+% # {time | time != 0}
+% function simpleInterest(uint principle, uint rate, uint time) returns (uint interest) { ... }
+% \end{lstlisting}
+
 Or, we could write a single flat contract for the argument introducing
 multiple argument binders:
+
 \begin{lstlisting}
   # { (x, y) | x > 0 && y < 100 } -> {z | z == x + y }
   function f(int x, int y) returns (int z) { returns x + y; }
