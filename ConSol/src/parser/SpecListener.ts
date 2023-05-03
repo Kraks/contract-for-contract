@@ -4,7 +4,7 @@
 import {ParseTreeListener} from "antlr4";
 
 
-import { ProgContext } from "./SpecParser";
+import { SpecContext } from "./SpecParser";
 import { ExprContext } from "./SpecParser";
 
 
@@ -14,15 +14,15 @@ import { ExprContext } from "./SpecParser";
  */
 export default class SpecListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by `SpecParser.prog`.
+	 * Enter a parse tree produced by `SpecParser.spec`.
 	 * @param ctx the parse tree
 	 */
-	enterProg?: (ctx: ProgContext) => void;
+	enterSpec?: (ctx: SpecContext) => void;
 	/**
-	 * Exit a parse tree produced by `SpecParser.prog`.
+	 * Exit a parse tree produced by `SpecParser.spec`.
 	 * @param ctx the parse tree
 	 */
-	exitProg?: (ctx: ProgContext) => void;
+	exitSpec?: (ctx: SpecContext) => void;
 	/**
 	 * Enter a parse tree produced by `SpecParser.expr`.
 	 * @param ctx the parse tree

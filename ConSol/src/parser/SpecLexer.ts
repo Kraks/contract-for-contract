@@ -24,10 +24,10 @@ export default class SpecLexer extends Lexer {
 	public static readonly EOF = Token.EOF;
 
 	public static readonly channelNames: string[] = [ "DEFAULT_TOKEN_CHANNEL", "HIDDEN" ];
-	public static readonly literalNames: string[] = [ null, "'*'", "'/'", "'+'",
+	public static readonly literalNames: string[] = [ null, "'*'", "'/'", "'+'", 
                                                    "'-'", "'('", "')'" ];
-	public static readonly symbolicNames: string[] = [ null, null, null, null,
-                                                    null, null, null, "NEWLINE",
+	public static readonly symbolicNames: string[] = [ null, null, null, null, 
+                                                    null, null, null, "NEWLINE", 
                                                     "INT" ];
 	public static readonly modeNames: string[] = [ "DEFAULT_MODE", ];
 

@@ -1,5 +1,5 @@
 grammar Spec;
-prog:   (expr NEWLINE)* ;
+spec:   (expr NEWLINE)* ;
 expr:   expr ('*'|'/') expr
     |   expr ('+'|'-') expr
     |   INT

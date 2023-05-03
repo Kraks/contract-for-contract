@@ -29,20 +29,20 @@ export default class SpecParser extends Parser {
 	public static readonly NEWLINE = 7;
 	public static readonly INT = 8;
 	public static readonly EOF = Token.EOF;
-	public static readonly RULE_prog = 0;
+	public static readonly RULE_spec = 0;
 	public static readonly RULE_expr = 1;
-	public static readonly literalNames: (string | null)[] = [ null, "'*'",
-                                                            "'/'", "'+'",
-                                                            "'-'", "'('",
+	public static readonly literalNames: (string | null)[] = [ null, "'*'", 
+                                                            "'/'", "'+'", 
+                                                            "'-'", "'('", 
                                                             "')'" ];
-	public static readonly symbolicNames: (string | null)[] = [ null, null,
-                                                             null, null,
-                                                             null, null,
-                                                             null, "NEWLINE",
+	public static readonly symbolicNames: (string | null)[] = [ null, null, 
+                                                             null, null, 
+                                                             null, null, 
+                                                             null, "NEWLINE", 
                                                              "INT" ];
 	// tslint:disable:no-trailing-whitespace
 	public static readonly ruleNames: string[] = [
-		"prog", "expr",
+		"spec", "expr",
 	];
 	public get grammarFileName(): string { return "Spec.g4"; }
 	public get literalNames(): (string | null)[] { return SpecParser.literalNames; }
@@ -59,9 +59,9 @@ export default class SpecParser extends Parser {
 		this._interp = new ParserATNSimulator(this, SpecParser._ATN, SpecParser.DecisionsToDFA, new PredictionContextCache());
 	}
 	// @RuleVersion(0)
-	public prog(): ProgContext {
-		let localctx: ProgContext = new ProgContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 0, SpecParser.RULE_prog);
+	public spec(): SpecContext {
+		let localctx: SpecContext = new SpecContext(this, this._ctx, this.state);
+		this.enterRule(localctx, 0, SpecParser.RULE_spec);
 		let _la: number;
 		try {
 			this.enterOuterAlt(localctx, 1);
@@ -262,7 +262,7 @@ export default class SpecParser extends Parser {
 
 }
 
-export class ProgContext extends ParserRuleContext {
+export class SpecContext extends ParserRuleContext {
 	constructor(parser?: SpecParser, parent?: ParserRuleContext, invokingState?: number) {
 		super(parent, invokingState);
     	this.parser = parser;
@@ -280,22 +280,22 @@ export class ProgContext extends ParserRuleContext {
 		return this.getToken(SpecParser.NEWLINE, i);
 	}
     public get ruleIndex(): number {
-    	return SpecParser.RULE_prog;
+    	return SpecParser.RULE_spec;
 	}
 	public enterRule(listener: SpecListener): void {
-	    if(listener.enterProg) {
-	 		listener.enterProg(this);
+	    if(listener.enterSpec) {
+	 		listener.enterSpec(this);
 		}
 	}
 	public exitRule(listener: SpecListener): void {
-	    if(listener.exitProg) {
-	 		listener.exitProg(this);
+	    if(listener.exitSpec) {
+	 		listener.exitSpec(this);
 		}
 	}
 	// @Override
 	public accept<Result>(visitor: SpecVisitor<Result>): Result {
-		if (visitor.visitProg) {
-			return visitor.visitProg(this);
+		if (visitor.visitSpec) {
+			return visitor.visitSpec(this);
 		} else {
 			return visitor.visitChildren(this);
 		}

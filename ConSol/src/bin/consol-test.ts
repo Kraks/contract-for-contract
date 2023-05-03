@@ -12,7 +12,7 @@ function main() {
   const lexer = new SpecLexer(chars);
   const tokens = new CommonTokenStream(lexer);
   const parser = new SpecParser(tokens);
-  const tree = parser.prog();
+  const tree = parser.spec();
   console.log(tree);
 }
 

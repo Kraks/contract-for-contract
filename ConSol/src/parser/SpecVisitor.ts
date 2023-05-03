@@ -4,7 +4,7 @@
 import {ParseTreeVisitor} from 'antlr4';
 
 
-import { ProgContext } from "./SpecParser";
+import { SpecContext } from "./SpecParser";
 import { ExprContext } from "./SpecParser";
 
 
@@ -17,11 +17,11 @@ import { ExprContext } from "./SpecParser";
  */
 export default class SpecVisitor<Result> extends ParseTreeVisitor<Result> {
 	/**
-	 * Visit a parse tree produced by `SpecParser.prog`.
+	 * Visit a parse tree produced by `SpecParser.spec`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitProg?: (ctx: ProgContext) => Result;
+	visitSpec?: (ctx: SpecContext) => Result;
 	/**
 	 * Visit a parse tree produced by `SpecParser.expr`.
 	 * @param ctx the parse tree

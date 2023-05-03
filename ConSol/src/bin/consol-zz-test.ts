@@ -6,13 +6,13 @@ import SpecParser from '../parser/SpecParser.js';
 import { isNumber } from '../index.js';
 
 function main() {
-  const input = "3+4\n"
+  const input = "     3+4\n"
   console.log(input)
   const chars = new CharStream(input); // replace this with a FileStream as required
   const lexer = new SpecLexer(chars);
   const tokens = new CommonTokenStream(lexer);
   const parser = new SpecParser(tokens);
-  const tree = parser.prog();
+  const tree = parser.spec();
   console.log(tree);
   console.log(isNumber(tree));
 }
