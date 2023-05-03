@@ -125,6 +125,12 @@ dist
 .nvim/
 *.log
 
+# anter
+antlr-4.12.0-complete.jar
+!ConSol/grammar/gen.sh
+!ConSol/grammar/Spec.g4
+ConSol/grammar/
+
 # test
 Lock.json
 Lock_out.Sol
