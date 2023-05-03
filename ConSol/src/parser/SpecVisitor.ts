@@ -6,8 +6,11 @@ import {ParseTreeVisitor} from 'antlr4';
 
 import { SpecContext } from "./SpecParser";
 import { VspecContext } from "./SpecParser";
+import { ArgsContext } from "./SpecParser";
+import { IdentsContext } from "./SpecParser";
+import { DictContext } from "./SpecParser";
 import { PairContext } from "./SpecParser";
-import { ExprContext } from "./SpecParser";
+import { SexprContext } from "./SpecParser";
 
 
 /**
@@ -31,16 +34,34 @@ export default class SpecVisitor<Result> extends ParseTreeVisitor<Result> {
 	 */
 	visitVspec?: (ctx: VspecContext) => Result;
 	/**
+	 * Visit a parse tree produced by `SpecParser.args`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitArgs?: (ctx: ArgsContext) => Result;
+	/**
+	 * Visit a parse tree produced by `SpecParser.idents`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitIdents?: (ctx: IdentsContext) => Result;
+	/**
+	 * Visit a parse tree produced by `SpecParser.dict`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitDict?: (ctx: DictContext) => Result;
+	/**
 	 * Visit a parse tree produced by `SpecParser.pair`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	visitPair?: (ctx: PairContext) => Result;
 	/**
-	 * Visit a parse tree produced by `SpecParser.expr`.
+	 * Visit a parse tree produced by `SpecParser.sexpr`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitExpr?: (ctx: ExprContext) => Result;
+	visitSexpr?: (ctx: SexprContext) => Result;
 }
 

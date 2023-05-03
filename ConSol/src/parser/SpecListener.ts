@@ -6,8 +6,11 @@ import {ParseTreeListener} from "antlr4";
 
 import { SpecContext } from "./SpecParser";
 import { VspecContext } from "./SpecParser";
+import { ArgsContext } from "./SpecParser";
+import { IdentsContext } from "./SpecParser";
+import { DictContext } from "./SpecParser";
 import { PairContext } from "./SpecParser";
-import { ExprContext } from "./SpecParser";
+import { SexprContext } from "./SpecParser";
 
 
 /**
@@ -36,6 +39,36 @@ export default class SpecListener extends ParseTreeListener {
 	 */
 	exitVspec?: (ctx: VspecContext) => void;
 	/**
+	 * Enter a parse tree produced by `SpecParser.args`.
+	 * @param ctx the parse tree
+	 */
+	enterArgs?: (ctx: ArgsContext) => void;
+	/**
+	 * Exit a parse tree produced by `SpecParser.args`.
+	 * @param ctx the parse tree
+	 */
+	exitArgs?: (ctx: ArgsContext) => void;
+	/**
+	 * Enter a parse tree produced by `SpecParser.idents`.
+	 * @param ctx the parse tree
+	 */
+	enterIdents?: (ctx: IdentsContext) => void;
+	/**
+	 * Exit a parse tree produced by `SpecParser.idents`.
+	 * @param ctx the parse tree
+	 */
+	exitIdents?: (ctx: IdentsContext) => void;
+	/**
+	 * Enter a parse tree produced by `SpecParser.dict`.
+	 * @param ctx the parse tree
+	 */
+	enterDict?: (ctx: DictContext) => void;
+	/**
+	 * Exit a parse tree produced by `SpecParser.dict`.
+	 * @param ctx the parse tree
+	 */
+	exitDict?: (ctx: DictContext) => void;
+	/**
 	 * Enter a parse tree produced by `SpecParser.pair`.
 	 * @param ctx the parse tree
 	 */
@@ -46,14 +79,14 @@ export default class SpecListener extends ParseTreeListener {
 	 */
 	exitPair?: (ctx: PairContext) => void;
 	/**
-	 * Enter a parse tree produced by `SpecParser.expr`.
+	 * Enter a parse tree produced by `SpecParser.sexpr`.
 	 * @param ctx the parse tree
 	 */
-	enterExpr?: (ctx: ExprContext) => void;
+	enterSexpr?: (ctx: SexprContext) => void;
 	/**
-	 * Exit a parse tree produced by `SpecParser.expr`.
+	 * Exit a parse tree produced by `SpecParser.sexpr`.
 	 * @param ctx the parse tree
 	 */
-	exitExpr?: (ctx: ExprContext) => void;
+	exitSexpr?: (ctx: SexprContext) => void;
 }
 
