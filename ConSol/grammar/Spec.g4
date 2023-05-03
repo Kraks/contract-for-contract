@@ -1,14 +1,9 @@
 grammar Spec;
 
 spec  :   vspec ;
-vspec :   '{' (dict)? args '|' expr '}' ;
-args  :   IDENT
-      |   tuple
+vspec :   '{' ( '{' (pair (',' pair)*)? '}' )? IDENT '|' expr '}'
+      |   '{' ( '{' (pair (',' pair)*)? '}' )? '(' (IDENT (',' IDENT)*)? ')' '|' expr '}'
       ;
-tuple :   '(' idents ')' ;
-dict  :   '{' pairs '}' ;
-idents:   (IDENT (',' IDENT)*)? ;
-pairs :   (pair (',' pair)*)? ;
 pair  :   IDENT ':' expr ;
 expr  :   expr ('*'|'/') expr
       |   expr ('+'|'-') expr
