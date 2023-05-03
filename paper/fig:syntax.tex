@@ -9,10 +9,12 @@
     \Typ{Literals}    \qquad & v && \in
       \mathbb{Z} \mid
       \todo{whatelse} \\
-    \Typ{Primitives} \qquad & o && ::=
+    \Typ{Operators} \qquad & o && ::=
       + \mid
       - \mid
       \times \mid
+      \land \mid
+      \lor \mid
       \dots \\
     \Typ{Expressions}\qquad & e && ::=
       v \mid
@@ -23,8 +25,16 @@
     \Typ{Statements} \qquad & s && ::=
       x ~\mathsf{:=}~ e \mid
       \dots \\
-    \Typ{Function Def} \qquad & f && ::=
-      \Keywd{function}~f(x ~ t, \dots)~\Keywd{returns}~t~\{ s \}
+    \Typ{Temporal~Connectives} \qquad & \oplus && ::=
+      ~ \Rightarrow ~\mid~ \not\Rightarrow ~\mid~ \leadsto ~\mid~ \not\leadsto \\
+    \Typ{Value~Specifications} \qquad & \varsigma_v && ::=
+      \{ (x, \dots) ~\vert~ e \} \mid
+      \varsigma_v \mapsto \varsigma_v \\
+    \Typ{Temporal~Specifications} \qquad & \varsigma_t && ::=
+     f(x, \dots)~\Keywd{returns}~ (z_1, \dots) ~\oplus~ g(y, \dots)~\Keywd{returns}~ (z_2, \dots) \land e \\
+    \Typ{Specifications} \qquad & \varsigma && ::= \varsigma_v \mid \varsigma_t \\
+    \Typ{Function~Definitions} \qquad & \mathcal{F} && ::=
+      \# \varsigma^* ~ \Keywd{function}~f(x ~ t, \dots)~\Keywd{returns}~t~\{ ~s~ \}
   \end{alignat*}
   \caption{The abstract syntax of \lang.}
   \label{fig:syntax}
