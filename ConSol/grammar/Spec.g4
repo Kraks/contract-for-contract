@@ -1,18 +1,31 @@
 grammar Spec;
-// online test: http://lab.antlr.org/
+// Online test: http://lab.antlr.org/
 
-spec  :   vspec ;
-vspec :   '{' (dict)? args '|' sexpr '}' ;
-args  :   IDENT
+// Add EOF to ensure that the sexpr in tspec will capture the entire expression.
+spec  :   vspec EOF
+      |   tspec EOF
+      ;
+vspec :   '{' (dict)? tuple '|' sexpr '}'
+      |   vspec '->' vspec
+      ;
+tspec :   func TCONN func ( '/\\' sexpr )? ;
+tuple :   IDENT
       |   '(' idents ')'
       ;
 idents:   (IDENT (',' IDENT)*)? ;
 dict  :   '{' (pair (',' pair)*)? '}' ;
 pair  :   IDENT ':' IDENT ;
+func  :   IDENT '(' idents ')' ('returns' tuple)? ;
 sexpr :   ~('{' | '}')+ ;
 
 
 IDENT :   [a-zA-Z_] [a-zA-Z_0-9]* ;
+TCONN :   '=>'
+      |   '=/>'
+      |   '~>'
+      |   '~/>'
+      ;
+// Define OP for the lexer
 OP    :   '|'
       |   '&'
       |   '^'
@@ -45,6 +58,7 @@ OP    :   '|'
       |   '<<'
       |   '('
       |   ')'
+      |   '.'
       ;
 QUOTE :   '\'' | '"' ;
 INT   :   [0-9]+

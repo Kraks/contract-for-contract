@@ -6,10 +6,12 @@ import {ParseTreeListener} from "antlr4";
 
 import { SpecContext } from "./SpecParser";
 import { VspecContext } from "./SpecParser";
-import { ArgsContext } from "./SpecParser";
+import { TspecContext } from "./SpecParser";
+import { TupleContext } from "./SpecParser";
 import { IdentsContext } from "./SpecParser";
 import { DictContext } from "./SpecParser";
 import { PairContext } from "./SpecParser";
+import { FuncContext } from "./SpecParser";
 import { SexprContext } from "./SpecParser";
 
 
@@ -39,15 +41,25 @@ export default class SpecListener extends ParseTreeListener {
 	 */
 	exitVspec?: (ctx: VspecContext) => void;
 	/**
-	 * Enter a parse tree produced by `SpecParser.args`.
+	 * Enter a parse tree produced by `SpecParser.tspec`.
 	 * @param ctx the parse tree
 	 */
-	enterArgs?: (ctx: ArgsContext) => void;
+	enterTspec?: (ctx: TspecContext) => void;
 	/**
-	 * Exit a parse tree produced by `SpecParser.args`.
+	 * Exit a parse tree produced by `SpecParser.tspec`.
 	 * @param ctx the parse tree
 	 */
-	exitArgs?: (ctx: ArgsContext) => void;
+	exitTspec?: (ctx: TspecContext) => void;
+	/**
+	 * Enter a parse tree produced by `SpecParser.tuple`.
+	 * @param ctx the parse tree
+	 */
+	enterTuple?: (ctx: TupleContext) => void;
+	/**
+	 * Exit a parse tree produced by `SpecParser.tuple`.
+	 * @param ctx the parse tree
+	 */
+	exitTuple?: (ctx: TupleContext) => void;
 	/**
 	 * Enter a parse tree produced by `SpecParser.idents`.
 	 * @param ctx the parse tree
@@ -78,6 +90,16 @@ export default class SpecListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitPair?: (ctx: PairContext) => void;
+	/**
+	 * Enter a parse tree produced by `SpecParser.func`.
+	 * @param ctx the parse tree
+	 */
+	enterFunc?: (ctx: FuncContext) => void;
+	/**
+	 * Exit a parse tree produced by `SpecParser.func`.
+	 * @param ctx the parse tree
+	 */
+	exitFunc?: (ctx: FuncContext) => void;
 	/**
 	 * Enter a parse tree produced by `SpecParser.sexpr`.
 	 * @param ctx the parse tree
