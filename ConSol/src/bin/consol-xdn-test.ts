@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 import { ErrorListener, CharStream, CommonTokenStream, Recognizer, RecognitionException, Token, ParseTreeWalker, ParserRuleContext, TerminalNode, ParseTree}  from 'antlr4';
-import SpecLexer from '../parser/SpecLexer.js';
-import SpecParser from '../parser/SpecParser.js';
-import {SpecContext} from '../parser/SpecParser.js';
+import SpecLexer from '../lib/spec-parser/SpecLexer.js';
+import SpecParser from '../lib/spec-parser/SpecParser.js';
+import {SpecContext} from '../lib/spec-parser/SpecParser.js';
 import { isNumber } from '../index.js';
 import * as util from 'util'
-import SpecListener from '../parser/SpecListener.js'; 
-import SpecVisitor from '../parser/SpecVisitor.js';
+import SpecListener from '../lib/spec-parser/SpecListener.js'; 
+import SpecVisitor from '../lib/spec-parser/SpecVisitor.js';
 
 class ConSolParseError extends Error {
   constructor(public line: number, public charPositionInLine: number, message: string) {

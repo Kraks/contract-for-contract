@@ -1,2 +1,2 @@
-src/parser/*.ts
+src/lib/spec-parser/*.ts
 **/*-test.ts
