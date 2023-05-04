@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { ErrorListener, CharStream, CommonTokenStream, Recognizer, RecognitionException, Token, ParseTreeWalker, ParserRuleContext, TerminalNode}  from 'antlr4';
+import { ErrorListener, CharStream, CommonTokenStream, Recognizer, RecognitionException, Token, ParseTreeWalker, ParserRuleContext, TerminalNode, ParseTree}  from 'antlr4';
 import SpecLexer from '../parser/SpecLexer.js';
 import SpecParser from '../parser/SpecParser.js';
 import {SpecContext} from '../parser/SpecParser.js';
@@ -41,6 +41,12 @@ class MySpecListener extends SpecListener{
   exitSpec: (ctx: SpecContext) => void  = (ctx: SpecContext) => {
     console.log("[Walker] Exit a spec");
   };
+  // Other methods:
+  // enter/exit xxx
+  // visitTerminal
+  // visitErrorNode
+  // enterEveryRule
+  // exitEveryRule
 }
 
 
@@ -49,22 +55,22 @@ class MySpecVisitor extends SpecVisitor<void> {
     if (!ctx || !ctx.children) {
       return;
     }
-    ctx.children.forEach((child, index) => {
-      if (child instanceof ParserRuleContext) {
-        if (child.children && child.children.length !== 0) {
-          console.log("[Visitor] Node", index, "text:", child.getText());
-          this.visit(child); // Use the 'visit' method of the visitor class directly
-        }
-      } else if (child instanceof TerminalNode) {
-        console.log("[Visitor] TerminalNode", index, "text:", child.getText());
-      }
-      else{ //dead code
-        console.log("[Visitor] Node", index, "text:", child.getText());
-      }
-    });
+    this.dfs(ctx, 0);
   }
 
+  dfs(node: ParseTree, depth: number): void {
+    // TerminalNode or ParserRuleContext (non-terminal)
+    const nodeType = node instanceof ParserRuleContext ? "Non-terminal" : "Terminal";
+    const nodeName = node.getText();
+    console.log(`[Visitor] Depth: ${depth}, Type: ${nodeType}, Name: ${nodeName}`);
 
+    // If the node is a ParserRuleContext (non-terminal), continue DFS
+    if (node instanceof ParserRuleContext && node.children) {
+      for (const child of node.children) {
+        this.dfs(child, depth + 1);
+      }
+    }
+  }
 }
 
 
@@ -95,11 +101,11 @@ function parse(specStr: string) {
 function main() {
   // vspec
   parse("{x | 1 + 2}");
-  parse("{ (x) | 1 + 2}");
-  parse("{ (x, y) | 1 + 2}");
-  parse("{x | 1 + 2} -> {y | 1 + 2}");
-  parse("{ {x:y, a:b} z | 1 + 2}");
-  parse("{ {x:y, a:b} (x,y) | 1 + 2}");
+  // parse("{ (x) | 1 + 2}");
+  // parse("{ (x, y) | 1 + 2}");
+  // parse("{x | 1 + 2} -> {y | 1 + 2}");
+  // parse("{ {x:y, a:b} z | 1 + 2}");
+  // parse("{ {x:y, a:b} (x,y) | 1 + 2}");
 }
 
 main();
