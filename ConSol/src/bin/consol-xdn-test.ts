@@ -1,15 +1,13 @@
 #!/usr/bin/env node
 
-import { ErrorListener, CharStream, CommonTokenStream, Recognizer, RecognitionException, Token, ParseTreeWalker}  from 'antlr4';
+import { ErrorListener, CharStream, CommonTokenStream, Recognizer, RecognitionException, Token, ParseTreeWalker, ParserRuleContext, TerminalNode}  from 'antlr4';
 import SpecLexer from '../parser/SpecLexer.js';
 import SpecParser from '../parser/SpecParser.js';
-
+import {SpecContext} from '../parser/SpecParser.js';
 import { isNumber } from '../index.js';
 import * as util from 'util'
-import SpecListener from '../parser/SpecListener.js';
-import {SpecContext} from '../parser/SpecParser.js';
+import SpecListener from '../parser/SpecListener.js'; 
 import SpecVisitor from '../parser/SpecVisitor.js';
-import {ParserRuleContext, ParseTreeVisitor, RuleNode, TerminalNode, ErrorNode} from "antlr4";
 
 class ConSolParseError extends Error {
   constructor(public line: number, public charPositionInLine: number, message: string) {
@@ -38,10 +36,10 @@ class ConSolErrorListener implements ErrorListener <Token> {
 
 class MySpecListener extends SpecListener{
   enterSpec:  (ctx: SpecContext) => void  = (ctx: SpecContext) =>{
-    console.log("Enter a spec: ", ctx.getText());
+    console.log("[Walker] Enter a spec: ", ctx.getText());
   };
   exitSpec: (ctx: SpecContext) => void  = (ctx: SpecContext) => {
-    console.log("Exit a spec");
+    console.log("[Walker] Exit a spec");
   };
 }
 
@@ -51,14 +49,17 @@ class MySpecVisitor extends SpecVisitor<void> {
     if (!ctx || !ctx.children) {
       return;
     }
-
     ctx.children.forEach((child, index) => {
       if (child instanceof ParserRuleContext) {
         if (child.children && child.children.length !== 0) {
+          console.log("[Visitor] Node", index, "text:", child.getText());
           this.visit(child); // Use the 'visit' method of the visitor class directly
         }
       } else if (child instanceof TerminalNode) {
-        console.log("Child", index, "text:", child.getText());
+        console.log("[Visitor] TerminalNode", index, "text:", child.getText());
+      }
+      else{ //dead code
+        console.log("[Visitor] Node", index, "text:", child.getText());
       }
     });
   }
