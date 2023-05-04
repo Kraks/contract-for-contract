@@ -51,6 +51,14 @@ class MySpecListener extends SpecListener{
 
 
 class MySpecVisitor extends SpecVisitor<void> {
+  private parser: SpecParser;
+
+  constructor(parser: SpecParser) {
+    super();
+    this.parser = parser;
+  }
+
+
   visitChildren(ctx: ParserRuleContext): void {
     if (!ctx || !ctx.children) {
       return;
@@ -58,9 +66,29 @@ class MySpecVisitor extends SpecVisitor<void> {
     this.dfs(ctx, 0);
   }
 
+  getNodeType(node: ParseTree) : string | null {
+    
+    if (node instanceof ParserRuleContext) {
+      // rule name
+      return node.constructor.name;
+    }
+    else if (node instanceof TerminalNode) {
+      let typeIdx = node.symbol.type;
+      if (typeIdx === Token.EOF){
+        return "EOF";
+      }
+      else if (this.parser.literalNames.length > typeIdx){
+        return this.parser.literalNames[typeIdx];
+      }
+      else if (this.parser.symbolicNames.length > typeIdx){
+        return this.parser.symbolicNames[typeIdx];
+      }
+    }
+    throw new Error("?"); 
+  }
+
   dfs(node: ParseTree, depth: number): void {
-    // TerminalNode or ParserRuleContext (non-terminal)
-    const nodeType = node instanceof ParserRuleContext ? "Non-terminal" : "Terminal";
+    const nodeType = this.getNodeType(node);
     const nodeName = node.getText();
     console.log(`[Visitor] Depth: ${depth}, Type: ${nodeType}, Name: ${nodeName}`);
 
@@ -88,7 +116,8 @@ function parse(specStr: string) {
     // console.log(util.inspect(tree, true, 4));
     // console.log(tree);
     ParseTreeWalker.DEFAULT.walk(walker, tree);
-    tree.accept(new MySpecVisitor());
+    const myVisitor = new MySpecVisitor(parser);
+    tree.accept(myVisitor);
   } catch (error) {
     if (error instanceof ConSolParseError) {
       console.error(`ConSolParseError: ${error.message}`);
