@@ -27,9 +27,57 @@ function convertResultToPlainObject(result: CompileResult): Record<string, any> 
   };
 }
 
+/**
+ * util functions for parsing `complieResult` 
+ * complieResult structure:
+ *  data
+ *    contracts
+ *      fileRaw
+ * */ 
+
+const SPEC_TAG = "custom:consol";
+
+interface ContractRaw {
+  abi: any[];
+  devdoc: {
+    kind: string;
+    [key: string]: any;
+  };
+}
+
+interface FileRaw {  
+  [fileName: string]: {
+    [contractName: string]: ContractRaw;
+  };
+}
+
+
+function getXwithSpec(
+  x: keyof ContractRaw["devdoc"],
+) : (contract: ContractRaw) => Record<string, string> {
+  return (contract) => {
+    const xWithSpec : Record<string, string> = {};
+    const xValues = contract.devdoc[x];
+    if (xValues){
+      for (const xVal in xValues) {
+        const xSpec  = xValues[xVal][SPEC_TAG];
+        if (xSpec){
+          xWithSpec[xVal] = xSpec;
+        }
+      }
+    }
+    return xWithSpec;
+  };
+}
+
+const getMethodsWithSpec = getXwithSpec("methods");
+const getEventsWithSpec = getXwithSpec("events");
+const getVarsWithSpec = getXwithSpec("stateVariables");
+
+
 
 async function main() {
-  let result: CompileResult;
+  let complieResult: CompileResult;
 
   try {
     const args = process.argv.slice(1);
@@ -45,21 +93,27 @@ async function main() {
     const outputJson = path.join(dirname, filename.split('.')[0] + '.json');
     const outputSol = path.join(dirname, filename.split('.')[0] + '_out.sol');
 
-    result = await compileSol(inputPath, 'auto');
-    // console.log(result);
-    // console.log(result.data.sources[`${filename}.sol`].ast.nodes[1].nodes);
+    complieResult = await compileSol(inputPath, 'auto');
+    // console.log(complieResult);
+    // console.log(complieResult.data.sources[`${filename}.sol`].ast.nodes[1].nodes);
 
     // dump to json file
-    await fs.writeFile(outputJson, JSON.stringify(convertResultToPlainObject(result), null, 2));
+    await fs.writeFile(outputJson, JSON.stringify(convertResultToPlainObject(complieResult), null, 2));
 
     // read the typed ast
     const reader = new ASTReader();
-    const sourceUnits = reader.read(result.data);
+    const sourceUnits = reader.read(complieResult.data);
 
-    console.log('Used compiler version: ' + result.compilerVersion);
+    console.log('Used compiler version: ' + complieResult.compilerVersion);
     console.log(sourceUnits[0].print());
 
     // TODO: conduct transformation
+    const LockContract : ContractRaw = complieResult.data.contracts[inputPath]["Lock"];
+    const methodsWithSpec = getMethodsWithSpec(LockContract);
+    console.log(methodsWithSpec);
+
+
+    
     // @custom:consol { _unlockTime | _unlockTime > 0 } for constructor
     const buildRequireStmt = (ctx: ASTContext, constraint: Expression, msg?: string): ExpressionStatement => {
       const factory = new ASTNodeFactory(ctx);
@@ -103,7 +157,7 @@ async function main() {
     const writer = new ASTWriter(
       DefaultASTWriterMapping,
       formatter,
-      result.compilerVersion ? result.compilerVersion : LatestCompilerVersion,
+      complieResult.compilerVersion ? complieResult.compilerVersion : LatestCompilerVersion,
     );
 
     for (const sourceUnit of sourceUnits) {
