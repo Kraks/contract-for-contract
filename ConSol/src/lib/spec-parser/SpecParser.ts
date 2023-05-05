@@ -160,15 +160,44 @@ export default class SpecParser extends Parser {
 			this.tuple();
 			this.state = 32;
 			this.match(SpecParser.T__1);
-			this.state = 33;
-			this.sexpr();
-			this.state = 34;
+			this.state = 35;
+			this._errHandler.sync(this);
+			switch (this._input.LA(1)) {
+			case 2:
+			case 4:
+			case 5:
+			case 6:
+			case 7:
+			case 8:
+			case 9:
+			case 10:
+			case 11:
+			case 12:
+			case 13:
+			case 14:
+			case 15:
+			case 16:
+				{
+				this.state = 33;
+				this.sexpr();
+				}
+				break;
+			case 1:
+				{
+				this.state = 34;
+				this.vspec(0);
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
+			}
+			this.state = 37;
 			this.match(SpecParser.T__2);
 			}
 			this._ctx.stop = this._input.LT(-1);
-			this.state = 41;
+			this.state = 44;
 			this._errHandler.sync(this);
-			_alt = this._interp.adaptivePredict(this._input, 2, this._ctx);
+			_alt = this._interp.adaptivePredict(this._input, 3, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					if (this._parseListeners != null) {
@@ -179,20 +208,20 @@ export default class SpecParser extends Parser {
 					{
 					localctx = new VspecContext(this, _parentctx, _parentState);
 					this.pushNewRecursionContext(localctx, _startState, SpecParser.RULE_vspec);
-					this.state = 36;
+					this.state = 39;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 					}
-					this.state = 37;
+					this.state = 40;
 					this.match(SpecParser.T__3);
-					this.state = 38;
+					this.state = 41;
 					this.vspec(2);
 					}
 					}
 				}
-				this.state = 43;
+				this.state = 46;
 				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 2, this._ctx);
+				_alt = this._interp.adaptivePredict(this._input, 3, this._ctx);
 			}
 			}
 		}
@@ -218,20 +247,20 @@ export default class SpecParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 44;
+			this.state = 47;
 			this.func();
-			this.state = 45;
+			this.state = 48;
 			this.match(SpecParser.TCONN);
-			this.state = 46;
-			this.func();
 			this.state = 49;
+			this.func();
+			this.state = 52;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la===5) {
 				{
-				this.state = 47;
+				this.state = 50;
 				this.match(SpecParser.T__4);
-				this.state = 48;
+				this.state = 51;
 				this.sexpr();
 				}
 			}
@@ -257,24 +286,24 @@ export default class SpecParser extends Parser {
 		let localctx: TupleContext = new TupleContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 6, SpecParser.RULE_tuple);
 		try {
-			this.state = 56;
+			this.state = 59;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case 11:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 51;
+				this.state = 54;
 				this.match(SpecParser.IDENT);
 				}
 				break;
 			case 6:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 52;
+				this.state = 55;
 				this.match(SpecParser.T__5);
-				this.state = 53;
+				this.state = 56;
 				this.idents();
-				this.state = 54;
+				this.state = 57;
 				this.match(SpecParser.T__6);
 				}
 				break;
@@ -304,26 +333,26 @@ export default class SpecParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 66;
+			this.state = 69;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la===11) {
 				{
-				this.state = 58;
+				this.state = 61;
 				this.match(SpecParser.IDENT);
-				this.state = 63;
+				this.state = 66;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				while (_la===8) {
 					{
 					{
-					this.state = 59;
+					this.state = 62;
 					this.match(SpecParser.T__7);
-					this.state = 60;
+					this.state = 63;
 					this.match(SpecParser.IDENT);
 					}
 					}
-					this.state = 65;
+					this.state = 68;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
@@ -354,35 +383,35 @@ export default class SpecParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 68;
+			this.state = 71;
 			this.match(SpecParser.T__0);
-			this.state = 77;
+			this.state = 80;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la===11) {
 				{
-				this.state = 69;
+				this.state = 72;
 				this.pair();
-				this.state = 74;
+				this.state = 77;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				while (_la===8) {
 					{
 					{
-					this.state = 70;
+					this.state = 73;
 					this.match(SpecParser.T__7);
-					this.state = 71;
+					this.state = 74;
 					this.pair();
 					}
 					}
-					this.state = 76;
+					this.state = 79;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
 				}
 			}
 
-			this.state = 79;
+			this.state = 82;
 			this.match(SpecParser.T__2);
 			}
 		}
@@ -407,11 +436,11 @@ export default class SpecParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 81;
+			this.state = 84;
 			this.match(SpecParser.IDENT);
-			this.state = 82;
+			this.state = 85;
 			this.match(SpecParser.T__8);
-			this.state = 83;
+			this.state = 86;
 			this.match(SpecParser.IDENT);
 			}
 		}
@@ -437,22 +466,22 @@ export default class SpecParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 85;
-			this.match(SpecParser.IDENT);
-			this.state = 86;
-			this.match(SpecParser.T__5);
-			this.state = 87;
-			this.idents();
 			this.state = 88;
-			this.match(SpecParser.T__6);
+			this.match(SpecParser.IDENT);
+			this.state = 89;
+			this.match(SpecParser.T__5);
+			this.state = 90;
+			this.idents();
 			this.state = 91;
+			this.match(SpecParser.T__6);
+			this.state = 94;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la===10) {
 				{
-				this.state = 89;
+				this.state = 92;
 				this.match(SpecParser.T__9);
-				this.state = 90;
+				this.state = 93;
 				this.tuple();
 				}
 			}
@@ -481,13 +510,13 @@ export default class SpecParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 94;
+			this.state = 97;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			do {
 				{
 				{
-				this.state = 93;
+				this.state = 96;
 				_la = this._input.LA(1);
 				if(_la<=0 || _la===1 || _la===3) {
 				this._errHandler.recoverInline(this);
@@ -498,7 +527,7 @@ export default class SpecParser extends Parser {
 				}
 				}
 				}
-				this.state = 96;
+				this.state = 99;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			} while ((((_la) & ~0x1F) === 0 && ((1 << _la) & 131060) !== 0));
@@ -534,34 +563,35 @@ export default class SpecParser extends Parser {
 		return true;
 	}
 
-	public static readonly _serializedATN: number[] = [4,1,16,99,2,0,7,0,2,
+	public static readonly _serializedATN: number[] = [4,1,16,102,2,0,7,0,2,
 	1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,7,7,2,8,7,8,1,0,1,0,1,
-	0,1,0,1,0,1,0,3,0,25,8,0,1,1,1,1,1,1,3,1,30,8,1,1,1,1,1,1,1,1,1,1,1,1,1,
-	1,1,1,1,5,1,40,8,1,10,1,12,1,43,9,1,1,2,1,2,1,2,1,2,1,2,3,2,50,8,2,1,3,
-	1,3,1,3,1,3,1,3,3,3,57,8,3,1,4,1,4,1,4,5,4,62,8,4,10,4,12,4,65,9,4,3,4,
-	67,8,4,1,5,1,5,1,5,1,5,5,5,73,8,5,10,5,12,5,76,9,5,3,5,78,8,5,1,5,1,5,1,
-	6,1,6,1,6,1,6,1,7,1,7,1,7,1,7,1,7,1,7,3,7,92,8,7,1,8,4,8,95,8,8,11,8,12,
-	8,96,1,8,0,1,2,9,0,2,4,6,8,10,12,14,16,0,1,2,0,1,1,3,3,100,0,24,1,0,0,0,
-	2,26,1,0,0,0,4,44,1,0,0,0,6,56,1,0,0,0,8,66,1,0,0,0,10,68,1,0,0,0,12,81,
-	1,0,0,0,14,85,1,0,0,0,16,94,1,0,0,0,18,19,3,2,1,0,19,20,5,0,0,1,20,25,1,
-	0,0,0,21,22,3,4,2,0,22,23,5,0,0,1,23,25,1,0,0,0,24,18,1,0,0,0,24,21,1,0,
-	0,0,25,1,1,0,0,0,26,27,6,1,-1,0,27,29,5,1,0,0,28,30,3,10,5,0,29,28,1,0,
-	0,0,29,30,1,0,0,0,30,31,1,0,0,0,31,32,3,6,3,0,32,33,5,2,0,0,33,34,3,16,
-	8,0,34,35,5,3,0,0,35,41,1,0,0,0,36,37,10,1,0,0,37,38,5,4,0,0,38,40,3,2,
-	1,2,39,36,1,0,0,0,40,43,1,0,0,0,41,39,1,0,0,0,41,42,1,0,0,0,42,3,1,0,0,
-	0,43,41,1,0,0,0,44,45,3,14,7,0,45,46,5,12,0,0,46,49,3,14,7,0,47,48,5,5,
-	0,0,48,50,3,16,8,0,49,47,1,0,0,0,49,50,1,0,0,0,50,5,1,0,0,0,51,57,5,11,
-	0,0,52,53,5,6,0,0,53,54,3,8,4,0,54,55,5,7,0,0,55,57,1,0,0,0,56,51,1,0,0,
-	0,56,52,1,0,0,0,57,7,1,0,0,0,58,63,5,11,0,0,59,60,5,8,0,0,60,62,5,11,0,
-	0,61,59,1,0,0,0,62,65,1,0,0,0,63,61,1,0,0,0,63,64,1,0,0,0,64,67,1,0,0,0,
-	65,63,1,0,0,0,66,58,1,0,0,0,66,67,1,0,0,0,67,9,1,0,0,0,68,77,5,1,0,0,69,
-	74,3,12,6,0,70,71,5,8,0,0,71,73,3,12,6,0,72,70,1,0,0,0,73,76,1,0,0,0,74,
-	72,1,0,0,0,74,75,1,0,0,0,75,78,1,0,0,0,76,74,1,0,0,0,77,69,1,0,0,0,77,78,
-	1,0,0,0,78,79,1,0,0,0,79,80,5,3,0,0,80,11,1,0,0,0,81,82,5,11,0,0,82,83,
-	5,9,0,0,83,84,5,11,0,0,84,13,1,0,0,0,85,86,5,11,0,0,86,87,5,6,0,0,87,88,
-	3,8,4,0,88,91,5,7,0,0,89,90,5,10,0,0,90,92,3,6,3,0,91,89,1,0,0,0,91,92,
-	1,0,0,0,92,15,1,0,0,0,93,95,8,0,0,0,94,93,1,0,0,0,95,96,1,0,0,0,96,94,1,
-	0,0,0,96,97,1,0,0,0,97,17,1,0,0,0,11,24,29,41,49,56,63,66,74,77,91,96];
+	0,1,0,1,0,1,0,3,0,25,8,0,1,1,1,1,1,1,3,1,30,8,1,1,1,1,1,1,1,1,1,3,1,36,
+	8,1,1,1,1,1,1,1,1,1,1,1,5,1,43,8,1,10,1,12,1,46,9,1,1,2,1,2,1,2,1,2,1,2,
+	3,2,53,8,2,1,3,1,3,1,3,1,3,1,3,3,3,60,8,3,1,4,1,4,1,4,5,4,65,8,4,10,4,12,
+	4,68,9,4,3,4,70,8,4,1,5,1,5,1,5,1,5,5,5,76,8,5,10,5,12,5,79,9,5,3,5,81,
+	8,5,1,5,1,5,1,6,1,6,1,6,1,6,1,7,1,7,1,7,1,7,1,7,1,7,3,7,95,8,7,1,8,4,8,
+	98,8,8,11,8,12,8,99,1,8,0,1,2,9,0,2,4,6,8,10,12,14,16,0,1,2,0,1,1,3,3,104,
+	0,24,1,0,0,0,2,26,1,0,0,0,4,47,1,0,0,0,6,59,1,0,0,0,8,69,1,0,0,0,10,71,
+	1,0,0,0,12,84,1,0,0,0,14,88,1,0,0,0,16,97,1,0,0,0,18,19,3,2,1,0,19,20,5,
+	0,0,1,20,25,1,0,0,0,21,22,3,4,2,0,22,23,5,0,0,1,23,25,1,0,0,0,24,18,1,0,
+	0,0,24,21,1,0,0,0,25,1,1,0,0,0,26,27,6,1,-1,0,27,29,5,1,0,0,28,30,3,10,
+	5,0,29,28,1,0,0,0,29,30,1,0,0,0,30,31,1,0,0,0,31,32,3,6,3,0,32,35,5,2,0,
+	0,33,36,3,16,8,0,34,36,3,2,1,0,35,33,1,0,0,0,35,34,1,0,0,0,36,37,1,0,0,
+	0,37,38,5,3,0,0,38,44,1,0,0,0,39,40,10,1,0,0,40,41,5,4,0,0,41,43,3,2,1,
+	2,42,39,1,0,0,0,43,46,1,0,0,0,44,42,1,0,0,0,44,45,1,0,0,0,45,3,1,0,0,0,
+	46,44,1,0,0,0,47,48,3,14,7,0,48,49,5,12,0,0,49,52,3,14,7,0,50,51,5,5,0,
+	0,51,53,3,16,8,0,52,50,1,0,0,0,52,53,1,0,0,0,53,5,1,0,0,0,54,60,5,11,0,
+	0,55,56,5,6,0,0,56,57,3,8,4,0,57,58,5,7,0,0,58,60,1,0,0,0,59,54,1,0,0,0,
+	59,55,1,0,0,0,60,7,1,0,0,0,61,66,5,11,0,0,62,63,5,8,0,0,63,65,5,11,0,0,
+	64,62,1,0,0,0,65,68,1,0,0,0,66,64,1,0,0,0,66,67,1,0,0,0,67,70,1,0,0,0,68,
+	66,1,0,0,0,69,61,1,0,0,0,69,70,1,0,0,0,70,9,1,0,0,0,71,80,5,1,0,0,72,77,
+	3,12,6,0,73,74,5,8,0,0,74,76,3,12,6,0,75,73,1,0,0,0,76,79,1,0,0,0,77,75,
+	1,0,0,0,77,78,1,0,0,0,78,81,1,0,0,0,79,77,1,0,0,0,80,72,1,0,0,0,80,81,1,
+	0,0,0,81,82,1,0,0,0,82,83,5,3,0,0,83,11,1,0,0,0,84,85,5,11,0,0,85,86,5,
+	9,0,0,86,87,5,11,0,0,87,13,1,0,0,0,88,89,5,11,0,0,89,90,5,6,0,0,90,91,3,
+	8,4,0,91,94,5,7,0,0,92,93,5,10,0,0,93,95,3,6,3,0,94,92,1,0,0,0,94,95,1,
+	0,0,0,95,15,1,0,0,0,96,98,8,0,0,0,97,96,1,0,0,0,98,99,1,0,0,0,99,97,1,0,
+	0,0,99,100,1,0,0,0,100,17,1,0,0,0,12,24,29,35,44,52,59,66,69,77,80,94,99];
 
 	private static __ATN: ATN;
 	public static get _ATN(): ATN {
@@ -626,14 +656,14 @@ export class VspecContext extends ParserRuleContext {
 	public sexpr(): SexprContext {
 		return this.getTypedRuleContext(SexprContext, 0) as SexprContext;
 	}
-	public dict(): DictContext {
-		return this.getTypedRuleContext(DictContext, 0) as DictContext;
-	}
 	public vspec_list(): VspecContext[] {
 		return this.getTypedRuleContexts(VspecContext) as VspecContext[];
 	}
 	public vspec(i: number): VspecContext {
 		return this.getTypedRuleContext(VspecContext, i) as VspecContext;
+	}
+	public dict(): DictContext {
+		return this.getTypedRuleContext(DictContext, 0) as DictContext;
 	}
     public get ruleIndex(): number {
     	return SpecParser.RULE_vspec;

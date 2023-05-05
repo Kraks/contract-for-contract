@@ -12,7 +12,7 @@ export interface FunSpec<T> {
 
 export type ValSpec<T> =
   Opaque<FlatSpec<T>, 'FlatSpec'>
-| Opaque<FunSpec<T>, 'FunSpec'>
+  | Opaque<FunSpec<T>, 'FunSpec'>;
 
 export enum TempConn {
   After,
@@ -34,4 +34,4 @@ export interface TempSpec<T> {
   cond: T
 }
 
-export type CSSpec<T> = ValSpec<T> | Opaque<TempSpec<T>, 'TempSpec'>
+export type CSSpec<T> = ValSpec<T> | Opaque<TempSpec<T>, 'TempSpec'>;

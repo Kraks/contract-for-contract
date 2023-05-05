@@ -5,7 +5,7 @@ grammar Spec;
 spec  :   vspec EOF
       |   tspec EOF
       ;
-vspec :   '{' (dict)? tuple '|' sexpr '}'
+vspec :   '{' (dict)? tuple '|' (sexpr | vspec) '}'
       |   vspec '->' vspec
       ;
 tspec :   func TCONN func ( '/\\' sexpr )? ;
