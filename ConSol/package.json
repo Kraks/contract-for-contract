@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "antlr4": "^4.12.0",
-    "solc-typed-ast": "^14.0.0"
+    "solc-typed-ast": "^14.0.0",
+    "type-fest": "^3.10.0"
   }
 }
