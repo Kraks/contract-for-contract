@@ -6,7 +6,7 @@ import {
   CompileResult,
   compileSol, ContractDefinition,
   Expression,
-  ExpressionStatement, FunctionCallKind, FunctionDefinition, LiteralKind, VariableDeclaration,
+  ExpressionStatement, FunctionCallKind, FunctionDefinition, LiteralKind,
 } from 'solc-typed-ast';
 import fs from 'fs/promises';
 import {
@@ -83,8 +83,12 @@ async function main() {
             const ctx = body.context as ASTContext;
             const factory = new ASTNodeFactory(ctx);
             const zeroLiteral = factory.makeLiteral('uint256', LiteralKind.Number, '0', '0');
-            const unlockTimeDecl = su.getChildrenBySelector((node) => node instanceof VariableDeclaration && node.name === '_unlockTime')[0];
-            const unlockTime = factory.makeIdentifier('uint256', '_unlockTime', unlockTimeDecl.id);
+            const params = f_node.vParameters;
+            const unlockTimeDecl = params.vParameters[0];
+            const unlockTime = factory.makeIdentifierFor(unlockTimeDecl);
+            // const unlockTimeDecl = su.getChildrenBySelector((node) => node instanceof VariableDeclaration && node.name === '_unlockTime')[0];
+
+            // const unlockTime = factory.makeIdentifier('uint256', '_unlockTime', unlockTimeDecl.id);
             const constraintExpr = factory.makeBinaryOperation('bool', '>', unlockTime, zeroLiteral);
             const requireStmt = buildRequireStmt(ctx, constraintExpr, 'unlockTime must be greater than 0');
             body.insertAtBeginning(requireStmt);
