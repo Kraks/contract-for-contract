@@ -4,7 +4,7 @@
     \Typ{Types}      \qquad & t && ::=
       \Keywd{address} \mid
       \Keywd{uint} \mid
-      \Keywd{function}(t, \dots)~\optional{\Keywd{returns}~t} \mid
+      \Keywd{function}(t, \dots)~\Keywd{returns}~t \mid
       \dots \\
     \Typ{Literals}    \qquad & v && \in
       \mathbb{Z} \mid
@@ -26,7 +26,7 @@
                                    s_1; s_2 \mid
                                    x ~\mathsf{:=}~ e \mid
                                    x ~\mathsf{:=}~ f(e, \dots)  \text{\yy{unify assignments?}}\\
-                            & && \mid \Keywd{if}~e~\Keywd{then}~s_1~\optional{\Keywd{else}~s_2} \mid
+                            & && \mid \Keywd{if}~e~\Keywd{then}~s_1~\Keywd{else}~s_2 \mid
                                    \Keywd{while}~e~\Keywd{do}~s
                                    \\
     \Typ{Temporal~Connectives} \qquad & \oplus && ::=
@@ -38,7 +38,7 @@
      f(x, \dots)~\Keywd{returns}~ (z_1, \dots) ~\oplus~ g(y, \dots)~\Keywd{returns}~ (z_2, \dots) \land e \\
     \Typ{Specifications} \qquad & \varsigma && ::= \varsigma_v \mid \varsigma_t \\
     \Typ{Function~Definitions} \qquad & \mathcal{F} && ::=
-      \# \varsigma^* ~ \Keywd{function}~f(t ~ x, \dots)~\optional{\Keywd{returns}~t}~\{ ~s~ \}
+      \# \varsigma^* ~ \Keywd{function}~f(t ~ x, \dots)~\Keywd{returns}~t~\{ ~s~ \}
   \end{alignat*}
   \caption{The abstract syntax of \lang.}
   \label{fig:syntax}
