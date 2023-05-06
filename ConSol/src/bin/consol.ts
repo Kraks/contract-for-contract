@@ -5,8 +5,9 @@ import {
   CompileFailedError,
   CompileResult,
   compileSol, ContractDefinition,
+  EventDefinition,
   Expression,
-  ExpressionStatement, FunctionCallKind, FunctionDefinition, LiteralKind,
+  ExpressionStatement, FunctionCallKind, FunctionDefinition, LiteralKind,StructuredDocumentation, VariableDeclaration, ASTNode
 } from 'solc-typed-ast';
 import fs from 'fs/promises';
 import {
@@ -27,53 +28,14 @@ function convertResultToPlainObject(result: CompileResult): Record<string, any> 
   };
 }
 
-/**
- * util functions for parsing `complieResult` 
- * complieResult structure:
- *  data
- *    contracts
- *      fileRaw
- * */ 
+// Util functions
 
-const SPEC_TAG = "custom:consol";
-
-interface ContractRaw {
-  abi: any[];
-  devdoc: {
-    kind: string;
-    [key: string]: any;
-  };
+function nodeIsConstructor (node: ASTNode): node is FunctionDefinition {
+  return (
+    node instanceof FunctionDefinition &&
+    (node as FunctionDefinition).isConstructor
+  );
 }
-
-interface FileRaw {  
-  [fileName: string]: {
-    [contractName: string]: ContractRaw;
-  };
-}
-
-
-function getXwithSpec(
-  x: keyof ContractRaw["devdoc"],
-) : (contract: ContractRaw) => Record<string, string> {
-  return (contract) => {
-    const xWithSpec : Record<string, string> = {};
-    const xValues = contract.devdoc[x];
-    if (xValues){
-      for (const xVal in xValues) {
-        const xSpec  = xValues[xVal][SPEC_TAG];
-        if (xSpec){
-          xWithSpec[xVal] = xSpec;
-        }
-      }
-    }
-    return xWithSpec;
-  };
-}
-
-const getMethodsWithSpec = getXwithSpec("methods");
-const getEventsWithSpec = getXwithSpec("events");
-const getVarsWithSpec = getXwithSpec("stateVariables");
-
 
 
 async function main() {
@@ -108,10 +70,21 @@ async function main() {
     console.log(sourceUnits[0].print());
 
     // TODO: conduct transformation
-    const LockContract : ContractRaw = complieResult.data.contracts[inputPath]["Lock"];
-    const methodsWithSpec = getMethodsWithSpec(LockContract);
-    console.log(methodsWithSpec);
 
+    // Step1: get spec from comment
+    sourceUnits[0].vContracts[0].walkChildren ((astNode) => {
+      const astNodeDoc = (astNode as FunctionDefinition | EventDefinition | VariableDeclaration).documentation as StructuredDocumentation;
+      if (astNodeDoc){
+        let astNodeName = astNode.raw.name;
+        if (nodeIsConstructor(astNode)){
+          astNodeName = "constructor";
+        }
+        console.log(astNode.type);
+        console.log(astNodeName);
+        console.log(astNodeDoc.text);
+        console.log("\n")
+      }
+    });
 
     
     // @custom:consol { _unlockTime | _unlockTime > 0 } for constructor
@@ -128,28 +101,28 @@ async function main() {
       return factory.makeExpressionStatement(requireCall);
     };
 
-    sourceUnits.forEach((su) => su.walkChildren((c_node) => {
-      if (c_node instanceof ContractDefinition) {
-        c_node.walkChildren((f_node) => {
-          if (f_node instanceof FunctionDefinition && f_node.isConstructor && f_node.implemented && f_node.vBody) {
-            const body = f_node.vBody;
-            console.assert(body.context !== undefined);
-            const ctx = body.context as ASTContext;
-            const factory = new ASTNodeFactory(ctx);
-            const zeroLiteral = factory.makeLiteral('uint256', LiteralKind.Number, '0', '0');
-            const params = f_node.vParameters;
-            const unlockTimeDecl = params.vParameters[0];
-            const unlockTime = factory.makeIdentifierFor(unlockTimeDecl);
-            // const unlockTimeDecl = su.getChildrenBySelector((node) => node instanceof VariableDeclaration && node.name === '_unlockTime')[0];
+    // sourceUnits.forEach((su) => su.walkChildren((c_node) => {
+    //   if (c_node instanceof ContractDefinition) {
+    //     c_node.walkChildren((f_node: any) 
+    sourceUnits[0].vContracts[0].walkChildren ((astNode: ASTNode) =>  {
+      if (nodeIsConstructor(astNode) && astNode.implemented && astNode.vBody) {
+        const body = astNode.vBody;
+        console.assert(body.context !== undefined);
+        const ctx = body.context as ASTContext;
+        const factory = new ASTNodeFactory(ctx);
+        const zeroLiteral = factory.makeLiteral('uint256', LiteralKind.Number, '0', '0');
+        const params = astNode.vParameters;
+        const unlockTimeDecl = params.vParameters[0];
+        const unlockTime = factory.makeIdentifierFor(unlockTimeDecl);
+        // const unlockTimeDecl = su.getChildrenBySelector((node) => node instanceof VariableDeclaration && node.name === '_unlockTime')[0];
 
-            // const unlockTime = factory.makeIdentifier('uint256', '_unlockTime', unlockTimeDecl.id);
-            const constraintExpr = factory.makeBinaryOperation('bool', '>', unlockTime, zeroLiteral);
-            const requireStmt = buildRequireStmt(ctx, constraintExpr, 'unlockTime must be greater than 0');
-            body.insertAtBeginning(requireStmt);
-          }
-        });
+        // const unlockTime = factory.makeIdentifier('uint256', '_unlockTime', unlockTimeDecl.id);
+        const constraintExpr = factory.makeBinaryOperation('bool', '>', unlockTime, zeroLiteral);
+        const requireStmt = buildRequireStmt(ctx, constraintExpr, 'unlockTime must be greater than 0');
+        body.insertAtBeginning(requireStmt);
       }
-    }));
+    });
+
 
 
     // convert ast back to source

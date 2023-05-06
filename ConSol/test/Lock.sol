@@ -2,7 +2,7 @@
 pragma solidity ^0.8.9;
 
 contract Lock {
-    /// @custom:consol {unlockTime |true}
+    /// regular comment
     uint256 public unlockTime;
     address payable public owner;
 
@@ -10,6 +10,8 @@ contract Lock {
     event Withdrawal(uint256 amount, uint256 when);
 
     /// @custom:consol {_unlockTime | _unlockTime > 0}
+    /// @dev ualadfskf
+    /// @custom:consol part2
     constructor(uint256 _unlockTime) payable {
         require(
             block.timestamp < _unlockTime,
