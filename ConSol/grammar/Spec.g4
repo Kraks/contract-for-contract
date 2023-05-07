@@ -14,7 +14,7 @@ tuple :   IDENT
       ;
 idents:   (IDENT (',' IDENT)*)? ;
 dict  :   '{' (pair (',' pair)*)? '}' ;
-pair  :   IDENT ':' IDENT ;
+pair  :   IDENT ':' (IDENT | INT) ;
 func  :   IDENT '(' idents ')' ('returns' tuple)? ;
 sexpr :   ~('{' | '}')+ ;
 
