@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import { ErrorListener, CharStream, CommonTokenStream } from "antlr4";
-import SpecLexer from "../lib/spec-parser/SpecLexer.js";
-import SpecParser from "../lib/spec-parser/SpecParser.js";
-import { isNumber } from "../index.js";
-import * as util from "util";
+import { ErrorListener, CharStream, CommonTokenStream } from 'antlr4';
+import SpecLexer from '../lib/spec-parser/SpecLexer.js';
+import SpecParser from '../lib/spec-parser/SpecParser.js';
+import { isNumber } from '../index.js';
+import * as util from 'util';
 
 function parse(specStr: string) {
   console.log(specStr);
@@ -18,10 +18,10 @@ function parse(specStr: string) {
 }
 
 function main() {
-  parse("{x | 1 + 2}");
-  parse("{ (x) | 1 + 2}");
-  parse("{ (x, y) | 1 + 2}");
-  parse("{ {value: 5} (x, y) | 1 + 2}");
+  parse('{x | 1 + 2}');
+  parse('{ (x) | 1 + 2}');
+  parse('{ (x, y) | 1 + 2}');
+  parse('{ {value: 5} (x, y) | 1 + 2}');
 }
 
 main();

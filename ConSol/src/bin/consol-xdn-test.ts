@@ -11,23 +11,23 @@ import {
   ParserRuleContext,
   TerminalNode,
   ParseTree,
-} from "antlr4";
-import SpecLexer from "../lib/spec-parser/SpecLexer.js";
-import SpecParser from "../lib/spec-parser/SpecParser.js";
-import { SpecContext } from "../lib/spec-parser/SpecParser.js";
-import { isNumber } from "../index.js";
-import * as util from "util";
-import SpecListener from "../lib/spec-parser/SpecListener.js";
-import SpecVisitor from "../lib/spec-parser/SpecVisitor.js";
+} from 'antlr4';
+import SpecLexer from '../lib/spec-parser/SpecLexer.js';
+import SpecParser from '../lib/spec-parser/SpecParser.js';
+import { SpecContext } from '../lib/spec-parser/SpecParser.js';
+import { isNumber } from '../index.js';
+import * as util from 'util';
+import SpecListener from '../lib/spec-parser/SpecListener.js';
+import SpecVisitor from '../lib/spec-parser/SpecVisitor.js';
 
 class ConSolParseError extends Error {
   constructor(
     public line: number,
     public charPositionInLine: number,
-    message: string
+    message: string,
   ) {
     super(message);
-    this.name = "ConSolParseError";
+    this.name = 'ConSolParseError';
   }
 }
 
@@ -38,23 +38,23 @@ class ConSolErrorListener implements ErrorListener<Token> {
     line: number,
     charPositionInLine: number,
     msg: string,
-    e: RecognitionException | undefined
+    e: RecognitionException | undefined,
   ): void {
     // console.error(`Error at line ${line}:${charPositionInLine} - ${msg}`);
     throw new ConSolParseError(
       line,
       charPositionInLine,
-      `Error at line ${line}:${charPositionInLine} - ${msg}`
+      `Error at line ${line}:${charPositionInLine} - ${msg}`,
     );
   }
 }
 
 class MySpecListener extends SpecListener {
   enterSpec: (ctx: SpecContext) => void = (ctx: SpecContext) => {
-    console.log("[Walker] Enter a spec: ", ctx.getText());
+    console.log('[Walker] Enter a spec: ', ctx.getText());
   };
   exitSpec: (ctx: SpecContext) => void = (ctx: SpecContext) => {
-    console.log("[Walker] Exit a spec");
+    console.log('[Walker] Exit a spec');
   };
   // Other methods:
   // enter/exit xxx
@@ -86,21 +86,21 @@ class MySpecVisitor extends SpecVisitor<void> {
     } else if (node instanceof TerminalNode) {
       let typeIdx = node.symbol.type;
       if (typeIdx === Token.EOF) {
-        return "EOF";
+        return 'EOF';
       } else if (this.parser.literalNames.length > typeIdx) {
         return this.parser.literalNames[typeIdx];
       } else if (this.parser.symbolicNames.length > typeIdx) {
         return this.parser.symbolicNames[typeIdx];
       }
     }
-    throw new Error("?");
+    throw new Error('?');
   }
 
   dfs(node: ParseTree, depth: number): void {
     const nodeType = this.getNodeType(node);
     const nodeName = node.getText();
     console.log(
-      `[Visitor] Depth: ${depth}, Type: ${nodeType}, Name: ${nodeName}`
+      `[Visitor] Depth: ${depth}, Type: ${nodeType}, Name: ${nodeName}`,
     );
 
     // If the node is a ParserRuleContext (non-terminal), continue DFS
@@ -132,14 +132,14 @@ function parse(specStr: string) {
     if (error instanceof ConSolParseError) {
       console.error(`ConSolParseError: ${error.message}`);
     } else {
-      console.error("other errors");
+      console.error('other errors');
     }
   }
 }
 
 function main() {
   // vspec
-  parse("{x | 1 + 2}");
+  parse('{x | 1 + 2}');
   // parse("{ (x) | 1 + 2}");
   // parse("{ (x, y) | 1 + 2}");
   // parse("{x | 1 + 2} -> {y | 1 + 2}");
