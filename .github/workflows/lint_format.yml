@@ -22,6 +22,9 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./ConSol
 
     strategy:
       matrix:
@@ -33,7 +36,6 @@ jobs:
       with:
           fetch-depth: 0
           ref: main
-    - run: cd ConSol
     
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
