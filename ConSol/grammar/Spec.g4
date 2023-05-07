@@ -8,14 +8,14 @@ spec  :   vspec EOF
 vspec :   '{' (dict)? tuple '|' (sexpr | vspec) '}'
       |   vspec '->' vspec
       ;
-tspec :   func TCONN func ( '/\\' sexpr )? ;
+tspec :   call TCONN call ( '/\\' sexpr )? ;
 tuple :   IDENT
       |   '(' idents ')'
       ;
 idents:   (IDENT (',' IDENT)*)? ;
 dict  :   '{' (pair (',' pair)*)? '}' ;
 pair  :   IDENT ':' (IDENT | INT) ;
-func  :   IDENT '(' idents ')' ('returns' tuple)? ;
+call  :   IDENT '(' idents ')' ('returns' tuple)? ;
 sexpr :   ~('{' | '}')+ ;
 
 

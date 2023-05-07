@@ -1,7 +1,7 @@
 import type { Opaque } from 'type-fest';
 
 export interface FlatSpec<T> {
-  var: Array<string>;
+  vars: Array<string>;
   cond: T;
 }
 
