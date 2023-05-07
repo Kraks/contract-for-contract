@@ -1,13 +1,20 @@
 #!/usr/bin/env node
 
 import {
-  ASTContext, ASTNodeFactory,
+  ASTContext,
+  ASTNodeFactory,
   CompileFailedError,
   CompileResult,
-  compileSol, ContractDefinition,
+  compileSol,
   EventDefinition,
   Expression,
-  ExpressionStatement, FunctionCallKind, FunctionDefinition, LiteralKind,StructuredDocumentation, VariableDeclaration, ASTNode
+  ExpressionStatement,
+  FunctionCallKind,
+  FunctionDefinition,
+  LiteralKind,
+  StructuredDocumentation,
+  VariableDeclaration,
+  ASTNode,
 } from 'solc-typed-ast';
 import fs from 'fs/promises';
 import {
@@ -19,7 +26,9 @@ import {
 } from 'solc-typed-ast';
 import * as path from 'path';
 
-function convertResultToPlainObject(result: CompileResult): Record<string, any> {
+function convertResultToPlainObject(
+  result: CompileResult,
+): Record<string, unknown> {
   return {
     ...result,
     files: Object.fromEntries(result.files),
@@ -30,13 +39,12 @@ function convertResultToPlainObject(result: CompileResult): Record<string, any> 
 
 // Util functions
 
-function nodeIsConstructor (node: ASTNode): node is FunctionDefinition {
+function nodeIsConstructor(node: ASTNode): node is FunctionDefinition {
   return (
     node instanceof FunctionDefinition &&
     (node as FunctionDefinition).isConstructor
   );
 }
-
 
 async function main() {
   let complieResult: CompileResult;
@@ -60,7 +68,10 @@ async function main() {
     // console.log(complieResult.data.sources[`${filename}.sol`].ast.nodes[1].nodes);
 
     // dump to json file
-    await fs.writeFile(outputJson, JSON.stringify(convertResultToPlainObject(complieResult), null, 2));
+    await fs.writeFile(
+      outputJson,
+      JSON.stringify(convertResultToPlainObject(complieResult), null, 2),
+    );
 
     // read the typed ast
     const reader = new ASTReader();
@@ -72,65 +83,98 @@ async function main() {
     // TODO: conduct transformation
 
     // Step1: get spec from comment
-    sourceUnits[0].vContracts[0].walkChildren ((astNode) => {
-      const astNodeDoc = (astNode as FunctionDefinition | EventDefinition | VariableDeclaration).documentation as StructuredDocumentation;
-      if (astNodeDoc){
+    sourceUnits[0].vContracts[0].walkChildren((astNode) => {
+      const astNodeDoc = (
+        astNode as FunctionDefinition | EventDefinition | VariableDeclaration
+      ).documentation as StructuredDocumentation;
+      if (astNodeDoc) {
         let astNodeName = astNode.raw.name;
-        if (nodeIsConstructor(astNode)){
-          astNodeName = "constructor";
+        if (nodeIsConstructor(astNode)) {
+          astNodeName = 'constructor';
         }
         console.log(astNode.type);
         console.log(astNodeName);
         console.log(astNodeDoc.text);
-        console.log("\n")
+        console.log('\n');
       }
     });
 
-    
     // @custom:consol { _unlockTime | _unlockTime > 0 } for constructor
-    const buildRequireStmt = (ctx: ASTContext, constraint: Expression, msg?: string): ExpressionStatement => {
+    const buildRequireStmt = (
+      ctx: ASTContext,
+      constraint: Expression,
+      msg?: string,
+    ): ExpressionStatement => {
       const factory = new ASTNodeFactory(ctx);
       const callArgs = msg
         ? [
-          constraint,
-          factory.makeLiteral('string', LiteralKind.String, Buffer.from(msg, 'utf8').toString('hex'), msg),
-        ]
+            constraint,
+            factory.makeLiteral(
+              'string',
+              LiteralKind.String,
+              Buffer.from(msg, 'utf8').toString('hex'),
+              msg,
+            ),
+          ]
         : [constraint];
-      const requireFn = factory.makeIdentifier('function (bool,string memory) pure', 'require', -1);
-      const requireCall = factory.makeFunctionCall('bool', FunctionCallKind.FunctionCall, requireFn, callArgs);
+      const requireFn = factory.makeIdentifier(
+        'function (bool,string memory) pure',
+        'require',
+        -1,
+      );
+      const requireCall = factory.makeFunctionCall(
+        'bool',
+        FunctionCallKind.FunctionCall,
+        requireFn,
+        callArgs,
+      );
       return factory.makeExpressionStatement(requireCall);
     };
 
     // sourceUnits.forEach((su) => su.walkChildren((c_node) => {
     //   if (c_node instanceof ContractDefinition) {
-    //     c_node.walkChildren((f_node: any) 
-    sourceUnits[0].vContracts[0].walkChildren ((astNode: ASTNode) =>  {
+    //     c_node.walkChildren((f_node: any)
+    sourceUnits[0].vContracts[0].walkChildren((astNode: ASTNode) => {
       if (nodeIsConstructor(astNode) && astNode.implemented && astNode.vBody) {
         const body = astNode.vBody;
         console.assert(body.context !== undefined);
         const ctx = body.context as ASTContext;
         const factory = new ASTNodeFactory(ctx);
-        const zeroLiteral = factory.makeLiteral('uint256', LiteralKind.Number, '0', '0');
+        const zeroLiteral = factory.makeLiteral(
+          'uint256',
+          LiteralKind.Number,
+          '0',
+          '0',
+        );
         const params = astNode.vParameters;
         const unlockTimeDecl = params.vParameters[0];
         const unlockTime = factory.makeIdentifierFor(unlockTimeDecl);
         // const unlockTimeDecl = su.getChildrenBySelector((node) => node instanceof VariableDeclaration && node.name === '_unlockTime')[0];
 
         // const unlockTime = factory.makeIdentifier('uint256', '_unlockTime', unlockTimeDecl.id);
-        const constraintExpr = factory.makeBinaryOperation('bool', '>', unlockTime, zeroLiteral);
-        const requireStmt = buildRequireStmt(ctx, constraintExpr, 'unlockTime must be greater than 0');
+        const constraintExpr = factory.makeBinaryOperation(
+          'bool',
+          '>',
+          unlockTime,
+          zeroLiteral,
+        );
+        const requireStmt = buildRequireStmt(
+          ctx,
+          constraintExpr,
+          'unlockTime must be greater than 0',
+        );
         body.insertAtBeginning(requireStmt);
       }
     });
-
-
 
     // convert ast back to source
     const formatter = new PrettyFormatter(4, 0);
     const writer = new ASTWriter(
       DefaultASTWriterMapping,
       formatter,
-      complieResult.compilerVersion ? complieResult.compilerVersion : LatestCompilerVersion,
+      complieResult.compilerVersion
+        ? complieResult.compilerVersion
+        : LatestCompilerVersion,
     );
 
     for (const sourceUnit of sourceUnits) {
@@ -144,8 +188,6 @@ async function main() {
         console.error(`Error saving file ${outputSol}: ${error}`);
       }
     }
-
-
   } catch (e) {
     if (e instanceof CompileFailedError) {
       console.error('Compile errors encounterd: ');
@@ -160,7 +202,6 @@ async function main() {
       console.error(e.message);
     }
   }
-
 }
 
 main();

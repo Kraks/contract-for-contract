@@ -1,2 +1,10 @@
 src/lib/spec-parser/*.ts
 **/*-test.ts
+/node_modules
+/dist
+/coverage
+/.idea
+/.vscode
+/.prettierrc.cjs
+/.eslintrc.cjs
+/jest.config.ts

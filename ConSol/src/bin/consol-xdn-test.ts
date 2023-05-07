@@ -1,44 +1,59 @@
 #!/usr/bin/env node
 
-import { ErrorListener, CharStream, CommonTokenStream, Recognizer, RecognitionException, Token, ParseTreeWalker, ParserRuleContext, TerminalNode, ParseTree}  from 'antlr4';
-import SpecLexer from '../lib/spec-parser/SpecLexer.js';
-import SpecParser from '../lib/spec-parser/SpecParser.js';
-import {SpecContext} from '../lib/spec-parser/SpecParser.js';
-import { isNumber } from '../index.js';
-import * as util from 'util'
-import SpecListener from '../lib/spec-parser/SpecListener.js'; 
-import SpecVisitor from '../lib/spec-parser/SpecVisitor.js';
+import {
+  ErrorListener,
+  CharStream,
+  CommonTokenStream,
+  Recognizer,
+  RecognitionException,
+  Token,
+  ParseTreeWalker,
+  ParserRuleContext,
+  TerminalNode,
+  ParseTree,
+} from "antlr4";
+import SpecLexer from "../lib/spec-parser/SpecLexer.js";
+import SpecParser from "../lib/spec-parser/SpecParser.js";
+import { SpecContext } from "../lib/spec-parser/SpecParser.js";
+import { isNumber } from "../index.js";
+import * as util from "util";
+import SpecListener from "../lib/spec-parser/SpecListener.js";
+import SpecVisitor from "../lib/spec-parser/SpecVisitor.js";
 
 class ConSolParseError extends Error {
-  constructor(public line: number, public charPositionInLine: number, message: string) {
+  constructor(
+    public line: number,
+    public charPositionInLine: number,
+    message: string
+  ) {
     super(message);
-    this.name = 'ConSolParseError';
+    this.name = "ConSolParseError";
   }
 }
 
-
-
-class ConSolErrorListener implements ErrorListener <Token> {
-    syntaxError(
-      recognizer: Recognizer<Token>,
-      offendingSymbol: Token | undefined,
-      line: number,
-      charPositionInLine: number,
-      msg: string,
-      e: RecognitionException | undefined
-    ): void {
-      // console.error(`Error at line ${line}:${charPositionInLine} - ${msg}`);
-      throw new ConSolParseError(line, charPositionInLine, `Error at line ${line}:${charPositionInLine} - ${msg}`);
-    }
-  
+class ConSolErrorListener implements ErrorListener<Token> {
+  syntaxError(
+    recognizer: Recognizer<Token>,
+    offendingSymbol: Token | undefined,
+    line: number,
+    charPositionInLine: number,
+    msg: string,
+    e: RecognitionException | undefined
+  ): void {
+    // console.error(`Error at line ${line}:${charPositionInLine} - ${msg}`);
+    throw new ConSolParseError(
+      line,
+      charPositionInLine,
+      `Error at line ${line}:${charPositionInLine} - ${msg}`
+    );
   }
+}
 
-
-class MySpecListener extends SpecListener{
-  enterSpec:  (ctx: SpecContext) => void  = (ctx: SpecContext) =>{
+class MySpecListener extends SpecListener {
+  enterSpec: (ctx: SpecContext) => void = (ctx: SpecContext) => {
     console.log("[Walker] Enter a spec: ", ctx.getText());
   };
-  exitSpec: (ctx: SpecContext) => void  = (ctx: SpecContext) => {
+  exitSpec: (ctx: SpecContext) => void = (ctx: SpecContext) => {
     console.log("[Walker] Exit a spec");
   };
   // Other methods:
@@ -49,7 +64,6 @@ class MySpecListener extends SpecListener{
   // exitEveryRule
 }
 
-
 class MySpecVisitor extends SpecVisitor<void> {
   private parser: SpecParser;
 
@@ -58,7 +72,6 @@ class MySpecVisitor extends SpecVisitor<void> {
     this.parser = parser;
   }
 
-
   visitChildren(ctx: ParserRuleContext): void {
     if (!ctx || !ctx.children) {
       return;
@@ -66,31 +79,29 @@ class MySpecVisitor extends SpecVisitor<void> {
     this.dfs(ctx, 0);
   }
 
-  getNodeType(node: ParseTree) : string | null {
-    
+  getNodeType(node: ParseTree): string | null {
     if (node instanceof ParserRuleContext) {
       // rule name
       return node.constructor.name;
-    }
-    else if (node instanceof TerminalNode) {
+    } else if (node instanceof TerminalNode) {
       let typeIdx = node.symbol.type;
-      if (typeIdx === Token.EOF){
+      if (typeIdx === Token.EOF) {
         return "EOF";
-      }
-      else if (this.parser.literalNames.length > typeIdx){
+      } else if (this.parser.literalNames.length > typeIdx) {
         return this.parser.literalNames[typeIdx];
-      }
-      else if (this.parser.symbolicNames.length > typeIdx){
+      } else if (this.parser.symbolicNames.length > typeIdx) {
         return this.parser.symbolicNames[typeIdx];
       }
     }
-    throw new Error("?"); 
+    throw new Error("?");
   }
 
   dfs(node: ParseTree, depth: number): void {
     const nodeType = this.getNodeType(node);
     const nodeName = node.getText();
-    console.log(`[Visitor] Depth: ${depth}, Type: ${nodeType}, Name: ${nodeName}`);
+    console.log(
+      `[Visitor] Depth: ${depth}, Type: ${nodeType}, Name: ${nodeName}`
+    );
 
     // If the node is a ParserRuleContext (non-terminal), continue DFS
     if (node instanceof ParserRuleContext && node.children) {
@@ -101,12 +112,11 @@ class MySpecVisitor extends SpecVisitor<void> {
   }
 }
 
-
 function parse(specStr: string) {
   const myConSolErrorListener = new ConSolErrorListener();
-  const walker = new MySpecListener(); 
+  const walker = new MySpecListener();
   try {
-    console.log(specStr)
+    console.log(specStr);
     const chars = new CharStream(specStr); // replace this with a FileStream as required
     const lexer = new SpecLexer(chars);
     const tokens = new CommonTokenStream(lexer);

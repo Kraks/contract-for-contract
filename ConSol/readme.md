@@ -14,10 +14,18 @@ $ npm run build
 
 ## Lint
 
-Lint the code before committing.
+Lint and format the code before committing.
 
 ```
-$ npm run lint:fix
+$ npm run lint:fix && npm run format
+```
+
+## Test
+
+Run automated test suites.
+
+```
+npm run test
 ```
 
 ## Run
@@ -28,12 +36,12 @@ $ npm link          # required only for the initial run.
 $ consol <inputfile>
 ```
 
-For example, 
+For example,
 
 ```
 $ consol Lock.sol
 
-$ ls 
+$ ls
     Lock.sol        # input file
     Lock.json       # output json
     Lock_out.sol    # solidity code after transformation.
@@ -41,22 +49,22 @@ $ ls
 
 ### Explanation
 
-**Output file**: 
+**Output file**:
 - `Lock.json`
     - ast nodes in `data.sources[<filename>.sol].ast.nodes[1].nodes`
-    - print ast nodes: 
+    - print ast nodes:
     > console.log(result.data.sources[ \` ${filename}.sol \` ].ast.nodes[1].nodes)
 - `Lock_out.sol`: Solidity code after transformation.
 
 
 ## Annotation
-Follow [Solidity Annotation](https://docs.soliditylang.org/en/v0.8.11/natspec-format.html). 
+Follow [Solidity Annotation](https://docs.soliditylang.org/en/v0.8.11/natspec-format.html).
 
 ```
 /// @custom:consol ...
 ```
 
-Or 
+Or
 
 ```
 /**
