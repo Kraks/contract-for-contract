@@ -23,7 +23,7 @@
     "lint": "eslint ./src ./test --ext=ts,js,cjs,mjs --no-error-on-unmatched-pattern",
     "lint:fix": "eslint ./src ./test --ext=ts,js,cjs,mjs --no-error-on-unmatched-pattern --fix",
     "format": "prettier --no-error-on-unmatched-pattern --write ./**/*.{ts,js,cjs,mjs,json,jsonc}",
-    "test": "jest"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "devDependencies": {
     "@types/jest": "^29.5.1",
