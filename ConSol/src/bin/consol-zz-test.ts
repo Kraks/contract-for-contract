@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { ErrorListener, CharStream, CommonTokenStream } from 'antlr4';
+import { CSSpecVisitorString } from '../lib/spec-ast.js';
 import SpecLexer from '../lib/spec-parser/SpecLexer.js';
 import SpecParser from '../lib/spec-parser/SpecParser.js';
 import { isNumber } from '../index.js';
@@ -13,15 +14,17 @@ function parse(specStr: string) {
   const tokens = new CommonTokenStream(lexer);
   const parser = new SpecParser(tokens);
   const tree = parser.spec();
-  // console.log(util.inspect(tree, true, 4));
-  console.log(tree);
+
+  const visitor = new CSSpecVisitorString();
+  console.log(tree.accept(visitor));
 }
 
 function main() {
-  parse('{x | 1 + 2}');
-  parse('{ (x) | 1 + 2}');
-  parse('{ (x, y) | 1 + 2}');
-  parse('{ {value: 5} (x, y) | 1 + 2}');
+  // parse('{x | 1 + 2}');
+  parse('f(x, y, z) returns (f1) => g() /\\ 1 + 2')
+  // parse('{ (x) | 1 + 2}');
+  // parse('{ (x, y) | 1 + 2}');
+  // parse('{ {value: 5} (x, y) | 1 + 2}');
 }
 
 main();

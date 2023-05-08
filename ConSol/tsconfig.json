@@ -18,6 +18,8 @@
     "noImplicitThis": true,
     "alwaysStrict": true,
 
+    "skipLibCheck": true,
+
     "noUnusedLocals": false,
     "noImplicitReturns": true,
 

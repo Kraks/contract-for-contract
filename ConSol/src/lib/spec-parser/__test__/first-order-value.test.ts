@@ -29,7 +29,7 @@ describe('first-order value spec', () => {
       '{x | 1 + 2}',
       '{ (x) | 1 + 2}',
       '{ (x, y) | 1 + 2}',
-      '{ {value: 5} (x, y) | 1 + 2}',
+      '{ {value, gas} (x, y) | 1 + 2}',
     ];
     specs.forEach((specStr) =>
       it(`should parse ${specStr}`, () => {
