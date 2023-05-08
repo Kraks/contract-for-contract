@@ -75,14 +75,16 @@ make an additional boolean state, marking if the function is finished.
 And often worse, defensive checks can be easily forgotten or disregarded,
 leading to vulnerable code causing real monetary lose.
 
-Apart from the investigating effort to certify and verify smart contract
-programs, language designers are responsible to empower programmers with better
-linguistic solutions to secure smart contracts in the first place.
-In this paper, we develop practical \emph{higher-order and temporal behavioral
+%Apart from the investigating effort to certify and verify smart contract
+%programs, language designers are responsible to empower programmers with better
+%linguistic solutions to secure smart contracts in the first place.
+In this paper, we develop practical \emph{behavioral
 software contracts} that provide a lightweight solution for securing
-\emph{smart contracts}.
+\emph{smart contracts}. In particular, we develop a specification language and
+monitor for higher-order and temporal behaviors in the Solidity language.
 
-\subsubsection*{\textbf{Behavioral Contracts for Smart Contracts}}
+\subsection*{\textbf{Behavioral Contracts for Smart Contracts}}
+
 Behavioral contracts provide a mechanism for programmers to specify assumptions
 and guarantees of software components. The specified assumptions and guarantees
 will be monitored and reported when violated.
@@ -106,7 +108,8 @@ behavioral contracts, which are absent in existing approaches.
 \todo{allows furthermore downstream tasks, fuzzing, static verification,
 	natural language to formal spec etc.}
 
-\subsubsection*{\textbf{Contracts for Callable Addresses and Higher-Order Functions}}
+\subsection*{\textbf{Contracts for Callable Addresses and Higher-Order Functions}}
+
 Higher-order contracts provides a way to specify and enforce pre- and
 post-conditions of untrusted functions. \todo{...}
 
@@ -114,10 +117,10 @@ post-conditions of untrusted functions. \todo{...}
 \todo{why static verification fails}
 \zz{address vs. function call?}
 
-\subsubsection*{\textbf{Contracts for Temporal Properties}}
+\subsection*{\textbf{Contracts for Temporal Properties}}
+
 Temporal contracts provides a way to \todo{...}.
 \todo{why static verification fails}
-
 
 We develop a core model of the extension, including its syntax,
 operational semantics, and discuss its soundness guarantee.
@@ -136,18 +139,19 @@ compared to manually inserted assertion checks, showing that \todo{...}
 
 \subsubsection*{\textbf{Contributions}} This paper makes the following contributions:
 \begin{itemize}
-	\item We propose a specification of behavioral contracts for expressing and
-	      enforcing higher-order and temporal properties for smart contracts.
-	\item We design \lang, an extension for Solidity with
-	      behavioral contracts, demonstrate its use cases through extensive examples,
-	      and how it can improve the safety and reliability.
+  \item We design \lang, an extension for Solidity that allows programmers to
+        specify and enforce higher-order and temporal behaviors in smart contracts.
+        We demonstrate \lang's use cases through extensive examples and
+        implement \lang as a preprocessor for ordinary Solidity programs.
 	\item We present the core formalization $\lambda_\lang$ for our proposed
 	      extension, including its syntax, formal semantics, compilation, and
 	      soundness.
-	\item We examine a number of real-world attacks and show that our proposal is
-	      effective in improving safety and reliability.
-	\item We implement our approach on top of the existing Solidity compiler and shows
-	      that its runtime overhead is marginal, therefore practical to use.
-	\item \zz{Would open-sourcing be considered a contribution? Lol}
+  \item We examine a number of real-world attacks with \lang, showing that our
+        approach is effective in improving safety and reliability of smart contract
+        programs.
+  \item We evaluate the overhead of \lang compared to manually implemented
+        assertions and checks, showing that our approach does not introduce
+        additional runtime overhead.
 \end{itemize}
+\lang is open-sourced and publicly available at \note{url}.
 
