@@ -68,8 +68,8 @@ export type SpecParseResult<T> =
 export abstract class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
   abstract parseSexpr(text: string): T;
 
+  // spec  :   vspec EOF | tspec EOF;
   visitSpec: (ctx: SpecContext) => CSSpec<T> = (ctx) => {
-    // spec  :   vspec EOF | tspec EOF;
     assert(ctx.children != null);
     assert(ctx.children.length == 2);
 
@@ -80,10 +80,10 @@ export abstract class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     }
   };
 
+  // tspec :   call TCONN call ( '/\\' sexpr )? ;
   visitTspec: (ctx: TspecContext) => Opaque<TempSpec<T>, 'TempSpec'> = (
     ctx,
   ) => {
-    // tspec :   call TCONN call ( '/\\' sexpr )? ;
     assert(ctx.children != null);
     assert(ctx.children.length == 3 || ctx.children.length == 5);
 
@@ -120,8 +120,8 @@ export abstract class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     return tspec as Opaque<TempSpec<T>, 'TempSpec'>;
   };
 
+  // call  :   IDENT ( dict )? '(' idents ')' ('returns' tuple)? ;
   visitCall: (ctx: CallContext) => Call = (ctx) => {
-    // call  :   IDENT ( dict )? '(' idents ')' ('returns' tuple)? ;
     assert(ctx.children != null);
     assert(ctx.children.length >= 4 && ctx.children.length <= 7);
 
@@ -164,8 +164,8 @@ export abstract class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     };
   };
 
+  // tuple :   IDENT | '(' idents ')' ;
   visitTuple: (ctx: TupleContext) => Array<string> = (ctx) => {
-    // tuple :   IDENT | '(' idents ')' ;
     assert(ctx.children != null);
     assert(ctx.children.length == 1 || ctx.children.length == 3);
 
@@ -180,8 +180,8 @@ export abstract class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     }
   };
 
+  // dict  :   '{' idents '}' ;
   visitDict: (ctx: DictContext) => Array<string> = (ctx) => {
-    // dict  :   '{' idents '}' ;
     assert(ctx.children != null);
     assert(ctx.children.length == 3);
 
@@ -191,8 +191,8 @@ export abstract class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     return this.visitIdents(ctx.children[1] as IdentsContext);
   };
 
+  // idents:    (IDENT (',' IDENT)*)? ;
   visitIdents: (ctx: IdentsContext) => Array<string> = (ctx) => {
-    // (IDENT (',' IDENT)*)? ;
     if (ctx.children == null) {
       return [];
     } else {

@@ -13,7 +13,7 @@ describe('temporal contract', () => {
         rets: [],
       },
       conn: 0,
-      cond: '1+3',
+      cond: '1+2',
     };
 
     const visitor = new CSSpecVisitorString();
