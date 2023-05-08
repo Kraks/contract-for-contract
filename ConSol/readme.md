@@ -7,9 +7,15 @@
 ## Install and Build
 
 ```
-$ npm install
+npm install
 
-$ npm run build
+npm run build
+```
+
+## Generate Parser from ANTLR4
+
+```
+npm run gen:parser
 ```
 
 ## Lint

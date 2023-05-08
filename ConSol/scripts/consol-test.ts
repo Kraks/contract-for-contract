@@ -1,9 +1,8 @@
-#!/usr/bin/env node
+#!/usr/bin/env ts-node-esm
 
 import { CharStream, CommonTokenStream } from 'antlr4';
-import SpecLexer from '../lib/spec/spec-parser/SpecLexer.js';
-import SpecParser from '../lib/spec/spec-parser/SpecParser.js';
-import { isNumber } from '../index';
+import SpecLexer from '../src/spec/parser/SpecLexer.js';
+import SpecParser from '../src/spec/parser/SpecParser.js';
 
 function main() {
   const input = '3+4\n';

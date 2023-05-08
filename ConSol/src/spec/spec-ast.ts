@@ -3,9 +3,9 @@ import type { Opaque } from 'type-fest';
 import { TerminalNode } from 'antlr4';
 import { CharStream, CommonTokenStream } from 'antlr4';
 
-import SpecVisitor from './spec-parser/SpecVisitor.js';
-import SpecLexer from './spec-parser/SpecLexer.js';
-import SpecParser from './spec-parser/SpecParser.js';
+import SpecVisitor from './parser/SpecVisitor.js';
+import SpecLexer from './parser/SpecLexer.js';
+import SpecParser from './parser/SpecParser.js';
 import {
   SpecContext,
   TupleContext,
@@ -15,7 +15,7 @@ import {
   CallContext,
   SexprContext,
   IdentsContext,
-} from './spec-parser/SpecParser.js';
+} from './parser/SpecParser.js';
 
 export interface FlatSpec<T> {
   vars: Array<string>;

@@ -14,10 +14,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "consol": "dist/bin/consol.js",
-    "consol-test": "dist/bin/consol-test.js"
+    "consol": "bin/consol.js"
   },
   "scripts": {
+    "gen:parser": "zsh scripts/gen-parser.zsh",
     "build": "npm run clean && tsc --build && chmod u+x dist/bin/*.js",
     "clean": "rm -rf dist/*",
     "lint": "eslint ./src ./test --ext=ts,js,cjs,mjs --no-error-on-unmatched-pattern",

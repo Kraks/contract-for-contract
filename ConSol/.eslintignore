@@ -1,5 +1,6 @@
-src/lib/spec/spec-parser/*.ts
-**/*-test.ts
+/grammar
+/src/spec/parser/*.ts
+/scripts/**/*-test.ts
 /node_modules
 /dist
 /coverage
@@ -8,3 +9,4 @@ src/lib/spec/spec-parser/*.ts
 /.prettierrc.cjs
 /.eslintrc.cjs
 /jest.config.ts
+/bin

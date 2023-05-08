@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env ts-node-esm
 
 import {
   ErrorListener,
@@ -12,13 +12,12 @@ import {
   TerminalNode,
   ParseTree,
 } from 'antlr4';
-import SpecLexer from '../lib/spec/spec-parser/SpecLexer.js';
-import SpecParser from '../lib/spec/spec-parser/SpecParser.js';
-import { SpecContext } from '../lib/spec/spec-parser/SpecParser.js';
-import { isNumber } from '../index.js';
+import SpecLexer from '../src/spec/parser/SpecLexer.js';
+import SpecParser from '../src/spec/parser/SpecParser.js';
+import { SpecContext } from '../src/spec/parser/SpecParser.js';
 import * as util from 'util';
-import SpecListener from '../lib/spec/spec-parser/SpecListener.js';
-import SpecVisitor from '../lib/spec/spec-parser/SpecVisitor.js';
+import SpecListener from '../src/spec/parser/SpecListener.js';
+import SpecVisitor from '../src/spec/parser/SpecVisitor.js';
 
 class ConSolParseError extends Error {
   constructor(

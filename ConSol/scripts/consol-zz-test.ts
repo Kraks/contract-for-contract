@@ -1,6 +1,6 @@
-#!/usr/bin/env node
+#!/usr/bin/env ts-node-esm
 
-import { CSSpecParse, CSSpecVisitorString } from '../lib/spec/index.js';
+import { CSSpecParse, CSSpecVisitorString } from '../src/spec/index.js';
 import * as util from 'util';
 
 function parse(specStr: string) {
