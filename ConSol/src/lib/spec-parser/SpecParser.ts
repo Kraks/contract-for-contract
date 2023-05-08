@@ -53,8 +53,8 @@ export default class SpecParser extends Parser {
   public static readonly RULE_tspec = 2;
   public static readonly RULE_tuple = 3;
   public static readonly RULE_idents = 4;
-  public static readonly RULE_dict = 5;
-  public static readonly RULE_call = 6;
+  public static readonly RULE_call = 5;
+  public static readonly RULE_dict = 6;
   public static readonly RULE_sexpr = 7;
   public static readonly literalNames: (string | null)[] = [
     null,
@@ -93,8 +93,8 @@ export default class SpecParser extends Parser {
     'tspec',
     'tuple',
     'idents',
-    'dict',
     'call',
+    'dict',
     'sexpr',
   ];
   public get grammarFileName(): string {
@@ -427,18 +427,42 @@ export default class SpecParser extends Parser {
     return localctx;
   }
   // @RuleVersion(0)
-  public dict(): DictContext {
-    let localctx: DictContext = new DictContext(this, this._ctx, this.state);
-    this.enterRule(localctx, 10, SpecParser.RULE_dict);
+  public call(): CallContext {
+    let localctx: CallContext = new CallContext(this, this._ctx, this.state);
+    this.enterRule(localctx, 10, SpecParser.RULE_call);
+    let _la: number;
     try {
       this.enterOuterAlt(localctx, 1);
       {
         this.state = 69;
-        this.match(SpecParser.T__0);
-        this.state = 70;
-        this.idents();
+        this.match(SpecParser.IDENT);
         this.state = 71;
-        this.match(SpecParser.T__2);
+        this._errHandler.sync(this);
+        _la = this._input.LA(1);
+        if (_la === 1) {
+          {
+            this.state = 70;
+            this.dict();
+          }
+        }
+
+        this.state = 73;
+        this.match(SpecParser.T__5);
+        this.state = 74;
+        this.idents();
+        this.state = 75;
+        this.match(SpecParser.T__6);
+        this.state = 78;
+        this._errHandler.sync(this);
+        _la = this._input.LA(1);
+        if (_la === 9) {
+          {
+            this.state = 76;
+            this.match(SpecParser.T__8);
+            this.state = 77;
+            this.tuple();
+          }
+        }
       }
     } catch (re) {
       if (re instanceof RecognitionException) {
@@ -454,32 +478,18 @@ export default class SpecParser extends Parser {
     return localctx;
   }
   // @RuleVersion(0)
-  public call(): CallContext {
-    let localctx: CallContext = new CallContext(this, this._ctx, this.state);
-    this.enterRule(localctx, 12, SpecParser.RULE_call);
-    let _la: number;
+  public dict(): DictContext {
+    let localctx: DictContext = new DictContext(this, this._ctx, this.state);
+    this.enterRule(localctx, 12, SpecParser.RULE_dict);
     try {
       this.enterOuterAlt(localctx, 1);
       {
-        this.state = 73;
-        this.match(SpecParser.IDENT);
-        this.state = 74;
-        this.match(SpecParser.T__5);
-        this.state = 75;
+        this.state = 80;
+        this.match(SpecParser.T__0);
+        this.state = 81;
         this.idents();
-        this.state = 76;
-        this.match(SpecParser.T__6);
-        this.state = 79;
-        this._errHandler.sync(this);
-        _la = this._input.LA(1);
-        if (_la === 9) {
-          {
-            this.state = 77;
-            this.match(SpecParser.T__8);
-            this.state = 78;
-            this.tuple();
-          }
-        }
+        this.state = 82;
+        this.match(SpecParser.T__2);
       }
     } catch (re) {
       if (re instanceof RecognitionException) {
@@ -502,13 +512,13 @@ export default class SpecParser extends Parser {
     try {
       this.enterOuterAlt(localctx, 1);
       {
-        this.state = 82;
+        this.state = 85;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
         do {
           {
             {
-              this.state = 81;
+              this.state = 84;
               _la = this._input.LA(1);
               if (_la <= 0 || _la === 1 || _la === 3) {
                 this._errHandler.recoverInline(this);
@@ -518,7 +528,7 @@ export default class SpecParser extends Parser {
               }
             }
           }
-          this.state = 84;
+          this.state = 87;
           this._errHandler.sync(this);
           _la = this._input.LA(1);
         } while ((_la & ~0x1f) === 0 && ((1 << _la) & 65524) !== 0);
@@ -557,39 +567,40 @@ export default class SpecParser extends Parser {
   }
 
   public static readonly _serializedATN: number[] = [
-    4, 1, 15, 87, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7, 4, 2,
+    4, 1, 15, 90, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7, 4, 2,
     5, 7, 5, 2, 6, 7, 6, 2, 7, 7, 7, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 3, 0,
     23, 8, 0, 1, 1, 1, 1, 1, 1, 3, 1, 28, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1,
     34, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 41, 8, 1, 10, 1, 12, 1, 44, 9,
     1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 3, 2, 51, 8, 2, 1, 3, 1, 3, 1, 3, 1, 3, 1,
     3, 3, 3, 58, 8, 3, 1, 4, 1, 4, 1, 4, 5, 4, 63, 8, 4, 10, 4, 12, 4, 66, 9, 4,
-    3, 4, 68, 8, 4, 1, 5, 1, 5, 1, 5, 1, 5, 1, 6, 1, 6, 1, 6, 1, 6, 1, 6, 1, 6,
-    3, 6, 80, 8, 6, 1, 7, 4, 7, 83, 8, 7, 11, 7, 12, 7, 84, 1, 7, 0, 1, 2, 8, 0,
-    2, 4, 6, 8, 10, 12, 14, 0, 1, 2, 0, 1, 1, 3, 3, 88, 0, 22, 1, 0, 0, 0, 2,
-    24, 1, 0, 0, 0, 4, 45, 1, 0, 0, 0, 6, 57, 1, 0, 0, 0, 8, 67, 1, 0, 0, 0, 10,
-    69, 1, 0, 0, 0, 12, 73, 1, 0, 0, 0, 14, 82, 1, 0, 0, 0, 16, 17, 3, 2, 1, 0,
-    17, 18, 5, 0, 0, 1, 18, 23, 1, 0, 0, 0, 19, 20, 3, 4, 2, 0, 20, 21, 5, 0, 0,
-    1, 21, 23, 1, 0, 0, 0, 22, 16, 1, 0, 0, 0, 22, 19, 1, 0, 0, 0, 23, 1, 1, 0,
-    0, 0, 24, 25, 6, 1, -1, 0, 25, 27, 5, 1, 0, 0, 26, 28, 3, 10, 5, 0, 27, 26,
-    1, 0, 0, 0, 27, 28, 1, 0, 0, 0, 28, 29, 1, 0, 0, 0, 29, 30, 3, 6, 3, 0, 30,
-    33, 5, 2, 0, 0, 31, 34, 3, 14, 7, 0, 32, 34, 3, 2, 1, 0, 33, 31, 1, 0, 0, 0,
-    33, 32, 1, 0, 0, 0, 34, 35, 1, 0, 0, 0, 35, 36, 5, 3, 0, 0, 36, 42, 1, 0, 0,
-    0, 37, 38, 10, 1, 0, 0, 38, 39, 5, 4, 0, 0, 39, 41, 3, 2, 1, 2, 40, 37, 1,
-    0, 0, 0, 41, 44, 1, 0, 0, 0, 42, 40, 1, 0, 0, 0, 42, 43, 1, 0, 0, 0, 43, 3,
-    1, 0, 0, 0, 44, 42, 1, 0, 0, 0, 45, 46, 3, 12, 6, 0, 46, 47, 5, 11, 0, 0,
-    47, 50, 3, 12, 6, 0, 48, 49, 5, 5, 0, 0, 49, 51, 3, 14, 7, 0, 50, 48, 1, 0,
-    0, 0, 50, 51, 1, 0, 0, 0, 51, 5, 1, 0, 0, 0, 52, 58, 5, 10, 0, 0, 53, 54, 5,
-    6, 0, 0, 54, 55, 3, 8, 4, 0, 55, 56, 5, 7, 0, 0, 56, 58, 1, 0, 0, 0, 57, 52,
-    1, 0, 0, 0, 57, 53, 1, 0, 0, 0, 58, 7, 1, 0, 0, 0, 59, 64, 5, 10, 0, 0, 60,
-    61, 5, 8, 0, 0, 61, 63, 5, 10, 0, 0, 62, 60, 1, 0, 0, 0, 63, 66, 1, 0, 0, 0,
-    64, 62, 1, 0, 0, 0, 64, 65, 1, 0, 0, 0, 65, 68, 1, 0, 0, 0, 66, 64, 1, 0, 0,
-    0, 67, 59, 1, 0, 0, 0, 67, 68, 1, 0, 0, 0, 68, 9, 1, 0, 0, 0, 69, 70, 5, 1,
-    0, 0, 70, 71, 3, 8, 4, 0, 71, 72, 5, 3, 0, 0, 72, 11, 1, 0, 0, 0, 73, 74, 5,
-    10, 0, 0, 74, 75, 5, 6, 0, 0, 75, 76, 3, 8, 4, 0, 76, 79, 5, 7, 0, 0, 77,
-    78, 5, 9, 0, 0, 78, 80, 3, 6, 3, 0, 79, 77, 1, 0, 0, 0, 79, 80, 1, 0, 0, 0,
-    80, 13, 1, 0, 0, 0, 81, 83, 8, 0, 0, 0, 82, 81, 1, 0, 0, 0, 83, 84, 1, 0, 0,
-    0, 84, 82, 1, 0, 0, 0, 84, 85, 1, 0, 0, 0, 85, 15, 1, 0, 0, 0, 10, 22, 27,
-    33, 42, 50, 57, 64, 67, 79, 84,
+    3, 4, 68, 8, 4, 1, 5, 1, 5, 3, 5, 72, 8, 5, 1, 5, 1, 5, 1, 5, 1, 5, 1, 5, 3,
+    5, 79, 8, 5, 1, 6, 1, 6, 1, 6, 1, 6, 1, 7, 4, 7, 86, 8, 7, 11, 7, 12, 7, 87,
+    1, 7, 0, 1, 2, 8, 0, 2, 4, 6, 8, 10, 12, 14, 0, 1, 2, 0, 1, 1, 3, 3, 92, 0,
+    22, 1, 0, 0, 0, 2, 24, 1, 0, 0, 0, 4, 45, 1, 0, 0, 0, 6, 57, 1, 0, 0, 0, 8,
+    67, 1, 0, 0, 0, 10, 69, 1, 0, 0, 0, 12, 80, 1, 0, 0, 0, 14, 85, 1, 0, 0, 0,
+    16, 17, 3, 2, 1, 0, 17, 18, 5, 0, 0, 1, 18, 23, 1, 0, 0, 0, 19, 20, 3, 4, 2,
+    0, 20, 21, 5, 0, 0, 1, 21, 23, 1, 0, 0, 0, 22, 16, 1, 0, 0, 0, 22, 19, 1, 0,
+    0, 0, 23, 1, 1, 0, 0, 0, 24, 25, 6, 1, -1, 0, 25, 27, 5, 1, 0, 0, 26, 28, 3,
+    12, 6, 0, 27, 26, 1, 0, 0, 0, 27, 28, 1, 0, 0, 0, 28, 29, 1, 0, 0, 0, 29,
+    30, 3, 6, 3, 0, 30, 33, 5, 2, 0, 0, 31, 34, 3, 14, 7, 0, 32, 34, 3, 2, 1, 0,
+    33, 31, 1, 0, 0, 0, 33, 32, 1, 0, 0, 0, 34, 35, 1, 0, 0, 0, 35, 36, 5, 3, 0,
+    0, 36, 42, 1, 0, 0, 0, 37, 38, 10, 1, 0, 0, 38, 39, 5, 4, 0, 0, 39, 41, 3,
+    2, 1, 2, 40, 37, 1, 0, 0, 0, 41, 44, 1, 0, 0, 0, 42, 40, 1, 0, 0, 0, 42, 43,
+    1, 0, 0, 0, 43, 3, 1, 0, 0, 0, 44, 42, 1, 0, 0, 0, 45, 46, 3, 10, 5, 0, 46,
+    47, 5, 11, 0, 0, 47, 50, 3, 10, 5, 0, 48, 49, 5, 5, 0, 0, 49, 51, 3, 14, 7,
+    0, 50, 48, 1, 0, 0, 0, 50, 51, 1, 0, 0, 0, 51, 5, 1, 0, 0, 0, 52, 58, 5, 10,
+    0, 0, 53, 54, 5, 6, 0, 0, 54, 55, 3, 8, 4, 0, 55, 56, 5, 7, 0, 0, 56, 58, 1,
+    0, 0, 0, 57, 52, 1, 0, 0, 0, 57, 53, 1, 0, 0, 0, 58, 7, 1, 0, 0, 0, 59, 64,
+    5, 10, 0, 0, 60, 61, 5, 8, 0, 0, 61, 63, 5, 10, 0, 0, 62, 60, 1, 0, 0, 0,
+    63, 66, 1, 0, 0, 0, 64, 62, 1, 0, 0, 0, 64, 65, 1, 0, 0, 0, 65, 68, 1, 0, 0,
+    0, 66, 64, 1, 0, 0, 0, 67, 59, 1, 0, 0, 0, 67, 68, 1, 0, 0, 0, 68, 9, 1, 0,
+    0, 0, 69, 71, 5, 10, 0, 0, 70, 72, 3, 12, 6, 0, 71, 70, 1, 0, 0, 0, 71, 72,
+    1, 0, 0, 0, 72, 73, 1, 0, 0, 0, 73, 74, 5, 6, 0, 0, 74, 75, 3, 8, 4, 0, 75,
+    78, 5, 7, 0, 0, 76, 77, 5, 9, 0, 0, 77, 79, 3, 6, 3, 0, 78, 76, 1, 0, 0, 0,
+    78, 79, 1, 0, 0, 0, 79, 11, 1, 0, 0, 0, 80, 81, 5, 1, 0, 0, 81, 82, 3, 8, 4,
+    0, 82, 83, 5, 3, 0, 0, 83, 13, 1, 0, 0, 0, 84, 86, 8, 0, 0, 0, 85, 84, 1, 0,
+    0, 0, 86, 87, 1, 0, 0, 0, 87, 85, 1, 0, 0, 0, 87, 88, 1, 0, 0, 0, 88, 15, 1,
+    0, 0, 0, 11, 22, 27, 33, 42, 50, 57, 64, 67, 71, 78, 87,
   ];
 
   private static __ATN: ATN;
@@ -816,6 +827,50 @@ export class IdentsContext extends ParserRuleContext {
   }
 }
 
+export class CallContext extends ParserRuleContext {
+  constructor(
+    parser?: SpecParser,
+    parent?: ParserRuleContext,
+    invokingState?: number,
+  ) {
+    super(parent, invokingState);
+    this.parser = parser;
+  }
+  public IDENT(): TerminalNode {
+    return this.getToken(SpecParser.IDENT, 0);
+  }
+  public idents(): IdentsContext {
+    return this.getTypedRuleContext(IdentsContext, 0) as IdentsContext;
+  }
+  public dict(): DictContext {
+    return this.getTypedRuleContext(DictContext, 0) as DictContext;
+  }
+  public tuple(): TupleContext {
+    return this.getTypedRuleContext(TupleContext, 0) as TupleContext;
+  }
+  public get ruleIndex(): number {
+    return SpecParser.RULE_call;
+  }
+  public enterRule(listener: SpecListener): void {
+    if (listener.enterCall) {
+      listener.enterCall(this);
+    }
+  }
+  public exitRule(listener: SpecListener): void {
+    if (listener.exitCall) {
+      listener.exitCall(this);
+    }
+  }
+  // @Override
+  public accept<Result>(visitor: SpecVisitor<Result>): Result {
+    if (visitor.visitCall) {
+      return visitor.visitCall(this);
+    } else {
+      return visitor.visitChildren(this);
+    }
+  }
+}
+
 export class DictContext extends ParserRuleContext {
   constructor(
     parser?: SpecParser,
@@ -845,47 +900,6 @@ export class DictContext extends ParserRuleContext {
   public accept<Result>(visitor: SpecVisitor<Result>): Result {
     if (visitor.visitDict) {
       return visitor.visitDict(this);
-    } else {
-      return visitor.visitChildren(this);
-    }
-  }
-}
-
-export class CallContext extends ParserRuleContext {
-  constructor(
-    parser?: SpecParser,
-    parent?: ParserRuleContext,
-    invokingState?: number,
-  ) {
-    super(parent, invokingState);
-    this.parser = parser;
-  }
-  public IDENT(): TerminalNode {
-    return this.getToken(SpecParser.IDENT, 0);
-  }
-  public idents(): IdentsContext {
-    return this.getTypedRuleContext(IdentsContext, 0) as IdentsContext;
-  }
-  public tuple(): TupleContext {
-    return this.getTypedRuleContext(TupleContext, 0) as TupleContext;
-  }
-  public get ruleIndex(): number {
-    return SpecParser.RULE_call;
-  }
-  public enterRule(listener: SpecListener): void {
-    if (listener.enterCall) {
-      listener.enterCall(this);
-    }
-  }
-  public exitRule(listener: SpecListener): void {
-    if (listener.exitCall) {
-      listener.exitCall(this);
-    }
-  }
-  // @Override
-  public accept<Result>(visitor: SpecVisitor<Result>): Result {
-    if (visitor.visitCall) {
-      return visitor.visitCall(this);
     } else {
       return visitor.visitChildren(this);
     }

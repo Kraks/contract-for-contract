@@ -8,8 +8,8 @@ import { VspecContext } from './SpecParser';
 import { TspecContext } from './SpecParser';
 import { TupleContext } from './SpecParser';
 import { IdentsContext } from './SpecParser';
-import { DictContext } from './SpecParser';
 import { CallContext } from './SpecParser';
+import { DictContext } from './SpecParser';
 import { SexprContext } from './SpecParser';
 
 /**
@@ -68,16 +68,6 @@ export default class SpecListener extends ParseTreeListener {
    */
   exitIdents?: (ctx: IdentsContext) => void;
   /**
-   * Enter a parse tree produced by `SpecParser.dict`.
-   * @param ctx the parse tree
-   */
-  enterDict?: (ctx: DictContext) => void;
-  /**
-   * Exit a parse tree produced by `SpecParser.dict`.
-   * @param ctx the parse tree
-   */
-  exitDict?: (ctx: DictContext) => void;
-  /**
    * Enter a parse tree produced by `SpecParser.call`.
    * @param ctx the parse tree
    */
@@ -87,6 +77,16 @@ export default class SpecListener extends ParseTreeListener {
    * @param ctx the parse tree
    */
   exitCall?: (ctx: CallContext) => void;
+  /**
+   * Enter a parse tree produced by `SpecParser.dict`.
+   * @param ctx the parse tree
+   */
+  enterDict?: (ctx: DictContext) => void;
+  /**
+   * Exit a parse tree produced by `SpecParser.dict`.
+   * @param ctx the parse tree
+   */
+  exitDict?: (ctx: DictContext) => void;
   /**
    * Enter a parse tree produced by `SpecParser.sexpr`.
    * @param ctx the parse tree

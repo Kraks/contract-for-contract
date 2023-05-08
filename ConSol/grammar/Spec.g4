@@ -13,8 +13,8 @@ tuple :   IDENT
       |   '(' idents ')'
       ;
 idents:   (IDENT (',' IDENT)*)? ;
+call  :   IDENT ( dict )? '(' idents ')' ('returns' tuple)? ;
 dict  :   '{' idents '}' ;
-call  :   IDENT '(' idents ')' ('returns' tuple)? ;
 sexpr :   ~('{' | '}')+ ;
 
 
