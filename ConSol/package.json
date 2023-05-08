@@ -4,9 +4,9 @@
   "version": "0.0.1",
   "description": "Implement higher-order temporal behavioral contracts in Solidity",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=18.0.0"
   },
-  "packageManager": "npm@8.19.3",
+  "packageManager": "npm@8.19.2",
   "keywords": [],
   "files": [
     "dist"
