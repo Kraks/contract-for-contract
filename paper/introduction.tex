@@ -21,36 +21,31 @@ parties involved in the agreement can be certain about the outcome.
 Smart contracts are ``smart'' since by using blockchains they provide a
 mechanism to \emph{ensure the economic outcome of transactions} without a
 central authority.
-A blockchain is a \note{XXX} that implements a consensus protocol of
-Byzantine-fault-tolerant distributed ledgers.
+A blockchain implements a consensus protocol of Byzantine-fault-tolerant
+distributed ledgers.
 
 It is however ironic that many popular smart contract languages, which hold the
 great promise to ensure transactional outcomes via consensus and distributed
-ledgers, do not provide enough means to \emph{ensure the computational outcomes},
-leading to poor quality of programs.
-Without ensuring the quality of programs, it is impossible to ensure
-the economic outcome of transactions.
+ledgers, do not provide enough means to \emph{ensure the computational outcomes}.
+This unfortunate reality leads to poor quality of programs.
+Without ensuring the quality of programs, it is impossible to ensure the
+economic outcome of transactions.
 
-Indeed, we have seen a great number of notorious attacks to smart contract
-systems in recent years.
-For example, \todo{explain attack using callback}.
-Attackers are able to utilize
-the callback mechanism to \note{do crazy things and steal money}
-The root cause of this attack is \todo{explain}.
+Indeed, in recent years, we have seen a number of failures of smart contract
+systems due to attacks utilizing vulnerable contract programs.
+For example, in the famous DAO hack\note{cite}, the attacker is able to utilize the
+callback mechanism to create recursive function calls and temporarily stole
+money, causing a total lose of \$50 million.
+The root cause of this attack is that the contract does not deploy defensive
+checks before performing critical actions.
 
-Solidity does provide first-order assertion primitives (e.g. @require@) but
-they cannot effectively check function values, which are a common pattern used
-in smart contract programs.
-\zz{
-On the other hand, assertion primitives are crucial for ensuring the accuracy and
-integrity of a smart contract's business model.
-}
-\zz{
-I'm not sure if this statement applies to the PL community, but from my
-understanding, assertions are typically used during testing rather than runtime.
-However, in smart contracts, these assertions function as guard conditions and can cause reverts if violated, making them extremely important.
-}
-Programmers have to manually insert such checks around relevant call-sites, \todo{which is bad}.
+%\zz{ On the other hand, assertion primitives are crucial for ensuring the
+%accuracy and integrity of a smart contract's business model. }
+%\zz{ I'm not sure if this statement applies to the PL community, but from my
+%understanding, assertions are typically used during testing rather than
+%runtime.  However, in smart contracts, these assertions function as guard
+%conditions and can cause reverts if violated, making them extremely important. }
+
 %Solidity also provides the @modifier@ mechanism that intercepts
 %before and after a function call, thus can be used to check
 %pre- and post-conditions.
@@ -58,24 +53,34 @@ Programmers have to manually insert such checks around relevant call-sites, \tod
 %\todo{can we attach modifier to callbacks?}
 %\todo{can we use modifier to check function's argument?}
 
-The lack of sufficient linguistic means to specify and enforce subtle behaviors
-discourages programmers to use concise higher-level abstractions when writing
-smart contract code.
+We observe that popular smart contract languages (such as Solidity) do
+not provide \emph{rich, effective, convenient} means to specify and enforce
+contract behaviors.
+Simple first-order assertion primitives (e.g., @require@) are indeed common,
+but they cannot effectively check callable addresses or function values, which
+are a common pattern used in smart contract programs.
+Moreover, many of the critical behavior in smart contracts are \emph{temporal}.
+For instance, the defense to the DAO attack \note{cite} is to
+prevent ``reentrancy'' via external functions, which requires that the function
+of interest cannot be invoked \emph{before} the current call of this function is finished.
+
+The lack of sufficient linguistic means to specify and enforce subtle but
+critical behaviors discourages programmers to use concise higher-level
+abstractions when writing smart contract code.
 Instead, to be secure, programmers are obliged to write verbose code with
-lower-level abstractions, which conflates the main business logic and
-behavioral checks, leading to poor readability and maintainability.
-For instance, to defend the famous DAO attack \note{cite} caused by allowing
-``reentrancy'' via external functions, programmers have to be extra cautious
-about the execution order or maintain additional states to check if a call is
-allowed. Either way is not ideal.
+lower-level or no abstractions, which conflates the main business logic with
+behavioral checks, further leading to poor readability and maintainability.
+For example, a common way to implement ``reentrancy guards'' is to manually
+make an additional boolean state, marking if the function is finished.
 And often worse, defensive checks can be easily forgotten or disregarded,
 leading to vulnerable code causing real monetary lose.
 
-Apart from investigating effort to audit, certify, or verify smart contract programs,
-language designers are responsible to empower programmers with better
+Apart from the investigating effort to certify and verify smart contract
+programs, language designers are responsible to empower programmers with better
 linguistic solutions to secure smart contracts in the first place.
-In this paper, we show that advanced \emph{behavioral software contracts} provide a
-lightweight solution for securing \emph{smart contracts}.
+In this paper, we develop practical \emph{higher-order and temporal behavioral
+software contracts} that provide a lightweight solution for securing
+\emph{smart contracts}.
 
 \subsubsection*{\textbf{Behavioral Contracts for Smart Contracts}}
 Behavioral contracts provide a mechanism for programmers to specify assumptions
