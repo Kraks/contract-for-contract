@@ -65,8 +65,13 @@ export type SpecParseResult<T> =
  * XXX: [discussion]
  *  Should we use assertions or error handling for invalid parsed tree?
  */
-export abstract class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
-  abstract parseSexpr(text: string): T;
+export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
+  parseSexpr: (_: string) => T;
+
+  constructor(parseSexpr: (_: string) => T) {
+    super();
+    this.parseSexpr = parseSexpr;
+  }
 
   // spec  :   vspec EOF | tspec EOF;
   visitSpec: (ctx: SpecContext) => CSSpec<T> = (ctx) => {
@@ -203,14 +208,6 @@ export abstract class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
         .map((child) => child.getText());
     }
   };
-}
-
-// XXX: only for testing (a predefined visitor)
-// we can direct make a CSSpecVisitor<Solidity> without abstract method later
-export class CSSpecVisitorString extends CSSpecVisitor<string> {
-  parseSexpr(text: string): string {
-    return text;
-  }
 }
 
 // TODO: add error handling

@@ -1,7 +1,9 @@
-import { CSSpecVisitorString, CSSpecParse, TempSpec } from '../index.js';
+import { CSSpecVisitor, CSSpecParse, TempSpec } from '../index.js';
 
 describe('temporal contract', () => {
-  const visitor = new CSSpecVisitorString();
+  const visitor = new CSSpecVisitor((s: string) => {
+    return s;
+  });
 
   it('no argument and dict', () => {
     const s = 'f() returns () =/> g{}()';

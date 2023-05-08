@@ -8,4 +8,4 @@ export {
   CSSpec,
 } from './spec-ast.js';
 
-export { CSSpecParse, CSSpecVisitor, CSSpecVisitorString } from './spec-ast.js';
+export { CSSpecParse, CSSpecVisitor } from './spec-ast.js';

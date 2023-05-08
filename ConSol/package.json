@@ -18,7 +18,7 @@
   },
   "scripts": {
     "gen:parser": "zsh scripts/gen-parser.zsh",
-    "build": "npm run clean && tsc --build && chmod u+x dist/bin/*.js",
+    "build": "npm run clean && tsc --build",
     "clean": "rm -rf dist/*",
     "lint": "eslint ./src ./test --ext=ts,js,cjs,mjs --no-error-on-unmatched-pattern",
     "lint:fix": "eslint ./src ./test --ext=ts,js,cjs,mjs --no-error-on-unmatched-pattern --fix",
