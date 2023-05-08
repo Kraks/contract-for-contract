@@ -2,10 +2,15 @@ import assert from 'assert';
 import type { Opaque } from 'type-fest';
 import { TerminalNode } from 'antlr4';
 
-import SpecVisitor from './spec-parser/SpecVisitor.js'
-import { 
-    SpecContext, VspecContext, TspecContext, CallContext, SexprContext, IdentsContext
-} from "./spec-parser/SpecParser.js";
+import SpecVisitor from './spec-parser/SpecVisitor.js';
+import {
+  SpecContext,
+  VspecContext,
+  TspecContext,
+  CallContext,
+  SexprContext,
+  IdentsContext,
+} from './spec-parser/SpecParser.js';
 
 export interface FlatSpec<T> {
   vars: Array<string>;
@@ -44,12 +49,12 @@ export interface TempSpec<T> {
 
 export type CSSpec<T> = ValSpec<T> | Opaque<TempSpec<T>, 'TempSpec'>;
 
-export type SpecParseResult<T> = T 
+export type SpecParseResult<T> =
+  | T
   | CSSpec<T>
   | Call
   | TempConn
-  | Array<string>
-  ;
+  | Array<string>;
 
 /*
  * XXX: [discussion]
@@ -58,7 +63,7 @@ export type SpecParseResult<T> = T
 export abstract class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
   abstract parseSexpr(text: string): T;
 
-  visitSpec: (ctx: SpecContext) => CSSpec<T> = ((ctx) => {
+  visitSpec: (ctx: SpecContext) => CSSpec<T> = (ctx) => {
     assert(ctx.children != null);
     assert(ctx.children.length == 2);
 
@@ -68,12 +73,14 @@ export abstract class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
       assert(ctx.children[0] instanceof TspecContext);
       return this.visitTspec(ctx.children[0]);
     }
-  })
+  };
 
-  visitTspec: (ctx: TspecContext) => Opaque<TempSpec<T>, 'TempSpec'>  = ((ctx) => {
+  visitTspec: (ctx: TspecContext) => Opaque<TempSpec<T>, 'TempSpec'> = (
+    ctx,
+  ) => {
     assert(ctx.children != null);
     assert(ctx.children.length == 3 || ctx.children.length == 5);
-    
+
     // XXX: to bypass type checking: is there a better way to do so???
     assert(ctx.children[0] instanceof CallContext);
     assert(ctx.children[2] instanceof CallContext);
@@ -94,7 +101,7 @@ export abstract class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
       _conn = TempConn.NotUnderCtx;
     }
 
-    const tspec: TempSpec<T> = {call1: _call1, call2: _call2, conn: _conn};
+    const tspec: TempSpec<T> = { call1: _call1, call2: _call2, conn: _conn };
     if (ctx.children.length == 5) {
       assert(ctx.children[3] instanceof TerminalNode);
       assert(ctx.children[3].symbol.text == '/\\');
@@ -103,10 +110,10 @@ export abstract class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
       tspec.cond = this.parseSexpr(ctx.children[4].getText());
     }
 
-    return tspec as Opaque<TempSpec<T>, 'TempSpec'>;  
-  })
+    return tspec as Opaque<TempSpec<T>, 'TempSpec'>;
+  };
 
-  visitCall: (ctx: CallContext) => Call = ((ctx) => {
+  visitCall: (ctx: CallContext) => Call = (ctx) => {
     assert(ctx.children != null);
     assert(ctx.children.length == 4 || ctx.children.length == 6);
 
@@ -127,18 +134,18 @@ export abstract class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
       args: _args,
       kwargs: [],
       rets: [],
-    }
-  })
+    };
+  };
 
-  visitIdents: (ctx: IdentsContext) => Array<string> = ((ctx) => {
+  visitIdents: (ctx: IdentsContext) => Array<string> = (ctx) => {
     return [];
-  })
+  };
 }
 
 // XXX: only for testing
 // we can direct make a CSSpecVisitor<Solidity> without abstract method later
 export class CSSpecVisitorString extends CSSpecVisitor<string> {
   parseSexpr(text: string): string {
-    return text; 
+    return text;
   }
 }
