@@ -21,7 +21,7 @@ function parse(specStr: string) {
 
 function main() {
   // parse('{x | 1 + 2}');
-  parse('f(x, y, z) returns (f1) => g() /\\ 1 + 2');
+  parse('f(x, y, z) returns (f1) => g{value, gas, gas_}() /\\ 1 + 2');
   // parse('{ (x) | 1 + 2}');
   // parse('{ (x, y) | 1 + 2}');
   // parse('{ {value: 5} (x, y) | 1 + 2}');
