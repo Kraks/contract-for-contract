@@ -1,9 +1,11 @@
 import assert from 'assert';
 import type { Opaque } from 'type-fest';
 import { TerminalNode } from 'antlr4';
+import { CharStream, CommonTokenStream } from 'antlr4';
 
 import SpecVisitor from './spec-parser/SpecVisitor.js';
 import SpecLexer from './spec-parser/SpecLexer.js';
+import SpecParser from './spec-parser/SpecParser.js';
 import {
   SpecContext,
   TupleContext,
@@ -203,10 +205,25 @@ export abstract class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
   };
 }
 
-// XXX: only for testing
+// XXX: only for testing (a predefined visitor)
 // we can direct make a CSSpecVisitor<Solidity> without abstract method later
 export class CSSpecVisitorString extends CSSpecVisitor<string> {
   parseSexpr(text: string): string {
     return text;
   }
+}
+
+// TODO: add error handling
+// XXX: for now, just for testing
+export function CSSpecParse<T>(
+  s: string,
+  visitor: CSSpecVisitor<T>,
+): CSSpec<T> {
+  const chars = new CharStream(s); // replace this with a FileStream as required
+  const lexer = new SpecLexer(chars);
+  const tokens = new CommonTokenStream(lexer);
+  const parser = new SpecParser(tokens);
+  const tree = parser.spec();
+
+  return tree.accept(visitor) as CSSpec<T>;
 }

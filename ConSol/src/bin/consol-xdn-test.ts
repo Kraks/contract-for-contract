@@ -12,13 +12,13 @@ import {
   TerminalNode,
   ParseTree,
 } from 'antlr4';
-import SpecLexer from '../lib/spec-parser/SpecLexer.js';
-import SpecParser from '../lib/spec-parser/SpecParser.js';
-import { SpecContext } from '../lib/spec-parser/SpecParser.js';
+import SpecLexer from '../lib/spec/spec-parser/SpecLexer.js';
+import SpecParser from '../lib/spec/spec-parser/SpecParser.js';
+import { SpecContext } from '../lib/spec/spec-parser/SpecParser.js';
 import { isNumber } from '../index.js';
 import * as util from 'util';
-import SpecListener from '../lib/spec-parser/SpecListener.js';
-import SpecVisitor from '../lib/spec-parser/SpecVisitor.js';
+import SpecListener from '../lib/spec/spec-parser/SpecListener.js';
+import SpecVisitor from '../lib/spec/spec-parser/SpecVisitor.js';
 
 class ConSolParseError extends Error {
   constructor(

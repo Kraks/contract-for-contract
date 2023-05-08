@@ -1,4 +1,4 @@
-src/lib/spec-parser/*.ts
+src/lib/spec/spec-parser/*.ts
 **/*-test.ts
 /node_modules
 /dist
