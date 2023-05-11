@@ -298,8 +298,9 @@ happen after another event.
 \begin{lstlisting}
   # ts1 @ f(x) returns z =/> ts2 @ g(a) returns c /\ side-cond
 \end{lstlisting}
-It enforces that when @g@ is invoked, we check that @f@ has not invoked
-\emph{and} the side condition is evaluated to true.
+It enforces that when @g@ is invoked \emph{and} the side condition
+evaluates to true, we check that @f@ has not been invoked.
+
 We do not enforce that @g@ cannot be invoked eventually
 after invoking @f@.
 
@@ -386,3 +387,8 @@ equivalent to
   # f ~/> f
   function f(uint x) { f(n) }
 \end{lstlisting}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "paper"
+%%% End:
