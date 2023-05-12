@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-contract Example_ArgFunFun {
+contract Example_ArgFunFunCond {
   function foo(int32 x) private pure returns (int32) {
     return x + 1;
   }
@@ -28,19 +28,28 @@ contract Example_ArgFunFun {
     return z + 1;
   }
 
-  function tee(function (int32) returns (int32) h) private returns (int32) {
+  function tee1(function (int32) returns (int32) h) private returns (int32) {
     return h(0) + 1;
+  }
+
+  function tee2(function (int32) returns (int32) h) private returns (int32) {
+    return h(0) - 1;
+  }
+
+  function select(bool flag) private returns (function (function (int32) returns (int32)) returns (int32)) {
+    if (flag) return tee1;
+    else return tee2;
   }
 
   // now suppose some function uses gee
   // we must know the argument passed to gee *within* this contract
-  function cool() private {
-    gee(tee);
+  function cool(bool flag) private {
+    function (function (int32) returns (int32)) returns (int32) ttt = select(flag);
+    gee(ttt);
   }
 }
 
-contract Example_ArgFunFun_Translated {
-  // unchanged, no spec attached
+contract Example_ArgFunFunCond_Translated {
   function foo(int32 x) private pure returns (int32) {
     return x + 1;
   }
@@ -118,17 +127,22 @@ contract Example_ArgFunFun_Translated {
     return ret;
   }
 
-  // XXX: be careful if tee is called via other path, so an unguarded version should be used in that case.
-  function tee(function (int32) returns (int32) h) private returns (int32) {
-    return h(0) + 1;
-  }
 
-  function tee_guarded(Guarded_int32_int32 memory h) private returns (int32) {
+  function tee1_guarded(Guarded_int32_int32 memory h) private returns (int32) {
     return apply_Guarded_int32_int32(h, 0) + 1;
   }
+  function tee2_guarded(Guarded_int32_int32 memory h) private returns (int32) {
+    return apply_Guarded_int32_int32(h, 0) - 1;
+  }
 
-  function cool() private {
-    gee(tee_guarded);
+  function select(bool flag) private returns (function (Guarded_int32_int32 memory) returns (int32)) {
+    if (flag) return tee1_guarded;
+    else return tee2_guarded;
+  }
+
+  function cool(bool flag) private {
+    function (Guarded_int32_int32 memory) returns (int32) ttt = select(flag);
+    gee(ttt);
   }
 
 }
