@@ -119,14 +119,17 @@ contract Example_ArgFunFun_Translated {
     return ret;
   }
 
-  // tee needs to be updated
-  // XXX: be careful if tee is called via other path, so an ungarded version should be used in that case.
-  function tee(Guarded_int32_int32 memory h) private returns (int32) {
+  // XXX: be careful if tee is called via other path, so an unguarded version should be used in that case.
+  function tee(function (int32) returns (int32) h) private returns (int32) {
+    return h(0) + 1;
+  }
+
+  function tee_guarded(Guarded_int32_int32 memory h) private returns (int32) {
     return apply_Guarded_int32_int32(h, 0) + 1;
   }
 
   function cool() private {
-    gee(tee);
+    gee(tee_guarded);
   }
 
 }
