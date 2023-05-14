@@ -4,82 +4,83 @@ grammar Spec;
 // {foo{value:v,gas:g}()returns(x)requires{x>0&&x==0}where{f()}ensures{x&&y}}
 // {foo()=>bar()when{x<0}ensures{z==z2}}
 
-
-spec  :   fspec EOF
-      |   tspec EOF
+spec  : vspec EOF
+      | tspec EOF
       ;
 
-fspec :   '{' call 
-            ('requires' '{' sexpr '}')? 
-            ('where' fspec)? 
-            ('ensures' '{' sexpr '}')? 
-            ('where' fspec)? 
-          '}' ;
+vspec : '{' call
+          ('requires' '{' sexpr '}')?
+          ('where' vspec*)?
+          ('ensures' '{' sexpr '}')?
+          ('where' vspec*)?
+        '}'
+;
 
-tspec :   '{' call TCONN call
-            ('when' '{' sexpr '}')? 
-            ('ensures' '{' sexpr '}')? 
-          '}' ;
-sexpr :   ~('{' | '}')+ ;
+tspec : '{' call TCONN call
+          ('when' '{' sexpr '}')?
+          ('ensures' '{' sexpr '}')?
+        '}'
+;
+sexpr : ~('{' | '}')+ ;
 
-call  : IDENT ( dict )? tuple ('returns' tuple)? ;
+call  : IDENT ( dict )? '(' idents ')' ('returns' tuple)? ;
 
 // dict is non-empty
-dict  :   '{' pair (',' pair)* '}' ;
+dict  : '{' pair (',' pair)* '}' ;
 
-pair  :   IDENT ':' IDENT ;
+pair  : IDENT ':' IDENT ;
 
 // tuple can be empty
-tuple :   IDENT
-      |   '(' idents ')'
+tuple : IDENT
+      | '(' idents ')'
       ;
-      
-idents:   (IDENT (',' IDENT)*)? ;
 
-IDENT :   [a-zA-Z_] [a-zA-Z_0-9]* ;
+idents: (IDENT (',' IDENT)*)? ;
 
-TCONN :   '=>'
-      |   '=/>'
-      |   '~>'
-      |   '~/>'
+IDENT : [a-zA-Z_] [a-zA-Z_0-9]* ;
+
+TCONN : '=>'
+      | '=/>'
+      | '~>'
+      | '~/>'
       ;
-      
-OP    :   '|'
-      |   '&'
-      |   '^'
-      |   '~'
-      |   '+'
-      |   '-'
-      |   '*'
-      |   '/'
-      |   '%'
-      |   '!'
-      |   '?'
-      |   ':'
-      |   '=='
-      |   '!='
-      |   '<'
-      |   '>'
-      |   '<='
-      |   '>='
-      |   '&&'
-      |   '||'
-      |   '++'
-      |   '--'
-      |   '-='
-      |   '+='
-      |   '*='
-      |   '/='
-      |   '%='
-      |   '>>'
-      |   '>>>'
-      |   '<<'
-      |   '('
-      |   ')'
-      |   '.'
+
+OP    : '|'
+      | '&'
+      | '^'
+      | '~'
+      | '+'
+      | '-'
+      | '*'
+      | '/'
+      | '%'
+      | '!'
+      | '?'
+      | ':'
+      | '=='
+      | '!='
+      | '<'
+      | '>'
+      | '<='
+      | '>='
+      | '&&'
+      | '||'
+      | '++'
+      | '--'
+      | '-='
+      | '+='
+      | '*='
+      | '/='
+      | '%='
+      | '>>'
+      | '>>>'
+      | '<<'
+      | '('
+      | ')'
+      | '.'
       ;
-QUOTE :   '\'' | '"' ;
-INT   :   [0-9]+
-      |   '0' [xX] [0-9a-fA-F]+
-      |   '0' [oO]? [0-7]+
+QUOTE : '\'' | '"' ;
+INT   : [0-9]+
+      | '0' [xX] [0-9a-fA-F]+
+      | '0' [oO]? [0-7]+
       ;
