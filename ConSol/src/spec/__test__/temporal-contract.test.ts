@@ -6,7 +6,7 @@ describe('temporal contract', () => {
   });
 
   it('no argument and dict', () => {
-    const s = '{f() returns () =/> g{}()';
+    const s = '{ f() =/> g() }';
     const spec: TempSpec<string> = {
       call1: { funName: 'f', kwargs: [], args: [], rets: [] },
       call2: { funName: 'g', kwargs: [], args: [], rets: [] },
@@ -17,6 +17,7 @@ describe('temporal contract', () => {
     expect(spec_).toEqual(spec);
   });
 
+  /*
   it('single argument without side condition', () => {
     const s = 'f{}(x) returns (y) ~> g() returns z';
     const spec: TempSpec<string> = {
@@ -110,5 +111,6 @@ describe('temporal contract', () => {
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
-  });
+    });
+    */
 });

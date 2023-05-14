@@ -1,3 +1,4 @@
+import SpecLexer from '../SpecLexer.js';
 import SpecParser from '../SpecParser.js';
 import {
   CharStream,
@@ -6,7 +7,6 @@ import {
   Recognizer,
   Token,
 } from 'antlr4';
-import SpecLexer from '../SpecLexer.js';
 
 export const createParser = (specStr: string): SpecParser => {
   const chars = new CharStream(specStr);
@@ -15,8 +15,8 @@ export const createParser = (specStr: string): SpecParser => {
   return new SpecParser(tokens);
 };
 
-export class TestErrorListener implements ErrorListener<Token> {
-  constructor(private readonly handler: (msg: string) => void) {}
+export class TestErrorListener extends ErrorListener<Token> {
+  constructor(private readonly handler: (msg: string) => void) { super() }
 
   syntaxError(
     recognizer: Recognizer<Token>,

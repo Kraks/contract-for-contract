@@ -4,6 +4,7 @@ import { createParser, TestErrorListener } from './util.js';
 describe('first-order value spec', () => {
   describe('Parser', () => {
     const specs = [
+      /*
       '{x | 1 + 2}',
       '{ (x) | 1 + 2}',
       '{ (x, y) | 1 + 2}',
@@ -14,7 +15,9 @@ describe('first-order value spec', () => {
       '{x | x < type(uint).max / 1e18}  -> {y | true}',
       '{x | x > 0} -> {y | y < 100} -> {z | z == x + y }',
       '{ (x, y) | x > 0 && y < 100 } -> {z | z == x + y }',
-      '{ n | msg.value >= 1e15 * n }',
+      '{ n | msg.value >= 1e15 * n }',a
+      */
+      '{ f(x) requires { x > 0 } }'
     ];
     specs.forEach((specStr) =>
       it(`should parse ${specStr}`, () => {

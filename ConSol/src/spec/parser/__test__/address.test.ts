@@ -4,15 +4,15 @@ import { createParser, TestErrorListener } from './util.js';
 describe('address spec', () => {
   describe('Parser', () => {
     const specs = [
-      '{ addr | { {value, gas}(arg) | value > 0 } -> { (res, data) | res == true } }',
+      '{ f(addr) where { addr{value: v, gas: g}(arg) returns (res, data) requires {v > 0} ensures {res == true} } }'
     ];
     specs.forEach((specStr) =>
       it(`should parse ${specStr}`, () => {
         const parser = createParser(specStr);
-        const syntaxError = jest.fn();
-        parser.addErrorListener(new TestErrorListener(syntaxError));
+        const syntaxErrorHandler = jest.fn();
+        parser.addErrorListener(new TestErrorListener(syntaxErrorHandler));
         const tree = parser.spec();
-        expect(syntaxError).not.toHaveBeenCalled();
+        expect(syntaxErrorHandler).not.toHaveBeenCalled();
         expect(tree).toBeDefined();
       }),
     );
