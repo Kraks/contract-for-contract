@@ -16,7 +16,9 @@ export const createParser = (specStr: string): SpecParser => {
 };
 
 export class TestErrorListener extends ErrorListener<Token> {
-  constructor(private readonly handler: (msg: string) => void) { super() }
+  constructor(private readonly handler: (msg: string) => void) {
+    super();
+  }
 
   syntaxError(
     recognizer: Recognizer<Token>,

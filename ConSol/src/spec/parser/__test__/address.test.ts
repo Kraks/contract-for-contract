@@ -4,7 +4,7 @@ import { createParser, TestErrorListener } from './util.js';
 describe('address spec', () => {
   describe('Parser', () => {
     const specs = [
-      '{ f(addr) where { addr{value: v, gas: g}(arg) returns (res, data) requires {v > 0} ensures {res == true} } }'
+      '{ f(addr) where { addr{value: v, gas: g}(arg) returns (res, data) requires {v > 0} ensures {res == true} } }',
     ];
     specs.forEach((specStr) =>
       it(`should parse ${specStr}`, () => {

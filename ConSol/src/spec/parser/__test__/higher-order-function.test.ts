@@ -6,7 +6,7 @@ describe('higher-order functions spec', () => {
     const specs = [
       //'{ f | {x | x < 0} -> {y | y > 0} }',
       //'{ f | smallerThanZero -> greaterThanZero }',
-      '{ f(g) where { g(x) requires { x > 0 } } }'
+      '{ f(g) where { g(x) requires { x > 0 } } }',
     ];
     specs.forEach((specStr) =>
       it(`should parse ${specStr}`, () => {

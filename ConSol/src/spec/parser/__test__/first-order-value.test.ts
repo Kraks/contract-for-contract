@@ -17,7 +17,7 @@ describe('first-order value spec', () => {
       '{ (x, y) | x > 0 && y < 100 } -> {z | z == x + y }',
       '{ n | msg.value >= 1e15 * n }',a
       */
-      '{ f(x) requires { x > 0 } }'
+      '{ f(x) requires { x > 0 } }',
     ];
     specs.forEach((specStr) =>
       it(`should parse ${specStr}`, () => {
