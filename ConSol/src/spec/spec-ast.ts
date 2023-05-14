@@ -14,22 +14,17 @@ import {
   TspecContext,
   CallContext,
   SexprContext,
+  PairContext,
   IdentsContext,
 } from './parser/SpecParser.js';
 
-export interface FlatSpec<T> {
-  vars: Array<string>;
-  cond: T;
+export interface ValSpec<T> {
+  call: Call,
+  preCond: T,
+  preFunSpec: Array<ValSpec<T>>,
+  postCond: T
+  postFunSpec: Array<ValSpec<T>>,
 }
-
-export interface FunSpec<T> {
-  dom: ValSpec<T>;
-  codom: ValSpec<T>;
-}
-
-export type ValSpec<T> =
-  | Opaque<FlatSpec<T>, 'FlatSpec'>
-  | Opaque<FunSpec<T>, 'FunSpec'>;
 
 export enum TempConn {
   After,
@@ -38,10 +33,15 @@ export enum TempConn {
   NotUnderCtx,
 }
 
+export interface Pair<T1, T2> {
+  fst: T1,
+  snd: T2
+}
+
 export interface Call {
   funName: string;
   args: Array<string>;
-  kwargs: Array<string>;
+  kwargs: Array<Pair<string, string>>;
   rets: Array<string>;
 }
 
@@ -49,7 +49,8 @@ export interface TempSpec<T> {
   conn: TempConn;
   call1: Call;
   call2: Call;
-  cond?: T;
+  preCond?: T;
+  postCond?: T;
 }
 
 export type CSSpec<T> = ValSpec<T> | Opaque<TempSpec<T>, 'TempSpec'>;
@@ -59,7 +60,10 @@ export type SpecParseResult<T> =
   | CSSpec<T>
   | Call
   | TempConn
-  | Array<string>;
+  | string
+  | Array<Pair<string, string>>
+  | Array<string>
+  | Pair<string, string>;
 
 /*
  * XXX: [discussion]
@@ -71,6 +75,10 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
   constructor(parseSexpr: (_: string) => T) {
     super();
     this.parseSexpr = parseSexpr;
+  }
+
+  extractTermText(n: any): string {
+    return (n as TerminalNode).symbol.text;
   }
 
   // spec  :   vspec EOF | tspec EOF;
@@ -85,20 +93,25 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     }
   };
 
-  // tspec :   call TCONN call ( '/\\' sexpr )? ;
+  /*
+    tspec : '{' call TCONN call
+            ('when' '{' sexpr '}')?
+            ('ensures' '{' sexpr '}')?
+            '}';
+  */
   visitTspec: (ctx: TspecContext) => Opaque<TempSpec<T>, 'TempSpec'> = (
     ctx,
   ) => {
     assert(ctx.children != null);
-    assert(ctx.children.length == 3 || ctx.children.length == 5);
+    assert(ctx.children.length == 5 || ctx.children.length == 9 || ctx.children.length == 13);
 
     // XXX: shall we use assertion or `as` here?
-    const _call1 = this.visitCall(ctx.children[0] as CallContext);
-    const _call2 = this.visitCall(ctx.children[2] as CallContext);
+    const _call1 = this.visitCall(ctx.children[1] as CallContext);
+    const _call2 = this.visitCall(ctx.children[3] as CallContext);
 
     // XXX: same question here: is the `as` a safe casting with runtime type check?
     let _conn: TempConn;
-    switch ((ctx.children[1] as TerminalNode).symbol.text) {
+    switch ((ctx.children[2] as TerminalNode).symbol.text) {
       case '=>':
         _conn = TempConn.After;
         break;
@@ -116,10 +129,22 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     }
 
     const tspec: TempSpec<T> = { call1: _call1, call2: _call2, conn: _conn };
-    if (ctx.children.length == 5) {
-      assert((ctx.children[3] as TerminalNode).symbol.text == '/\\');
-      assert(ctx.children[4] instanceof SexprContext);
-      tspec.cond = this.parseSexpr(ctx.children[4].getText());
+    if (ctx.children.length == 9) {
+      // Only "when" or "ensures" is provided
+      let prompt = this.extractTermText(ctx.children[4]) 
+      if (prompt == "when") {
+	assert(ctx.children[6] instanceof SexprContext);
+	tspec.preCond = this.parseSexpr(ctx.children[6].getText());
+      } else if (prompt == "ensures") {
+	assert(ctx.children[6] instanceof SexprContext);
+	tspec.postCond = this.parseSexpr(ctx.children[6].getText());
+      } else {
+	assert(false, "invalid keyword (which shouldn't happen at all)");
+      }
+    }
+    if (ctx.children.length == 13) {
+      // both "when" or "ensures" is provided
+      // TODO
     }
 
     return tspec as Opaque<TempSpec<T>, 'TempSpec'>;
@@ -133,7 +158,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     const _funName = (ctx.children[0] as TerminalNode).symbol.text;
 
     // kwargs
-    let identsIdx: number, _kwargs: Array<string>;
+    let identsIdx: number, _kwargs: Array<Pair<string, string>>;
     if (ctx.children[1] instanceof DictContext) {
       identsIdx = 3;
       _kwargs = this.visitDict(ctx.children[1]);
@@ -185,15 +210,23 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     }
   };
 
-  // dict  :   '{' idents '}' ;
-  visitDict: (ctx: DictContext) => Array<string> = (ctx) => {
+  // pair : IDENT ':' IDENT ;
+  visitPair: (ctx: PairContext) => Pair<string, string> = (ctx) => {
     assert(ctx.children != null);
-    assert(ctx.children.length == 3);
+    return { fst: ctx.children[0].getText(), snd: ctx.children[2].getText() };
+  };
+
+  // dict  : '{' pair (',' pair)* '}' ;
+  visitDict: (ctx: DictContext) => Array<Pair<string, string>> = (ctx) => {
+    assert(ctx.children != null);
+    assert(ctx.children.length >= 3);
 
     assert((ctx.children[0] as TerminalNode).symbol.text == '{');
-    assert((ctx.children[2] as TerminalNode).symbol.text == '}');
+    assert((ctx.children[ctx.children.length-1] as TerminalNode).symbol.text == '}');
 
-    return this.visitIdents(ctx.children[1] as IdentsContext);
+    let kvs = ctx.children.filter((child) => (child instanceof PairContext)).map((child) => this.visitPair(child as PairContext));
+
+    return kvs;
   };
 
   // idents:    (IDENT (',' IDENT)*)? ;

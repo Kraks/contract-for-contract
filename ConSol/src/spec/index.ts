@@ -1,6 +1,4 @@
 export {
-  FlatSpec,
-  FunSpec,
   ValSpec,
   TempConn,
   Call,
