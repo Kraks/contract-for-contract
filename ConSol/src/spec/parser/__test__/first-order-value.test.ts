@@ -4,20 +4,12 @@ import { createParser, TestErrorListener } from './util.js';
 describe('first-order value spec', () => {
   describe('Parser', () => {
     const specs = [
-      /*
-      '{x | 1 + 2}',
-      '{ (x) | 1 + 2}',
-      '{ (x, y) | 1 + 2}',
-      '{ {value, gas} (x, y) | 1 + 2}',
-      '{x | x % 1e18 < 1e17}',
-      '{y | y < type(uint).max / 1e18}',
-      '{x | x % 1e18 < 1e17} -> {y | y < type(uint).max / 1e18}',
-      '{x | x < type(uint).max / 1e18}  -> {y | true}',
-      '{x | x > 0} -> {y | y < 100} -> {z | z == x + y }',
-      '{ (x, y) | x > 0 && y < 100 } -> {z | z == x + y }',
-      '{ n | msg.value >= 1e15 * n }',a
-      */
       '{ f(x) requires { x > 0 } }',
+      '{ f(x) returns y requires { x > 0 } ensures { y > x } }',
+      '{ f(x1, x2) returns (y, z) requires { x1 + z > 0 } ensures { y - z > x2 } }',
+      '{ f{value: v, gas: g}(x1, x2) returns (y, z) requires { x1 + z > v } ensures { y - z > x2 + g } }',
+      '{ f{value: v, gas: g}(x1, x2) returns (y, z) requires { x1 + z > v } ensures { y < type(uint).max / 1e18 } }',
+      '{ f{value: v, gas: g}(x1, x2) returns (y, z) requires { msg.value >= 1e15 } ensures { y < type(uint).max / 1e18 } }',
     ];
     specs.forEach((specStr) =>
       it(`should parse ${specStr}`, () => {

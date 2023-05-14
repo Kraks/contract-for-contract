@@ -4,9 +4,10 @@ import { createParser, TestErrorListener } from './util.js';
 describe('higher-order functions spec', () => {
   describe('Parser', () => {
     const specs = [
-      //'{ f | {x | x < 0} -> {y | y > 0} }',
-      //'{ f | smallerThanZero -> greaterThanZero }',
-      '{ f(g) where { g(x) requires { x > 0 } } }',
+      '{ f(x, g) requires { x > 0 } where { g(x) requires { x > 0 } } }',
+      `{ f(x, g) returns (h, y) requires { x > 0 } where { g(x) requires { x > 0 } }
+         ensures { y == 0 } where { h(z) returns r requires { z + r > 0 } ensures { z != 0 } }
+       }`,
     ];
     specs.forEach((specStr) =>
       it(`should parse ${specStr}`, () => {
