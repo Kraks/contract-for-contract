@@ -19,11 +19,11 @@ import {
 } from './parser/SpecParser.js';
 
 export interface ValSpec<T> {
-  call: Call,
-  preCond: T,
-  preFunSpec: Array<ValSpec<T>>,
-  postCond: T
-  postFunSpec: Array<ValSpec<T>>,
+  call: Call;
+  preCond: T;
+  preFunSpec: Array<ValSpec<T>>;
+  postCond: T;
+  postFunSpec: Array<ValSpec<T>>;
 }
 
 export enum TempConn {
@@ -34,8 +34,8 @@ export enum TempConn {
 }
 
 export interface Pair<T1, T2> {
-  fst: T1,
-  snd: T2
+  fst: T1;
+  snd: T2;
 }
 
 export interface Call {
@@ -103,7 +103,11 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     ctx,
   ) => {
     assert(ctx.children != null);
-    assert(ctx.children.length == 5 || ctx.children.length == 9 || ctx.children.length == 13);
+    assert(
+      ctx.children.length == 5 ||
+        ctx.children.length == 9 ||
+        ctx.children.length == 13,
+    );
 
     // XXX: shall we use assertion or `as` here?
     const _call1 = this.visitCall(ctx.children[1] as CallContext);
@@ -131,15 +135,15 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     const tspec: TempSpec<T> = { call1: _call1, call2: _call2, conn: _conn };
     if (ctx.children.length == 9) {
       // Only "when" or "ensures" is provided
-      let prompt = this.extractTermText(ctx.children[4]) 
-      if (prompt == "when") {
-	assert(ctx.children[6] instanceof SexprContext);
-	tspec.preCond = this.parseSexpr(ctx.children[6].getText());
-      } else if (prompt == "ensures") {
-	assert(ctx.children[6] instanceof SexprContext);
-	tspec.postCond = this.parseSexpr(ctx.children[6].getText());
+      const prompt = this.extractTermText(ctx.children[4]);
+      if (prompt == 'when') {
+        assert(ctx.children[6] instanceof SexprContext);
+        tspec.preCond = this.parseSexpr(ctx.children[6].getText());
+      } else if (prompt == 'ensures') {
+        assert(ctx.children[6] instanceof SexprContext);
+        tspec.postCond = this.parseSexpr(ctx.children[6].getText());
       } else {
-	assert(false, "invalid keyword (which shouldn't happen at all)");
+        assert(false, "invalid keyword (which shouldn't happen at all)");
       }
     }
     if (ctx.children.length == 13) {
@@ -222,9 +226,14 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     assert(ctx.children.length >= 3);
 
     assert((ctx.children[0] as TerminalNode).symbol.text == '{');
-    assert((ctx.children[ctx.children.length-1] as TerminalNode).symbol.text == '}');
+    assert(
+      (ctx.children[ctx.children.length - 1] as TerminalNode).symbol.text ==
+        '}',
+    );
 
-    let kvs = ctx.children.filter((child) => (child instanceof PairContext)).map((child) => this.visitPair(child as PairContext));
+    const kvs = ctx.children
+      .filter((child) => child instanceof PairContext)
+      .map((child) => this.visitPair(child as PairContext));
 
     return kvs;
   };

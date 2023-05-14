@@ -19,7 +19,7 @@ function main() {
   // new syntax:
   //parse('{ f(x) => g(x) }');
   //parse('{ f{value: v, dict: d}(x) => g(x) }')
-  parse('{ f{value: v, dict: d}(x) => g(x) returns y }')
+  parse('{ f{value: v, dict: d}(x) => g(x) returns y }');
 }
 
 main();

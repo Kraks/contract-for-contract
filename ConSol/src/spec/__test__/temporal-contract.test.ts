@@ -73,7 +73,10 @@ describe('temporal contract', () => {
     const spec: TempSpec<string> = {
       call1: {
         funName: 'f',
-        kwargs: [['gas', 'gas'], ['value', 'value']],
+        kwargs: [
+          ['gas', 'gas'],
+          ['value', 'value'],
+        ],
         args: ['x', 'y', 'z'],
         rets: ['x'],
       },
@@ -87,12 +90,17 @@ describe('temporal contract', () => {
   });
 
   it('muliptles arguments with side condition (2)', () => {
-    const s = 'f(x, y, z) returns (f1) => g{value: value, gas: gas, g: g}() /\\ 1 + 2';
+    const s =
+      'f(x, y, z) returns (f1) => g{value: value, gas: gas, g: g}() /\\ 1 + 2';
     const spec: TempSpec<string> = {
       call1: { funName: 'f', kwargs: [], args: ['x', 'y', 'z'], rets: ['f1'] },
       call2: {
         funName: 'g',
-        kwargs: [['value', 'value'], ['gas', 'gas'], ['g', 'g']],
+        kwargs: [
+          ['value', 'value'],
+          ['gas', 'gas'],
+          ['g', 'g'],
+        ],
         args: [],
         rets: [],
       },
