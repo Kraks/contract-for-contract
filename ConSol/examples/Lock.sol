@@ -6,12 +6,10 @@ contract Lock {
     uint256 public unlockTime;
     address payable public owner;
 
-    /// @custom:consol.js {amount | amount > 0}
+    /// @custom:consol { Withdrawal(amount, when) requires { amount > 0 } }
     event Withdrawal(uint256 amount, uint256 when);
 
-    /// @custom:consol.js {_unlockTime | _unlockTime > 0}
-    /// @dev ualadfskf
-    /// @custom:consol.js part2
+    /// @custom:consol { constructor(t) requires { t > 0 } }
     constructor(uint256 _unlockTime) payable {
         require(
             block.timestamp < _unlockTime,
@@ -22,7 +20,7 @@ contract Lock {
         owner = payable(msg.sender);
     }
 
-    /// @custom:consol.js {msg.sender | msg.sender ==owner}
+    /// @custom:consol { withdraw() requires { msg.sender == owner } }
     function withdraw() public {
         require(block.timestamp >= unlockTime, "You can't withdraw yet");
         // require(msg.sender == owner, "You aren't the owner");

@@ -97,7 +97,7 @@ async function main() {
       }
     });
 
-    // @custom:consol.js { _unlockTime | _unlockTime > 0 } for constructor
+    // @custom:consol { _unlockTime | _unlockTime > 0 } for constructor
     const buildRequireStmt = (
       ctx: ASTContext,
       constraint: Expression,
