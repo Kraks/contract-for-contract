@@ -1,5 +1,4 @@
 import assert from 'assert';
-import type { Opaque } from 'type-fest';
 import { TerminalNode } from 'antlr4';
 import { CharStream, CommonTokenStream } from 'antlr4';
 
@@ -60,7 +59,7 @@ export interface TempSpec<T> {
   postCond?: T;
 }
 
-export type CSSpec<T> = ValSpec<T> | Opaque<TempSpec<T>, 'TempSpec'>;
+export type CSSpec<T> = ValSpec<T> | TempSpec<T>;
 
 export type SpecParseResult<T> =
   | T
@@ -95,11 +94,21 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     assert(ctx.children != null);
     assert(ctx.children.length == 2);
 
-    if (ctx.children[0] instanceof VspecContext) {
-      assert(false); // TODO
-    } else {
-      return this.visit(ctx.children[0]) as CSSpec<T>;
-    }
+    return this.visit(ctx.children[0]) as CSSpec<T>;
+  };
+
+  /*
+    vspec : '{' call
+            ('requires' '{' sexpr '}')?
+            ('where' vspec*)?
+            ('ensures' '{' sexpr '}')?
+            ('where' vspec*)?
+            '}';
+  */
+  visitVspec: (ctx: VspecContext) => ValSpec<T> = (ctx) => {
+    assert(ctx.children != null);
+
+    const call = this.visit(ctx.children[0]) as Call;
   };
 
   /*
@@ -108,9 +117,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
             ('ensures' '{' sexpr '}')?
             '}';
   */
-  visitTspec: (ctx: TspecContext) => Opaque<TempSpec<T>, 'TempSpec'> = (
-    ctx,
-  ) => {
+  visitTspec: (ctx: TspecContext) => TempSpec<T> = (ctx) => {
     assert(ctx.children != null);
     assert(
       ctx.children.length == 5 ||
@@ -158,7 +165,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
       assert(this.extractTermText(ctx.children[i + 3]) == '}');
     }
 
-    return tspec as Opaque<TempSpec<T>, 'TempSpec'>;
+    return tspec;
   };
 
   // call  :   fname ( dict )? '(' idents ')' ('returns' tuple)? ;

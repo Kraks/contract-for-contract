@@ -1,9 +1,5 @@
 grammar Spec;
 
-// test:
-// {foo{value:v,gas:g}()returns(x)requires{x>0&&x==0}where{f()}ensures{x&&y}}
-// {foo()=>bar()when{x<0}ensures{z==z2}}
-
 spec  : vspec EOF
       | tspec EOF
       ;
