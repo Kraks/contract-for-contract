@@ -8,6 +8,7 @@ import { VspecContext } from './SpecParser';
 import { TspecContext } from './SpecParser';
 import { SexprContext } from './SpecParser';
 import { CallContext } from './SpecParser';
+import { FnameContext } from './SpecParser';
 import { DictContext } from './SpecParser';
 import { PairContext } from './SpecParser';
 import { TupleContext } from './SpecParser';
@@ -68,6 +69,16 @@ export default class SpecListener extends ParseTreeListener {
    * @param ctx the parse tree
    */
   exitCall?: (ctx: CallContext) => void;
+  /**
+   * Enter a parse tree produced by `SpecParser.fname`.
+   * @param ctx the parse tree
+   */
+  enterFname?: (ctx: FnameContext) => void;
+  /**
+   * Exit a parse tree produced by `SpecParser.fname`.
+   * @param ctx the parse tree
+   */
+  exitFname?: (ctx: FnameContext) => void;
   /**
    * Enter a parse tree produced by `SpecParser.dict`.
    * @param ctx the parse tree

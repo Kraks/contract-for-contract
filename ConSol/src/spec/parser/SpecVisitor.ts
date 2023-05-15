@@ -8,6 +8,7 @@ import { VspecContext } from './SpecParser';
 import { TspecContext } from './SpecParser';
 import { SexprContext } from './SpecParser';
 import { CallContext } from './SpecParser';
+import { FnameContext } from './SpecParser';
 import { DictContext } from './SpecParser';
 import { PairContext } from './SpecParser';
 import { TupleContext } from './SpecParser';
@@ -51,6 +52,12 @@ export default class SpecVisitor<Result> extends ParseTreeVisitor<Result> {
    * @return the visitor result
    */
   visitCall?: (ctx: CallContext) => Result;
+  /**
+   * Visit a parse tree produced by `SpecParser.fname`.
+   * @param ctx the parse tree
+   * @return the visitor result
+   */
+  visitFname?: (ctx: FnameContext) => Result;
   /**
    * Visit a parse tree produced by `SpecParser.dict`.
    * @param ctx the parse tree

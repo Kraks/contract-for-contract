@@ -8,6 +8,7 @@ import SpecLexer from './parser/SpecLexer.js';
 import SpecParser from './parser/SpecParser.js';
 import {
   SpecContext,
+  FnameContext,
   TupleContext,
   DictContext,
   VspecContext,
@@ -39,10 +40,16 @@ export interface Pair<T1, T2> {
 }
 
 export interface Call {
+  addr?: string;
   funName: string;
   args: Array<string>;
   kwargs: Array<Pair<string, string>>;
   rets: Array<string>;
+}
+
+export interface FunName {
+  func: string;
+  addr?: string;
 }
 
 export interface TempSpec<T> {
@@ -59,6 +66,7 @@ export type SpecParseResult<T> =
   | T
   | CSSpec<T>
   | Call
+  | FunName
   | TempConn
   | string
   | Array<Pair<string, string>>
@@ -90,7 +98,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     if (ctx.children[0] instanceof VspecContext) {
       assert(false); // TODO
     } else {
-      return this.visitTspec(ctx.children[0] as TspecContext);
+      return this.visit(ctx.children[0]) as CSSpec<T>;
     }
   };
 
@@ -111,12 +119,12 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     );
 
     // XXX: shall we use assertion or `as` here?
-    const call1 = this.visitCall(ctx.children[1] as CallContext);
-    const call2 = this.visitCall(ctx.children[3] as CallContext);
+    const call1 = this.visit(ctx.children[1]) as Call;
+    const call2 = this.visit(ctx.children[3]) as Call;
 
     // XXX: same question here: is the `as` a safe casting with runtime type check?
     let conn: TempConn;
-    switch ((ctx.children[2] as TerminalNode).symbol.text) {
+    switch (this.extractTermText(ctx.children[2])) {
       case '=>':
         conn = TempConn.After;
         break;
@@ -153,48 +161,68 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     return tspec as Opaque<TempSpec<T>, 'TempSpec'>;
   };
 
-  // call  :   IDENT ( dict )? '(' idents ')' ('returns' tuple)? ;
+  // call  :   fname ( dict )? '(' idents ')' ('returns' tuple)? ;
   visitCall: (ctx: CallContext) => Call = (ctx) => {
     assert(ctx.children != null);
     assert(ctx.children.length >= 4 && ctx.children.length <= 7);
 
-    const funName = (ctx.children[0] as TerminalNode).symbol.text;
+    const funName = this.visit(ctx.children[0]) as FunName;
 
     // kwargs
     let identsIdx: number, kwargs: Array<Pair<string, string>>;
     if (ctx.children[1] instanceof DictContext) {
       identsIdx = 3;
-      kwargs = this.visitDict(ctx.children[1]);
+      kwargs = this.visit(ctx.children[1]) as Array<Pair<string, string>>;
     } else {
       identsIdx = 2;
       kwargs = [];
     }
 
     // args
-    assert((ctx.children[identsIdx - 1] as TerminalNode).symbol.text == '(');
-    assert((ctx.children[identsIdx + 1] as TerminalNode).symbol.text == ')');
-    const args = this.visitIdents(ctx.children[identsIdx] as IdentsContext);
+    assert(this.extractTermText(ctx.children[identsIdx - 1]) == '(');
+    assert(this.extractTermText(ctx.children[identsIdx + 1]) == ')');
+    const args = this.visit(ctx.children[identsIdx]) as Array<string>;
 
     // returns
     let rets: Array<string>;
     if (ctx.children[ctx.children.length - 1] instanceof TupleContext) {
       assert(
-        (ctx.children[ctx.children.length - 2] as TerminalNode).symbol.text ==
+        this.extractTermText(ctx.children[ctx.children.length - 2]) ==
           'returns',
       );
-      rets = this.visitTuple(
-        ctx.children[ctx.children.length - 1] as TupleContext,
-      );
+      rets = this.visit(ctx.children[ctx.children.length - 1]) as Array<string>;
     } else {
       rets = [];
     }
 
-    return {
-      funName: funName,
+    const call: Call = {
+      funName: funName.func,
       kwargs: kwargs,
       args: args,
       rets: rets,
     };
+
+    if (funName.addr) {
+      call.addr = funName.addr;
+    }
+
+    return call;
+  };
+
+  // fname :   IDENT ( '.' IDENT )?
+  visitFname: (ctx: FnameContext) => FunName = (ctx) => {
+    assert(ctx.children != null);
+    assert(ctx.children.length == 1 || ctx.children.length == 3);
+
+    if (ctx.children.length == 1) {
+      return { func: this.extractTermText(ctx.children[0]) };
+    } else {
+      assert(this.extractTermText(ctx.children[1]) == '.');
+      return {
+        func: this.extractTermText(ctx.children[2]),
+        addr: this.extractTermText(ctx.children[0]),
+      };
+    }
   };
 
   // tuple :   IDENT | '(' idents ')' ;
@@ -207,9 +235,9 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
       assert(child.symbol.type == SpecLexer.IDENT);
       return [child.symbol.text];
     } else {
-      assert((ctx.children[0] as TerminalNode).symbol.text == '(');
-      assert((ctx.children[2] as TerminalNode).symbol.text == ')');
-      return this.visitIdents(ctx.children[1] as IdentsContext);
+      assert(this.extractTermText(ctx.children[0]) == '(');
+      assert(this.extractTermText(ctx.children[2]) == ')');
+      return this.visit(ctx.children[1]) as Array<string>;
     }
   };
 
@@ -224,15 +252,12 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     assert(ctx.children != null);
     assert(ctx.children.length >= 3);
 
-    assert((ctx.children[0] as TerminalNode).symbol.text == '{');
-    assert(
-      (ctx.children[ctx.children.length - 1] as TerminalNode).symbol.text ==
-        '}',
-    );
+    assert(this.extractTermText(ctx.children[0]) == '{');
+    assert(this.extractTermText(ctx.children[ctx.children.length - 1]) == '}');
 
     const kvs = ctx.children
       .filter((child) => child instanceof PairContext)
-      .map((child) => this.visitPair(child as PairContext));
+      .map((child) => this.visit(child as PairContext) as Pair<string, string>);
 
     return kvs;
   };

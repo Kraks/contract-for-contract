@@ -23,7 +23,9 @@ tspec : '{' call TCONN call
 ;
 sexpr : ~('{' | '}')+ ;
 
-call  : IDENT ( dict )? '(' idents ')' ('returns' tuple)? ;
+call  : fname ( dict )? '(' idents ')' ('returns' tuple)? ;
+
+fname : IDENT ( '.' IDENT)?;
 
 // dict is non-empty
 dict  : '{' pair (',' pair)* '}' ;
@@ -38,13 +40,11 @@ tuple : IDENT
 idents: (IDENT (',' IDENT)*)? ;
 
 IDENT : [a-zA-Z_] [a-zA-Z_0-9]* ;
-
 TCONN : '=>'
       | '=/>'
       | '~>'
       | '~/>'
       ;
-
 OP    : '|'
       | '&'
       | '^'
