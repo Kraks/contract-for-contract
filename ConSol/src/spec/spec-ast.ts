@@ -109,6 +109,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     assert(ctx.children != null);
 
     const call = this.visit(ctx.children[0]) as Call;
+    assert(false);
   };
 
   /*
