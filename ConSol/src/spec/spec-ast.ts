@@ -78,6 +78,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
   }
 
   extractTermText(n: any): string {
+    assert(n instanceof TerminalNode);
     return (n as TerminalNode).symbol.text;
   }
 
@@ -110,45 +111,43 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     );
 
     // XXX: shall we use assertion or `as` here?
-    const _call1 = this.visitCall(ctx.children[1] as CallContext);
-    const _call2 = this.visitCall(ctx.children[3] as CallContext);
+    const call1 = this.visitCall(ctx.children[1] as CallContext);
+    const call2 = this.visitCall(ctx.children[3] as CallContext);
 
     // XXX: same question here: is the `as` a safe casting with runtime type check?
-    let _conn: TempConn;
+    let conn: TempConn;
     switch ((ctx.children[2] as TerminalNode).symbol.text) {
       case '=>':
-        _conn = TempConn.After;
+        conn = TempConn.After;
         break;
       case '=/>':
-        _conn = TempConn.NotAfter;
+        conn = TempConn.NotAfter;
         break;
       case '~>':
-        _conn = TempConn.UnderCtx;
+        conn = TempConn.UnderCtx;
         break;
       case '~/>':
-        _conn = TempConn.NotUnderCtx;
+        conn = TempConn.NotUnderCtx;
         break;
       default:
         assert(false, 'invald TempConn');
     }
 
-    const tspec: TempSpec<T> = { call1: _call1, call2: _call2, conn: _conn };
-    if (ctx.children.length == 9) {
-      // Only "when" or "ensures" is provided
-      const prompt = this.extractTermText(ctx.children[4]);
+    const tspec: TempSpec<T> = { call1: call1, call2: call2, conn: conn };
+    for (let i = 4; i < ctx.children.length - 1; i += 4) {
+      const prompt = this.extractTermText(ctx.children[i]);
       if (prompt == 'when') {
-        assert(ctx.children[6] instanceof SexprContext);
-        tspec.preCond = this.parseSexpr(ctx.children[6].getText());
+        assert(ctx.children[i + 2] instanceof SexprContext);
+        tspec.preCond = this.parseSexpr(ctx.children[i + 2].getText());
       } else if (prompt == 'ensures') {
-        assert(ctx.children[6] instanceof SexprContext);
-        tspec.postCond = this.parseSexpr(ctx.children[6].getText());
+        assert(ctx.children[i + 2] instanceof SexprContext);
+        tspec.postCond = this.parseSexpr(ctx.children[i + 2].getText());
       } else {
         assert(false, "invalid keyword (which shouldn't happen at all)");
       }
-    }
-    if (ctx.children.length == 13) {
-      // both "when" or "ensures" is provided
-      // TODO
+
+      assert(this.extractTermText(ctx.children[i + 1]) == '{');
+      assert(this.extractTermText(ctx.children[i + 3]) == '}');
     }
 
     return tspec as Opaque<TempSpec<T>, 'TempSpec'>;
@@ -159,42 +158,42 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     assert(ctx.children != null);
     assert(ctx.children.length >= 4 && ctx.children.length <= 7);
 
-    const _funName = (ctx.children[0] as TerminalNode).symbol.text;
+    const funName = (ctx.children[0] as TerminalNode).symbol.text;
 
     // kwargs
-    let identsIdx: number, _kwargs: Array<Pair<string, string>>;
+    let identsIdx: number, kwargs: Array<Pair<string, string>>;
     if (ctx.children[1] instanceof DictContext) {
       identsIdx = 3;
-      _kwargs = this.visitDict(ctx.children[1]);
+      kwargs = this.visitDict(ctx.children[1]);
     } else {
       identsIdx = 2;
-      _kwargs = [];
+      kwargs = [];
     }
 
     // args
     assert((ctx.children[identsIdx - 1] as TerminalNode).symbol.text == '(');
     assert((ctx.children[identsIdx + 1] as TerminalNode).symbol.text == ')');
-    const _args = this.visitIdents(ctx.children[identsIdx] as IdentsContext);
+    const args = this.visitIdents(ctx.children[identsIdx] as IdentsContext);
 
     // returns
-    let _rets: Array<string>;
+    let rets: Array<string>;
     if (ctx.children[ctx.children.length - 1] instanceof TupleContext) {
       assert(
         (ctx.children[ctx.children.length - 2] as TerminalNode).symbol.text ==
           'returns',
       );
-      _rets = this.visitTuple(
+      rets = this.visitTuple(
         ctx.children[ctx.children.length - 1] as TupleContext,
       );
     } else {
-      _rets = [];
+      rets = [];
     }
 
     return {
-      funName: _funName,
-      kwargs: _kwargs,
-      args: _args,
-      rets: _rets,
+      funName: funName,
+      kwargs: kwargs,
+      args: args,
+      rets: rets,
     };
   };
 

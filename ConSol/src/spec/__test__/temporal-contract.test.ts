@@ -151,7 +151,6 @@ describe('temporal contract', () => {
     expect(spec_).toEqual(spec);
   });
 
-  /*
   it('muliptles arguments with conditions (1)', () => {
     const s = `
     {
@@ -164,13 +163,13 @@ describe('temporal contract', () => {
             x + y + z == b + c + d
         }
     }
-    `
+    `;
     const spec: TempSpec<string> = {
       call1: {
         funName: 'f',
         kwargs: [
-          {fst: 'gas', snd: 'g1'},
-          {fst: 'value', snd: 'v1'},
+          { fst: 'gas', snd: 'g1' },
+          { fst: 'value', snd: 'v1' },
         ],
         args: ['x', 'y', 'z'],
         rets: ['w'],
@@ -186,26 +185,36 @@ describe('temporal contract', () => {
   });
 
   it('muliptles arguments with conditions (2)', () => {
-    const s =
-      'f(x, y, z) returns (f1) => g{value: value, gas: gas, g: g}() /\\ 1 + 2';
+    const s = `
+    {
+        f(x, y, z) returns (f1)
+            => g{value: v1, gas: g1, gas_: g2}() 
+        when {
+            x == v1 && (g1 + g2 == z)
+        }
+        ensures {
+            f1 > 0
+        }
+    }
+    `;
     const spec: TempSpec<string> = {
       call1: { funName: 'f', kwargs: [], args: ['x', 'y', 'z'], rets: ['f1'] },
       call2: {
         funName: 'g',
         kwargs: [
-          ['value', 'value'],
-          ['gas', 'gas'],
-          ['g', 'g'],
+          { fst: 'value', snd: 'v1' },
+          { fst: 'gas', snd: 'g1' },
+          { fst: 'gas_', snd: 'g2' },
         ],
         args: [],
         rets: [],
       },
       conn: 0,
-      cond: '1+2',
+      preCond: 'x==v1&&(g1+g2==z)',
+      postCond: 'f1>0',
     };
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
-    });
-    */
+  });
 });
