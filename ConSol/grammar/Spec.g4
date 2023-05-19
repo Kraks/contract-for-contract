@@ -6,7 +6,6 @@ spec  : vspec EOF
 
 vspec : '{' call
           ('requires' '{' sexpr '}')?
-          ('where' vspec*)?
           ('ensures' '{' sexpr '}')?
           ('where' vspec*)?
         '}'
