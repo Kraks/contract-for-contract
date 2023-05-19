@@ -107,12 +107,6 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
   */
   visitVspec: (ctx: VspecContext) => ValSpec<T> = (ctx) => {
     assert(ctx.children != null);
-    // assert(
-    //     ctx.children.length == 3 ||
-    //     ctx.children.length == 7 ||
-    //     ctx.children.length == 11 ||
-    //     ctx.children.length == 13,
-    // );
 
     const call = this.visit(ctx.children[1]) as Call;
     const vspec: ValSpec<T> = { call: call };
@@ -148,9 +142,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
           }
           i = i + 1;
         }
-      }
-      // vspec.postFunSpec = funspec;
-      else {
+      } else {
         assert(false, "invalid keyword (which shouldn't happen at all)");
       }
     }
