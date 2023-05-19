@@ -20,10 +20,10 @@ import {
 
 export interface ValSpec<T> {
   call: Call;
-  preCond: T;
-  preFunSpec: Array<ValSpec<T>>;
-  postCond: T;
-  postFunSpec: Array<ValSpec<T>>;
+  preCond?: T;
+  preFunSpec?: Array<ValSpec<T>>;
+  postCond?: T;
+  postFunSpec?: Array<ValSpec<T>>;
 }
 
 export enum TempConn {
@@ -38,6 +38,7 @@ export interface Pair<T1, T2> {
   snd: T2;
 }
 
+// TODO: kwargs and rets are optional
 export interface Call {
   addr?: string;
   funName: string;
@@ -100,16 +101,65 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
   /*
     vspec : '{' call
             ('requires' '{' sexpr '}')?
-            ('where' vspec*)?
             ('ensures' '{' sexpr '}')?
             ('where' vspec*)?
             '}';
   */
   visitVspec: (ctx: VspecContext) => ValSpec<T> = (ctx) => {
     assert(ctx.children != null);
+    // assert(
+    //     ctx.children.length == 3 ||
+    //     ctx.children.length == 7 ||
+    //     ctx.children.length == 11 ||
+    //     ctx.children.length == 13,
+    // );
 
-    const call = this.visit(ctx.children[0]) as Call;
-    assert(false);
+
+    const call = this.visit(ctx.children[1]) as Call;
+    const vspec: ValSpec<T> = { call: call};
+    for (let i = 2; i < ctx.children.length - 1; i += 4) {
+      const prompt = this.extractTermText(ctx.children[i]);
+      if (prompt == 'requires') {
+        assert(ctx.children[i + 2] instanceof SexprContext);
+        vspec.preCond = this.parseSexpr(ctx.children[i + 2].getText());
+      }
+      else if (prompt == 'ensures') {
+        assert(ctx.children[i + 2] instanceof SexprContext);
+        vspec.postCond = this.parseSexpr(ctx.children[i + 2].getText());
+      }
+      else if (prompt == 'where') {
+        i = i + 1; 
+        while (i <  ctx.children.length - 1) {
+          const funspec = this.visit(ctx.children[i]) as ValSpec<T>;
+          if (!funspec || !funspec.call) {
+            assert(false, 'Undefined fs or fs.call:' + funspec);
+            // continue;  
+          }
+          
+          if (call.args.includes(funspec.call.funName)){
+            if (!vspec.preFunSpec) {
+              vspec.preFunSpec = [];
+            }
+            vspec.preFunSpec.push(funspec);
+          }
+          else if (call.rets.includes(funspec.call.funName)){
+            if (!vspec.postFunSpec) {
+              vspec.postFunSpec = [];
+            }
+            vspec.postFunSpec.push(funspec);
+          }
+          else {
+            assert(false, "invalid keyword (which shouldn't happen at all)");
+          }
+          i = i + 1;
+        }
+      }
+      // vspec.postFunSpec = funspec;
+      else {
+        assert(false, "invalid keyword (which shouldn't happen at all)");
+      }
+    }
+    return vspec;
   };
 
   /*
