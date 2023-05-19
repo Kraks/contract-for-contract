@@ -20,7 +20,9 @@ function main() {
   //parse('{ f(x) => g(x) }');
   //parse('{ f{value: v, dict: d}(x) => g(x) }')
   // parse('{ f{value: v, dict: d}(x) => g(x) returns y }');
-  parse('{foo {value:v1, gas:g} (argfun, x, argfun2) returns (retFun)requires {xxx} ensures {yyy} where {argfun() ensures{aaa}} {retFun() ensures{bbb}} {argfun2(xxx) requires{ddd}}}');
+  parse(
+    '{foo {value:v1, gas:g} (argfun, x, argfun2) returns (retFun)requires {xxx} ensures {yyy} where {argfun() ensures{aaa}} {retFun() ensures{bbb}} {argfun2(xxx) requires{ddd}}}',
+  );
 }
 
 main();
