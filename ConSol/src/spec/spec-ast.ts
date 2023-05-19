@@ -38,7 +38,6 @@ export interface Pair<T1, T2> {
   snd: T2;
 }
 
-// TODO: kwargs and rets are optional
 export interface Call {
   addr?: string;
   funName: string;
