@@ -23,6 +23,9 @@ import {
   PrettyFormatter,
 } from 'solc-typed-ast';
 import * as path from 'path';
+import { CSSpecParse, CSSpecVisitor } from './spec/index.js';
+
+const SPEC_PREFIX = '@custom:consol';
 
 function convertResultToPlainObject(
   result: CompileResult,
@@ -78,8 +81,6 @@ async function main() {
     console.log('Used compiler version: ' + complieResult.compilerVersion);
     console.log(sourceUnits[0].print());
 
-    // TODO: conduct transformation
-
     // Step1: get spec from comment
     sourceUnits[0].vContracts[0].walkChildren((astNode) => {
       const astNodeDoc = (
@@ -90,12 +91,23 @@ async function main() {
         if (nodeIsConstructor(astNode)) {
           astNodeName = 'constructor';
         }
-        console.log(astNode.type);
-        console.log(astNodeName);
-        console.log(astNodeDoc.text);
-        console.log('\n');
+
+        let specStr = astNodeDoc.text;
+        if (specStr.startsWith(SPEC_PREFIX)) {
+          console.log(astNode.type);
+          console.log(astNodeName);
+          specStr = specStr.substring(SPEC_PREFIX.length).trim();
+          console.log(specStr);
+          console.log('\n');
+
+          const visitor = new CSSpecVisitor<string>((s) => s);
+          const spec = CSSpecParse<string>(specStr, visitor);
+          console.log(spec);
+        }
       }
     });
+
+    // TODO: spec ast parser
 
     // @custom:consol { _unlockTime | _unlockTime > 0 } for constructor
     const buildRequireStmt = (
