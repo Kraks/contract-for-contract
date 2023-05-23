@@ -5,14 +5,18 @@ import {
   CompileResult,
   compileSol,
   EventDefinition,
-  Expression,
-  ExpressionStatement,
-  FunctionCallKind,
   FunctionDefinition,
+  FunctionVisibility,
+  FunctionStateMutability,
   LiteralKind,
+  FunctionKind,
+  ParameterList,
   StructuredDocumentation,
   VariableDeclaration,
   ASTNode,
+  DataLocation,
+  StateVariableVisibility,
+  Mutability,
 } from 'solc-typed-ast';
 import fs from 'fs/promises';
 import {
@@ -46,6 +50,60 @@ function nodeIsConstructor(node: ASTNode): node is FunctionDefinition {
     (node as FunctionDefinition).isConstructor
   );
 }
+
+const createFirstOrderSpecFunc = (
+  ctx: ASTContext,
+  scope: number,
+  funName: string,
+  funKind: FunctionKind, // constructor/function/fallback...
+  visibility: FunctionVisibility,
+  stateMutability: FunctionStateMutability,
+  parameters: ParameterList,
+): FunctionDefinition => {
+  const factory = new ASTNodeFactory(ctx);
+
+  const returnValNode = factory.makeLiteral(
+    'bool',
+    LiteralKind.Bool,
+    '1',
+    'true',
+  );
+
+  const boolReturnVariable = factory.makeVariableDeclaration(
+    false, // constant
+    false, // indexed
+    'bool', // name
+    0, // scope
+    false, // stateVariable
+    DataLocation.Default, // storageLocation
+    StateVariableVisibility.Default, // visibility
+    Mutability.Constant, // mutability
+    'bool', // typeString, "bool"
+  );
+
+  const returnParameters = new ParameterList(0, '', [boolReturnVariable]);
+
+  const returnStatement = factory.makeReturn(returnValNode.id, returnValNode);
+
+  const funBody = factory.makeBlock([returnStatement]);
+
+  const funDef = factory.makeFunctionDefinition(
+    scope,
+    funKind,
+    funName,
+    false, // virtual
+    visibility,
+    stateMutability,
+    funKind == FunctionKind.Constructor,
+    parameters,
+    returnParameters,
+    [], //modifier
+    undefined,
+    funBody,
+  );
+
+  return funDef;
+};
 
 async function main() {
   let complieResult: CompileResult;
@@ -82,7 +140,7 @@ async function main() {
     console.log(sourceUnits[0].print());
 
     // Step1: get spec from comment
-    sourceUnits[0].vContracts[0].walkChildren((astNode) => {
+    sourceUnits[0].vContracts[0].walkChildren((astNode: ASTNode) => {
       const astNodeDoc = (
         astNode as FunctionDefinition | EventDefinition | VariableDeclaration
       ).documentation as StructuredDocumentation;
@@ -103,12 +161,56 @@ async function main() {
           const visitor = new CSSpecVisitor<string>((s) => s);
           const spec = CSSpecParse<string>(specStr, visitor);
           console.log(spec);
+
+          // add node
+          // including function and constructor
+
+          if (astNode instanceof FunctionDefinition) {
+            let specFunName = astNodeName;
+            const ctx = astNode.context as ASTContext;
+            console.assert(astNode.context !== undefined);
+
+            let preCondFunc, postCondFunc;
+
+            if ('preCond' in spec) {
+              const specStr = spec.preCond;
+              specFunName = '_' + astNodeName + 'Pre';
+              console.log('inserting ' + specFunName);
+              preCondFunc = createFirstOrderSpecFunc(
+                ctx,
+                astNode.id,
+                specFunName,
+                // nodeIsConstructor(astNode)? FunctionKind.Constructor : FunctionKind.Function,
+                FunctionKind.Function, // this is condFunc, always function
+                FunctionVisibility.Public,
+                FunctionStateMutability.NonPayable,
+                (astNode as FunctionDefinition).vParameters,
+              );
+              astNode.vScope.appendChild(preCondFunc);
+            }
+
+            if ('postCond' in spec) {
+              const specStr = spec.postCond;
+              specFunName = '_' + astNodeName + 'Post';
+              console.log('inserting ' + specFunName);
+              postCondFunc = createFirstOrderSpecFunc(
+                ctx,
+                astNode.id,
+                specFunName,
+                FunctionKind.Function, // this is condFunc, always function
+                FunctionVisibility.Public,
+                FunctionStateMutability.NonPayable,
+                (astNode as FunctionDefinition).vParameters,
+              );
+              astNode.vScope.appendChild(postCondFunc);
+            }
+            // TODO: add wrapper function
+          }
         }
       }
     });
 
-    // TODO: spec ast parser
-
+    /** 
     // @custom:consol { _unlockTime | _unlockTime > 0 } for constructor
     const buildRequireStmt = (
       ctx: ASTContext,
@@ -176,6 +278,7 @@ async function main() {
         body.insertAtBeginning(requireStmt);
       }
     });
+    */
 
     // convert ast back to source
     const formatter = new PrettyFormatter(4, 0);
