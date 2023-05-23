@@ -2,14 +2,14 @@
 pragma solidity ^0.8.9;
 
 contract Lock {
-    /// @custom:consol {Withdrawal (amount, w) requires {amount>0} }
+    /// custom:consol {Withdrawal (amount, w) requires {amount>0} }
     event Withdrawal(uint256 amount, uint256 when);
 
     /// regular comment
     uint256 public unlockTime;
     address payable public owner;
 
-    /// @custom:consol {constructor(_unlockTime) requires {_unlockTime>0 && block.timestamp < _unlockTime}}
+    /// custom:consol {constructor(_unlockTime) requires {_unlockTime>0 && block.timestamp < _unlockTime}}
     constructor(uint256 _unlockTime) payable {
         unlockTime = _unlockTime;
         owner = payable(msg.sender);

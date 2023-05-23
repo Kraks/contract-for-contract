@@ -17,6 +17,13 @@ import {
   DataLocation,
   StateVariableVisibility,
   Mutability,
+  TypeName,
+  FunctionCallKind,
+  ExpressionStatement, 
+  Expression,
+  FunctionCall,
+  Identifier,
+  Statement
 } from 'solc-typed-ast';
 import fs from 'fs/promises';
 import {
@@ -27,7 +34,7 @@ import {
   PrettyFormatter,
 } from 'solc-typed-ast';
 import * as path from 'path';
-import { CSSpecParse, CSSpecVisitor } from './spec/index.js';
+import { CSSpecParse, CSSpecVisitor, ValSpec } from './spec/index.js';
 
 const SPEC_PREFIX = '@custom:consol';
 
@@ -51,6 +58,8 @@ function nodeIsConstructor(node: ASTNode): node is FunctionDefinition {
   );
 }
 
+
+
 const createFirstOrderSpecFunc = (
   ctx: ASTContext,
   scope: number,
@@ -61,14 +70,12 @@ const createFirstOrderSpecFunc = (
   parameters: ParameterList,
 ): FunctionDefinition => {
   const factory = new ASTNodeFactory(ctx);
-
   const returnValNode = factory.makeLiteral(
     'bool',
     LiteralKind.Bool,
     '1',
     'true',
   );
-
   const boolReturnVariable = factory.makeVariableDeclaration(
     false, // constant
     false, // indexed
@@ -80,13 +87,9 @@ const createFirstOrderSpecFunc = (
     Mutability.Constant, // mutability
     'bool', // typeString, "bool"
   );
-
   const returnParameters = new ParameterList(0, '', [boolReturnVariable]);
-
   const returnStatement = factory.makeReturn(returnValNode.id, returnValNode);
-
   const funBody = factory.makeBlock([returnStatement]);
-
   const funDef = factory.makeFunctionDefinition(
     scope,
     funKind,
@@ -105,17 +108,181 @@ const createFirstOrderSpecFunc = (
   return funDef;
 };
 
+const buildRequireStmt = (
+  ctx: ASTContext,
+  constraint: Expression,
+  msg?: string,
+): ExpressionStatement => {
+  const factory = new ASTNodeFactory(ctx);
+  const callArgs = msg
+    ? [
+        constraint,
+        factory.makeLiteral(
+          'string',
+          LiteralKind.String,
+          Buffer.from(msg, 'utf8').toString('hex'),
+          msg,
+        ),
+      ]
+    : [constraint];
+  const requireFn = factory.makeIdentifier(
+    'function (bool,string memory) pure',
+    'require',
+    -1,
+  );
+  const requireCall = factory.makeFunctionCall(
+    'bool',
+    FunctionCallKind.FunctionCall,
+    requireFn,
+    callArgs,
+  );
+  return factory.makeExpressionStatement(requireCall);
+};
+
+
+const createParametersCopy = (parameters:VariableDeclaration[], factory:ASTNodeFactory) => {
+  return parameters.map((param) => factory.makeIdentifierFor(param));
+};
+
+const createWrapperFunc = (
+  ctx: ASTContext,
+  scope: number,   // TODO scope?
+  funName: string,
+  funKind: FunctionKind, 
+  funStateMutability: FunctionStateMutability, // payable/nonpayable
+  parameters: ParameterList,
+  originalFunId: number,
+  returnType?: TypeName,  //can be void
+  returnVarname?: string,
+  preCondFunName?: string,
+  postCondFunName?: string,
+): FunctionDefinition => {
+  const factory = new ASTNodeFactory(ctx);
+  const statements = [];
+  // Create require pre-condition statement
+  if (preCondFunName){
+    const tmpid = factory.makeIdentifier('function', preCondFunName, -1);
+    const preCondCall = factory.makeFunctionCall(
+      'bool', 
+      FunctionCallKind.FunctionCall,
+      tmpid,
+      createParametersCopy(parameters.vParameters, factory),
+      );
+    const preCondRequireStmt = buildRequireStmt(
+      ctx,
+      preCondCall,
+      "Violate the preondition for function " + funName,
+    );
+    statements.push(preCondRequireStmt);
+  }
+
+  // Create original function call
+  // factory.makeIdentifier('function', funName, originalFunId)
+  const funId = factory.makeIdentifier('function', funName, -1); // buggy
+  const params = createParametersCopy(parameters.vParameters, factory);
+  const originalCall = factory.makeFunctionCall(
+    returnType? returnType.typeString: "void",
+    FunctionCallKind.FunctionCall,
+    funId,
+    params,  
+  );
+  // let returnValId : Identifier | undefined;
+  let returnVarDecl: VariableDeclaration | undefined;
+  let returnStatement: Statement | undefined;
+  if (returnType && returnVarname){
+    returnVarDecl = factory.makeVariableDeclaration(
+      false,
+      false,
+      returnVarname,
+      scope, // scope 
+      false,
+      DataLocation.Default,
+      StateVariableVisibility.Default,
+      Mutability.Constant,
+      returnType.typeString,
+    );
+    // returnValId = factory.makeIdentifierFor(returnVarDecl);
+    const assignment = factory.makeAssignment(
+      returnType.typeString,
+      '=',
+      factory.makeIdentifierFor(returnVarDecl),
+      originalCall
+    );
+    
+    const assignmentStmt = factory.makeExpressionStatement(assignment);  
+    statements.push(assignmentStmt);
+    
+    
+    returnStatement = factory.makeReturn(returnVarDecl.id);
+  }
+  else {
+    // no return value
+    const originalCallStmt = factory.makeExpressionStatement(originalCall); 
+    statements.push(originalCallStmt);
+  }
+
+  if (postCondFunName){
+    // Create require post-condition statement
+    let postCallParamList;
+    if (returnVarDecl){
+      postCallParamList = [...createParametersCopy(parameters.vParameters, factory), factory.makeIdentifierFor(returnVarDecl)];
+    } else{
+      postCallParamList = createParametersCopy(parameters.vParameters, factory);
+    } 
+    const postCondCall = factory.makeFunctionCall(
+      'bool', 
+      FunctionCallKind.FunctionCall,
+      factory.makeIdentifier('function', postCondFunName, -1),
+      postCallParamList,
+    );
+    const postCondRequireStmt = buildRequireStmt(
+      ctx,
+      postCondCall,
+      "Violate the postondition for function " + funName,
+    );
+  }
+
+  // Create return statement
+  if (returnStatement) {
+    statements.push(returnStatement);
+  }
+
+
+  // Build function body
+  const funBody = factory.makeBlock(statements);
+  const funDef = factory.makeFunctionDefinition(
+    scope,
+    funKind,
+    funName + "_wrapper", // TODO: rename original func
+    false, // virtual
+    FunctionVisibility.Public,
+    funStateMutability,
+    funKind == FunctionKind.Constructor,
+    parameters,
+    returnVarDecl ? new ParameterList(0, '', [returnVarDecl]) : new ParameterList(0, '', []),
+    [], // modifier
+    undefined,
+    funBody
+  );
+  
+  return funDef;
+
+
+};
+
 async function main() {
   let complieResult: CompileResult;
 
-  try {
-    const args = process.argv.slice(1);
-    if (args.length !== 2) {
-      console.error(`Usage: ${process.argv[0]} <filepath>`);
-      process.exit(1);
-    }
+  // try
+  if (true) {
+    // const args = process.argv.slice(1);
+    // if (args.length !== 2) {
+    //   console.error(`Usage: ${process.argv[0]} <filepath>`);
+    //   process.exit(1);
+    // }
 
-    const inputPath = args[1];
+    // const inputPath = args[1];
+    const inputPath = "./test/Lock.sol";
     const filename = path.basename(inputPath);
     const dirname = path.dirname(inputPath);
 
@@ -170,16 +337,16 @@ async function main() {
             const ctx = astNode.context as ASTContext;
             console.assert(astNode.context !== undefined);
 
-            let preCondFunc, postCondFunc;
-
+            let preCondFunc, postCondFunc: FunctionDefinition | undefined;
+            let preFunName, postFunName: string | undefined;
             if ('preCond' in spec) {
               const specStr = spec.preCond;
-              specFunName = '_' + astNodeName + 'Pre';
-              console.log('inserting ' + specFunName);
+              preFunName = '_' + astNodeName + 'Pre';
+              console.log('inserting ' + preFunName);
               preCondFunc = createFirstOrderSpecFunc(
                 ctx,
                 astNode.id,
-                specFunName,
+                preFunName,
                 // nodeIsConstructor(astNode)? FunctionKind.Constructor : FunctionKind.Function,
                 FunctionKind.Function, // this is condFunc, always function
                 FunctionVisibility.Public,
@@ -203,8 +370,27 @@ async function main() {
                 (astNode as FunctionDefinition).vParameters,
               );
               astNode.vScope.appendChild(postCondFunc);
+            
             }
-            // TODO: add wrapper function
+            // TODO: add wrapper function  
+            if ('call' in spec){
+              console.log("inserting ValSpec wrapper function for "+astNodeName);
+              const wrapperFun = createWrapperFunc(
+                ctx,
+                astNode.id,
+                astNodeName,
+                nodeIsConstructor(astNode)? FunctionKind.Constructor : FunctionKind.Function, 
+                astNode.stateMutability, 
+                (astNode as FunctionDefinition).vParameters,
+                astNode.id,
+                undefined, //TOOD
+                undefined,
+                preFunName,
+                postFunName
+              );  
+              astNode.vScope.appendChild(wrapperFun);
+            }
+       
           }
         }
       }
@@ -212,37 +398,7 @@ async function main() {
 
     /** 
     // @custom:consol { _unlockTime | _unlockTime > 0 } for constructor
-    const buildRequireStmt = (
-      ctx: ASTContext,
-      constraint: Expression,
-      msg?: string,
-    ): ExpressionStatement => {
-      const factory = new ASTNodeFactory(ctx);
-      const callArgs = msg
-        ? [
-            constraint,
-            factory.makeLiteral(
-              'string',
-              LiteralKind.String,
-              Buffer.from(msg, 'utf8').toString('hex'),
-              msg,
-            ),
-          ]
-        : [constraint];
-      const requireFn = factory.makeIdentifier(
-        'function (bool,string memory) pure',
-        'require',
-        -1,
-      );
-      const requireCall = factory.makeFunctionCall(
-        'bool',
-        FunctionCallKind.FunctionCall,
-        requireFn,
-        callArgs,
-      );
-      return factory.makeExpressionStatement(requireCall);
-    };
-
+  
     // sourceUnits.forEach((su) => su.walkChildren((c_node) => {
     //   if (c_node instanceof ContractDefinition) {
     //     c_node.walkChildren((f_node: any)
@@ -301,20 +457,21 @@ async function main() {
         console.error(`Error saving file ${outputSol}: ${error}`);
       }
     }
-  } catch (e) {
-    if (e instanceof CompileFailedError) {
-      console.error('Compile errors encounterd: ');
-      for (const failure of e.failures) {
-        console.error(`Solc ${failure.compilerVersion}:`);
+  } 
+  // catch (e) {
+  //   if (e instanceof CompileFailedError) {
+  //     console.error('Compile errors encounterd: ');
+  //     for (const failure of e.failures) {
+  //       console.error(`Solc ${failure.compilerVersion}:`);
 
-        for (const error of failure.errors) {
-          console.error(error);
-        }
-      }
-    } else if (e instanceof Error) {
-      console.error(e.message);
-    }
-  }
+  //       for (const error of failure.errors) {
+  //         console.error(error);
+  //       }
+  //     }
+  //   } else if (e instanceof Error) {
+  //     console.error(e.message);
+  //   }
+  // }
 }
 
 main().catch(console.error);
