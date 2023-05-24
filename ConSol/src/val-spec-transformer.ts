@@ -81,10 +81,7 @@ function buildRequireStmt(
   return factory.makeExpressionStatement(requireCall);
 }
 
-function copyParameters(
-  params: VariableDeclaration[],
-  factory: ASTNodeFactory,
-) {
+function copyParameters(params: VariableDeclaration[], factory: ASTNodeFactory) {
   return params.map((param) => factory.makeIdentifierFor(param));
 }
 
