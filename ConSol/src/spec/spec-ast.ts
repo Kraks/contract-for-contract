@@ -19,12 +19,12 @@ import {
   IdentsContext,
 } from './parser/SpecParser.js';
 
-export interface _ValSpec<T> {
+export interface $ValSpec<T> {
   call: Call;
   preCond?: T;
-  preFunSpec?: Array<Opaque<_ValSpec<T>, 'ValSpec'>>;
+  preFunSpec?: Array<Opaque<$ValSpec<T>, 'ValSpec'>>;
   postCond?: T;
-  postFunSpec?: Array<Opaque<_ValSpec<T>, 'ValSpec'>>;
+  postFunSpec?: Array<Opaque<$ValSpec<T>, 'ValSpec'>>;
 }
 
 export enum TempConn {
@@ -52,7 +52,7 @@ export interface FunName {
   addr?: string;
 }
 
-export interface _TempSpec<T> {
+export interface $TempSpec<T> {
   conn: TempConn;
   call1: Call;
   call2: Call;
@@ -60,11 +60,19 @@ export interface _TempSpec<T> {
   postCond?: T;
 }
 
-export type ValSpec<T> = Opaque<_ValSpec<T>, 'ValSpec'>;
+export type ValSpec<T> = Opaque<$ValSpec<T>, 'ValSpec'>;
 
-export type TempSpec<T> = Opaque<_TempSpec<T>, 'TempSpec'>;
+export type TempSpec<T> = Opaque<$TempSpec<T>, 'TempSpec'>;
 
 export type CSSpec<T> = ValSpec<T> | TempSpec<T>;
+
+// Note: this is not safe yet, could narrow the `any` type
+export function makeValSpec<T>(obj: any): ValSpec<T> {
+  return obj as $ValSpec<T> as ValSpec<T>;
+}
+export function makeTempSpec<T>(obj: any): TempSpec<T> {
+  return obj as $TempSpec<T> as TempSpec<T>;
+}
 
 export type SpecParseResult<T> =
   | T

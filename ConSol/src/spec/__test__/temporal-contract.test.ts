@@ -1,4 +1,5 @@
-import { CSSpecVisitor, CSSpecParse, TempSpec } from '../index.js';
+import { CSSpecVisitor, CSSpecParse, TempSpec, makeTempSpec } from '../index.js';
+import type { Opaque } from 'type-fest';
 
 describe('temporal contract', () => {
   const visitor = new CSSpecVisitor((s: string) => {
@@ -7,11 +8,11 @@ describe('temporal contract', () => {
 
   it('no argument and dict', () => {
     const s = '{ f() =/> g() }';
-    const spec: TempSpec<string> = {
+    const spec: TempSpec<string> = makeTempSpec({
       call1: { funName: 'f', kwargs: [], args: [], rets: [] },
       call2: { funName: 'g', kwargs: [], args: [], rets: [] },
       conn: 1,
-    } as _TempSpec<string> as TempSpec<string>;
+    });
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
@@ -19,11 +20,11 @@ describe('temporal contract', () => {
 
   it('single argument without conditions', () => {
     const s = '{ f(x) returns (y) ~> g() returns z }';
-    const spec: TempSpec<string> = {
+    const spec: TempSpec<string> = makeTempSpec({
       call1: { funName: 'f', kwargs: [], args: ['x'], rets: ['y'] },
       call2: { funName: 'g', kwargs: [], args: [], rets: ['z'] },
       conn: 2,
-    } as TempSpec<string>;
+    });
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
@@ -38,12 +39,12 @@ describe('temporal contract', () => {
         }
     }
     `;
-    const spec: TempSpec<string> = {
+    const spec: TempSpec<string> = makeTempSpec({
       call1: { funName: 'f', kwargs: [], args: ['x'], rets: ['y'] },
       call2: { funName: 'g', kwargs: [], args: [], rets: ['z'] },
       conn: 2,
       preCond: 'x+y==z',
-    } as TempSpec<string>;
+    });
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
@@ -58,12 +59,12 @@ describe('temporal contract', () => {
         }
     }
     `;
-    const spec: TempSpec<string> = {
+    const spec: TempSpec<string> = makeTempSpec({
       call1: { funName: 'f', kwargs: [], args: ['x'], rets: ['y'] },
       call2: { funName: 'g', kwargs: [], args: [], rets: ['z'] },
       conn: 2,
       postCond: 'x+y==z',
-    } as TempSpec<string>;
+    });
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
@@ -71,7 +72,7 @@ describe('temporal contract', () => {
 
   it('single argument in dict without conditions', () => {
     const s = '{ f{gas: g1}(x) ~/> g{gas: g2}() }';
-    const spec: TempSpec<string> = {
+    const spec: TempSpec<string> = makeTempSpec({
       call1: {
         funName: 'f',
         kwargs: [{ fst: 'gas', snd: 'g1' }],
@@ -85,7 +86,7 @@ describe('temporal contract', () => {
         rets: [],
       },
       conn: 3,
-    } as TempSpec<string>;
+    });
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
@@ -100,7 +101,7 @@ describe('temporal contract', () => {
         }
     }
     `;
-    const spec: TempSpec<string> = {
+    const spec: TempSpec<string> = makeTempSpec({
       call1: {
         funName: 'f',
         kwargs: [{ fst: 'gas', snd: 'g1' }],
@@ -115,7 +116,7 @@ describe('temporal contract', () => {
       },
       conn: 3,
       preCond: 'g1>g2',
-    } as TempSpec<string>;
+    });
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
@@ -130,7 +131,7 @@ describe('temporal contract', () => {
         }
     }
     `;
-    const spec: TempSpec<string> = {
+    const spec: TempSpec<string> = makeTempSpec({
       call1: {
         funName: 'f',
         kwargs: [{ fst: 'gas', snd: 'g1' }],
@@ -145,7 +146,7 @@ describe('temporal contract', () => {
       },
       conn: 3,
       postCond: 'g1>g2',
-    } as TempSpec<string>;
+    });
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
@@ -164,7 +165,7 @@ describe('temporal contract', () => {
         }
     }
     `;
-    const spec: TempSpec<string> = {
+    const spec: TempSpec<string> = makeTempSpec({
       call1: {
         funName: 'f',
         kwargs: [
@@ -178,7 +179,7 @@ describe('temporal contract', () => {
       conn: 3,
       preCond: 'v1+x>g1-w',
       postCond: 'x+y+z==b+c+d',
-    } as TempSpec<string>;
+    });
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
@@ -197,7 +198,7 @@ describe('temporal contract', () => {
         }
     }
     `;
-    const spec: TempSpec<string> = {
+    const spec: TempSpec<string> = makeTempSpec({
       call1: { funName: 'f', kwargs: [], args: ['x', 'y', 'z'], rets: ['f1'] },
       call2: {
         funName: 'g',
@@ -212,7 +213,7 @@ describe('temporal contract', () => {
       conn: 0,
       preCond: 'x==v1&&(g1+g2==z)',
       postCond: 'f1>0',
-    } as TempSpec<string>;
+    });
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);

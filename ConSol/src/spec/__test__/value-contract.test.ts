@@ -1,4 +1,4 @@
-import { CSSpecVisitor, CSSpecParse, ValSpec } from '../index.js';
+import { CSSpecVisitor, CSSpecParse, ValSpec, makeValSpec } from '../index.js';
 
 describe('value (fun) contract', () => {
   const visitor = new CSSpecVisitor((s: string) => {
@@ -6,9 +6,9 @@ describe('value (fun) contract', () => {
   });
   it('minimum case', () => {
     const s = `{foo()}`;
-    const spec: ValSpec<string> = {
+    const spec: ValSpec<string> = makeValSpec({
       call: { funName: 'foo', kwargs: [], args: [], rets: [] },
-    };
+    });
 
     const spec_ = CSSpecParse(s, visitor) as ValSpec<string>;
     expect(spec_).toEqual(spec);
@@ -20,11 +20,11 @@ describe('value (fun) contract', () => {
         requires {xxx} 
         ensures {yyy} 
         }`;
-    const spec: ValSpec<string> = {
+    const spec: ValSpec<string> = makeValSpec({
       call: { funName: 'foo', kwargs: [], args: ['y'], rets: ['x'] },
       preCond: 'xxx',
       postCond: 'yyy',
-    };
+    });
 
     const spec_ = CSSpecParse(s, visitor) as ValSpec<string>;
     expect(spec_).toEqual(spec);
@@ -37,7 +37,7 @@ describe('value (fun) contract', () => {
             {argfun() ensures{aaa}} 
             {argfun2(xxx) returns (hhh) requires{ddd}}
         }`;
-    const spec: ValSpec<string> = {
+    const spec: ValSpec<string> = makeValSpec({
       call: {
         funName: 'foo',
         kwargs: [],
@@ -59,7 +59,7 @@ describe('value (fun) contract', () => {
           preCond: 'ddd',
         },
       ],
-    };
+    });
     const spec_ = CSSpecParse(s, visitor) as ValSpec<string>;
     expect(spec_).toEqual(spec);
   });
@@ -72,7 +72,7 @@ describe('value (fun) contract', () => {
             {retFun() ensures{bbb}} 
             {argfun2(xxx) returns (hhh) requires{ddd}}
         }`;
-    const spec: ValSpec<string> = {
+    const spec: ValSpec<string> = makeValSpec({
       call: {
         funName: 'foo',
         kwargs: [
@@ -103,7 +103,7 @@ describe('value (fun) contract', () => {
           postCond: 'bbb',
         },
       ],
-    };
+    });
 
     const spec_ = CSSpecParse(s, visitor) as ValSpec<string>;
     expect(spec_).toEqual(spec);
@@ -118,7 +118,7 @@ describe('value (fun) contract', () => {
             {retFun() ensures{bbb}} 
             {argfun2(xxx) returns (hhh) requires{ddd}}
         }`;
-    const spec: ValSpec<string> = {
+    const spec: ValSpec<string> = makeValSpec({
       call: {
         funName: 'foo',
         kwargs: [
@@ -150,7 +150,7 @@ describe('value (fun) contract', () => {
           postCond: 'bbb',
         },
       ],
-    };
+    });
 
     const spec_ = CSSpecParse(s, visitor) as ValSpec<string>;
     expect(spec_).toEqual(spec);
@@ -166,7 +166,7 @@ describe('value (fun) contract', () => {
             {retFun() ensures{bbb}} 
             {argfun2(xxx) returns (hhh) requires{ddd}}
         }`;
-    const spec: ValSpec<string> = {
+    const spec: ValSpec<string> = makeValSpec({
       call: {
         funName: 'foo',
         kwargs: [
@@ -199,7 +199,7 @@ describe('value (fun) contract', () => {
           postCond: 'bbb',
         },
       ],
-    };
+    });
 
     const spec_ = CSSpecParse(s, visitor) as ValSpec<string>;
     expect(spec_).toEqual(spec);
@@ -215,7 +215,7 @@ describe('value (fun) contract', () => {
             {retFun() ensures{bbb}} 
             {argfun2(xxx) returns (hhh) requires{ddd}}
         }`;
-    const spec: ValSpec<string> = {
+    const spec: ValSpec<string> = makeValSpec({
       call: {
         funName: 'foo',
         kwargs: [
@@ -248,7 +248,7 @@ describe('value (fun) contract', () => {
           postCond: 'bbb',
         },
       ],
-    };
+    });
     const parseSpec = () => {
       CSSpecParse(s, visitor) as ValSpec<string>;
     };
@@ -266,7 +266,7 @@ describe('value (fun) contract', () => {
             {retFun() ensures{bbb}} 
             {argfun2(xxx) returns (hhh) requires{ddd}}
         }`;
-    const spec: ValSpec<string> = {
+    const spec: ValSpec<string> = makeValSpec({
       call: {
         funName: 'foo',
         kwargs: [
@@ -299,7 +299,7 @@ describe('value (fun) contract', () => {
           postCond: 'bbb',
         },
       ],
-    };
+    });
     const parseSpec = () => {
       CSSpecParse(s, visitor) as ValSpec<string>;
     };
