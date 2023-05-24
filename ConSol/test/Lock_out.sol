@@ -37,7 +37,7 @@ contract Lock {
         require(_getSumPre(a, b), "Violate the preondition for function getSum");
         int256 c;
         int256 d;
-        (c, d) = getSum_original(a, b)
+        (c, d) = getSum_original(a, b);
         require(_getSumPost(a, b, c, d), "Violate the postondition for function getSum");
         return (c, d);
     }

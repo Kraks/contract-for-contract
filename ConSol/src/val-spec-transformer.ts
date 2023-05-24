@@ -172,7 +172,7 @@ function createWrapperFun(
     // assignment
 
     const assignmentStmt = factory.makeAssignment(retType[0].typeString, '=', retValTuple, originalCall);
-    stmts.push(assignmentStmt);
+    stmts.push(factory.makeExpressionStatement(assignmentStmt));
     // const varDeclStmt = factory.makeVariableDeclarationStatement([null], retTypeDecls, originalCall);
     // stmts.push(varDeclStmt);
 
