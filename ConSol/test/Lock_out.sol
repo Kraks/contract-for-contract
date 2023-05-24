@@ -21,7 +21,7 @@ contract Lock {
     }
 
     /// @custom:consol  {getSum (a, b) returns (c) requires {a>0 && b>0} ensures{c>0} }
-    function getSum(int256 a, int256 b) public pure returns (int256) {
+    function getSum_original(int256 a, int256 b) private pure returns (int256) {
         return a + b;
     }
 
@@ -33,9 +33,9 @@ contract Lock {
         return true;
     }
 
-    function getSum_wrapper(int256 a, int256 b) public pure returns (int256 c) {
+    function getSum(int256 a, int256 b) public pure returns (int256 c) {
         require(_getSumPre(a, b), "Violate the preondition for function getSum");
-        int256 c = getSum(a, b);
+        int256 c = getSum_original(a, b);
         require(_getSumPost(a, b, c), "Violate the postondition for function getSum");
         return c;
     }

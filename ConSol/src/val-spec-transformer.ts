@@ -91,6 +91,7 @@ function createWrapperFun(
   factory: ASTNodeFactory,
   scope: number,
   funName: string,
+  originalFunName: string,
   funKind: FunctionKind,
   funStateMutability: FunctionStateMutability, // payable/nonpayable
   params: ParameterList,
@@ -124,7 +125,7 @@ function createWrapperFun(
   const originalCall = factory.makeFunctionCall(
     retType ? retType.typeString : 'void',
     FunctionCallKind.FunctionCall,
-    factory.makeIdentifier('function', funName, -1),
+    factory.makeIdentifier('function', originalFunName, -1),
     copyParameters(params.vParameters, factory),
   );
   // let returnValId : Identifier | undefined;
@@ -201,7 +202,7 @@ function createWrapperFun(
   const funDef = factory.makeFunctionDefinition(
     scope,
     funKind,
-    funName + '_wrapper', // TODO: rename original func
+    funName,
     false, // virtual
     FunctionVisibility.Public,
     funStateMutability,
@@ -246,6 +247,8 @@ function getVarNameDecMap(
 
 function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
   const funName = extractFunName(node);
+  const originalFunName = node.name + '_original';
+  node.name = originalFunName;
   console.log('Handling FunctionDefinition: ' + funName);
   const ctx = node.context as ASTContext;
   console.assert(node.context !== undefined);
@@ -304,6 +307,7 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
       factory,
       node.id,
       funName,
+      originalFunName,
       isConstructor(node) ? FunctionKind.Constructor : FunctionKind.Function,
       node.stateMutability,
       (node as FunctionDefinition).vParameters,
@@ -314,6 +318,7 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
       postFunName,
     );
     node.vScope.appendChild(wrapperFun);
+    node.visibility = FunctionVisibility.Private;
   }
 }
 
