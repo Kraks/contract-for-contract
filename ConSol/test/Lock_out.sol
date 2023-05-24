@@ -20,23 +20,23 @@ contract Lock {
         owner.transfer(address(this).balance);
     }
 
-    /// @custom:consol  {getSum (a, b) returns (c) requires {a>0 && b>0} ensures{c>0} }
-    function getSum_original(int256 a, int256 b) private pure returns (int256) {
-        return a + b;
+    /// @custom:consol  {getSum (a, b) returns (c,d ) requires {a>0 && b>0} ensures{c>0} }
+    function getSum_original(int256 a, int256 b) private pure returns (int256, int256) {
+        return (a + b, a);
     }
 
     function _getSumPre(int256 a, int256 b) public returns (bool) {
         return true;
     }
 
-    function _getSumPost(int256 a, int256 b, int256 c) public returns (bool) {
+    function _getSumPost(int256 a, int256 b, int256 c, int256 d) public returns (bool) {
         return true;
     }
 
-    function getSum(int256 a, int256 b) public pure returns (int256 c) {
+    function getSum(int256 a, int256 b) public pure returns (int256 c, int256 d) {
         require(_getSumPre(a, b), "Violate the preondition for function getSum");
         int256 c = getSum_original(a, b);
-        require(_getSumPost(a, b, c), "Violate the postondition for function getSum");
-        return c;
+        require(_getSumPost(a, b, c, d), "Violate the postondition for function getSum");
+        return (c, d);
     }
 }
