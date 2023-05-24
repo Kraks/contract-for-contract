@@ -34,9 +34,30 @@ import {
   PrettyFormatter,
 } from 'solc-typed-ast';
 import * as path from 'path';
-import { CSSpecParse, CSSpecVisitor, ValSpec } from './spec/index.js';
+import { CSSpecParse, CSSpecVisitor, ValSpec, CSSpec } from './spec/index.js';
 
 const SPEC_PREFIX = '@custom:consol';
+
+function isConSolSpec(doc: string): boolean {
+  return doc.startsWith(SPEC_PREFIX);
+}
+
+function parseConSolSpec(doc: string): CSSpec<string> {
+  const specStr = doc.substring(SPEC_PREFIX.length).trim();
+  const visitor = new CSSpecVisitor<string>((s) => s);
+  const spec = CSSpecParse<string>(specStr, visitor);
+  return spec;
+}
+
+// AST node kinds that allow ConSol spec attachments
+type ConSolCheckNodes = FunctionDefinition | VariableDeclaration | EventDefinition;
+
+function isConstructor(node: ASTNode): node is FunctionDefinition {
+  return (
+    node instanceof FunctionDefinition &&
+    (node as FunctionDefinition).isConstructor
+  );
+}
 
 function convertResultToPlainObject(
   result: CompileResult,
@@ -50,15 +71,6 @@ function convertResultToPlainObject(
 }
 
 // Util functions
-
-function nodeIsConstructor(node: ASTNode): node is FunctionDefinition {
-  return (
-    node instanceof FunctionDefinition &&
-    (node as FunctionDefinition).isConstructor
-  );
-}
-
-
 
 const createFirstOrderSpecFunc = (
   ctx: ASTContext,
@@ -138,7 +150,6 @@ const buildRequireStmt = (
   );
   return factory.makeExpressionStatement(requireCall);
 };
-
 
 const createParametersCopy = (parameters:VariableDeclaration[], factory:ASTNodeFactory) => {
   return parameters.map((param) => factory.makeIdentifierFor(param));
@@ -266,8 +277,6 @@ const createWrapperFunc = (
   );
   
   return funDef;
-
-
 };
 
 async function main() {
@@ -308,132 +317,130 @@ async function main() {
 
     // Step1: get spec from comment
     sourceUnits[0].vContracts[0].walkChildren((astNode: ASTNode) => {
-      const astNodeDoc = (
-        astNode as FunctionDefinition | EventDefinition | VariableDeclaration
-      ).documentation as StructuredDocumentation;
-      if (astNodeDoc) {
-        let astNodeName = astNode.raw.name;
-        if (nodeIsConstructor(astNode)) {
-          astNodeName = 'constructor';
-        }
+      const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
+      if (!astNodeDoc) return;
+      let specStr = astNodeDoc.text;
+      if (!isConSolSpec(specStr)) return;
+      
+      const spec = parseConSolSpec(specStr);
 
-        let specStr = astNodeDoc.text;
-        if (specStr.startsWith(SPEC_PREFIX)) {
-          console.log(astNode.type);
-          console.log(astNodeName);
-          specStr = specStr.substring(SPEC_PREFIX.length).trim();
-          console.log(specStr);
-          console.log('\n');
+      //console.log(spec instanceof ValSpec<string>);
 
-          const visitor = new CSSpecVisitor<string>((s) => s);
-          const spec = CSSpecParse<string>(specStr, visitor);
-          console.log(spec);
+      let astNodeName = astNode.raw.name;
+      if (isConstructor(astNode)) {
+	astNodeName = 'constructor';
+      }
 
-          // add node
-          // including function and constructor
+      console.log(astNode.type);
+      console.log(astNodeName);
+      console.log(specStr.substring(SPEC_PREFIX.length).trim());
+      console.log('\n');
+      console.log(spec);
 
-          if (astNode instanceof FunctionDefinition) {
-            let specFunName = astNodeName;
-            const ctx = astNode.context as ASTContext;
-            console.assert(astNode.context !== undefined);
+      // add node
+      // including function and constructor
 
-            let preCondFunc, postCondFunc: FunctionDefinition | undefined;
-            let preFunName, postFunName: string | undefined;
-            if ('preCond' in spec) {
-              const specStr = spec.preCond;
-              preFunName = '_' + astNodeName + 'Pre';
-              console.log('inserting ' + preFunName);
-              preCondFunc = createFirstOrderSpecFunc(
-                ctx,
-                astNode.id,
-                preFunName,
-                // nodeIsConstructor(astNode)? FunctionKind.Constructor : FunctionKind.Function,
-                FunctionKind.Function, // this is condFunc, always function
-                FunctionVisibility.Public,
-                FunctionStateMutability.NonPayable,
-                (astNode as FunctionDefinition).vParameters,
-              );
-              astNode.vScope.appendChild(preCondFunc);
-            }
 
-            if ('postCond' in spec) {
-              const specStr = spec.postCond;
-              specFunName = '_' + astNodeName + 'Post';
-              console.log('inserting ' + specFunName);
-              postCondFunc = createFirstOrderSpecFunc(
-                ctx,
-                astNode.id,
-                specFunName,
-                FunctionKind.Function, // this is condFunc, always function
-                FunctionVisibility.Public,
-                FunctionStateMutability.NonPayable,
-                (astNode as FunctionDefinition).vParameters,
-              );
-              astNode.vScope.appendChild(postCondFunc);
-            
-            }
-            // TODO: add wrapper function  
-            if ('call' in spec){
-              console.log("inserting ValSpec wrapper function for "+astNodeName);
-              const wrapperFun = createWrapperFunc(
-                ctx,
-                astNode.id,
-                astNodeName,
-                nodeIsConstructor(astNode)? FunctionKind.Constructor : FunctionKind.Function, 
-                astNode.stateMutability, 
-                (astNode as FunctionDefinition).vParameters,
-                astNode.id,
-                undefined, //TOOD
-                undefined,
-                preFunName,
-                postFunName
-              );  
-              astNode.vScope.appendChild(wrapperFun);
-            }
-       
-          }
-        }
+      if (astNode instanceof FunctionDefinition) {
+	// TODO: should be extracted as separate functions
+	const ctx = astNode.context as ASTContext;
+	console.assert(astNode.context !== undefined);
+
+	let preFunName, postFunName: string | undefined;
+
+	if (spec.preCond !== undefined) {
+	  const specStr = spec.preCond;
+	  preFunName = '_' + astNodeName + 'Pre';
+	  console.log('inserting ' + preFunName);
+	  let preCondFunc = createFirstOrderSpecFunc(
+	    ctx,
+	    astNode.id,
+	    preFunName,
+	    // isConstructor(astNode)? FunctionKind.Constructor : FunctionKind.Function,
+	    FunctionKind.Function, // this is condFunc, always function
+	    FunctionVisibility.Public,
+	    FunctionStateMutability.NonPayable,
+	    (astNode as FunctionDefinition).vParameters,
+	  );
+	  astNode.vScope.appendChild(preCondFunc);
+	}
+
+	if (spec.postCond !== undefined) {
+	  const specStr = spec.postCond;
+	  postFunName = '_' + astNodeName + 'Post';
+	  console.log('inserting ' + postFunName);
+	  let postCondFunc = createFirstOrderSpecFunc(
+	    ctx,
+	    astNode.id,
+	    postFunName,
+	    FunctionKind.Function, // this is condFunc, always function
+	    FunctionVisibility.Public,
+	    FunctionStateMutability.NonPayable,
+	    (astNode as FunctionDefinition).vParameters,
+	  );
+	  astNode.vScope.appendChild(postCondFunc);
+	}
+
+	// TODO: add wrapper function  
+	//if (spec.call !== undefined){
+	if (true){
+	  console.log("inserting ValSpec wrapper function for "+astNodeName);
+	  const wrapperFun = createWrapperFunc(
+	    ctx,
+	    astNode.id,
+	    astNodeName,
+	    isConstructor(astNode)? FunctionKind.Constructor : FunctionKind.Function, 
+	    astNode.stateMutability, 
+	    (astNode as FunctionDefinition).vParameters,
+	    astNode.id,
+	    undefined, //TOOD
+	    undefined,
+	    preFunName,
+	    postFunName
+	  );  
+	  astNode.vScope.appendChild(wrapperFun);
+	}
       }
     });
 
     /** 
-    // @custom:consol { _unlockTime | _unlockTime > 0 } for constructor
-  
-    // sourceUnits.forEach((su) => su.walkChildren((c_node) => {
-    //   if (c_node instanceof ContractDefinition) {
-    //     c_node.walkChildren((f_node: any)
-    sourceUnits[0].vContracts[0].walkChildren((astNode: ASTNode) => {
-      if (nodeIsConstructor(astNode) && astNode.implemented && astNode.vBody) {
-        const body = astNode.vBody;
-        console.assert(body.context !== undefined);
-        const ctx = body.context as ASTContext;
-        const factory = new ASTNodeFactory(ctx);
-        const zeroLiteral = factory.makeLiteral(
-          'uint256',
-          LiteralKind.Number,
-          '0',
-          '0',
-        );
-        const params = astNode.vParameters;
-        const unlockTimeDecl = params.vParameters[0];
-        const unlockTime = factory.makeIdentifierFor(unlockTimeDecl);
-        // const unlockTimeDecl = su.getChildrenBySelector((node) => node instanceof VariableDeclaration && node.name === '_unlockTime')[0];
+     // @custom:consol { _unlockTime | _unlockTime > 0 } for constructor
+     
+     // sourceUnits.forEach((su) => su.walkChildren((c_node) => {
+     //   if (c_node instanceof ContractDefinition) {
+     //     c_node.walkChildren((f_node: any)
+     sourceUnits[0].vContracts[0].walkChildren((astNode: ASTNode) => {
+     if (isConstructor(astNode) && astNode.implemented && astNode.vBody) {
+     const body = astNode.vBody;
+     console.assert(body.context !== undefined);
+     const ctx = body.context as ASTContext;
+     const factory = new ASTNodeFactory(ctx);
+     const zeroLiteral = factory.makeLiteral(
+     'uint256',
+     LiteralKind.Number,
+     '0',
+     '0',
+     );
+     const params = astNode.vParameters;
+     const unlockTimeDecl = params.vParameters[0];
+     const unlockTime = factory.makeIdentifierFor(unlockTimeDecl);
+     // const unlockTimeDecl = su.getChildrenBySelector((node) => node instanceof VariableDeclaration && node.name === '_unlockTime')[0];
 
-        // const unlockTime = factory.makeIdentifier('uint256', '_unlockTime', unlockTimeDecl.id);
-        const constraintExpr = factory.makeBinaryOperation(
-          'bool',
-          '>',
-          unlockTime,
-          zeroLiteral,
-        );
-        const requireStmt = buildRequireStmt(
-          ctx,
-          constraintExpr,
-          'unlockTime must be greater than 0',
-        );
-        body.insertAtBeginning(requireStmt);
-      }
-    });
+     // const unlockTime = factory.makeIdentifier('uint256', '_unlockTime', unlockTimeDecl.id);
+     const constraintExpr = factory.makeBinaryOperation(
+     'bool',
+     '>',
+     unlockTime,
+     zeroLiteral,
+     );
+     const requireStmt = buildRequireStmt(
+     ctx,
+     constraintExpr,
+     'unlockTime must be greater than 0',
+     );
+     body.insertAtBeginning(requireStmt);
+     }
+     });
     */
 
     // convert ast back to source
@@ -442,19 +449,19 @@ async function main() {
       DefaultASTWriterMapping,
       formatter,
       complieResult.compilerVersion
-        ? complieResult.compilerVersion
-        : LatestCompilerVersion,
+	? complieResult.compilerVersion
+	: LatestCompilerVersion,
     );
 
     for (const sourceUnit of sourceUnits) {
       console.log('// ' + sourceUnit.absolutePath);
       const outFileContent = writer.write(sourceUnit);
       try {
-        // Use the writeFile method to save the content to a file
-        await fs.writeFile(outputSol, outFileContent);
-        console.log(`File ${outputSol} saved successfully`);
+	// Use the writeFile method to save the content to a file
+	await fs.writeFile(outputSol, outFileContent);
+	console.log(`File ${outputSol} saved successfully`);
       } catch (error) {
-        console.error(`Error saving file ${outputSol}: ${error}`);
+	console.error(`Error saving file ${outputSol}: ${error}`);
       }
     }
   } 

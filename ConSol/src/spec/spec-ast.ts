@@ -1,6 +1,7 @@
 import assert from 'assert';
 import { TerminalNode } from 'antlr4';
 import { CharStream, CommonTokenStream } from 'antlr4';
+import type { Opaque } from 'type-fest';
 
 import SpecVisitor from './parser/SpecVisitor.js';
 import SpecLexer from './parser/SpecLexer.js';
@@ -18,12 +19,12 @@ import {
   IdentsContext,
 } from './parser/SpecParser.js';
 
-export interface ValSpec<T> {
+export interface _ValSpec<T> {
   call: Call;
   preCond?: T;
-  preFunSpec?: Array<ValSpec<T>>;
+  preFunSpec?: Array<Opaque<_ValSpec<T>, 'ValSpec'>>;
   postCond?: T;
-  postFunSpec?: Array<ValSpec<T>>;
+  postFunSpec?: Array<Opaque<_ValSpec<T>, 'ValSpec'>>;
 }
 
 export enum TempConn {
@@ -51,13 +52,17 @@ export interface FunName {
   addr?: string;
 }
 
-export interface TempSpec<T> {
+export interface _TempSpec<T> {
   conn: TempConn;
   call1: Call;
   call2: Call;
   preCond?: T;
   postCond?: T;
 }
+
+export type ValSpec<T> = Opaque<_ValSpec<T>, 'ValSpec'>;
+
+export type TempSpec<T> = Opaque<_TempSpec<T>, 'TempSpec'>;
 
 export type CSSpec<T> = ValSpec<T> | TempSpec<T>;
 
@@ -108,7 +113,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     assert(ctx.children != null);
 
     const call = this.visit(ctx.children[1]) as Call;
-    const vspec: ValSpec<T> = { call: call };
+    const vspec: ValSpec<T> = { call: call } as ValSpec<T>;
     for (let i = 2; i < ctx.children.length - 1; i += 4) {
       const prompt = this.extractTermText(ctx.children[i]);
       if (prompt == 'requires') {
@@ -185,7 +190,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
         assert(false, 'invald TempConn');
     }
 
-    const tspec: TempSpec<T> = { call1: call1, call2: call2, conn: conn };
+    const tspec: TempSpec<T> = { call1: call1, call2: call2, conn: conn } as TempSpec<T>;
     for (let i = 4; i < ctx.children.length - 1; i += 4) {
       const prompt = this.extractTermText(ctx.children[i]);
       if (prompt == 'when') {

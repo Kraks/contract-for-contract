@@ -11,7 +11,7 @@ describe('temporal contract', () => {
       call1: { funName: 'f', kwargs: [], args: [], rets: [] },
       call2: { funName: 'g', kwargs: [], args: [], rets: [] },
       conn: 1,
-    };
+    } as _TempSpec<string> as TempSpec<string>;
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
@@ -23,7 +23,7 @@ describe('temporal contract', () => {
       call1: { funName: 'f', kwargs: [], args: ['x'], rets: ['y'] },
       call2: { funName: 'g', kwargs: [], args: [], rets: ['z'] },
       conn: 2,
-    };
+    } as TempSpec<string>;
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
@@ -43,7 +43,7 @@ describe('temporal contract', () => {
       call2: { funName: 'g', kwargs: [], args: [], rets: ['z'] },
       conn: 2,
       preCond: 'x+y==z',
-    };
+    } as TempSpec<string>;
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
@@ -63,7 +63,7 @@ describe('temporal contract', () => {
       call2: { funName: 'g', kwargs: [], args: [], rets: ['z'] },
       conn: 2,
       postCond: 'x+y==z',
-    };
+    } as TempSpec<string>;
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
@@ -85,7 +85,7 @@ describe('temporal contract', () => {
         rets: [],
       },
       conn: 3,
-    };
+    } as TempSpec<string>;
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
@@ -115,7 +115,7 @@ describe('temporal contract', () => {
       },
       conn: 3,
       preCond: 'g1>g2',
-    };
+    } as TempSpec<string>;
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
@@ -145,7 +145,7 @@ describe('temporal contract', () => {
       },
       conn: 3,
       postCond: 'g1>g2',
-    };
+    } as TempSpec<string>;
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
@@ -178,7 +178,7 @@ describe('temporal contract', () => {
       conn: 3,
       preCond: 'v1+x>g1-w',
       postCond: 'x+y+z==b+c+d',
-    };
+    } as TempSpec<string>;
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
@@ -212,7 +212,7 @@ describe('temporal contract', () => {
       conn: 0,
       preCond: 'x==v1&&(g1+g2==z)',
       postCond: 'f1>0',
-    };
+    } as TempSpec<string>;
 
     const spec_ = CSSpecParse(s, visitor) as TempSpec<string>;
     expect(spec_).toEqual(spec);
