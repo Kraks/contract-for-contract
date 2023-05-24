@@ -31,15 +31,15 @@ function makeFlatCheckFun(
   funKind: FunctionKind, // constructor/function/fallback...
   visibility: FunctionVisibility,
   stateMutability: FunctionStateMutability,
-  parameters: ParameterList,
+  params: ParameterList,
 ): FunctionDefinition {
-  const returnValNode = factory.makeLiteral(
+  const retNode = factory.makeLiteral(
     'bool',
     LiteralKind.Bool,
     '1',
     'true',
   );
-  const boolReturnVariable = factory.makeVariableDeclaration(
+  const boolRetVar = factory.makeVariableDeclaration(
     false, // constant
     false, // indexed
     'bool', // name
@@ -50,9 +50,9 @@ function makeFlatCheckFun(
     Mutability.Constant, // mutability
     'bool', // typeString, "bool"
   );
-  const returnParameters = new ParameterList(0, '', [boolReturnVariable]);
-  const returnStatement = factory.makeReturn(returnValNode.id, returnValNode);
-  const funBody = factory.makeBlock([returnStatement]);
+  const retParams = new ParameterList(0, '', [boolRetVar]);
+  const retStmt = factory.makeReturn(retNode.id, retNode);
+  const funBody = factory.makeBlock([retStmt]);
   const funDef = factory.makeFunctionDefinition(
     scope,
     funKind,
@@ -61,8 +61,8 @@ function makeFlatCheckFun(
     visibility,
     stateMutability,
     funKind == FunctionKind.Constructor,
-    parameters,
-    returnParameters,
+    params,
+    retParams,
     [], //modifier
     undefined,
     funBody,
@@ -114,14 +114,14 @@ function createWrapperFun(
   funName: string,
   funKind: FunctionKind,
   funStateMutability: FunctionStateMutability, // payable/nonpayable
-  parameters: ParameterList,
+  params: ParameterList,
   originalFunId: number,
   returnType?: TypeName, //can be void
   returnVarname?: string,
   preCondFunName?: string,
   postCondFunName?: string,
 ): FunctionDefinition {
-  const statements = [];
+  const stmts = [];
 
   // Create require pre-condition statement
   if (preCondFunName) {
@@ -138,13 +138,12 @@ function createWrapperFun(
       preCondCall,
       'Violate the preondition for function ' + funName,
     );
-    statements.push(preCondRequireStmt);
+    stmts.push(preCondRequireStmt);
   }
 
   // Create original function call
   // factory.makeIdentifier('function', funName, originalFunId)
   const funId = factory.makeIdentifier('function', funName, -1); // buggy
-  const params = copyParameters(parameters.vParameters, factory);
   const originalCall = factory.makeFunctionCall(
     returnType ? returnType.typeString : 'void',
     FunctionCallKind.FunctionCall,
@@ -164,11 +163,11 @@ function createWrapperFun(
       DataLocation.Default,
       StateVariableVisibility.Default,
       Mutability.Constant,
-      returnType.typeString,
+      retType.typeString,
     );
-    // returnValId = factory.makeIdentifierFor(returnVarDecl);
+    // returnValId = factory.makeIdentifierFor(retVarDecl);
     const assignment = factory.makeAssignment(
-      returnType.typeString,
+      retType.typeString,
       '=',
       factory.makeIdentifierFor(returnVarDecl),
       originalCall,
@@ -210,12 +209,12 @@ function createWrapperFun(
   }
 
   // Create return statement
-  if (returnStatement) {
-    statements.push(returnStatement);
+  if (retStmt) {
+    stmts.push(retStmt);
   }
 
   // Build function body
-  const funBody = factory.makeBlock(statements);
+  const funBody = factory.makeBlock(stmts);
   const funDef = factory.makeFunctionDefinition(
     scope,
     funKind,
