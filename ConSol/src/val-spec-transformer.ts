@@ -183,7 +183,6 @@ function createWrapperFun(
     const assignmentStmt = factory.makeExpressionStatement(assignment);  
     statements.push(assignmentStmt);
     
-    
     returnStatement = factory.makeReturn(returnVarDecl.id);
   } else {
     // no return value
@@ -251,7 +250,7 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
     const specStr = spec.preCond;
     preFunName = '_' + funName + 'Pre';
     console.log('inserting ' + preFunName);
-    let preCondFunc = makeFlatCheckFunc(
+    let preCondFunc = makeFlatCheckFun(
       ctx,
       factory,
       node.id,
@@ -269,7 +268,7 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
     const specStr = spec.postCond;
     postFunName = '_' + funName + 'Post';
     console.log('inserting ' + postFunName);
-    let postCondFunc = makeFlatCheckFunc(
+    let postCondFunc = makeFlatCheckFun(
       ctx,
       factory,
       node.id,

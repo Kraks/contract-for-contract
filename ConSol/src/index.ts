@@ -58,8 +58,6 @@ function parseConSolSpec(doc: string): CSSpec<string> {
 }
 
 async function main() {
-  let complieResult: CompileResult;
-
   // const args = process.argv.slice(1);
   // if (args.length !== 2) {
   //   console.error(`Usage: ${process.argv[0]} <filepath>`);
@@ -74,7 +72,7 @@ async function main() {
   const outputJson = path.join(dirname, filename.split('.')[0] + '.json');
   const outputSol = path.join(dirname, filename.split('.')[0] + '_out.sol');
 
-  complieResult = await compileSol(inputPath, 'auto');
+  const complieResult = await compileSol(inputPath, 'auto');
   // console.log(complieResult);
   // console.log(complieResult.data.sources[`${filename}.sol`].ast.nodes[1].nodes);
 
