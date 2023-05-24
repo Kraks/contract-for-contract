@@ -33,12 +33,7 @@ function makeFlatCheckFun(
   stateMutability: FunctionStateMutability,
   params: ParameterList,
 ): FunctionDefinition {
-  const retNode = factory.makeLiteral(
-    'bool',
-    LiteralKind.Bool,
-    '1',
-    'true',
-  );
+  const retNode = factory.makeLiteral('bool', LiteralKind.Bool, '1', 'true');
   const boolRetVar = factory.makeVariableDeclaration(
     false, // constant
     false, // indexed
@@ -100,7 +95,10 @@ function buildRequireStmt(
   return factory.makeExpressionStatement(requireCall);
 }
 
-function copyParameters(params: VariableDeclaration[], factory: ASTNodeFactory) {
+function copyParameters(
+  params: VariableDeclaration[],
+  factory: ASTNodeFactory,
+) {
   return params.map((param) => factory.makeIdentifierFor(param));
 }
 
