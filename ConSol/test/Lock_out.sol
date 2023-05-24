@@ -23,4 +23,9 @@ contract Lock {
     function _withdrawPre() public returns (bool) {
         return true;
     }
+
+    function withdraw_wrapper() public {
+        require(_withdrawPre(), "Violate the preondition for function withdraw");
+        withdraw();
+    }
 }

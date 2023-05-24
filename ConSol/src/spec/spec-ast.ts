@@ -1,7 +1,6 @@
 import assert from 'assert';
 import { TerminalNode } from 'antlr4';
 import { CharStream, CommonTokenStream } from 'antlr4';
-import type { Opaque } from 'type-fest';
 
 import SpecVisitor from './parser/SpecVisitor.js';
 import SpecLexer from './parser/SpecLexer.js';
@@ -18,6 +17,12 @@ import {
   PairContext,
   IdentsContext,
 } from './parser/SpecParser.js';
+
+type Tagged<Tag> = {
+  readonly tag: Tag;
+};
+
+export type Opaque<T, Tag> = T & Tagged<Tag>;
 
 export interface $ValSpec<T> {
   call: Call;
@@ -66,12 +71,21 @@ export type TempSpec<T> = Opaque<$TempSpec<T>, 'TempSpec'>;
 
 export type CSSpec<T> = ValSpec<T> | TempSpec<T>;
 
-// Note: this is not safe yet, could narrow the `any` type
+// Note: this is not safe yet -- should narrow the `any` type
 export function makeValSpec<T>(obj: any): ValSpec<T> {
-  return obj as $ValSpec<T> as ValSpec<T>;
+  obj.tag = 'ValSpec';
+  return obj as ValSpec<T>;
 }
 export function makeTempSpec<T>(obj: any): TempSpec<T> {
-  return obj as $TempSpec<T> as TempSpec<T>;
+  obj.tag = 'TempSpec';
+  return obj as TempSpec<T>;
+}
+
+export function isValSpec<T>(v: CSSpec<T>): v is ValSpec<T> {
+  return v.tag === 'ValSpec';
+}
+export function isTempSpec<T>(v: CSSpec<T>): v is TempSpec<T> {
+  return v.tag === 'TempSpec'; 
 }
 
 export type SpecParseResult<T> =
@@ -121,7 +135,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     assert(ctx.children != null);
 
     const call = this.visit(ctx.children[1]) as Call;
-    const vspec: ValSpec<T> = { call: call } as ValSpec<T>;
+    const vspec: ValSpec<T> = makeValSpec({ call: call });
     for (let i = 2; i < ctx.children.length - 1; i += 4) {
       const prompt = this.extractTermText(ctx.children[i]);
       if (prompt == 'requires') {
@@ -198,7 +212,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
         assert(false, 'invald TempConn');
     }
 
-    const tspec: TempSpec<T> = { call1: call1, call2: call2, conn: conn } as TempSpec<T>;
+    const tspec: TempSpec<T> = makeTempSpec({ call1: call1, call2: call2, conn: conn });
     for (let i = 4; i < ctx.children.length - 1; i += 4) {
       const prompt = this.extractTermText(ctx.children[i]);
       if (prompt == 'when') {
