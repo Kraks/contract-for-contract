@@ -18,6 +18,7 @@ import {
   Expression,
   Statement,
   assert,
+  TypeName,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -94,7 +95,7 @@ function createWrapperFun(
   funStateMutability: FunctionStateMutability, // payable/nonpayable
   params: ParameterList,
   originalFunId: number,
-  retType?: string, //can be void
+  retType?: TypeName, //can be void
   returnVarname?: string,
   preCondFunName?: string,
   postCondFunName?: string,
@@ -121,16 +122,29 @@ function createWrapperFun(
 
   // Create original function call
   const originalCall = factory.makeFunctionCall(
-    retType ? retType : 'void',
+    retType ? retType.typeString : 'void',
     FunctionCallKind.FunctionCall,
     factory.makeIdentifier('function', funName, -1),
     copyParameters(params.vParameters, factory),
   );
   // let returnValId : Identifier | undefined;
-  let retValDecl: VariableDeclaration | undefined;
+  let retValDecl: VariableDeclaration | undefined; // has name info
+  let retTypeDecl: VariableDeclaration | undefined; // has type info
   let retStmt: Statement | undefined;
   if (retType && returnVarname) {
-    // const retTypeName = factory.makeElementaryTypeName(retType, retType);
+    retTypeDecl = factory.makeVariableDeclaration(
+      false,
+      false,
+      returnVarname,
+      scope, // scope
+      false,
+      DataLocation.Default,
+      StateVariableVisibility.Default,
+      Mutability.Mutable,
+      retType.typeString,
+    );
+    retTypeDecl.vType = retType;
+
     retValDecl = factory.makeVariableDeclaration(
       false,
       false,
@@ -140,20 +154,12 @@ function createWrapperFun(
       DataLocation.Default,
       StateVariableVisibility.Default,
       Mutability.Mutable,
-      retType,
+      retType.typeString,
     );
+
     // assignment
-    // const varDeclStmt = factory.makeVariableDeclarationStatement([null], [retValDecl], originalCall);
-    // stmts.push(varDeclStmt);
-
-    // buggy: the type info is missing
-    const varDeclStmt = factory.makeVariableDeclarationStatement([retValDecl.id], [retValDecl]);
+    const varDeclStmt = factory.makeVariableDeclarationStatement([null], [retTypeDecl], originalCall);
     stmts.push(varDeclStmt);
-
-    const asnmt = factory.makeAssignment(retType, '=', factory.makeIdentifierFor(retValDecl), originalCall);
-
-    const asnmtStmt = factory.makeExpressionStatement(asnmt);
-    stmts.push(asnmtStmt);
 
     retStmt = factory.makeReturn(retValDecl.id, retValDecl);
   } else {
@@ -165,8 +171,8 @@ function createWrapperFun(
   if (postCondFunName) {
     // Create require post-condition statement
     let postCallParamList;
-    if (retValDecl) {
-      postCallParamList = [...copyParameters(params.vParameters, factory), factory.makeIdentifierFor(retValDecl)];
+    if (retTypeDecl) {
+      postCallParamList = [...copyParameters(params.vParameters, factory), factory.makeIdentifierFor(retTypeDecl)];
     } else {
       postCallParamList = copyParameters(params.vParameters, factory);
     }
@@ -201,7 +207,7 @@ function createWrapperFun(
     funStateMutability,
     funKind == FunctionKind.Constructor,
     params,
-    retValDecl ? new ParameterList(0, '', [retValDecl]) : new ParameterList(0, '', []),
+    retTypeDecl ? new ParameterList(0, '', [retTypeDecl]) : new ParameterList(0, '', []),
     [], // modifier
     undefined,
     funBody,
@@ -291,7 +297,7 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
     console.log('inserting ValSpec wrapper function for ' + funName);
 
     // TODO: only consider the first ret for now
-    const returnType = node.vReturnParameters.vParameters[0]?.typeString;
+    const returnType = node.vReturnParameters.vParameters[0]?.vType;
     const returnVarName = spec.call.rets[0];
     const wrapperFun = createWrapperFun(
       ctx,
