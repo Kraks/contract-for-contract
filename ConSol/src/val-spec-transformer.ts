@@ -100,11 +100,8 @@ function buildRequireStmt(
   return factory.makeExpressionStatement(requireCall);
 }
 
-function copyParameters(
-  parameters: VariableDeclaration[],
-  factory: ASTNodeFactory,
-) {
-  return parameters.map((param) => factory.makeIdentifierFor(param));
+function copyParameters(params: VariableDeclaration[], factory: ASTNodeFactory) {
+  return params.map((param) => factory.makeIdentifierFor(param));
 }
 
 function createWrapperFun(
@@ -116,7 +113,7 @@ function createWrapperFun(
   funStateMutability: FunctionStateMutability, // payable/nonpayable
   params: ParameterList,
   originalFunId: number,
-  returnType?: TypeName, //can be void
+  retType?: TypeName, //can be void
   returnVarname?: string,
   preCondFunName?: string,
   postCondFunName?: string,
@@ -130,7 +127,7 @@ function createWrapperFun(
       'bool',
       FunctionCallKind.FunctionCall,
       tmpid,
-      copyParameters(parameters.vParameters, factory),
+      copyParameters(params.vParameters, factory),
     );
     const preCondRequireStmt = buildRequireStmt(
       ctx,
@@ -145,16 +142,16 @@ function createWrapperFun(
   // factory.makeIdentifier('function', funName, originalFunId)
   const funId = factory.makeIdentifier('function', funName, -1); // buggy
   const originalCall = factory.makeFunctionCall(
-    returnType ? returnType.typeString : 'void',
+    retType ? retType.typeString : 'void',
     FunctionCallKind.FunctionCall,
     funId,
-    params,
+    copyParameters(params.vParameters, factory),
   );
   // let returnValId : Identifier | undefined;
-  let returnVarDecl: VariableDeclaration | undefined;
-  let returnStatement: Statement | undefined;
-  if (returnType && returnVarname) {
-    returnVarDecl = factory.makeVariableDeclaration(
+  let retValDecl: VariableDeclaration | undefined;
+  let retStmt: Statement | undefined;
+  if (retType && returnVarname) {
+    retValDecl = factory.makeVariableDeclaration(
       false,
       false,
       returnVarname,
@@ -166,33 +163,33 @@ function createWrapperFun(
       retType.typeString,
     );
     // returnValId = factory.makeIdentifierFor(retVarDecl);
-    const assignment = factory.makeAssignment(
+    const asnmt = factory.makeAssignment(
       retType.typeString,
       '=',
-      factory.makeIdentifierFor(returnVarDecl),
+      factory.makeIdentifierFor(retValDecl),
       originalCall,
     );
 
-    const assignmentStmt = factory.makeExpressionStatement(assignment);
-    statements.push(assignmentStmt);
+    const asnmtStmt = factory.makeExpressionStatement(asnmt);
+    stmts.push(asnmtStmt);
 
-    returnStatement = factory.makeReturn(returnVarDecl.id);
+    retStmt = factory.makeReturn(retValDecl.id);
   } else {
     // no return value
     const originalCallStmt = factory.makeExpressionStatement(originalCall);
-    statements.push(originalCallStmt);
+    stmts.push(originalCallStmt);
   }
 
   if (postCondFunName) {
     // Create require post-condition statement
     let postCallParamList;
-    if (returnVarDecl) {
+    if (retValDecl) {
       postCallParamList = [
-        ...copyParameters(parameters.vParameters, factory),
-        factory.makeIdentifierFor(returnVarDecl),
+        ...copyParameters(params.vParameters, factory),
+        factory.makeIdentifierFor(retValDecl),
       ];
     } else {
-      postCallParamList = copyParameters(parameters.vParameters, factory);
+      postCallParamList = copyParameters(params.vParameters, factory);
     }
     const postCondCall = factory.makeFunctionCall(
       'bool',
@@ -223,9 +220,9 @@ function createWrapperFun(
     FunctionVisibility.Public,
     funStateMutability,
     funKind == FunctionKind.Constructor,
-    parameters,
-    returnVarDecl
-      ? new ParameterList(0, '', [returnVarDecl])
+    params,
+    retValDecl
+      ? new ParameterList(0, '', [retValDecl])
       : new ParameterList(0, '', []),
     [], // modifier
     undefined,
