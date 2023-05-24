@@ -22,7 +22,7 @@
     "clean": "rm -rf dist/*",
     "lint": "eslint ./src ./test --ext=ts,js,cjs,mjs --no-error-on-unmatched-pattern",
     "lint:fix": "eslint ./src ./test --ext=ts,js,cjs,mjs --no-error-on-unmatched-pattern --fix",
-    "format": "prettier --no-error-on-unmatched-pattern --write './**/*.{ts,js,cjs,mjs,json,jsonc}'",
+    "format": "prettier --no-error-on-unmatched-pattern --print-width 120 --write './**/*.{ts,js,cjs,mjs,json,jsonc}'",
     "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest"
   },
   "devDependencies": {

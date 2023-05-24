@@ -20,11 +20,7 @@ import SpecListener from '../src/spec/parser/SpecListener.js';
 import SpecVisitor from '../src/spec/parser/SpecVisitor.js';
 
 class ConSolParseError extends Error {
-  constructor(
-    public line: number,
-    public charPositionInLine: number,
-    message: string,
-  ) {
+  constructor(public line: number, public charPositionInLine: number, message: string) {
     super(message);
     this.name = 'ConSolParseError';
   }
@@ -40,11 +36,7 @@ class ConSolErrorListener implements ErrorListener<Token> {
     e: RecognitionException | undefined,
   ): void {
     // console.error(`Error at line ${line}:${charPositionInLine} - ${msg}`);
-    throw new ConSolParseError(
-      line,
-      charPositionInLine,
-      `Error at line ${line}:${charPositionInLine} - ${msg}`,
-    );
+    throw new ConSolParseError(line, charPositionInLine, `Error at line ${line}:${charPositionInLine} - ${msg}`);
   }
 }
 
@@ -98,9 +90,7 @@ class MySpecVisitor extends SpecVisitor<void> {
   dfs(node: ParseTree, depth: number): void {
     const nodeType = this.getNodeType(node);
     const nodeName = node.getText();
-    console.log(
-      `[Visitor] Depth: ${depth}, Type: ${nodeType}, Name: ${nodeName}`,
-    );
+    console.log(`[Visitor] Depth: ${depth}, Type: ${nodeType}, Name: ${nodeName}`);
 
     // If the node is a ParserRuleContext (non-terminal), continue DFS
     if (node instanceof ParserRuleContext && node.children) {

@@ -126,10 +126,7 @@ export default class SpecParser extends Parser {
     return SpecParser._serializedATN;
   }
 
-  protected createFailedPredicateException(
-    predicate?: string,
-    message?: string,
-  ): FailedPredicateException {
+  protected createFailedPredicateException(predicate?: string, message?: string): FailedPredicateException {
     return new FailedPredicateException(this, predicate, message);
   }
 
@@ -573,11 +570,7 @@ export default class SpecParser extends Parser {
   }
   // @RuleVersion(0)
   public idents(): IdentsContext {
-    let localctx: IdentsContext = new IdentsContext(
-      this,
-      this._ctx,
-      this.state,
-    );
+    let localctx: IdentsContext = new IdentsContext(this, this._ctx, this.state);
     this.enterRule(localctx, 18, SpecParser.RULE_idents);
     let _la: number;
     try {
@@ -624,80 +617,55 @@ export default class SpecParser extends Parser {
   }
 
   public static readonly _serializedATN: number[] = [
-    4, 1, 18, 129, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7, 4,
-    2, 5, 7, 5, 2, 6, 7, 6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 1, 0, 1, 0, 1,
-    0, 1, 0, 1, 0, 1, 0, 3, 0, 27, 8, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 3, 1, 36, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 43, 8, 1, 1, 1, 1, 1,
-    5, 1, 47, 8, 1, 10, 1, 12, 1, 50, 9, 1, 3, 1, 52, 8, 1, 1, 1, 1, 1, 1, 2, 1,
-    2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 3, 2, 65, 8, 2, 1, 2, 1, 2, 1,
-    2, 1, 2, 1, 2, 3, 2, 72, 8, 2, 1, 2, 1, 2, 1, 3, 4, 3, 77, 8, 3, 11, 3, 12,
-    3, 78, 1, 4, 1, 4, 3, 4, 83, 8, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 3, 4, 90,
-    8, 4, 1, 5, 1, 5, 1, 5, 3, 5, 95, 8, 5, 1, 6, 1, 6, 1, 6, 1, 6, 5, 6, 101,
-    8, 6, 10, 6, 12, 6, 104, 9, 6, 1, 6, 1, 6, 1, 7, 1, 7, 1, 7, 1, 7, 1, 8, 1,
-    8, 1, 8, 1, 8, 1, 8, 3, 8, 117, 8, 8, 1, 9, 1, 9, 1, 9, 5, 9, 122, 8, 9, 10,
-    9, 12, 9, 125, 9, 9, 3, 9, 127, 8, 9, 1, 9, 0, 0, 10, 0, 2, 4, 6, 8, 10, 12,
-    14, 16, 18, 0, 1, 2, 0, 1, 1, 3, 3, 133, 0, 26, 1, 0, 0, 0, 2, 28, 1, 0, 0,
-    0, 4, 55, 1, 0, 0, 0, 6, 76, 1, 0, 0, 0, 8, 80, 1, 0, 0, 0, 10, 91, 1, 0, 0,
-    0, 12, 96, 1, 0, 0, 0, 14, 107, 1, 0, 0, 0, 16, 116, 1, 0, 0, 0, 18, 126, 1,
-    0, 0, 0, 20, 21, 3, 2, 1, 0, 21, 22, 5, 0, 0, 1, 22, 27, 1, 0, 0, 0, 23, 24,
-    3, 4, 2, 0, 24, 25, 5, 0, 0, 1, 25, 27, 1, 0, 0, 0, 26, 20, 1, 0, 0, 0, 26,
-    23, 1, 0, 0, 0, 27, 1, 1, 0, 0, 0, 28, 29, 5, 1, 0, 0, 29, 35, 3, 8, 4, 0,
-    30, 31, 5, 2, 0, 0, 31, 32, 5, 1, 0, 0, 32, 33, 3, 6, 3, 0, 33, 34, 5, 3, 0,
-    0, 34, 36, 1, 0, 0, 0, 35, 30, 1, 0, 0, 0, 35, 36, 1, 0, 0, 0, 36, 42, 1, 0,
-    0, 0, 37, 38, 5, 4, 0, 0, 38, 39, 5, 1, 0, 0, 39, 40, 3, 6, 3, 0, 40, 41, 5,
-    3, 0, 0, 41, 43, 1, 0, 0, 0, 42, 37, 1, 0, 0, 0, 42, 43, 1, 0, 0, 0, 43, 51,
-    1, 0, 0, 0, 44, 48, 5, 5, 0, 0, 45, 47, 3, 2, 1, 0, 46, 45, 1, 0, 0, 0, 47,
-    50, 1, 0, 0, 0, 48, 46, 1, 0, 0, 0, 48, 49, 1, 0, 0, 0, 49, 52, 1, 0, 0, 0,
-    50, 48, 1, 0, 0, 0, 51, 44, 1, 0, 0, 0, 51, 52, 1, 0, 0, 0, 52, 53, 1, 0, 0,
-    0, 53, 54, 5, 3, 0, 0, 54, 3, 1, 0, 0, 0, 55, 56, 5, 1, 0, 0, 56, 57, 3, 8,
-    4, 0, 57, 58, 5, 14, 0, 0, 58, 64, 3, 8, 4, 0, 59, 60, 5, 6, 0, 0, 60, 61,
-    5, 1, 0, 0, 61, 62, 3, 6, 3, 0, 62, 63, 5, 3, 0, 0, 63, 65, 1, 0, 0, 0, 64,
-    59, 1, 0, 0, 0, 64, 65, 1, 0, 0, 0, 65, 71, 1, 0, 0, 0, 66, 67, 5, 4, 0, 0,
-    67, 68, 5, 1, 0, 0, 68, 69, 3, 6, 3, 0, 69, 70, 5, 3, 0, 0, 70, 72, 1, 0, 0,
-    0, 71, 66, 1, 0, 0, 0, 71, 72, 1, 0, 0, 0, 72, 73, 1, 0, 0, 0, 73, 74, 5, 3,
-    0, 0, 74, 5, 1, 0, 0, 0, 75, 77, 8, 0, 0, 0, 76, 75, 1, 0, 0, 0, 77, 78, 1,
-    0, 0, 0, 78, 76, 1, 0, 0, 0, 78, 79, 1, 0, 0, 0, 79, 7, 1, 0, 0, 0, 80, 82,
-    3, 10, 5, 0, 81, 83, 3, 12, 6, 0, 82, 81, 1, 0, 0, 0, 82, 83, 1, 0, 0, 0,
-    83, 84, 1, 0, 0, 0, 84, 85, 5, 7, 0, 0, 85, 86, 3, 18, 9, 0, 86, 89, 5, 8,
-    0, 0, 87, 88, 5, 9, 0, 0, 88, 90, 3, 16, 8, 0, 89, 87, 1, 0, 0, 0, 89, 90,
-    1, 0, 0, 0, 90, 9, 1, 0, 0, 0, 91, 94, 5, 13, 0, 0, 92, 93, 5, 10, 0, 0, 93,
-    95, 5, 13, 0, 0, 94, 92, 1, 0, 0, 0, 94, 95, 1, 0, 0, 0, 95, 11, 1, 0, 0, 0,
-    96, 97, 5, 1, 0, 0, 97, 102, 3, 14, 7, 0, 98, 99, 5, 11, 0, 0, 99, 101, 3,
-    14, 7, 0, 100, 98, 1, 0, 0, 0, 101, 104, 1, 0, 0, 0, 102, 100, 1, 0, 0, 0,
-    102, 103, 1, 0, 0, 0, 103, 105, 1, 0, 0, 0, 104, 102, 1, 0, 0, 0, 105, 106,
-    5, 3, 0, 0, 106, 13, 1, 0, 0, 0, 107, 108, 5, 13, 0, 0, 108, 109, 5, 12, 0,
-    0, 109, 110, 5, 13, 0, 0, 110, 15, 1, 0, 0, 0, 111, 117, 5, 13, 0, 0, 112,
-    113, 5, 7, 0, 0, 113, 114, 3, 18, 9, 0, 114, 115, 5, 8, 0, 0, 115, 117, 1,
-    0, 0, 0, 116, 111, 1, 0, 0, 0, 116, 112, 1, 0, 0, 0, 117, 17, 1, 0, 0, 0,
-    118, 123, 5, 13, 0, 0, 119, 120, 5, 11, 0, 0, 120, 122, 5, 13, 0, 0, 121,
-    119, 1, 0, 0, 0, 122, 125, 1, 0, 0, 0, 123, 121, 1, 0, 0, 0, 123, 124, 1, 0,
-    0, 0, 124, 127, 1, 0, 0, 0, 125, 123, 1, 0, 0, 0, 126, 118, 1, 0, 0, 0, 126,
-    127, 1, 0, 0, 0, 127, 19, 1, 0, 0, 0, 15, 26, 35, 42, 48, 51, 64, 71, 78,
-    82, 89, 94, 102, 116, 123, 126,
+    4, 1, 18, 129, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7, 4, 2, 5, 7, 5, 2, 6, 7, 6, 2, 7, 7, 7, 2, 8,
+    7, 8, 2, 9, 7, 9, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 3, 0, 27, 8, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3,
+    1, 36, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 43, 8, 1, 1, 1, 1, 1, 5, 1, 47, 8, 1, 10, 1, 12, 1, 50, 9, 1, 3, 1,
+    52, 8, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 3, 2, 65, 8, 2, 1, 2, 1, 2, 1, 2, 1, 2,
+    1, 2, 3, 2, 72, 8, 2, 1, 2, 1, 2, 1, 3, 4, 3, 77, 8, 3, 11, 3, 12, 3, 78, 1, 4, 1, 4, 3, 4, 83, 8, 4, 1, 4, 1, 4, 1,
+    4, 1, 4, 1, 4, 3, 4, 90, 8, 4, 1, 5, 1, 5, 1, 5, 3, 5, 95, 8, 5, 1, 6, 1, 6, 1, 6, 1, 6, 5, 6, 101, 8, 6, 10, 6, 12,
+    6, 104, 9, 6, 1, 6, 1, 6, 1, 7, 1, 7, 1, 7, 1, 7, 1, 8, 1, 8, 1, 8, 1, 8, 1, 8, 3, 8, 117, 8, 8, 1, 9, 1, 9, 1, 9,
+    5, 9, 122, 8, 9, 10, 9, 12, 9, 125, 9, 9, 3, 9, 127, 8, 9, 1, 9, 0, 0, 10, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 0, 1,
+    2, 0, 1, 1, 3, 3, 133, 0, 26, 1, 0, 0, 0, 2, 28, 1, 0, 0, 0, 4, 55, 1, 0, 0, 0, 6, 76, 1, 0, 0, 0, 8, 80, 1, 0, 0,
+    0, 10, 91, 1, 0, 0, 0, 12, 96, 1, 0, 0, 0, 14, 107, 1, 0, 0, 0, 16, 116, 1, 0, 0, 0, 18, 126, 1, 0, 0, 0, 20, 21, 3,
+    2, 1, 0, 21, 22, 5, 0, 0, 1, 22, 27, 1, 0, 0, 0, 23, 24, 3, 4, 2, 0, 24, 25, 5, 0, 0, 1, 25, 27, 1, 0, 0, 0, 26, 20,
+    1, 0, 0, 0, 26, 23, 1, 0, 0, 0, 27, 1, 1, 0, 0, 0, 28, 29, 5, 1, 0, 0, 29, 35, 3, 8, 4, 0, 30, 31, 5, 2, 0, 0, 31,
+    32, 5, 1, 0, 0, 32, 33, 3, 6, 3, 0, 33, 34, 5, 3, 0, 0, 34, 36, 1, 0, 0, 0, 35, 30, 1, 0, 0, 0, 35, 36, 1, 0, 0, 0,
+    36, 42, 1, 0, 0, 0, 37, 38, 5, 4, 0, 0, 38, 39, 5, 1, 0, 0, 39, 40, 3, 6, 3, 0, 40, 41, 5, 3, 0, 0, 41, 43, 1, 0, 0,
+    0, 42, 37, 1, 0, 0, 0, 42, 43, 1, 0, 0, 0, 43, 51, 1, 0, 0, 0, 44, 48, 5, 5, 0, 0, 45, 47, 3, 2, 1, 0, 46, 45, 1, 0,
+    0, 0, 47, 50, 1, 0, 0, 0, 48, 46, 1, 0, 0, 0, 48, 49, 1, 0, 0, 0, 49, 52, 1, 0, 0, 0, 50, 48, 1, 0, 0, 0, 51, 44, 1,
+    0, 0, 0, 51, 52, 1, 0, 0, 0, 52, 53, 1, 0, 0, 0, 53, 54, 5, 3, 0, 0, 54, 3, 1, 0, 0, 0, 55, 56, 5, 1, 0, 0, 56, 57,
+    3, 8, 4, 0, 57, 58, 5, 14, 0, 0, 58, 64, 3, 8, 4, 0, 59, 60, 5, 6, 0, 0, 60, 61, 5, 1, 0, 0, 61, 62, 3, 6, 3, 0, 62,
+    63, 5, 3, 0, 0, 63, 65, 1, 0, 0, 0, 64, 59, 1, 0, 0, 0, 64, 65, 1, 0, 0, 0, 65, 71, 1, 0, 0, 0, 66, 67, 5, 4, 0, 0,
+    67, 68, 5, 1, 0, 0, 68, 69, 3, 6, 3, 0, 69, 70, 5, 3, 0, 0, 70, 72, 1, 0, 0, 0, 71, 66, 1, 0, 0, 0, 71, 72, 1, 0, 0,
+    0, 72, 73, 1, 0, 0, 0, 73, 74, 5, 3, 0, 0, 74, 5, 1, 0, 0, 0, 75, 77, 8, 0, 0, 0, 76, 75, 1, 0, 0, 0, 77, 78, 1, 0,
+    0, 0, 78, 76, 1, 0, 0, 0, 78, 79, 1, 0, 0, 0, 79, 7, 1, 0, 0, 0, 80, 82, 3, 10, 5, 0, 81, 83, 3, 12, 6, 0, 82, 81,
+    1, 0, 0, 0, 82, 83, 1, 0, 0, 0, 83, 84, 1, 0, 0, 0, 84, 85, 5, 7, 0, 0, 85, 86, 3, 18, 9, 0, 86, 89, 5, 8, 0, 0, 87,
+    88, 5, 9, 0, 0, 88, 90, 3, 16, 8, 0, 89, 87, 1, 0, 0, 0, 89, 90, 1, 0, 0, 0, 90, 9, 1, 0, 0, 0, 91, 94, 5, 13, 0, 0,
+    92, 93, 5, 10, 0, 0, 93, 95, 5, 13, 0, 0, 94, 92, 1, 0, 0, 0, 94, 95, 1, 0, 0, 0, 95, 11, 1, 0, 0, 0, 96, 97, 5, 1,
+    0, 0, 97, 102, 3, 14, 7, 0, 98, 99, 5, 11, 0, 0, 99, 101, 3, 14, 7, 0, 100, 98, 1, 0, 0, 0, 101, 104, 1, 0, 0, 0,
+    102, 100, 1, 0, 0, 0, 102, 103, 1, 0, 0, 0, 103, 105, 1, 0, 0, 0, 104, 102, 1, 0, 0, 0, 105, 106, 5, 3, 0, 0, 106,
+    13, 1, 0, 0, 0, 107, 108, 5, 13, 0, 0, 108, 109, 5, 12, 0, 0, 109, 110, 5, 13, 0, 0, 110, 15, 1, 0, 0, 0, 111, 117,
+    5, 13, 0, 0, 112, 113, 5, 7, 0, 0, 113, 114, 3, 18, 9, 0, 114, 115, 5, 8, 0, 0, 115, 117, 1, 0, 0, 0, 116, 111, 1,
+    0, 0, 0, 116, 112, 1, 0, 0, 0, 117, 17, 1, 0, 0, 0, 118, 123, 5, 13, 0, 0, 119, 120, 5, 11, 0, 0, 120, 122, 5, 13,
+    0, 0, 121, 119, 1, 0, 0, 0, 122, 125, 1, 0, 0, 0, 123, 121, 1, 0, 0, 0, 123, 124, 1, 0, 0, 0, 124, 127, 1, 0, 0, 0,
+    125, 123, 1, 0, 0, 0, 126, 118, 1, 0, 0, 0, 126, 127, 1, 0, 0, 0, 127, 19, 1, 0, 0, 0, 15, 26, 35, 42, 48, 51, 64,
+    71, 78, 82, 89, 94, 102, 116, 123, 126,
   ];
 
   private static __ATN: ATN;
   public static get _ATN(): ATN {
     if (!SpecParser.__ATN) {
-      SpecParser.__ATN = new ATNDeserializer().deserialize(
-        SpecParser._serializedATN,
-      );
+      SpecParser.__ATN = new ATNDeserializer().deserialize(SpecParser._serializedATN);
     }
 
     return SpecParser.__ATN;
   }
 
-  static DecisionsToDFA = SpecParser._ATN.decisionToState.map(
-    (ds: DecisionState, index: number) => new DFA(ds, index),
-  );
+  static DecisionsToDFA = SpecParser._ATN.decisionToState.map((ds: DecisionState, index: number) => new DFA(ds, index));
 }
 
 export class SpecContext extends ParserRuleContext {
-  constructor(
-    parser?: SpecParser,
-    parent?: ParserRuleContext,
-    invokingState?: number,
-  ) {
+  constructor(parser?: SpecParser, parent?: ParserRuleContext, invokingState?: number) {
     super(parent, invokingState);
     this.parser = parser;
   }
@@ -734,11 +702,7 @@ export class SpecContext extends ParserRuleContext {
 }
 
 export class VspecContext extends ParserRuleContext {
-  constructor(
-    parser?: SpecParser,
-    parent?: ParserRuleContext,
-    invokingState?: number,
-  ) {
+  constructor(parser?: SpecParser, parent?: ParserRuleContext, invokingState?: number) {
     super(parent, invokingState);
     this.parser = parser;
   }
@@ -781,11 +745,7 @@ export class VspecContext extends ParserRuleContext {
 }
 
 export class TspecContext extends ParserRuleContext {
-  constructor(
-    parser?: SpecParser,
-    parent?: ParserRuleContext,
-    invokingState?: number,
-  ) {
+  constructor(parser?: SpecParser, parent?: ParserRuleContext, invokingState?: number) {
     super(parent, invokingState);
     this.parser = parser;
   }
@@ -828,11 +788,7 @@ export class TspecContext extends ParserRuleContext {
 }
 
 export class SexprContext extends ParserRuleContext {
-  constructor(
-    parser?: SpecParser,
-    parent?: ParserRuleContext,
-    invokingState?: number,
-  ) {
+  constructor(parser?: SpecParser, parent?: ParserRuleContext, invokingState?: number) {
     super(parent, invokingState);
     this.parser = parser;
   }
@@ -860,11 +816,7 @@ export class SexprContext extends ParserRuleContext {
 }
 
 export class CallContext extends ParserRuleContext {
-  constructor(
-    parser?: SpecParser,
-    parent?: ParserRuleContext,
-    invokingState?: number,
-  ) {
+  constructor(parser?: SpecParser, parent?: ParserRuleContext, invokingState?: number) {
     super(parent, invokingState);
     this.parser = parser;
   }
@@ -904,11 +856,7 @@ export class CallContext extends ParserRuleContext {
 }
 
 export class FnameContext extends ParserRuleContext {
-  constructor(
-    parser?: SpecParser,
-    parent?: ParserRuleContext,
-    invokingState?: number,
-  ) {
+  constructor(parser?: SpecParser, parent?: ParserRuleContext, invokingState?: number) {
     super(parent, invokingState);
     this.parser = parser;
   }
@@ -942,11 +890,7 @@ export class FnameContext extends ParserRuleContext {
 }
 
 export class DictContext extends ParserRuleContext {
-  constructor(
-    parser?: SpecParser,
-    parent?: ParserRuleContext,
-    invokingState?: number,
-  ) {
+  constructor(parser?: SpecParser, parent?: ParserRuleContext, invokingState?: number) {
     super(parent, invokingState);
     this.parser = parser;
   }
@@ -980,11 +924,7 @@ export class DictContext extends ParserRuleContext {
 }
 
 export class PairContext extends ParserRuleContext {
-  constructor(
-    parser?: SpecParser,
-    parent?: ParserRuleContext,
-    invokingState?: number,
-  ) {
+  constructor(parser?: SpecParser, parent?: ParserRuleContext, invokingState?: number) {
     super(parent, invokingState);
     this.parser = parser;
   }
@@ -1018,11 +958,7 @@ export class PairContext extends ParserRuleContext {
 }
 
 export class TupleContext extends ParserRuleContext {
-  constructor(
-    parser?: SpecParser,
-    parent?: ParserRuleContext,
-    invokingState?: number,
-  ) {
+  constructor(parser?: SpecParser, parent?: ParserRuleContext, invokingState?: number) {
     super(parent, invokingState);
     this.parser = parser;
   }
@@ -1056,11 +992,7 @@ export class TupleContext extends ParserRuleContext {
 }
 
 export class IdentsContext extends ParserRuleContext {
-  constructor(
-    parser?: SpecParser,
-    parent?: ParserRuleContext,
-    invokingState?: number,
-  ) {
+  constructor(parser?: SpecParser, parent?: ParserRuleContext, invokingState?: number) {
     super(parent, invokingState);
     this.parser = parser;
   }

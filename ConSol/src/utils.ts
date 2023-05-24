@@ -16,10 +16,7 @@ export function parseConSolSpec(doc: string): CSSpec<string> {
 }
 
 export function isConstructor(node: ASTNode): node is FunctionDefinition {
-  return (
-    node instanceof FunctionDefinition &&
-    (node as FunctionDefinition).isConstructor
-  );
+  return node instanceof FunctionDefinition && (node as FunctionDefinition).isConstructor;
 }
 
 export function extractFunName(node: ASTNode): string {

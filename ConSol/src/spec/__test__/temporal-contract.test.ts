@@ -1,9 +1,4 @@
-import {
-  CSSpecVisitor,
-  CSSpecParse,
-  TempSpec,
-  makeTempSpec,
-} from '../index.js';
+import { CSSpecVisitor, CSSpecParse, TempSpec, makeTempSpec } from '../index.js';
 
 describe('temporal contract', () => {
   const visitor = new CSSpecVisitor((s: string) => {

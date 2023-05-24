@@ -74,24 +74,10 @@ function buildRequireStmt(
 ): ExpressionStatement {
   const callArgs = [
     constraint,
-    factory.makeLiteral(
-      'string',
-      LiteralKind.String,
-      Buffer.from(msg, 'utf8').toString('hex'),
-      msg,
-    ),
+    factory.makeLiteral('string', LiteralKind.String, Buffer.from(msg, 'utf8').toString('hex'), msg),
   ];
-  const requireFn = factory.makeIdentifier(
-    'function (bool,string memory) pure',
-    'require',
-    -1,
-  );
-  const requireCall = factory.makeFunctionCall(
-    'bool',
-    FunctionCallKind.FunctionCall,
-    requireFn,
-    callArgs,
-  );
+  const requireFn = factory.makeIdentifier('function (bool,string memory) pure', 'require', -1);
+  const requireCall = factory.makeFunctionCall('bool', FunctionCallKind.FunctionCall, requireFn, callArgs);
   return factory.makeExpressionStatement(requireCall);
 }
 
@@ -161,12 +147,7 @@ function createWrapperFun(
       retType.typeString,
     );
     // returnValId = factory.makeIdentifierFor(retVarDecl);
-    const asnmt = factory.makeAssignment(
-      retType.typeString,
-      '=',
-      factory.makeIdentifierFor(retValDecl),
-      originalCall,
-    );
+    const asnmt = factory.makeAssignment(retType.typeString, '=', factory.makeIdentifierFor(retValDecl), originalCall);
 
     const asnmtStmt = factory.makeExpressionStatement(asnmt);
     stmts.push(asnmtStmt);
@@ -182,10 +163,7 @@ function createWrapperFun(
     // Create require post-condition statement
     let postCallParamList;
     if (retValDecl) {
-      postCallParamList = [
-        ...copyParameters(params.vParameters, factory),
-        factory.makeIdentifierFor(retValDecl),
-      ];
+      postCallParamList = [...copyParameters(params.vParameters, factory), factory.makeIdentifierFor(retValDecl)];
     } else {
       postCallParamList = copyParameters(params.vParameters, factory);
     }
@@ -219,9 +197,7 @@ function createWrapperFun(
     funStateMutability,
     funKind == FunctionKind.Constructor,
     params,
-    retValDecl
-      ? new ParameterList(0, '', [retValDecl])
-      : new ParameterList(0, '', []),
+    retValDecl ? new ParameterList(0, '', [retValDecl]) : new ParameterList(0, '', []),
     [], // modifier
     undefined,
     funBody,

@@ -7,30 +7,16 @@ import {
   ASTNode,
 } from 'solc-typed-ast';
 import fs from 'fs/promises';
-import {
-  ASTWriter,
-  ASTReader,
-  DefaultASTWriterMapping,
-  LatestCompilerVersion,
-  PrettyFormatter,
-} from 'solc-typed-ast';
+import { ASTWriter, ASTReader, DefaultASTWriterMapping, LatestCompilerVersion, PrettyFormatter } from 'solc-typed-ast';
 import * as path from 'path';
-import {
-  CSSpecParse,
-  CSSpecVisitor,
-  CSSpec,
-  isValSpec,
-  isTempSpec,
-} from './spec/index.js';
+import { CSSpecParse, CSSpecVisitor, CSSpec, isValSpec, isTempSpec } from './spec/index.js';
 import { handleValSpec } from './val-spec-transformer.js';
 import { SPEC_PREFIX, isConSolSpec } from './utils.js';
 
 // AST node kinds that allow ConSol spec attachments
 type ConSolCheckNodes = FunctionDefinition | EventDefinition;
 
-function convertResultToPlainObject(
-  result: CompileResult,
-): Record<string, unknown> {
+function convertResultToPlainObject(result: CompileResult): Record<string, unknown> {
   return {
     ...result,
     files: Object.fromEntries(result.files),
@@ -66,10 +52,7 @@ async function main() {
   // console.log(complieResult.data.sources[`${filename}.sol`].ast.nodes[1].nodes);
 
   // dump to json file
-  await fs.writeFile(
-    outputJson,
-    JSON.stringify(convertResultToPlainObject(complieResult), null, 2),
-  );
+  await fs.writeFile(outputJson, JSON.stringify(convertResultToPlainObject(complieResult), null, 2));
 
   // read the typed ast
   const reader = new ASTReader();
@@ -79,15 +62,12 @@ async function main() {
   console.log(sourceUnits[0].print());
 
   sourceUnits[0].vContracts[0].walkChildren((astNode: ASTNode) => {
-    const astNodeDoc = (astNode as ConSolCheckNodes)
-      .documentation as StructuredDocumentation;
+    const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
     if (!astNodeDoc) return;
     const specStr = astNodeDoc.text;
     if (!isConSolSpec(specStr)) return;
 
-    console.log(
-      'Processing spec: ' + specStr.substring(SPEC_PREFIX.length).trim(),
-    );
+    console.log('Processing spec: ' + specStr.substring(SPEC_PREFIX.length).trim());
 
     const spec = parseConSolSpec(specStr);
 
@@ -147,9 +127,7 @@ async function main() {
   const writer = new ASTWriter(
     DefaultASTWriterMapping,
     formatter,
-    complieResult.compilerVersion
-      ? complieResult.compilerVersion
-      : LatestCompilerVersion,
+    complieResult.compilerVersion ? complieResult.compilerVersion : LatestCompilerVersion,
   );
 
   for (const sourceUnit of sourceUnits) {

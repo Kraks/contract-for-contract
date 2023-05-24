@@ -183,11 +183,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
   */
   visitTspec: (ctx: TspecContext) => TempSpec<T> = (ctx) => {
     assert(ctx.children != null);
-    assert(
-      ctx.children.length == 5 ||
-        ctx.children.length == 9 ||
-        ctx.children.length == 13,
-    );
+    assert(ctx.children.length == 5 || ctx.children.length == 9 || ctx.children.length == 13);
 
     // XXX: shall we use assertion or `as` here?
     const call1 = this.visit(ctx.children[1]) as Call;
@@ -261,10 +257,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     // returns
     let rets: Array<string>;
     if (ctx.children[ctx.children.length - 1] instanceof TupleContext) {
-      assert(
-        this.extractTermText(ctx.children[ctx.children.length - 2]) ==
-          'returns',
-      );
+      assert(this.extractTermText(ctx.children[ctx.children.length - 2]) == 'returns');
       rets = this.visit(ctx.children[ctx.children.length - 1]) as Array<string>;
     } else {
       rets = [];
@@ -343,9 +336,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
       return [];
     } else {
       return ctx.children
-        .filter(
-          (child) => (child as TerminalNode).symbol.type == SpecLexer.IDENT,
-        )
+        .filter((child) => (child as TerminalNode).symbol.type == SpecLexer.IDENT)
         .map((child) => child.getText());
     }
   };
@@ -353,10 +344,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
 
 // TODO: add error handling
 // XXX: for now, just for testing
-export function CSSpecParse<T>(
-  s: string,
-  visitor: CSSpecVisitor<T>,
-): CSSpec<T> {
+export function CSSpecParse<T>(s: string, visitor: CSSpecVisitor<T>): CSSpec<T> {
   const chars = new CharStream(s); // replace this with a FileStream as required
   const lexer = new SpecLexer(chars);
   const tokens = new CommonTokenStream(lexer);
