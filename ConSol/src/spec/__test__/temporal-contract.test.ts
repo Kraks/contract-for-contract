@@ -1,5 +1,9 @@
-import { CSSpecVisitor, CSSpecParse, TempSpec, makeTempSpec } from '../index.js';
-import type { Opaque } from 'type-fest';
+import {
+  CSSpecVisitor,
+  CSSpecParse,
+  TempSpec,
+  makeTempSpec,
+} from '../index.js';
 
 describe('temporal contract', () => {
   const visitor = new CSSpecVisitor((s: string) => {

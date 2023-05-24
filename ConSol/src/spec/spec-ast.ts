@@ -85,7 +85,7 @@ export function isValSpec<T>(v: CSSpec<T>): v is ValSpec<T> {
   return v.tag === 'ValSpec';
 }
 export function isTempSpec<T>(v: CSSpec<T>): v is TempSpec<T> {
-  return v.tag === 'TempSpec'; 
+  return v.tag === 'TempSpec';
 }
 
 export type SpecParseResult<T> =
@@ -212,7 +212,11 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
         assert(false, 'invald TempConn');
     }
 
-    const tspec: TempSpec<T> = makeTempSpec({ call1: call1, call2: call2, conn: conn });
+    const tspec: TempSpec<T> = makeTempSpec({
+      call1: call1,
+      call2: call2,
+      conn: conn,
+    });
     for (let i = 4; i < ctx.children.length - 1; i += 4) {
       const prompt = this.extractTermText(ctx.children[i]);
       if (prompt == 'when') {

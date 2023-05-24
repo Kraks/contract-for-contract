@@ -1,9 +1,6 @@
 import {
   ASTContext,
   ASTNodeFactory,
-  CompileFailedError,
-  CompileResult,
-  compileSol,
   EventDefinition,
   FunctionDefinition,
   FunctionVisibility,
@@ -11,7 +8,6 @@ import {
   LiteralKind,
   FunctionKind,
   ParameterList,
-  StructuredDocumentation,
   VariableDeclaration,
   ASTNode,
   DataLocation,
@@ -19,23 +15,13 @@ import {
   Mutability,
   TypeName,
   FunctionCallKind,
-  ExpressionStatement, 
+  ExpressionStatement,
   Expression,
-  FunctionCall,
-  Identifier,
-  Statement
+  Statement,
 } from 'solc-typed-ast';
-import fs from 'fs/promises';
-import {
-  ASTWriter,
-  ASTReader,
-  DefaultASTWriterMapping,
-  LatestCompilerVersion,
-  PrettyFormatter,
-} from 'solc-typed-ast';
-import * as path from 'path';
-import { CSSpec, isValSpec, isTempSpec, ValSpec } from './spec/index.js';
-import { SPEC_PREFIX, isConSolSpec, isConstructor, extractFunName } from './utils.js';
+
+import { ValSpec } from './spec/index.js';
+import { isConstructor, extractFunName } from './utils.js';
 
 function makeFlatCheckFun(
   ctx: ASTContext,
@@ -85,7 +71,12 @@ function makeFlatCheckFun(
   return funDef;
 }
 
-function buildRequireStmt(ctx: ASTContext, factory: ASTNodeFactory, constraint: Expression, msg: string): ExpressionStatement {
+function buildRequireStmt(
+  ctx: ASTContext,
+  factory: ASTNodeFactory,
+  constraint: Expression,
+  msg: string,
+): ExpressionStatement {
   const callArgs = [
     constraint,
     factory.makeLiteral(
@@ -109,20 +100,23 @@ function buildRequireStmt(ctx: ASTContext, factory: ASTNodeFactory, constraint: 
   return factory.makeExpressionStatement(requireCall);
 }
 
-function copyParameters(parameters: VariableDeclaration[], factory: ASTNodeFactory) {
+function copyParameters(
+  parameters: VariableDeclaration[],
+  factory: ASTNodeFactory,
+) {
   return parameters.map((param) => factory.makeIdentifierFor(param));
 }
 
 function createWrapperFun(
   ctx: ASTContext,
   factory: ASTNodeFactory,
-  scope: number,   // TODO scope?
+  scope: number, // TODO scope?
   funName: string,
-  funKind: FunctionKind, 
+  funKind: FunctionKind,
   funStateMutability: FunctionStateMutability, // payable/nonpayable
   parameters: ParameterList,
   originalFunId: number,
-  returnType?: TypeName,  //can be void
+  returnType?: TypeName, //can be void
   returnVarname?: string,
   preCondFunName?: string,
   postCondFunName?: string,
@@ -130,19 +124,19 @@ function createWrapperFun(
   const statements = [];
 
   // Create require pre-condition statement
-  if (preCondFunName){
+  if (preCondFunName) {
     const tmpid = factory.makeIdentifier('function', preCondFunName, -1);
     const preCondCall = factory.makeFunctionCall(
-      'bool', 
+      'bool',
       FunctionCallKind.FunctionCall,
       tmpid,
       copyParameters(parameters.vParameters, factory),
-      );
+    );
     const preCondRequireStmt = buildRequireStmt(
       ctx,
       factory,
       preCondCall,
-      "Violate the preondition for function " + funName,
+      'Violate the preondition for function ' + funName,
     );
     statements.push(preCondRequireStmt);
   }
@@ -152,20 +146,20 @@ function createWrapperFun(
   const funId = factory.makeIdentifier('function', funName, -1); // buggy
   const params = copyParameters(parameters.vParameters, factory);
   const originalCall = factory.makeFunctionCall(
-    returnType? returnType.typeString: "void",
+    returnType ? returnType.typeString : 'void',
     FunctionCallKind.FunctionCall,
     funId,
-    params,  
+    params,
   );
   // let returnValId : Identifier | undefined;
   let returnVarDecl: VariableDeclaration | undefined;
   let returnStatement: Statement | undefined;
-  if (returnType && returnVarname){
+  if (returnType && returnVarname) {
     returnVarDecl = factory.makeVariableDeclaration(
       false,
       false,
       returnVarname,
-      scope, // scope 
+      scope, // scope
       false,
       DataLocation.Default,
       StateVariableVisibility.Default,
@@ -177,29 +171,32 @@ function createWrapperFun(
       returnType.typeString,
       '=',
       factory.makeIdentifierFor(returnVarDecl),
-      originalCall
+      originalCall,
     );
-    
-    const assignmentStmt = factory.makeExpressionStatement(assignment);  
+
+    const assignmentStmt = factory.makeExpressionStatement(assignment);
     statements.push(assignmentStmt);
-    
+
     returnStatement = factory.makeReturn(returnVarDecl.id);
   } else {
     // no return value
-    const originalCallStmt = factory.makeExpressionStatement(originalCall); 
+    const originalCallStmt = factory.makeExpressionStatement(originalCall);
     statements.push(originalCallStmt);
   }
 
-  if (postCondFunName){
+  if (postCondFunName) {
     // Create require post-condition statement
     let postCallParamList;
-    if (returnVarDecl){
-      postCallParamList = [...copyParameters(parameters.vParameters, factory), factory.makeIdentifierFor(returnVarDecl)];
-    } else{
+    if (returnVarDecl) {
+      postCallParamList = [
+        ...copyParameters(parameters.vParameters, factory),
+        factory.makeIdentifierFor(returnVarDecl),
+      ];
+    } else {
       postCallParamList = copyParameters(parameters.vParameters, factory);
-    } 
+    }
     const postCondCall = factory.makeFunctionCall(
-      'bool', 
+      'bool',
       FunctionCallKind.FunctionCall,
       factory.makeIdentifier('function', postCondFunName, -1),
       postCallParamList,
@@ -208,7 +205,7 @@ function createWrapperFun(
       ctx,
       factory,
       postCondCall,
-      "Violate the postondition for function " + funName,
+      'Violate the postondition for function ' + funName,
     );
   }
 
@@ -222,24 +219,26 @@ function createWrapperFun(
   const funDef = factory.makeFunctionDefinition(
     scope,
     funKind,
-    funName + "_wrapper", // TODO: rename original func
+    funName + '_wrapper', // TODO: rename original func
     false, // virtual
     FunctionVisibility.Public,
     funStateMutability,
     funKind == FunctionKind.Constructor,
     parameters,
-    returnVarDecl ? new ParameterList(0, '', [returnVarDecl]) : new ParameterList(0, '', []),
+    returnVarDecl
+      ? new ParameterList(0, '', [returnVarDecl])
+      : new ParameterList(0, '', []),
     [], // modifier
     undefined,
-    funBody
+    funBody,
   );
-  
+
   return funDef;
 }
 
 function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
   const funName = extractFunName(node);
-  console.log("Handling FunctionDefinition: " + funName);
+  console.log('Handling FunctionDefinition: ' + funName);
   const ctx = node.context as ASTContext;
   console.assert(node.context !== undefined);
   const factory = new ASTNodeFactory(ctx);
@@ -250,7 +249,7 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
     const specStr = spec.preCond;
     preFunName = '_' + funName + 'Pre';
     console.log('inserting ' + preFunName);
-    let preCondFunc = makeFlatCheckFun(
+    const preCondFunc = makeFlatCheckFun(
       ctx,
       factory,
       node.id,
@@ -268,7 +267,7 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
     const specStr = spec.postCond;
     postFunName = '_' + funName + 'Post';
     console.log('inserting ' + postFunName);
-    let postCondFunc = makeFlatCheckFun(
+    const postCondFunc = makeFlatCheckFun(
       ctx,
       factory,
       node.id,
@@ -281,29 +280,29 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
     node.vScope.appendChild(postCondFunc);
   }
 
-  // TODO: add wrapper function  
-  if (spec.call !== undefined){
-    console.log("inserting ValSpec wrapper function for " + funName);
+  // TODO: add wrapper function
+  if (spec.call !== undefined) {
+    console.log('inserting ValSpec wrapper function for ' + funName);
     const wrapperFun = createWrapperFun(
       ctx,
       factory,
       node.id,
       funName,
-      isConstructor(node)? FunctionKind.Constructor : FunctionKind.Function, 
-      node.stateMutability, 
+      isConstructor(node) ? FunctionKind.Constructor : FunctionKind.Function,
+      node.stateMutability,
       (node as FunctionDefinition).vParameters,
       node.id,
       undefined, //TOOD
       undefined,
       preFunName,
-      postFunName
-    );  
+      postFunName,
+    );
     node.vScope.appendChild(wrapperFun);
   }
 }
 
 export function handleValSpec<T>(node: ASTNode, spec: ValSpec<T>) {
-  console.log("Parsed spec AST:");
+  console.log('Parsed spec AST:');
   console.log(spec);
   console.log(spec.tag);
 
@@ -312,6 +311,6 @@ export function handleValSpec<T>(node: ASTNode, spec: ValSpec<T>) {
   } else if (node instanceof EventDefinition) {
     // TODO
   } else {
-    console.assert(false, "wow");
+    console.assert(false, 'wow');
   }
 }

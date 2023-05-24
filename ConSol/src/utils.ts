@@ -1,40 +1,6 @@
-import {
-  ASTContext,
-  ASTNodeFactory,
-  CompileFailedError,
-  CompileResult,
-  compileSol,
-  EventDefinition,
-  FunctionDefinition,
-  FunctionVisibility,
-  FunctionStateMutability,
-  LiteralKind,
-  FunctionKind,
-  ParameterList,
-  StructuredDocumentation,
-  VariableDeclaration,
-  ASTNode,
-  DataLocation,
-  StateVariableVisibility,
-  Mutability,
-  TypeName,
-  FunctionCallKind,
-  ExpressionStatement, 
-  Expression,
-  FunctionCall,
-  Identifier,
-  Statement
-} from 'solc-typed-ast';
-import fs from 'fs/promises';
-import {
-  ASTWriter,
-  ASTReader,
-  DefaultASTWriterMapping,
-  LatestCompilerVersion,
-  PrettyFormatter,
-} from 'solc-typed-ast';
-import * as path from 'path';
-import { CSSpecParse, CSSpecVisitor, CSSpec, isValSpec, isTempSpec } from './spec/index.js';
+import { FunctionDefinition, ASTNode } from 'solc-typed-ast';
+
+import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
 
 export const SPEC_PREFIX = '@custom:consol';
 

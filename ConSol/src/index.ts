@@ -1,29 +1,10 @@
 import {
-  ASTContext,
-  ASTNodeFactory,
-  CompileFailedError,
   CompileResult,
   compileSol,
   EventDefinition,
   FunctionDefinition,
-  FunctionVisibility,
-  FunctionStateMutability,
-  LiteralKind,
-  FunctionKind,
-  ParameterList,
   StructuredDocumentation,
-  VariableDeclaration,
   ASTNode,
-  DataLocation,
-  StateVariableVisibility,
-  Mutability,
-  TypeName,
-  FunctionCallKind,
-  ExpressionStatement, 
-  Expression,
-  FunctionCall,
-  Identifier,
-  Statement
 } from 'solc-typed-ast';
 import fs from 'fs/promises';
 import {
@@ -34,14 +15,22 @@ import {
   PrettyFormatter,
 } from 'solc-typed-ast';
 import * as path from 'path';
-import { CSSpecParse, CSSpecVisitor, CSSpec, isValSpec, isTempSpec } from './spec/index.js';
+import {
+  CSSpecParse,
+  CSSpecVisitor,
+  CSSpec,
+  isValSpec,
+  isTempSpec,
+} from './spec/index.js';
 import { handleValSpec } from './val-spec-transformer.js';
-import { SPEC_PREFIX, isConSolSpec, isConstructor, extractFunName } from './utils.js';
+import { SPEC_PREFIX, isConSolSpec } from './utils.js';
 
 // AST node kinds that allow ConSol spec attachments
 type ConSolCheckNodes = FunctionDefinition | EventDefinition;
 
-function convertResultToPlainObject(result: CompileResult): Record<string, unknown> {
+function convertResultToPlainObject(
+  result: CompileResult,
+): Record<string, unknown> {
   return {
     ...result,
     files: Object.fromEntries(result.files),
@@ -65,7 +54,7 @@ async function main() {
   // }
 
   // const inputPath = args[1];
-  const inputPath = "./test/Lock.sol";
+  const inputPath = './test/Lock.sol';
   const filename = path.basename(inputPath);
   const dirname = path.dirname(inputPath);
 
@@ -90,13 +79,16 @@ async function main() {
   console.log(sourceUnits[0].print());
 
   sourceUnits[0].vContracts[0].walkChildren((astNode: ASTNode) => {
-    const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
+    const astNodeDoc = (astNode as ConSolCheckNodes)
+      .documentation as StructuredDocumentation;
     if (!astNodeDoc) return;
-    let specStr = astNodeDoc.text;
+    const specStr = astNodeDoc.text;
     if (!isConSolSpec(specStr)) return;
 
-    console.log("Processing spec: " + specStr.substring(SPEC_PREFIX.length).trim());
-    
+    console.log(
+      'Processing spec: ' + specStr.substring(SPEC_PREFIX.length).trim(),
+    );
+
     const spec = parseConSolSpec(specStr);
 
     if (isValSpec(spec)) {
