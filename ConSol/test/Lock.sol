@@ -15,9 +15,14 @@ contract Lock {
         owner = payable(msg.sender);
     }
 
-    /// @custom:consol  {withdraw () requires {block.timestamp >= unlockTime} }
+    /// custom:consol  {withdraw () requires {block.timestamp >= unlockTime} }
     function withdraw() public{
         emit Withdrawal(address(this).balance, block.timestamp);
         owner.transfer(address(this).balance);
+    }
+
+    /// @custom:consol  {getSum (a, b) returns (c) requires {a>0 && b>0} ensures{c>0} }
+    function getSum(int256 a, int256 b) public pure returns (int256) {
+        return a + b;
     }
 }

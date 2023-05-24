@@ -14,18 +14,30 @@ contract Lock {
         owner = payable(msg.sender);
     }
 
-    /// @custom:consol  {withdraw () requires {block.timestamp >= unlockTime} }
+    /// custom:consol  {withdraw () requires {block.timestamp >= unlockTime} }
     function withdraw() public {
         emit Withdrawal(address(this).balance, block.timestamp);
         owner.transfer(address(this).balance);
     }
 
-    function _withdrawPre() public returns (bool) {
+    /// @custom:consol  {getSum (a, b) returns (c) requires {a>0 && b>0} ensures{c>0} }
+    function getSum(int256 a, int256 b) public pure returns (int256) {
+        return a + b;
+    }
+
+    function _getSumPre(int256 a, int256 b) public returns (bool) {
         return true;
     }
 
-    function withdraw_wrapper() public {
-        require(_withdrawPre(), "Violate the preondition for function withdraw");
-        withdraw();
+    function _getSumPost(int256 a, int256 b, int256 c) public returns (bool) {
+        return true;
+    }
+
+    function getSum_wrapper(int256 a, int256 b) public pure returns (c) {
+        require(_getSumPre(a, b), "Violate the preondition for function getSum");
+        var c;
+        c = getSum(a, b);
+        require(_getSumPost(a, b, c), "Violate the postondition for function getSum");
+        return c;
     }
 }
