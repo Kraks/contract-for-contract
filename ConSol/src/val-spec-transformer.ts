@@ -37,7 +37,7 @@ import * as path from 'path';
 import { CSSpec, isValSpec, isTempSpec, ValSpec } from './spec/index.js';
 import { SPEC_PREFIX, isConSolSpec, isConstructor, extractFunName } from './utils.js';
 
-function createFirstOrderSpecFunc(
+function makeFlatCheckFun(
   ctx: ASTContext,
   factory: ASTNodeFactory,
   scope: number,
@@ -109,11 +109,11 @@ function buildRequireStmt(ctx: ASTContext, factory: ASTNodeFactory, constraint: 
   return factory.makeExpressionStatement(requireCall);
 }
 
-function createParametersCopy(parameters: VariableDeclaration[], factory: ASTNodeFactory) {
+function copyParameters(parameters: VariableDeclaration[], factory: ASTNodeFactory) {
   return parameters.map((param) => factory.makeIdentifierFor(param));
 }
 
-function createWrapperFunc(
+function createWrapperFun(
   ctx: ASTContext,
   factory: ASTNodeFactory,
   scope: number,   // TODO scope?
@@ -128,6 +128,7 @@ function createWrapperFunc(
   postCondFunName?: string,
 ): FunctionDefinition {
   const statements = [];
+
   // Create require pre-condition statement
   if (preCondFunName){
     const tmpid = factory.makeIdentifier('function', preCondFunName, -1);
@@ -135,7 +136,7 @@ function createWrapperFunc(
       'bool', 
       FunctionCallKind.FunctionCall,
       tmpid,
-      createParametersCopy(parameters.vParameters, factory),
+      copyParameters(parameters.vParameters, factory),
       );
     const preCondRequireStmt = buildRequireStmt(
       ctx,
@@ -149,7 +150,7 @@ function createWrapperFunc(
   // Create original function call
   // factory.makeIdentifier('function', funName, originalFunId)
   const funId = factory.makeIdentifier('function', funName, -1); // buggy
-  const params = createParametersCopy(parameters.vParameters, factory);
+  const params = copyParameters(parameters.vParameters, factory);
   const originalCall = factory.makeFunctionCall(
     returnType? returnType.typeString: "void",
     FunctionCallKind.FunctionCall,
@@ -184,8 +185,7 @@ function createWrapperFunc(
     
     
     returnStatement = factory.makeReturn(returnVarDecl.id);
-  }
-  else {
+  } else {
     // no return value
     const originalCallStmt = factory.makeExpressionStatement(originalCall); 
     statements.push(originalCallStmt);
@@ -195,9 +195,9 @@ function createWrapperFunc(
     // Create require post-condition statement
     let postCallParamList;
     if (returnVarDecl){
-      postCallParamList = [...createParametersCopy(parameters.vParameters, factory), factory.makeIdentifierFor(returnVarDecl)];
+      postCallParamList = [...copyParameters(parameters.vParameters, factory), factory.makeIdentifierFor(returnVarDecl)];
     } else{
-      postCallParamList = createParametersCopy(parameters.vParameters, factory);
+      postCallParamList = copyParameters(parameters.vParameters, factory);
     } 
     const postCondCall = factory.makeFunctionCall(
       'bool', 
@@ -251,7 +251,7 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
     const specStr = spec.preCond;
     preFunName = '_' + funName + 'Pre';
     console.log('inserting ' + preFunName);
-    let preCondFunc = createFirstOrderSpecFunc(
+    let preCondFunc = makeFlatCheckFunc(
       ctx,
       factory,
       node.id,
@@ -269,7 +269,7 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
     const specStr = spec.postCond;
     postFunName = '_' + funName + 'Post';
     console.log('inserting ' + postFunName);
-    let postCondFunc = createFirstOrderSpecFunc(
+    let postCondFunc = makeFlatCheckFunc(
       ctx,
       factory,
       node.id,
@@ -285,7 +285,7 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
   // TODO: add wrapper function  
   if (spec.call !== undefined){
     console.log("inserting ValSpec wrapper function for " + funName);
-    const wrapperFun = createWrapperFunc(
+    const wrapperFun = createWrapperFun(
       ctx,
       factory,
       node.id,
