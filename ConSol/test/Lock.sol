@@ -21,8 +21,8 @@ contract Lock {
         owner.transfer(address(this).balance);
     }
 
-    /// @custom:consol  {getSum (a, b) returns (c) requires {a>0 && b>0} ensures{c>0} }
-    function getSum(int256 a, int256 b) public pure returns (int256) {
-        return a + b;
+    /// @custom:consol  {getSum (a, b) returns (c,d ) requires {a>0 && b>0} ensures{c>0} }
+    function getSum(int256 a, int256 b) public pure returns (int256, int256) {
+        return (a + b , a);
     }
 }

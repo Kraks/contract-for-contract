@@ -128,10 +128,8 @@ function createWrapperFun(
     copyParameters(params.vParameters, factory),
   );
   // let returnValId : Identifier | undefined;
-  const retTypeDecls: VariableDeclaration[] | undefined = [];
-  const retValDecls: VariableDeclaration[] | undefined = [];
-  // let retValDecl: VariableDeclaration | undefined; // has name info
-  // let retTypeDecl: VariableDeclaration | undefined; // has type info
+  const retTypeDecls: VariableDeclaration[] | undefined = []; // has name info
+  const retValDecls: VariableDeclaration[] | undefined = []; // has type info
   let retStmt: Statement | undefined;
   if (retType && returnVarname) {
     for (let i = 0; i < retType.length; i++) {
@@ -160,17 +158,23 @@ function createWrapperFun(
       );
       retTypeDecl.vType = retType[i];
       retTypeDecls.push(retTypeDecl);
+
+      // declare return variables
+      const retVarDecStmt = factory.makeVariableDeclarationStatement([null], [retTypeDecl]);
+      stmts.push(retVarDecStmt);
     }
 
-    // const retValTuple = factory.makeTupleExpression(retValDecls.map(r => factory.makeIdentifierFor(r));
     const retValTuple = factory.makeTupleExpression(
       retType[0].typeString, // TODO this should also be a tuple?
       false,
       retValDecls.map((r) => factory.makeIdentifierFor(r)),
     );
     // assignment
-    const varDeclStmt = factory.makeVariableDeclarationStatement([null], retTypeDecls, originalCall);
-    stmts.push(varDeclStmt);
+
+    const assignmentStmt = factory.makeAssignment(retType[0].typeString, '=', retValTuple, originalCall);
+    stmts.push(assignmentStmt);
+    // const varDeclStmt = factory.makeVariableDeclarationStatement([null], retTypeDecls, originalCall);
+    // stmts.push(varDeclStmt);
 
     retStmt = factory.makeReturn(retValTuple.id, retValTuple);
     // retStmt = factory.makeReturn());
