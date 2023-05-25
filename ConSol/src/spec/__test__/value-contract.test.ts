@@ -14,6 +14,36 @@ describe('value (fun) contract', () => {
     expect(spec_).toEqual(spec);
   });
 
+  it('address', () => {
+    const s = `
+        { testCallFoo(addr)
+        where
+          {
+            addr{value: v, gas: g}(msg, x) returns (flag, data)
+            requires { v > 5 && g < 10000 && x != 0 }
+            ensures { flag == true }
+          }
+        }`;
+    const spec: ValSpec<string> = makeValSpec({
+      call: { funName: 'testCallFoo', kwargs: [], args: ['addr'], rets: [] },
+      preFunSpec: [
+        makeValSpec({
+          call: {
+            funName: 'addr',
+            kwargs: [{ fst: 'value', snd: 'v' }, { fst: 'gas', snd: 'g' }],
+            args: ['msg', 'x'],
+            rets: ['flag', 'data'],
+          },
+          preCond: 'v>5&&g<10000&&x!=0',
+	  postCond: 'flag==true'
+        }),
+      ],
+    });
+
+    const spec_ = CSSpecParse(s, visitor) as ValSpec<string>;
+    expect(spec_).toEqual(spec);
+  });
+
   it('pre and post', () => {
     const s = `{
         foo (y) returns (x)
@@ -309,4 +339,5 @@ describe('value (fun) contract', () => {
 
     expect(parseSpec).toThrow();
   });
+
 });
