@@ -1,0 +1,3 @@
+[submodule "solc-typed-ast"]
+	path = solc-typed-ast
+	url = git@github.com:Kraks/solc-typed-ast.git
