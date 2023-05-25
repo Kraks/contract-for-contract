@@ -130,22 +130,10 @@ function createWrapperFun(
   );
   // let returnValId : Identifier | undefined;
   const retTypeDecls: VariableDeclaration[] | undefined = []; // has name info
-  const retValDecls: VariableDeclaration[] | undefined = []; // has type info
+  //const retValDecls: VariableDeclaration[] | undefined = []; // has type info
   let retStmt: Statement | undefined;
   if (retType && returnVarname) {
     for (let i = 0; i < retType.length; i++) {
-      const retValDecl = factory.makeVariableDeclaration(
-        false,
-        false,
-        returnVarname[i],
-        scope, // scope
-        false,
-        DataLocation.Default,
-        StateVariableVisibility.Default,
-        Mutability.Mutable,
-        retType[i].typeString,
-      );
-      retValDecls.push(retValDecl);
       const retTypeDecl = factory.makeVariableDeclaration(
         false,
         false,
@@ -161,31 +149,15 @@ function createWrapperFun(
       retTypeDecls.push(retTypeDecl);
     }
 
-    if (retTypeDecls.length > 1) {
-      // more than one returns
-      // declare return variables first
-      for (let i = 0; i < retTypeDecls.length; i++) {
-        const retVarDecStmt = factory.makeVariableDeclarationStatement([null], [retTypeDecls[i]]);
-        stmts.push(retVarDecStmt);
-      }
-
-      const retValTuple = factory.makeTupleExpression(
-        retType[0].typeString, // TODO this should also be a tuple? seems ok
-        false,
-        retValDecls.map((r) => factory.makeIdentifierFor(r)),
-      );
-      // assignment
-
-      const assignmentStmt = factory.makeAssignment(retType[0].typeString, '=', retValTuple, originalCall);
-      stmts.push(factory.makeExpressionStatement(assignmentStmt));
-      retStmt = factory.makeReturn(retValTuple.id, retValTuple);
-    } else {
-      // only one return
-      assert(retValDecls.length == 1 && retTypeDecls.length == retValDecls.length, 'impossible');
-      const assignmentStmt = factory.makeVariableDeclarationStatement([null], retTypeDecls, originalCall);
-      stmts.push(assignmentStmt);
-      retStmt = factory.makeReturn(retValDecls[0].id, retValDecls[0]);
-    }
+    const retIds = retTypeDecls.map((r) => r.id)
+    const assignmentStmt = factory.makeVariableDeclarationStatement(retIds, retTypeDecls, originalCall);
+    stmts.push(assignmentStmt);
+    const retValTuple = factory.makeTupleExpression(
+      retType[0].typeString, // TODO this should also be a tuple? seems ok
+      false,
+      retTypeDecls.map((r) => factory.makeIdentifierFor(r)),
+    );
+    retStmt = factory.makeReturn(retValTuple.id, retValTuple);
   } else {
     // no return value
     const originalCallStmt = factory.makeExpressionStatement(originalCall);
