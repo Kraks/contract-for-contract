@@ -16,6 +16,7 @@ import {
   FunctionCallKind,
   ExpressionStatement,
   Expression,
+  PhantomExpression,
   Statement,
   assert,
   TypeName,
@@ -34,7 +35,8 @@ function makeFlatCheckFun(
   stateMutability: FunctionStateMutability,
   params: ParameterList,
 ): FunctionDefinition {
-  const retNode = factory.makeLiteral('bool', LiteralKind.Bool, '1', 'true');
+  //const retNode = factory.makeLiteral('bool', LiteralKind.Bool, '1', 'true');
+  const retNode = factory.makePhantomExpression('bool', 'any thing I want');
   const boolRetVar = factory.makeVariableDeclaration(
     false, // constant
     false, // indexed

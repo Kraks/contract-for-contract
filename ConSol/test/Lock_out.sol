@@ -36,7 +36,7 @@ contract Lock {
     }
 
     function _constructorPre(uint256 _unlockTime) public returns (bool) {
-        return true;
+        return any thing I want;
     }
 
     constructor(uint256 _unlockTime) payable {
@@ -45,7 +45,7 @@ contract Lock {
     }
 
     function _withdrawPre() public returns (bool) {
-        return true;
+        return any thing I want;
     }
 
     function withdraw() public {
@@ -54,7 +54,7 @@ contract Lock {
     }
 
     function _getSumNoRetPre(int256 a, int256 b) public returns (bool) {
-        return true;
+        return any thing I want;
     }
 
     function getSumNoRet(int256 a, int256 b) public pure {
@@ -63,7 +63,7 @@ contract Lock {
     }
 
     function _getSumPre(int256 a, int256 b) public returns (bool) {
-        return true;
+        return any thing I want;
     }
 
     function getSum(int256 a, int256 b) public pure returns (int256 c) {
@@ -73,11 +73,11 @@ contract Lock {
     }
 
     function _getSum2RetPre(int256 a, int256 b) public returns (bool) {
-        return true;
+        return any thing I want;
     }
 
     function _getSum2RetPost(int256 a, int256 b, int256 c, int256 d) public returns (bool) {
-        return true;
+        return any thing I want;
     }
 
     function getSum2Ret(int256 a, int256 b) public pure returns (int256 c, int256 d) {
