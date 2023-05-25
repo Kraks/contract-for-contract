@@ -41,8 +41,9 @@ jobs:
 
     - name: Install solc-typed-ast
       run: |
-        cd solc-typed-ast
+        cd ../solc-typed-ast
         npm install
+        cd ../ConSol
 
     - name: Install dependencies
       run: npm ci
