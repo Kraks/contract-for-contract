@@ -67,7 +67,7 @@ function makeFlatCheckFun(
   return funDef;
 }
 
-function buildRequireStmt(
+export function buildRequireStmt(
   ctx: ASTContext,
   factory: ASTNodeFactory,
   constraint: Expression,
