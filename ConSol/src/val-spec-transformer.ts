@@ -16,7 +16,6 @@ import {
   FunctionCallKind,
   ExpressionStatement,
   Expression,
-  PhantomExpression,
   Statement,
   assert,
   TypeName,
