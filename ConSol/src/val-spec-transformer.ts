@@ -95,8 +95,8 @@ function createWrapperFun(
   funKind: FunctionKind,
   funStateMutability: FunctionStateMutability, // payable/nonpayable
   params: ParameterList,
-  retType?: TypeName[], //can be void
-  returnVarname?: string[],
+  retType?: TypeName[] | undefined, //can be void
+  returnVarname?: string[] | undefined,
   preCondFunName?: string,
   postCondFunName?: string,
 ): FunctionDefinition {
@@ -122,7 +122,7 @@ function createWrapperFun(
 
   // Create original function call
   const originalCall = factory.makeFunctionCall(
-    retType ? retType[0].typeString : 'void', //TODO fix
+    retType ? retType[0].typeString : 'void', //TODO fix, seems ok
     FunctionCallKind.FunctionCall,
     factory.makeIdentifier('function', originalFunName, -1),
     copyParameters(params.vParameters, factory),
@@ -158,26 +158,33 @@ function createWrapperFun(
       );
       retTypeDecl.vType = retType[i];
       retTypeDecls.push(retTypeDecl);
-
-      // declare return variables
-      const retVarDecStmt = factory.makeVariableDeclarationStatement([null], [retTypeDecl]);
-      stmts.push(retVarDecStmt);
     }
 
-    const retValTuple = factory.makeTupleExpression(
-      retType[0].typeString, // TODO this should also be a tuple?
-      false,
-      retValDecls.map((r) => factory.makeIdentifierFor(r)),
-    );
-    // assignment
+    if (retTypeDecls.length > 1) {
+      // more than one returns
+      // declare return variables first
+      for (let i = 0; i < retTypeDecls.length; i++) {
+        const retVarDecStmt = factory.makeVariableDeclarationStatement([null], [retTypeDecls[i]]);
+        stmts.push(retVarDecStmt);
+      }
 
-    const assignmentStmt = factory.makeAssignment(retType[0].typeString, '=', retValTuple, originalCall);
-    stmts.push(factory.makeExpressionStatement(assignmentStmt));
-    // const varDeclStmt = factory.makeVariableDeclarationStatement([null], retTypeDecls, originalCall);
-    // stmts.push(varDeclStmt);
+      const retValTuple = factory.makeTupleExpression(
+        retType[0].typeString, // TODO this should also be a tuple? seems ok
+        false,
+        retValDecls.map((r) => factory.makeIdentifierFor(r)),
+      );
+      // assignment
 
-    retStmt = factory.makeReturn(retValTuple.id, retValTuple);
-    // retStmt = factory.makeReturn());
+      const assignmentStmt = factory.makeAssignment(retType[0].typeString, '=', retValTuple, originalCall);
+      stmts.push(factory.makeExpressionStatement(assignmentStmt));
+      retStmt = factory.makeReturn(retValTuple.id, retValTuple);
+    } else {
+      // only one return
+      assert(retValDecls.length == 1 && retTypeDecls.length == retValDecls.length, 'impossible');
+      const assignmentStmt = factory.makeVariableDeclarationStatement([null], retTypeDecls, originalCall);
+      stmts.push(assignmentStmt);
+      retStmt = factory.makeReturn(retValDecls[0].id, retValDecls[0]);
+    }
   } else {
     // no return value
     const originalCallStmt = factory.makeExpressionStatement(originalCall);
@@ -262,8 +269,9 @@ function getVarNameDecMap(
 
 function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
   const funName = extractFunName(node);
-  const originalFunName = node.name + '_original';
+  const originalFunName = funName + '_original';
   node.name = originalFunName;
+
   console.log('Handling FunctionDefinition: ' + funName);
   const ctx = node.context as ASTContext;
   console.assert(node.context !== undefined);
@@ -280,7 +288,6 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
       factory,
       node.id,
       preFunName,
-      // isConstructor(node)? FunctionKind.Constructor : FunctionKind.Function,
       FunctionKind.Function, // this is condFunc, always function
       FunctionVisibility.Public,
       FunctionStateMutability.NonPayable,
@@ -314,13 +321,17 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
   if (spec.call !== undefined) {
     console.log('inserting ValSpec wrapper function for ' + funName);
 
-    // TODO: only consider the first ret for now
-    const returnType: TypeName[] = node.vReturnParameters.vParameters
-      ?.map((param) => param.vType)
-      .filter((vType): vType is TypeName => vType !== undefined); // filter out the undefined object
-    assert(returnType.length === spec.call.rets.length, 'some return parameters are missing type');
+    let returnTypes: TypeName[] | undefined;
+    let returnVarNames: string[] | undefined;
+    if (spec.call.rets.length > 0) {
+      returnTypes = node.vReturnParameters.vParameters
+        ?.map((param) => param.vType)
+        .filter((vType): vType is TypeName => vType !== undefined); // filter out the undefined object
+      assert(returnTypes.length === spec.call.rets.length, 'some return parameters are missing type');
 
-    const returnVarName: string[] = spec.call.rets;
+      returnVarNames = spec.call.rets;
+    }
+
     const wrapperFun = createWrapperFun(
       ctx,
       factory,
@@ -330,14 +341,18 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
       isConstructor(node) ? FunctionKind.Constructor : FunctionKind.Function,
       node.stateMutability,
       (node as FunctionDefinition).vParameters,
-      returnType,
-      returnVarName,
+      returnTypes,
+      returnVarNames,
       preFunName,
       postFunName,
     );
     node.vScope.appendChild(wrapperFun);
     node.visibility = FunctionVisibility.Private;
     // TODO: stateMutability: pure/payable/nonpayable ...
+    if (node.isConstructor) {
+      node.isConstructor = false;
+      node.kind = FunctionKind.Function;
+    }
   }
 }
 
