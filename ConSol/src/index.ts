@@ -80,48 +80,6 @@ async function main() {
     }
   });
 
-  // TODO: clean up the rest
-
-  /** 
-   // @custom:consol { _unlockTime | _unlockTime > 0 } for constructor
-   
-   // sourceUnits.forEach((su) => su.walkChildren((c_node) => {
-   //   if (c_node instanceof ContractDefinition) {
-   //     c_node.walkChildren((f_node: any)
-   sourceUnits[0].vContracts[0].walkChildren((astNode: ASTNode) => {
-   if (isConstructor(astNode) && astNode.implemented && astNode.vBody) {
-   const body = astNode.vBody;
-   console.assert(body.context !== undefined);
-   const ctx = body.context as ASTContext;
-   const factory = new ASTNodeFactory(ctx);
-   const zeroLiteral = factory.makeLiteral(
-   'uint256',
-   LiteralKind.Number,
-   '0',
-   '0',
-   );
-   const params = astNode.vParameters;
-   const unlockTimeDecl = params.vParameters[0];
-   const unlockTime = factory.makeIdentifierFor(unlockTimeDecl);
-   // const unlockTimeDecl = su.getChildrenBySelector((node) => node instanceof VariableDeclaration && node.name === '_unlockTime')[0];
-
-   // const unlockTime = factory.makeIdentifier('uint256', '_unlockTime', unlockTimeDecl.id);
-   const constraintExpr = factory.makeBinaryOperation(
-   'bool',
-   '>',
-   unlockTime,
-   zeroLiteral,
-   );
-   const requireStmt = buildRequireStmt(
-   ctx,
-   constraintExpr,
-   'unlockTime must be greater than 0',
-   );
-   body.insertAtBeginning(requireStmt);
-   }
-   });
-  */
-
   // convert ast back to source
   const formatter = new PrettyFormatter(4, 0);
   const writer = new ASTWriter(

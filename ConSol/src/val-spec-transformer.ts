@@ -364,7 +364,7 @@ export function handleValSpec<T>(node: ASTNode, spec: ValSpec<T>) {
   if (node instanceof FunctionDefinition) {
     handleValSpecFunDef(node, spec);
   } else if (node instanceof EventDefinition) {
-    // TODO
+    // TODO: optional
   } else {
     console.assert(false, 'wow');
   }
