@@ -15,10 +15,10 @@ describe('value (fun) contract', () => {
   });
 
   it('pre and post', () => {
-    const s = `{ 
-        foo (y) returns (x) 
-        requires {xxx} 
-        ensures {yyy} 
+    const s = `{
+        foo (y) returns (x)
+        requires {xxx}
+        ensures {yyy}
         }`;
     const spec: ValSpec<string> = makeValSpec({
       call: { funName: 'foo', kwargs: [], args: ['y'], rets: ['x'] },
@@ -31,10 +31,10 @@ describe('value (fun) contract', () => {
   });
 
   it('simple function and only funSpec', () => {
-    const s = `{ 
+    const s = `{
         foo(argfun, argfun2)
-        where 
-            {argfun() ensures{aaa}} 
+        where
+            {argfun() ensures{aaa}}
             {argfun2(xxx) returns (hhh) requires{ddd}}
         }`;
     const spec: ValSpec<string> = makeValSpec({
@@ -65,11 +65,11 @@ describe('value (fun) contract', () => {
   });
 
   it('only funSpec', () => {
-    const s = `{ 
-        foo {value:v, gas:g} (argfun, x, argfun2) returns (retFun) 
-        where 
-            {argfun() ensures{aaa}} 
-            {retFun() ensures{bbb}} 
+    const s = `{
+        foo {value:v, gas:g} (argfun, x, argfun2) returns (retFun)
+        where
+            {argfun() ensures{aaa}}
+            {retFun() ensures{bbb}}
             {argfun2(xxx) returns (hhh) requires{ddd}}
         }`;
     const spec: ValSpec<string> = makeValSpec({
@@ -110,12 +110,12 @@ describe('value (fun) contract', () => {
   });
 
   it('postSpec+funSpec', () => {
-    const s = `{ 
-        foo {value:v, gas:g} (argfun, x, argfun2) returns (retFun) 
-        ensures {yyy} 
-        where 
-            {argfun() ensures{aaa}} 
-            {retFun() ensures{bbb}} 
+    const s = `{
+        foo {value:v, gas:g} (argfun, x, argfun2) returns (retFun)
+        ensures {yyy}
+        where
+            {argfun() ensures{aaa}}
+            {retFun() ensures{bbb}}
             {argfun2(xxx) returns (hhh) requires{ddd}}
         }`;
     const spec: ValSpec<string> = makeValSpec({
@@ -157,13 +157,13 @@ describe('value (fun) contract', () => {
   });
 
   it('complex case (funSpec)', () => {
-    const s = `{ 
-        foo {value:v, gas:g} (argfun, x, argfun2) returns (retFun) 
-        requires {xxx} 
-        ensures {yyy} 
-        where 
-            {argfun() ensures{aaa}} 
-            {retFun() ensures{bbb}} 
+    const s = `{
+        foo {value:v, gas:g} (argfun, x, argfun2) returns (retFun)
+        requires {xxx}
+        ensures {yyy}
+        where
+            {argfun() ensures{aaa}}
+            {retFun() ensures{bbb}}
             {argfun2(xxx) returns (hhh) requires{ddd}}
         }`;
     const spec: ValSpec<string> = makeValSpec({
@@ -206,13 +206,13 @@ describe('value (fun) contract', () => {
   });
 
   it('[expect error] undefined function in PreFunSpec', () => {
-    const s = `{ 
-        foo {value:v, gas:g} (argfun, x) returns (retFun) 
-        requires {xxx} 
-        ensures {yyy} 
-        where 
-            {argfun() ensures{aaa}} 
-            {retFun() ensures{bbb}} 
+    const s = `{
+        foo {value:v, gas:g} (argfun, x) returns (retFun)
+        requires {xxx}
+        ensures {yyy}
+        where
+            {argfun() ensures{aaa}}
+            {retFun() ensures{bbb}}
             {argfun2(xxx) returns (hhh) requires{ddd}}
         }`;
     const spec: ValSpec<string> = makeValSpec({
@@ -231,6 +231,7 @@ describe('value (fun) contract', () => {
         {
           call: { funName: 'argfun', kwargs: [], args: [], rets: [] },
           postCond: 'aaa',
+          tag: 'ValSpec',
         },
         {
           call: {
@@ -240,12 +241,14 @@ describe('value (fun) contract', () => {
             rets: ['hhh'],
           },
           preCond: 'ddd',
+          tag: 'ValSpec',
         },
       ],
       postFunSpec: [
         {
           call: { funName: 'retFun', kwargs: [], args: [], rets: [] },
           postCond: 'bbb',
+          tag: 'ValSpec',
         },
       ],
     });
@@ -257,13 +260,13 @@ describe('value (fun) contract', () => {
   });
 
   it('[expect error] undefined PostFunSpec', () => {
-    const s = `{ 
-        foo {value:v, gas:g} (argfun, x, argfun2) 
-        requires {xxx} 
-        ensures {yyy} 
-        where 
-            {argfun() ensures{aaa}} 
-            {retFun() ensures{bbb}} 
+    const s = `{
+        foo {value:v, gas:g} (argfun, x, argfun2)
+        requires {xxx}
+        ensures {yyy}
+        where
+            {argfun() ensures{aaa}}
+            {retFun() ensures{bbb}}
             {argfun2(xxx) returns (hhh) requires{ddd}}
         }`;
     const spec: ValSpec<string> = makeValSpec({

@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { TerminalNode } from 'antlr4';
+import { ParseTree, TerminalNode } from 'antlr4';
 import { CharStream, CommonTokenStream } from 'antlr4';
 
 import SpecVisitor from './parser/SpecVisitor.js';
@@ -72,18 +72,24 @@ export type TempSpec<T> = Opaque<$TempSpec<T>, 'TempSpec'>;
 export type CSSpec<T> = ValSpec<T> | TempSpec<T>;
 
 // Note: this is not safe yet -- should narrow the `any` type
-export function makeValSpec<T>(obj: any): ValSpec<T> {
-  obj.tag = 'ValSpec';
-  return obj as ValSpec<T>;
+export function makeValSpec<T>(obj: $ValSpec<T>): ValSpec<T> {
+  return {
+    ...obj,
+    tag: 'ValSpec',
+  } as ValSpec<T>;
 }
-export function makeTempSpec<T>(obj: any): TempSpec<T> {
-  obj.tag = 'TempSpec';
-  return obj as TempSpec<T>;
+
+export function makeTempSpec<T>(obj: $TempSpec<T>): TempSpec<T> {
+  return {
+    ...obj,
+    tag: 'TempSpec',
+  } as TempSpec<T>;
 }
 
 export function isValSpec<T>(v: CSSpec<T>): v is ValSpec<T> {
   return v.tag === 'ValSpec';
 }
+
 export function isTempSpec<T>(v: CSSpec<T>): v is TempSpec<T> {
   return v.tag === 'TempSpec';
 }
@@ -111,7 +117,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     this.parseSexpr = parseSexpr;
   }
 
-  extractTermText(n: any): string {
+  extractTermText(n: ParseTree): string {
     assert(n instanceof TerminalNode);
     return (n as TerminalNode).symbol.text;
   }
