@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals';
-import { createParser, TestErrorListener } from './util.js';
+import { createParser } from './util.js';
+import { TestErrorListener } from '../../../__test__/util.js';
 
 describe('address spec', () => {
   describe('Parser', () => {
