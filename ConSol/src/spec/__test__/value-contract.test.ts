@@ -30,12 +30,15 @@ describe('value (fun) contract', () => {
         makeValSpec({
           call: {
             funName: 'addr',
-            kwargs: [{ fst: 'value', snd: 'v' }, { fst: 'gas', snd: 'g' }],
+            kwargs: [
+              { fst: 'value', snd: 'v' },
+              { fst: 'gas', snd: 'g' },
+            ],
             args: ['msg', 'x'],
             rets: ['flag', 'data'],
           },
           preCond: 'v>5&&g<10000&&x!=0',
-	  postCond: 'flag==true'
+          postCond: 'flag==true',
         }),
       ],
     });
@@ -339,5 +342,4 @@ describe('value (fun) contract', () => {
 
     expect(parseSpec).toThrow();
   });
-
 });
