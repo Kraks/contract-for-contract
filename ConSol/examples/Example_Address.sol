@@ -51,11 +51,11 @@ contract Call_Translated {
     // Note: alternatively, we could life the expressions in `require` into separate functions,
     // but it seems unnecessary
     require(v > 5 && g < 10000 && x != 0, "pre cond violates");
-    (bool success, bytes memory data) = addr.call{value: v, gas: g}(
+    (bool flag, bytes memory data) = addr.call{value: v, gas: g}(
       abi.encodeWithSignature("foo(string, uint256)", mymsg, x)
     );
-    require(success == true, "post cond violates");
-    return (success, data);
+    require(flag == true, "post cond violates");
+    return (flag, data);
   }
 
   function testCallFoo(address payable _addr) public payable {
