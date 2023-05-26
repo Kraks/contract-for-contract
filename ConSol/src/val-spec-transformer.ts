@@ -86,9 +86,19 @@ function copyParameters(params: VariableDeclaration[], factory: ASTNodeFactory) 
   return params.map((param) => factory.makeIdentifierFor(param));
 }
 
-function makeCheckStmt(ctx: ASTContext, factory: ASTNodeFactory, funName: string,
-		       args: Expression[], errorMsg: string): ExpressionStatement {
-  const call = factory.makeFunctionCall('bool', FunctionCallKind.FunctionCall, factory.makeIdentifier('function', funName, -1), args);
+function makeCheckStmt(
+  ctx: ASTContext,
+  factory: ASTNodeFactory,
+  funName: string,
+  args: Expression[],
+  errorMsg: string,
+): ExpressionStatement {
+  const call = factory.makeFunctionCall(
+    'bool',
+    FunctionCallKind.FunctionCall,
+    factory.makeIdentifier('function', funName, -1),
+    args,
+  );
   return makeRequireStmt(ctx, factory, call, errorMsg);
 }
 
@@ -107,14 +117,20 @@ function makeWrapperFun(
   postCondFunName?: string,
 ): FunctionDefinition {
   const stmts = [];
-  const retTypeStr = retType.length > 0 ? "(" + retType.map((t) => t.typeString).toString() + ")" : "void";
+  const retTypeStr = retType.length > 0 ? '(' + retType.map((t) => t.typeString).toString() + ')' : 'void';
   const retTypeDecls: VariableDeclaration[] = [];
   let retStmt: Statement | undefined;
 
   // Create require pre-condition statement
   if (preCondFunName) {
     const errorMsg = 'Violate the precondition for function ' + funName;
-    const preCondRequireStmt = makeCheckStmt(ctx, factory, preCondFunName, copyParameters(params.vParameters, factory), errorMsg);
+    const preCondRequireStmt = makeCheckStmt(
+      ctx,
+      factory,
+      preCondFunName,
+      copyParameters(params.vParameters, factory),
+      errorMsg,
+    );
     stmts.push(preCondRequireStmt);
   }
 
@@ -143,11 +159,13 @@ function makeWrapperFun(
       retTypeDecls.push(retTypeDecl);
     }
 
-    const retIds = retTypeDecls.map((r) => r.id)
+    const retIds = retTypeDecls.map((r) => r.id);
     const assignmentStmt = factory.makeVariableDeclarationStatement(retIds, retTypeDecls, originalCall);
     stmts.push(assignmentStmt);
     const retValTuple = factory.makeTupleExpression(
-      retTypeStr, false, retTypeDecls.map((r) => factory.makeIdentifierFor(r)),
+      retTypeStr,
+      false,
+      retTypeDecls.map((r) => factory.makeIdentifierFor(r)),
     );
     retStmt = factory.makeReturn(retValTuple.id, retValTuple);
   } else {
@@ -275,7 +293,7 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
 
   const retTypes: TypeName[] = node.vReturnParameters.vParameters
     ?.map((param) => param.vType)
-      .filter((vType): vType is TypeName => vType !== undefined); // filter out the undefined object
+    .filter((vType): vType is TypeName => vType !== undefined); // filter out the undefined object
   assert(retTypes.length === spec.call.rets.length, 'some return parameters are missing type');
   const retVarNames: string[] = spec.call.rets;
 
