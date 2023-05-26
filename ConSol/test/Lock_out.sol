@@ -40,7 +40,7 @@ contract Lock {
     }
 
     constructor(uint256 _unlockTime) payable {
-        require(_constructorPre(_unlockTime), "Violate the preondition for function constructor");
+        require(_constructorPre(_unlockTime), "Violate the precondition for function constructor");
         constructor_original(_unlockTime);
     }
 
@@ -49,7 +49,7 @@ contract Lock {
     }
 
     function withdraw() public {
-        require(_withdrawPre(), "Violate the preondition for function withdraw");
+        require(_withdrawPre(), "Violate the precondition for function withdraw");
         withdraw_original();
     }
 
@@ -58,7 +58,7 @@ contract Lock {
     }
 
     function getSumNoRet(int256 a, int256 b) public pure {
-        require(_getSumNoRetPre(a, b), "Violate the preondition for function getSumNoRet");
+        require(_getSumNoRetPre(a, b), "Violate the precondition for function getSumNoRet");
         getSumNoRet_original(a, b);
     }
 
@@ -67,7 +67,7 @@ contract Lock {
     }
 
     function getSum(int256 a, int256 b) public pure returns (int256 c) {
-        require(_getSumPre(a, b), "Violate the preondition for function getSum");
+        require(_getSumPre(a, b), "Violate the precondition for function getSum");
         int256 c = getSum_original(a, b);
         return (c);
     }
@@ -81,7 +81,7 @@ contract Lock {
     }
 
     function getSum2Ret(int256 a, int256 b) public pure returns (int256 c, int256 d) {
-        require(_getSum2RetPre(a, b), "Violate the preondition for function getSum2Ret");
+        require(_getSum2RetPre(a, b), "Violate the precondition for function getSum2Ret");
         (int256 c, int256 d) = getSum2Ret_original(a, b);
         require(_getSum2RetPost(a, b, c, d), "Violate the postondition for function getSum2Ret");
         return (c, d);

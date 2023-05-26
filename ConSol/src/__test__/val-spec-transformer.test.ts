@@ -11,7 +11,7 @@ import {
   LiteralKind,
   PrettyFormatter,
 } from 'solc-typed-ast';
-import { buildRequireStmt } from '../val-spec-transformer.js';
+import { makeRequireStmt } from '../val-spec-transformer.js';
 
 describe('val spec transformer', () => {
   const template = `
@@ -32,10 +32,10 @@ describe('val spec transformer', () => {
     ctx = body.context as ASTContext;
     nodeFactory = new ASTNodeFactory(body.context);
   });
-  describe('buildRequireStmt', () => {
+  describe('makeRequireStmt', () => {
     it('should build an always true require statement', async () => {
       const cond = nodeFactory.makeLiteral('boolean', LiteralKind.Bool, '0x1', 'true');
-      const stmt = buildRequireStmt(ctx, nodeFactory, cond, 'error message');
+      const stmt = makeRequireStmt(ctx, nodeFactory, cond, 'error message');
       const source = genSource(stmt)[0];
       expect(source).toEqual(`require(true, "error message");`);
     });

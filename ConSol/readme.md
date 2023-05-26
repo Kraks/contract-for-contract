@@ -1,14 +1,17 @@
 ## Relevant Links
 - solc-typed-ast
-    - Github: https://github.com/ConsenSys/solc-typed-ast
+    - Github: https://github.com/Kraks/solc-typed-ast
     - Doc: https://consensys.github.io/solc-typed-ast/
 - ANTLR4: https://www.antlr.org/
 
 ## Install and Build
 
 ```
+git clone --recurse-submodules https://github.com/Kraks/contract-for-contract
+cd solc-typed-ast
 npm install
-
+cd ../ConSol
+npm install
 npm run build
 ```
 
