@@ -24,18 +24,18 @@ import {
 import { ValSpec } from './spec/index.js';
 import { isConstructor, extractFunName } from './utils.js';
 
-function makeFlatCheckFun(
+function makeFlatCheckFun<T>(
   ctx: ASTContext,
   factory: ASTNodeFactory,
   scope: number,
   funName: string,
+  condExpr: T,
   funKind: FunctionKind, // constructor/function/fallback...
   visibility: FunctionVisibility,
   stateMutability: FunctionStateMutability,
   params: ParameterList,
 ): FunctionDefinition {
-  //const retNode = factory.makeLiteral('bool', LiteralKind.Bool, '1', 'true');
-  const retNode = factory.makePhantomExpression('bool', 'any thing I want');
+  const retNode = factory.makePhantomExpression('bool', condExpr as string);
   const boolRetVar = factory.makeVariableDeclaration(
     false, // constant
     false, // indexed
@@ -251,7 +251,6 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
   let preFunName, postFunName: string | undefined;
 
   if (spec.preCond !== undefined) {
-    const specStr = spec.preCond;
     preFunName = '_' + funName + 'Pre';
     console.log('inserting ' + preFunName);
     const preCondFunc = makeFlatCheckFun(
@@ -259,6 +258,7 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
       factory,
       node.id,
       preFunName,
+      spec.preCond,
       FunctionKind.Function, // this is condFunc, always function
       FunctionVisibility.Public,
       FunctionStateMutability.NonPayable,
@@ -268,7 +268,6 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
   }
 
   if (spec.postCond !== undefined) {
-    const specStr = spec.postCond;
     postFunName = '_' + funName + 'Post';
     console.log('inserting ' + postFunName);
     const inputParam = (node as FunctionDefinition).vParameters.vParameters;
@@ -281,6 +280,7 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
       factory,
       node.id,
       postFunName,
+      spec.postCond,
       FunctionKind.Function, // this is condFunc, always function
       FunctionVisibility.Public,
       FunctionStateMutability.NonPayable,
