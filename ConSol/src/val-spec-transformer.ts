@@ -19,6 +19,9 @@ import {
   Statement,
   assert,
   TypeName,
+  FunctionCall,
+  Assignment,
+  VariableDeclarationStatement,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -210,6 +213,50 @@ function makeWrapperFun(
   return funDef;
 }
 
+function handlePreFunSpec(ctx: ASTContext, node: FunctionDefinition, factory: ASTNodeFactory) {
+  // find the target addr.call
+  if (!node.vBody) {
+    return;
+  }
+  for (const statement of node.vBody.vStatements) {
+    let targetCall: FunctionCall | undefined;
+    if (statement instanceof VariableDeclarationStatement) {
+      const initValue = statement.vInitialValue;
+      // TODO: the identifier name is hardcoded
+      if (initValue instanceof FunctionCall && initValue.vIdentifier == '_addr' && initValue.vFunctionName == 'call') {
+        targetCall = initValue;
+      }
+    } else if (statement instanceof Assignment) {
+      const rhs = statement.vRightHandSide;
+      if (rhs instanceof FunctionCall && rhs.vIdentifier == '_addr' && rhs.vFunctionName == 'call') {
+        targetCall = rhs;
+      }
+    }
+
+    if (!targetCall) {
+      continue;
+    }
+
+    const targetCallArgs: Expression[] = (targetCall.vArguments[0] as FunctionCall).vArguments;
+
+    // TODO:
+    const guardFun = factory.makeIdentifier('function', 'guardedCall', -1);
+    const guardedCall = factory.makeFunctionCall(
+      targetCall.typeString,
+      FunctionCallKind.FunctionCall,
+      guardFun,
+      targetCallArgs,
+    );
+
+    // Replace the old call with the new one
+    if (statement instanceof VariableDeclarationStatement) {
+      statement.vInitialValue = guardedCall;
+    } else if (statement instanceof Assignment) {
+      statement.vRightHandSide = guardedCall;
+    }
+  } // end for
+}
+
 function getVarNameDecMap(
   factory: ASTNodeFactory,
   scope: number,
@@ -289,34 +336,47 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
     node.vScope.appendChild(postCondFunc);
   }
 
-  console.log('inserting ValSpec wrapper function for ' + funName);
+  if (spec.preFunSpec) {
+    // only handle address for now
+    // only handle first order preFunSpec
+    //TODO: call handlePreFunSpec
+    handlePreFunSpec(ctx, node, factory);
+  }
+  if (spec.postFunSpec) {
+    // addr: not supported
+  }
 
-  const retTypes: TypeName[] = node.vReturnParameters.vParameters
-    ?.map((param) => param.vType)
-    .filter((vType): vType is TypeName => vType !== undefined); // filter out the undefined object
-  assert(retTypes.length === spec.call.rets.length, 'some return parameters are missing type');
-  const retVarNames: string[] = spec.call.rets;
+  if (spec.preCond || spec.postCond) {
+    console.log('inserting ValSpec wrapper function for ' + funName);
 
-  const wrapperFun = makeWrapperFun(
-    ctx,
-    factory,
-    node.id,
-    funName,
-    originalFunName,
-    isConstructor(node) ? FunctionKind.Constructor : FunctionKind.Function,
-    node.stateMutability,
-    (node as FunctionDefinition).vParameters,
-    retTypes,
-    retVarNames,
-    preFunName,
-    postFunName,
-  );
-  node.vScope.appendChild(wrapperFun);
-  node.visibility = FunctionVisibility.Private;
-  // TODO: stateMutability: pure/payable/nonpayable ...
-  if (node.isConstructor) {
-    node.isConstructor = false;
-    node.kind = FunctionKind.Function;
+    const retTypes: TypeName[] = node.vReturnParameters.vParameters
+      ?.map((param) => param.vType)
+      .filter((vType): vType is TypeName => vType !== undefined); // filter out the undefined object
+    assert(retTypes.length === spec.call.rets.length, 'some return parameters are missing type');
+    const retVarNames: string[] = spec.call.rets;
+
+    const wrapperFun = makeWrapperFun(
+      ctx,
+      factory,
+      node.id,
+      funName,
+      originalFunName,
+      isConstructor(node) ? FunctionKind.Constructor : FunctionKind.Function,
+      node.stateMutability,
+      (node as FunctionDefinition).vParameters,
+      retTypes,
+      retVarNames,
+      preFunName,
+      postFunName,
+    );
+    node.vScope.appendChild(wrapperFun);
+    node.visibility = FunctionVisibility.Private;
+    // TODO: stateMutability: pure/payable/nonpayable ...
+    // TODO: data localtion
+    if (node.isConstructor) {
+      node.isConstructor = false;
+      node.kind = FunctionKind.Function;
+    }
   }
 }
 
@@ -324,7 +384,6 @@ export function handleValSpec<T>(node: ASTNode, spec: ValSpec<T>) {
   console.log('Parsed spec AST:');
   console.log(spec);
   console.log(spec.tag);
-
   if (node instanceof FunctionDefinition) {
     handleValSpecFunDef(node, spec);
   } else if (node instanceof EventDefinition) {

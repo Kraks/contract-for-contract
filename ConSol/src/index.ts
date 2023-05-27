@@ -40,7 +40,7 @@ async function main() {
   // }
 
   // const inputPath = args[1];
-  const inputPath = './test/Lock.sol';
+  const inputPath = './test/testCallFoo.sol';
   const filename = path.basename(inputPath);
   const dirname = path.dirname(inputPath);
 
@@ -59,7 +59,7 @@ async function main() {
   const sourceUnits = reader.read(complieResult.data);
 
   console.log('Used compiler version: ' + complieResult.compilerVersion);
-  console.log(sourceUnits[0].print());
+  // console.log(sourceUnits[0].print());
 
   sourceUnits[0].vContracts[0].walkChildren((astNode: ASTNode) => {
     const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
