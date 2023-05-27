@@ -22,7 +22,8 @@ contract Caller {
   // Let's imagine that contract Caller does not have the source code for the
   // contract Receiver, but we do know the address of contract Receiver and the function to call.
 
-  // @custom:consol { testCallFoo(addr)
+  // @custom:consol { testCallFoo(addr, x)
+  // requires {x > 0}
   // where
   //   {
   //     addr{value: v, gas: g}(mymsg, x) returns (flag, data)
@@ -30,7 +31,7 @@ contract Caller {
   //     ensures { flag == true }
   //   }
   // }
-  function testCallFoo(address payable _addr) public payable {
+  function testCallFoo(address payable _addr, int256 x) public payable {
     // You can send ether and specify a custom gas amount
     (bool success, bytes memory data) = _addr.call{value: msg.value, gas: 5000}(
       abi.encodeWithSignature("foo(string, uint256)", "call foo", 123)
@@ -58,9 +59,17 @@ contract Call_Translated {
     return (flag, data);
   }
 
-  function testCallFoo(address payable _addr) public payable {
+  function testCallFoo_original(address payable _addr, int256) private {
     (bool success, bytes memory data) = guardedCall(_addr, msg.value, 5000, "call foo", 123);
 
     emit Response(success, data);
+  }
+  function _testCallFooPre(address payable _addr, int256 x) private returns (bool) {
+    return x > 0;
+  }
+
+  function testCallFoo(address payable _addr, int256 x) public payable {
+    require(_testCallFooPre(_addr, x), "violate precondition");
+    testCallFoo_original(_addr, x);
   }
 }
