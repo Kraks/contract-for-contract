@@ -22,6 +22,7 @@ import {
   FunctionCall,
   Assignment,
   VariableDeclarationStatement,
+  FunctionCallOptions,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -213,22 +214,29 @@ function makeWrapperFun(
   return funDef;
 }
 
-function handlePreFunSpec(ctx: ASTContext, node: FunctionDefinition, factory: ASTNodeFactory) {
-  // find the target addr.call
+function handlePreFunSpec(ctx: ASTContext, node: FunctionDefinition, factory: ASTNodeFactory, guardFunName: string) {
+  // TODO: hardcode for now
+  const addrArgName = '_addr';
   if (!node.vBody) {
     return;
   }
   for (const statement of node.vBody.vStatements) {
+    // Find the target addr.call
     let targetCall: FunctionCall | undefined;
     if (statement instanceof VariableDeclarationStatement) {
       const initValue = statement.vInitialValue;
-      // TODO: the identifier name is hardcoded
-      if (initValue instanceof FunctionCall && initValue.vIdentifier == '_addr' && initValue.vFunctionName == 'call') {
+      // TODO: the identifier name is hardcoded.
+      // Q: would there be multiple addr as argument? _addr1, addr2, ...
+      if (
+        initValue instanceof FunctionCall &&
+        initValue.vIdentifier == addrArgName &&
+        initValue.vFunctionName == 'call'
+      ) {
         targetCall = initValue;
       }
     } else if (statement instanceof Assignment) {
       const rhs = statement.vRightHandSide;
-      if (rhs instanceof FunctionCall && rhs.vIdentifier == '_addr' && rhs.vFunctionName == 'call') {
+      if (rhs instanceof FunctionCall && rhs.vIdentifier == addrArgName && rhs.vFunctionName == 'call') {
         targetCall = rhs;
       }
     }
@@ -236,11 +244,25 @@ function handlePreFunSpec(ctx: ASTContext, node: FunctionDefinition, factory: AS
     if (!targetCall) {
       continue;
     }
+    // init the argument lists for the guarded call.
+    let targetCallArgs: Expression[] = (targetCall.vArguments[0] as FunctionCall).vArguments;
 
-    const targetCallArgs: Expression[] = (targetCall.vArguments[0] as FunctionCall).vArguments;
+    // add value and gas as arguments
+    if (targetCall.firstChild instanceof FunctionCallOptions) {
+      const optionsMap: Map<string, Expression> = targetCall.firstChild.vOptionsMap;
+      const valueOption = optionsMap.get('value');
+      const gasOption = optionsMap.get('gas');
+      if (gasOption) {
+        targetCallArgs = [gasOption, ...targetCallArgs];
+      }
+      if (valueOption) {
+        targetCallArgs = [valueOption, ...targetCallArgs];
+      }
+    }
+    // add addr itself
+    targetCallArgs = [factory.makeIdentifier('', addrArgName, -1), ...targetCallArgs];
 
-    // TODO:
-    const guardFun = factory.makeIdentifier('function', 'guardedCall', -1);
+    const guardFun = factory.makeIdentifier('function', guardFunName, -1);
     const guardedCall = factory.makeFunctionCall(
       targetCall.typeString,
       FunctionCallKind.FunctionCall,
@@ -339,8 +361,7 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
   if (spec.preFunSpec) {
     // only handle address for now
     // only handle first order preFunSpec
-    //TODO: call handlePreFunSpec
-    handlePreFunSpec(ctx, node, factory);
+    handlePreFunSpec(ctx, node, factory, 'guardedCall');
   }
   if (spec.postFunSpec) {
     // addr: not supported
