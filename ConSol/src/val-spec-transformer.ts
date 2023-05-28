@@ -25,7 +25,7 @@ import {
   FunctionCallOptions,
 } from 'solc-typed-ast';
 
-import { ValSpec } from './spec/index.js';
+import { ValSpec, Opaque, $ValSpec } from './spec/index.js';
 import { isConstructor, extractFunName } from './utils.js';
 
 function makeFlatCheckFun<T>(
@@ -214,7 +214,74 @@ function makeWrapperFun(
   return funDef;
 }
 
-function handlePreFunSpec(ctx: ASTContext, node: FunctionDefinition, factory: ASTNodeFactory, guardFunName: string) {
+function makeGuardedCallFun<T>(
+  ctx: ASTContext,
+  factory: ASTNodeFactory,
+  addrSpec: Opaque<$ValSpec<T>, 'ValSpec'>,
+  scope: number,
+  funName: string,
+  params: ParameterList,
+  retType: TypeName[],
+  returnVarname: string[],
+): FunctionDefinition {
+  const stmts = [];
+  const retTypeStr = retType.length > 0 ? '(' + retType.map((t) => t.typeString).toString() + ')' : 'void';
+  const retTypeDecls: VariableDeclaration[] = [];
+  let retStmt: Statement | undefined;
+  // add check for pre condition
+  if (addrSpec.preCond) {
+    const errorMsg = 'Violate the precondition';
+    const preCondRequireStmt = makeRequireStmt(
+      ctx,
+      factory,
+      factory.makePhantomExpression('bool', addrSpec.preCond as string),
+      errorMsg,
+    );
+    stmts.push(preCondRequireStmt);
+  }
+  // create original addr call
+  // add check for post condition
+  if (addrSpec.postCond) {
+    const errorMsg = 'Violate the postcondition';
+    const postCondRequireStmt = makeRequireStmt(
+      ctx,
+      factory,
+      factory.makePhantomExpression('bool', addrSpec.postCond as string),
+      errorMsg,
+    );
+    stmts.push(postCondRequireStmt);
+  }
+  // Create return statement
+  if (retStmt) {
+    stmts.push(retStmt);
+  }
+
+  // Build function body
+  const funBody = factory.makeBlock(stmts);
+  const funDef = factory.makeFunctionDefinition(
+    scope,
+    FunctionKind.Function,
+    funName,
+    false, // virtual
+    FunctionVisibility.Public,
+    FunctionStateMutability.Constant,
+    false,
+    params,
+    new ParameterList(0, '', retTypeDecls),
+    [], // modifier
+    undefined,
+    funBody,
+  );
+  return funDef;
+}
+
+function handlePreFunSpec<T>(
+  ctx: ASTContext,
+  node: FunctionDefinition,
+  factory: ASTNodeFactory,
+  preFunSpec: Opaque<$ValSpec<T>, 'ValSpec'>,
+  guardFunName: string,
+) {
   // TODO: hardcode for now
   const addrArgName = '_addr';
   if (!node.vBody) {
@@ -276,9 +343,39 @@ function handlePreFunSpec(ctx: ASTContext, node: FunctionDefinition, factory: AS
     } else if (statement instanceof Assignment) {
       statement.vRightHandSide = guardedCall;
     }
+    // TODO: make guardCallFun
+    const targetCallArgsDecl: VariableDeclaration[] = targetCallArgs.map((arg) =>
+      // TODO: literal and var
+      factory.makeVariableDeclaration(
+        false,
+        false,
+        '',
+        node.id,
+        false,
+        DataLocation.Default,
+        StateVariableVisibility.Default,
+        Mutability.Mutable,
+        arg.typeString,
+      ),
+    );
+    const retType: TypeName[] = [
+      factory.makeElementaryTypeName('', 'bool'),
+      factory.makeElementaryTypeName('', 'bytes memory'),
+    ];
+    const retVarName: string[] = ['flag', 'data'];
+    const guardedCallFun = makeGuardedCallFun(
+      ctx,
+      factory,
+      preFunSpec,
+      node.id,
+      guardFunName,
+      factory.makeParameterList(targetCallArgsDecl),
+      retType,
+      retVarName,
+    );
+    node.vScope.appendChild(guardedCallFun);
   } // end for
 }
-
 function getVarNameDecMap(
   factory: ASTNodeFactory,
   scope: number,
@@ -361,7 +458,7 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
   if (spec.preFunSpec) {
     // only handle address for now
     // only handle first order preFunSpec
-    handlePreFunSpec(ctx, node, factory, 'guardedCall');
+    handlePreFunSpec(ctx, node, factory, spec.preFunSpec[0], 'guardedCall');
   }
   if (spec.postFunSpec) {
     // addr: not supported

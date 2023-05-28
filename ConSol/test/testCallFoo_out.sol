@@ -13,6 +13,11 @@ contract Caller {
         return x>0;
     }
 
+    function guardedCall(, , , , , ) public constant {
+        require(v>5&&g<10000&&x!=0, "Violate the precondition");
+        require(flag==true, "Violate the postcondition");
+    }
+
     function testCallFoo(address payable _addr, int256 x) public payable {
         require(_testCallFooPre(_addr, x), "Violate the precondition for function testCallFoo");
         testCallFoo_original(_addr, x);
