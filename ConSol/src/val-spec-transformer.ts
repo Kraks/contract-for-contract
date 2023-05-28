@@ -26,7 +26,7 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec, Opaque, $ValSpec } from './spec/index.js';
-import { isConstructor, extractFunName, attachNames, copyNodes } from './utils.js';
+import { isConstructor, extractFunName, attachNames, copyNodes, makeIdsFromVarDecls, preCheckFunName, postCheckFunName } from './utils.js';
 
 function makeFlatCheckFun<T>(
   ctx: ASTContext,
@@ -86,10 +86,6 @@ export function makeRequireStmt(
   return factory.makeExpressionStatement(requireCall);
 }
 
-function copyParameters(params: VariableDeclaration[], factory: ASTNodeFactory) {
-  return params.map((param) => factory.makeIdentifierFor(param));
-}
-
 function makeCheckStmt(
   ctx: ASTContext,
   factory: ASTNodeFactory,
@@ -132,7 +128,7 @@ function makeWrapperFun(
       ctx,
       factory,
       preCondFunName,
-      copyParameters(params.vParameters, factory),
+      makeIdsFromVarDecls(factory, params.vParameters),
       errorMsg,
     );
     stmts.push(preCondRequireStmt);
@@ -143,7 +139,7 @@ function makeWrapperFun(
     retTypeStr,
     FunctionCallKind.FunctionCall,
     factory.makeIdentifier('function', originalFunName, -1),
-    copyParameters(params.vParameters, factory),
+    makeIdsFromVarDecls(factory, params.vParameters),
   );
 
   if (retType.length > 0 && returnVarname) {
@@ -180,9 +176,9 @@ function makeWrapperFun(
 
   if (postCondFunName) {
     // Create require post-condition statement
-    let postCallArgs = copyParameters(params.vParameters, factory);
+    let postCallArgs = makeIdsFromVarDecls(factory, params.vParameters);
     if (retTypeDecls.length > 0) {
-      postCallArgs = postCallArgs.concat(copyParameters(retTypeDecls, factory));
+      postCallArgs = postCallArgs.concat(makeIdsFromVarDecls(factory, retTypeDecls));
     }
     const errorMsg = 'Violate the postondition for function ' + funName;
     const postRequireStmt = makeCheckStmt(ctx, factory, postCondFunName, postCallArgs, errorMsg);
@@ -217,7 +213,7 @@ function makeWrapperFun(
 function makeGuardedCallFun<T>(
   ctx: ASTContext,
   factory: ASTNodeFactory,
-  addrSpec: Opaque<$ValSpec<T>, 'ValSpec'>,
+  addrSpec: ValSpec<T>,
   scope: number,
   funName: string,
   params: ParameterList,
@@ -279,7 +275,7 @@ function handlePreFunSpec<T>(
   ctx: ASTContext,
   node: FunctionDefinition,
   factory: ASTNodeFactory,
-  preFunSpec: Opaque<$ValSpec<T>, 'ValSpec'>,
+  preFunSpecs: Array<ValSpec<T>>,
   guardFunName: string,
 ) {
   // TODO: hardcode for now
@@ -366,7 +362,7 @@ function handlePreFunSpec<T>(
     const guardedCallFun = makeGuardedCallFun(
       ctx,
       factory,
-      preFunSpec,
+      preFunSpecs[0],
       node.id,
       guardFunName,
       factory.makeParameterList(targetCallArgsDecl),
@@ -390,8 +386,11 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
   let preFunName, postFunName: string | undefined;
 
   if (spec.preCond !== undefined) {
-    preFunName = '_' + funName + 'Pre';
+    preFunName = preCheckFunName(funName);
     console.log('inserting ' + preFunName);
+    const newInputs = copyNodes(factory, (node as FunctionDefinition).vParameters.vParameters);
+    attachNames(spec.call.args, newInputs);
+    const newParams = new ParameterList(0, '', [...newInputs]);
     const preCondFunc = makeFlatCheckFun(
       ctx,
       factory,
@@ -401,20 +400,20 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
       FunctionKind.Function, // this is condFunc, always function
       FunctionVisibility.Public,
       FunctionStateMutability.NonPayable,
-      (node as FunctionDefinition).vParameters,
+      newParams,
     );
     node.vScope.appendChild(preCondFunc);
   }
 
   if (spec.postCond !== undefined) {
-    postFunName = '_' + funName + 'Post';
+    postFunName = postCheckFunName(funName);
     console.log('inserting ' + postFunName);
-    const inputParam = (node as FunctionDefinition).vParameters.vParameters;
+    const newInputs = copyNodes(factory, (node as FunctionDefinition).vParameters.vParameters);
+    attachNames(spec.call.args, newInputs);
     // Note(GW): retParams can have names that refer to local variables defined in the function body
     const retParams = copyNodes(factory, (node as FunctionDefinition).vReturnParameters.vParameters);
     attachNames(spec.call.rets, retParams);
-
-    const allParams = new ParameterList(0, '', [...inputParam, ...retParams]);
+    const allParams = new ParameterList(0, '', [...newInputs, ...retParams]);
     const postCondFunc = makeFlatCheckFun(
       ctx,
       factory,
@@ -432,8 +431,9 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
   if (spec.preFunSpec) {
     // only handle address for now
     // only handle first order preFunSpec
-    handlePreFunSpec(ctx, node, factory, spec.preFunSpec[0], 'guardedCall');
+    handlePreFunSpec(ctx, node, factory, spec.preFunSpec, 'guardedCall');
   }
+
   if (spec.postFunSpec) {
     // addr: not supported
   }
@@ -477,6 +477,7 @@ export function handleValSpec<T>(node: ASTNode, spec: ValSpec<T>) {
   console.log(spec);
   console.log(spec.tag);
   if (node instanceof FunctionDefinition) {
+    //const trans = new ValSpecTransformer(node, spec);
     handleValSpecFunDef(node, spec);
   } else if (node instanceof EventDefinition) {
     // TODO: optional

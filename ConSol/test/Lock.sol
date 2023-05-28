@@ -21,7 +21,7 @@ contract Lock {
         owner.transfer(address(this).balance);
     }
 
-    /// @custom:consol  {getSumNoRet (a, b)requires {a>0 && b>0}}
+    /// @custom:consol  {getSumNoRet (not_the_same_name, metoo)requires {not_the_same_name>0 && metoo>0}}
     function getSumNoRet(int256 a, int256 b) public pure {
         int256 c = a+b;
     }

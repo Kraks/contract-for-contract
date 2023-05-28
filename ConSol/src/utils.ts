@@ -1,4 +1,4 @@
-import { ASTNodeFactory, FunctionDefinition, VariableDeclaration, ASTNode, assert } from 'solc-typed-ast';
+import { ASTNodeFactory, FunctionDefinition, VariableDeclaration, Identifier, ASTNode, assert } from 'solc-typed-ast';
 
 import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
 
@@ -39,4 +39,20 @@ export function attachNames(names: string[], decls: VariableDeclaration[]): Vari
     decls[i].name = name;
   });
   return decls;
+}
+
+export function makeIdFromVarDecl(factory: ASTNodeFactory, vd: VariableDeclaration): Identifier {
+  return factory.makeIdentifierFor(vd);
+}
+
+export function makeIdsFromVarDecls(factory: ASTNodeFactory, vds: VariableDeclaration[]): Identifier[] {
+  return vds.map((vd) => makeIdFromVarDecl(factory, vd));
+}
+
+export function preCheckFunName(f: string): string {
+  return '_' + f + 'Pre';
+}
+
+export function postCheckFunName(f: string): string {
+  return '_' + f + 'Post';
 }

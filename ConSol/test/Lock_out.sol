@@ -20,7 +20,7 @@ contract Lock {
         owner.transfer(address(this).balance);
     }
 
-    /// @custom:consol  {getSumNoRet (a, b)requires {a>0 && b>0}}
+    /// @custom:consol  {getSumNoRet (not_the_same_name, metoo)requires {not_the_same_name>0 && metoo>0}}
     function getSumNoRet_original(int256 a, int256 b) private pure {
         int256 c = a + b;
     }
@@ -53,8 +53,8 @@ contract Lock {
         withdraw_original();
     }
 
-    function _getSumNoRetPre(int256 a, int256 b) public returns (bool) {
-        return a>0&&b>0;
+    function _getSumNoRetPre(int256 not_the_same_name, int256 metoo) public returns (bool) {
+        return not_the_same_name>0&&metoo>0;
     }
 
     function getSumNoRet(int256 a, int256 b) public pure {
