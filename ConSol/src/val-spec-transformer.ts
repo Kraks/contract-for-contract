@@ -26,7 +26,7 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec, Opaque, $ValSpec } from './spec/index.js';
-import { isConstructor, extractFunName } from './utils.js';
+import { isConstructor, extractFunName, attachNames, copyNodes } from './utils.js';
 
 function makeFlatCheckFun<T>(
   ctx: ASTContext,

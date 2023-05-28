@@ -1,4 +1,29 @@
-import { FunctionDefinition, ASTNode } from 'solc-typed-ast';
+import {
+  ASTContext,
+  ASTNodeFactory,
+  EventDefinition,
+  FunctionDefinition,
+  FunctionVisibility,
+  FunctionStateMutability,
+  LiteralKind,
+  FunctionKind,
+  ParameterList,
+  VariableDeclaration,
+  ASTNode,
+  DataLocation,
+  StateVariableVisibility,
+  Mutability,
+  FunctionCallKind,
+  ExpressionStatement,
+  Expression,
+  Statement,
+  assert,
+  TypeName,
+  FunctionCall,
+  Assignment,
+  VariableDeclarationStatement,
+  FunctionCallOptions,
+} from 'solc-typed-ast';
 
 import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
 
@@ -24,7 +49,7 @@ export function extractFunName(node: ASTNode): string {
   return node.raw.name;
 }
 
-function copyNodes<T extends ASTNode>(factory: ASTNodeFactory, nodes: Array<T>): Array<T> {
+export function copyNodes<T extends ASTNode>(factory: ASTNodeFactory, nodes: Array<T>): Array<T> {
   const newNodes: Array<T> = [];
   nodes.forEach((node, i) => {
     newNodes.push(factory.copy(node));
@@ -33,7 +58,7 @@ function copyNodes<T extends ASTNode>(factory: ASTNodeFactory, nodes: Array<T>):
 }
 
 // Note(GW): this function changes `decls` in-place
-function attachNames(names: string[], decls: VariableDeclaration[]): VariableDeclaration[] {
+export function attachNames(names: string[], decls: VariableDeclaration[]): VariableDeclaration[] {
   assert(names.length === decls.length, 'Return Variable length wrong');
   names.forEach((name, i) => {
     decls[i].name = name;
