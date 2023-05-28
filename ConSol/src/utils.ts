@@ -23,3 +23,16 @@ export function extractFunName(node: ASTNode): string {
   if (isConstructor(node)) return 'constructor';
   return node.raw.name;
 }
+
+function copyNodes<T extends ASTNode>(factory: ASTNodeFactory, nodes: Array<T>): Array<T> {
+  const newNodes: Array<T> = [];
+  nodes.forEach((node, i) => { newNodes.push(factory.copy(node)); });
+  return newNodes;
+}
+
+// Note(GW): this function changes `decls` in-place
+function attachNames(names: string[], decls: VariableDeclaration[]): VariableDeclaration[] {
+  assert(names.length === decls.length, 'Return Variable length wrong');
+  names.forEach((name, i) => { decls[i].name = name });
+  return decls;
+}

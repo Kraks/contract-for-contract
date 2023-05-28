@@ -376,33 +376,6 @@ function handlePreFunSpec<T>(
     node.vScope.appendChild(guardedCallFun);
   } // end for
 }
-function getVarNameDecMap(
-  factory: ASTNodeFactory,
-  scope: number,
-  retVarNames: string[],
-  retParams: VariableDeclaration[],
-): Map<string, VariableDeclaration> {
-  assert(retVarNames.length === retParams.length, 'Return Variable length wrong');
-  const varNameDecMap = new Map<string, VariableDeclaration>();
-
-  retVarNames.forEach((name, index) => {
-    const type = retParams[index].typeString;
-    const retVarDec = factory.makeVariableDeclaration(
-      false,
-      false,
-      name,
-      scope,
-      false,
-      DataLocation.Default,
-      StateVariableVisibility.Internal,
-      Mutability.Mutable,
-      type,
-    );
-    retVarDec.vType = retParams[index].vType;
-    varNameDecMap.set(name, retVarDec);
-  });
-  return varNameDecMap;
-}
 
 function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
   const funName = extractFunName(node);
@@ -437,10 +410,11 @@ function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
     postFunName = '_' + funName + 'Post';
     console.log('inserting ' + postFunName);
     const inputParam = (node as FunctionDefinition).vParameters.vParameters;
-    const retParams = (node as FunctionDefinition).vReturnParameters.vParameters;
-    const varNameDecMap = getVarNameDecMap(factory, node.id, spec.call.rets, retParams);
+    // Note(GW): retParams can have names that refer to local variables defined in the function body
+    const retParams = copyNodes(factory, (node as FunctionDefinition).vReturnParameters.vParameters);
+    attachNames(spec.call.rets, retParams);
 
-    const allParams = new ParameterList(0, '', [...inputParam, ...Array.from(varNameDecMap.values())]);
+    const allParams = new ParameterList(0, '', [...inputParam, ...retParams]);
     const postCondFunc = makeFlatCheckFun(
       ctx,
       factory,
