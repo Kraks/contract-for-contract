@@ -49,7 +49,11 @@ export function makeIdsFromVarDecls(factory: ASTNodeFactory, vds: VariableDeclar
   return vds.map((vd) => makeIdFromVarDecl(factory, vd));
 }
 
-export function makeNewParams(factory: ASTNodeFactory, names: string[], decls: VariableDeclaration[]): VariableDeclaration[] {
+export function makeNewParams(
+  factory: ASTNodeFactory,
+  names: string[],
+  decls: VariableDeclaration[],
+): VariableDeclaration[] {
   const params = copyNodes(factory, decls);
   attachNames(names, params);
   return params;

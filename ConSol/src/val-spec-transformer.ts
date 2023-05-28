@@ -25,8 +25,8 @@ import {
   FunctionCallOptions,
 } from 'solc-typed-ast';
 
-import { ValSpec, Opaque, $ValSpec } from './spec/index.js';
-import { isConstructor, extractFunName, attachNames, copyNodes, makeIdsFromVarDecls, makeNewParams } from './utils.js';
+import { ValSpec } from './spec/index.js';
+import { extractFunName, makeIdsFromVarDecls, makeNewParams } from './utils.js';
 
 export function makeRequireStmt(
   ctx: ASTContext,
@@ -275,15 +275,15 @@ class ValSpecTransformer<T> {
   makeTypeDecls(types: TypeName[], names: string[]): VariableDeclaration[] {
     return types.map((ty, i) => {
       const retTypeDecl = this.factory.makeVariableDeclaration(
-	false,
-	false,
-	names[i],
-	this.funDef.scope,
-	false,
-	DataLocation.Default,
-	StateVariableVisibility.Default,
-	Mutability.Mutable,
-	types[i].typeString,
+        false,
+        false,
+        names[i],
+        this.funDef.scope,
+        false,
+        DataLocation.Default,
+        StateVariableVisibility.Default,
+        Mutability.Mutable,
+        types[i].typeString,
       );
       retTypeDecl.vType = ty;
       return retTypeDecl;
@@ -329,7 +329,10 @@ class ValSpecTransformer<T> {
     return postCondFunc;
   }
 
-  wrapperFun(preCondFun: FunctionDefinition|undefined, postCondFun: FunctionDefinition|undefined): FunctionDefinition|undefined {
+  wrapperFun(
+    preCondFun: FunctionDefinition | undefined,
+    postCondFun: FunctionDefinition | undefined,
+  ): FunctionDefinition | undefined {
     if (preCondFun === undefined && postCondFun === undefined) return undefined;
 
     const retTypes: TypeName[] = this.retParams.vParameters
@@ -345,9 +348,9 @@ class ValSpecTransformer<T> {
     if (preCondFun) {
       const errorMsg = 'Violate the precondition for function ' + this.funName;
       const preCondRequireStmt = this.makeCheckStmt(
-	preCondFun.name,
-	makeIdsFromVarDecls(this.factory, this.params.vParameters),
-	errorMsg,
+        preCondFun.name,
+        makeIdsFromVarDecls(this.factory, this.params.vParameters),
+        errorMsg,
       );
       stmts.push(preCondRequireStmt);
     }
@@ -372,7 +375,7 @@ class ValSpecTransformer<T> {
     if (postCondFun) {
       let postCallArgs = makeIdsFromVarDecls(this.factory, this.params.vParameters);
       if (retTypes.length > 0) {
-	postCallArgs = postCallArgs.concat(makeIdsFromVarDecls(this.factory, retTypeDecls));
+        postCallArgs = postCallArgs.concat(makeIdsFromVarDecls(this.factory, retTypeDecls));
       }
       const errorMsg = 'Violate the postondition for function ' + this.funName;
       const postRequireStmt = this.makeCheckStmt(postCondFun.name, postCallArgs, errorMsg);
@@ -382,9 +385,9 @@ class ValSpecTransformer<T> {
     // Create the return statement (if any)
     if (retTypeDecls.length > 0) {
       const retValTuple = this.factory.makeTupleExpression(
-	retTypeStr,
-	false,
-	retTypeDecls.map((r) => this.factory.makeIdentifierFor(r)),
+        retTypeStr,
+        false,
+        retTypeDecls.map((r) => this.factory.makeIdentifierFor(r)),
       );
       const retStmt = this.factory.makeReturn(retValTuple.id, retValTuple);
       stmts.push(retStmt);
@@ -411,9 +414,9 @@ class ValSpecTransformer<T> {
   }
 
   apply() {
-    const preFun = this.preCondCheckFun()
+    const preFun = this.preCondCheckFun();
     if (preFun) this.funDef.vScope.appendChild(preFun);
-    const postFun = this.postCondCheckFun()
+    const postFun = this.postCondCheckFun();
     if (postFun) this.funDef.vScope.appendChild(postFun);
 
     const wrapper = this.wrapperFun(preFun, postFun);
@@ -422,10 +425,10 @@ class ValSpecTransformer<T> {
       this.funDef.name = uncheckedFunName(this.funName);
       this.funDef.visibility = FunctionVisibility.Private;
       if (this.funDef.isConstructor) {
-	// If the spec is attached on a constructor, we generate a new constructo,
-	// and the original constructor becoems an ordinary function.
-	this.funDef.isConstructor = false;
-	this.funDef.kind = FunctionKind.Function;
+        // If the spec is attached on a constructor, we generate a new constructo,
+        // and the original constructor becoems an ordinary function.
+        this.funDef.isConstructor = false;
+        this.funDef.kind = FunctionKind.Function;
       }
     }
     // TODO(DX): stateMutability: pure/payable/nonpayable ...
