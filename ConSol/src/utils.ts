@@ -1,29 +1,4 @@
-import {
-  ASTContext,
-  ASTNodeFactory,
-  EventDefinition,
-  FunctionDefinition,
-  FunctionVisibility,
-  FunctionStateMutability,
-  LiteralKind,
-  FunctionKind,
-  ParameterList,
-  VariableDeclaration,
-  ASTNode,
-  DataLocation,
-  StateVariableVisibility,
-  Mutability,
-  FunctionCallKind,
-  ExpressionStatement,
-  Expression,
-  Statement,
-  assert,
-  TypeName,
-  FunctionCall,
-  Assignment,
-  VariableDeclarationStatement,
-  FunctionCallOptions,
-} from 'solc-typed-ast';
+import { ASTNodeFactory, FunctionDefinition, VariableDeclaration, ASTNode, assert } from 'solc-typed-ast';
 
 import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
 
