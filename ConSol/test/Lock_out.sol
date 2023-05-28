@@ -35,7 +35,7 @@ contract Lock {
         return (a + b, a - b);
     }
 
-    function _constructorPre(uint256 _unlockTime) public returns (bool) {
+    function _constructorPre(uint256 _unlockTime) private returns (bool) {
         return _unlockTime>0&&block.timestamp<_unlockTime;
     }
 
@@ -44,7 +44,7 @@ contract Lock {
         constructor_original(_unlockTime);
     }
 
-    function _withdrawPre() public returns (bool) {
+    function _withdrawPre() private returns (bool) {
         return block.timestamp>=unlockTime;
     }
 
@@ -53,7 +53,7 @@ contract Lock {
         withdraw_original();
     }
 
-    function _getSumNoRetPre(int256 not_the_same_name, int256 metoo) public returns (bool) {
+    function _getSumNoRetPre(int256 not_the_same_name, int256 metoo) private returns (bool) {
         return not_the_same_name>0&&metoo>0;
     }
 
@@ -62,7 +62,7 @@ contract Lock {
         getSumNoRet_original(a, b);
     }
 
-    function _getSumPre(int256 a, int256 b) public returns (bool) {
+    function _getSumPre(int256 a, int256 b) private returns (bool) {
         return a>0&&b>0;
     }
 
@@ -72,11 +72,11 @@ contract Lock {
         return (c);
     }
 
-    function _getSum2RetPre(int256 a, int256 b) public returns (bool) {
+    function _getSum2RetPre(int256 a, int256 b) private returns (bool) {
         return a>0&&b>0;
     }
 
-    function _getSum2RetPost(int256 a, int256 b, int256 c, int256 d) public returns (bool) {
+    function _getSum2RetPost(int256 a, int256 b, int256 c, int256 d) private returns (bool) {
         return c>0;
     }
 

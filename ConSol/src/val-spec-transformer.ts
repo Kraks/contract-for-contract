@@ -26,50 +26,7 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec, Opaque, $ValSpec } from './spec/index.js';
-import { isConstructor, extractFunName, attachNames, copyNodes, makeIdsFromVarDecls, preCheckFunName, postCheckFunName } from './utils.js';
-
-function makeFlatCheckFun<T>(
-  ctx: ASTContext,
-  factory: ASTNodeFactory,
-  scope: number,
-  funName: string,
-  condExpr: T,
-  funKind: FunctionKind, // constructor/function/fallback...
-  visibility: FunctionVisibility,
-  stateMutability: FunctionStateMutability,
-  params: ParameterList,
-): FunctionDefinition {
-  const retNode = factory.makePhantomExpression('bool', condExpr as string);
-  const boolRetVar = factory.makeVariableDeclaration(
-    false, // constant
-    false, // indexed
-    'bool', // name
-    0, // scope
-    false, // stateVariable
-    DataLocation.Default, // storageLocation
-    StateVariableVisibility.Default, // visibility
-    Mutability.Constant, // mutability
-    'bool', // typeString, "bool"
-  );
-  const retParams = new ParameterList(0, '', [boolRetVar]);
-  const retStmt = factory.makeReturn(retNode.id, retNode);
-  const funBody = factory.makeBlock([retStmt]);
-  const funDef = factory.makeFunctionDefinition(
-    scope,
-    funKind,
-    funName,
-    false, // virtual
-    visibility,
-    stateMutability,
-    funKind == FunctionKind.Constructor,
-    params,
-    retParams,
-    [], //modifier
-    undefined,
-    funBody,
-  );
-  return funDef;
-}
+import { isConstructor, extractFunName, attachNames, copyNodes, makeIdsFromVarDecls, makeNewParams } from './utils.js';
 
 export function makeRequireStmt(
   ctx: ASTContext,
@@ -86,130 +43,7 @@ export function makeRequireStmt(
   return factory.makeExpressionStatement(requireCall);
 }
 
-function makeCheckStmt(
-  ctx: ASTContext,
-  factory: ASTNodeFactory,
-  funName: string,
-  args: Expression[],
-  errorMsg: string,
-): ExpressionStatement {
-  const call = factory.makeFunctionCall(
-    'bool',
-    FunctionCallKind.FunctionCall,
-    factory.makeIdentifier('function', funName, -1),
-    args,
-  );
-  return makeRequireStmt(ctx, factory, call, errorMsg);
-}
-
-function makeWrapperFun(
-  ctx: ASTContext,
-  factory: ASTNodeFactory,
-  scope: number,
-  funName: string,
-  originalFunName: string,
-  funKind: FunctionKind,
-  funStateMutability: FunctionStateMutability, // payable/nonpayable
-  params: ParameterList,
-  retType: TypeName[],
-  returnVarname: string[],
-  preCondFunName?: string,
-  postCondFunName?: string,
-): FunctionDefinition {
-  const stmts = [];
-  const retTypeStr = retType.length > 0 ? '(' + retType.map((t) => t.typeString).toString() + ')' : 'void';
-  const retTypeDecls: VariableDeclaration[] = [];
-  let retStmt: Statement | undefined;
-
-  // Create require pre-condition statement
-  if (preCondFunName) {
-    const errorMsg = 'Violate the precondition for function ' + funName;
-    const preCondRequireStmt = makeCheckStmt(
-      ctx,
-      factory,
-      preCondFunName,
-      makeIdsFromVarDecls(factory, params.vParameters),
-      errorMsg,
-    );
-    stmts.push(preCondRequireStmt);
-  }
-
-  // Create original function call
-  const originalCall = factory.makeFunctionCall(
-    retTypeStr,
-    FunctionCallKind.FunctionCall,
-    factory.makeIdentifier('function', originalFunName, -1),
-    makeIdsFromVarDecls(factory, params.vParameters),
-  );
-
-  if (retType.length > 0 && returnVarname) {
-    for (let i = 0; i < retType.length; i++) {
-      const retTypeDecl = factory.makeVariableDeclaration(
-        false,
-        false,
-        returnVarname[i],
-        scope, // scope
-        false,
-        DataLocation.Default,
-        StateVariableVisibility.Default,
-        Mutability.Mutable,
-        retType[i].typeString,
-      );
-      retTypeDecl.vType = retType[i];
-      retTypeDecls.push(retTypeDecl);
-    }
-
-    const retIds = retTypeDecls.map((r) => r.id);
-    const assignmentStmt = factory.makeVariableDeclarationStatement(retIds, retTypeDecls, originalCall);
-    stmts.push(assignmentStmt);
-    const retValTuple = factory.makeTupleExpression(
-      retTypeStr,
-      false,
-      retTypeDecls.map((r) => factory.makeIdentifierFor(r)),
-    );
-    retStmt = factory.makeReturn(retValTuple.id, retValTuple);
-  } else {
-    // no return value
-    const originalCallStmt = factory.makeExpressionStatement(originalCall);
-    stmts.push(originalCallStmt);
-  }
-
-  if (postCondFunName) {
-    // Create require post-condition statement
-    let postCallArgs = makeIdsFromVarDecls(factory, params.vParameters);
-    if (retTypeDecls.length > 0) {
-      postCallArgs = postCallArgs.concat(makeIdsFromVarDecls(factory, retTypeDecls));
-    }
-    const errorMsg = 'Violate the postondition for function ' + funName;
-    const postRequireStmt = makeCheckStmt(ctx, factory, postCondFunName, postCallArgs, errorMsg);
-    stmts.push(postRequireStmt);
-  }
-
-  // Create return statement
-  if (retStmt) {
-    stmts.push(retStmt);
-  }
-
-  // Build function body
-  const funBody = factory.makeBlock(stmts);
-  const funDef = factory.makeFunctionDefinition(
-    scope,
-    funKind,
-    funName,
-    false, // virtual
-    FunctionVisibility.Public,
-    funStateMutability,
-    funKind == FunctionKind.Constructor,
-    params,
-    new ParameterList(0, '', retTypeDecls),
-    [], // modifier
-    undefined,
-    funBody,
-  );
-
-  return funDef;
-}
-
+// TODO: need refactor
 function makeGuardedCallFun<T>(
   ctx: ASTContext,
   factory: ASTNodeFactory,
@@ -271,6 +105,7 @@ function makeGuardedCallFun<T>(
   return funDef;
 }
 
+// TODO: need refactor
 function handlePreFunSpec<T>(
   ctx: ASTContext,
   node: FunctionDefinition,
@@ -373,102 +208,228 @@ function handlePreFunSpec<T>(
   } // end for
 }
 
-function handleValSpecFunDef<T>(node: FunctionDefinition, spec: ValSpec<T>) {
-  const funName = extractFunName(node);
-  const originalFunName = funName + '_original';
-  node.name = originalFunName;
+function preCheckFunName(f: string): string {
+  return '_' + f + 'Pre';
+}
 
-  console.log('Handling FunctionDefinition: ' + funName);
-  const ctx = node.context as ASTContext;
-  console.assert(node.context !== undefined);
-  const factory = new ASTNodeFactory(ctx);
+function postCheckFunName(f: string): string {
+  return '_' + f + 'Post';
+}
 
-  let preFunName, postFunName: string | undefined;
+function uncheckedFunName(f: string): string {
+  return f + '_original';
+}
 
-  if (spec.preCond !== undefined) {
-    preFunName = preCheckFunName(funName);
-    console.log('inserting ' + preFunName);
-    const newInputs = copyNodes(factory, (node as FunctionDefinition).vParameters.vParameters);
-    attachNames(spec.call.args, newInputs);
-    const newParams = new ParameterList(0, '', [...newInputs]);
-    const preCondFunc = makeFlatCheckFun(
-      ctx,
-      factory,
-      node.id,
-      preFunName,
-      spec.preCond,
-      FunctionKind.Function, // this is condFunc, always function
-      FunctionVisibility.Public,
-      FunctionStateMutability.NonPayable,
-      newParams,
+class ValSpecTransformer<T> {
+  ctx: ASTContext;
+  factory: ASTNodeFactory;
+  funDef: FunctionDefinition;
+  funName: string;
+  spec: ValSpec<T>;
+  params: ParameterList;
+  retParams: ParameterList;
+
+  constructor(funDef: FunctionDefinition, spec: ValSpec<T>) {
+    this.funDef = funDef;
+    this.funName = extractFunName(funDef);
+    this.spec = spec;
+    this.ctx = funDef.context as ASTContext;
+    this.factory = new ASTNodeFactory(this.ctx);
+    this.params = (this.funDef as FunctionDefinition).vParameters;
+    this.retParams = (this.funDef as FunctionDefinition).vReturnParameters;
+  }
+
+  makeFlatCheckFun(funName: string, condExpr: T, params: ParameterList): FunctionDefinition {
+    const retNode = this.factory.makePhantomExpression('bool', condExpr as string);
+    const boolRetVar = this.factory.makeVariableDeclaration(
+      false, // constant
+      false, // indexed
+      'bool', // name
+      0, // scope
+      false, // stateVariable
+      DataLocation.Default, // storageLocation
+      StateVariableVisibility.Default, // visibility
+      Mutability.Constant, // mutability
+      'bool', // typeString, "bool"
     );
-    node.vScope.appendChild(preCondFunc);
-  }
-
-  if (spec.postCond !== undefined) {
-    postFunName = postCheckFunName(funName);
-    console.log('inserting ' + postFunName);
-    const newInputs = copyNodes(factory, (node as FunctionDefinition).vParameters.vParameters);
-    attachNames(spec.call.args, newInputs);
-    // Note(GW): retParams can have names that refer to local variables defined in the function body
-    const retParams = copyNodes(factory, (node as FunctionDefinition).vReturnParameters.vParameters);
-    attachNames(spec.call.rets, retParams);
-    const allParams = new ParameterList(0, '', [...newInputs, ...retParams]);
-    const postCondFunc = makeFlatCheckFun(
-      ctx,
-      factory,
-      node.id,
-      postFunName,
-      spec.postCond,
-      FunctionKind.Function, // this is condFunc, always function
-      FunctionVisibility.Public,
+    const retParams = new ParameterList(0, '', [boolRetVar]);
+    const retStmt = this.factory.makeReturn(retNode.id, retNode);
+    const funBody = this.factory.makeBlock([retStmt]);
+    const funDef = this.factory.makeFunctionDefinition(
+      this.funDef.scope, // XXX(GW): why?
+      FunctionKind.Function,
+      funName,
+      false, // virtual
+      FunctionVisibility.Private,
       FunctionStateMutability.NonPayable,
-      allParams,
+      false, // funKind == FunctionKind.Constructor,
+      params,
+      retParams,
+      [], //modifier
+      undefined,
+      funBody,
     );
-    node.vScope.appendChild(postCondFunc);
+    return funDef;
   }
 
-  if (spec.preFunSpec) {
-    // only handle address for now
-    // only handle first order preFunSpec
-    handlePreFunSpec(ctx, node, factory, spec.preFunSpec, 'guardedCall');
+  makeTypeDecls(types: TypeName[], names: string[]): VariableDeclaration[] {
+    return types.map((ty, i) => {
+      const retTypeDecl = this.factory.makeVariableDeclaration(
+	false,
+	false,
+	names[i],
+	this.funDef.scope,
+	false,
+	DataLocation.Default,
+	StateVariableVisibility.Default,
+	Mutability.Mutable,
+	types[i].typeString,
+      );
+      retTypeDecl.vType = ty;
+      return retTypeDecl;
+    });
   }
 
-  if (spec.postFunSpec) {
-    // addr: not supported
+  makeRequireStmt(constraint: Expression, msg: string): ExpressionStatement {
+    const callArgs = [
+      constraint,
+      this.factory.makeLiteral('string', LiteralKind.String, Buffer.from(msg, 'utf8').toString('hex'), msg),
+    ];
+    const requireFn = this.factory.makeIdentifier('function (bool,string memory) pure', 'require', -1);
+    const requireCall = this.factory.makeFunctionCall('bool', FunctionCallKind.FunctionCall, requireFn, callArgs);
+    return this.factory.makeExpressionStatement(requireCall);
   }
 
-  if (spec.preCond || spec.postCond) {
-    console.log('inserting ValSpec wrapper function for ' + funName);
+  makeCheckStmt(funName: string, args: Expression[], errorMsg: string): ExpressionStatement {
+    const call = this.factory.makeFunctionCall(
+      'bool',
+      FunctionCallKind.FunctionCall,
+      this.factory.makeIdentifier('function', funName, -1),
+      args,
+    );
+    return this.makeRequireStmt(call, errorMsg);
+  }
 
-    const retTypes: TypeName[] = node.vReturnParameters.vParameters
+  preCondCheckFun(): FunctionDefinition | undefined {
+    if (this.spec.preCond === undefined) return undefined;
+    const preFunName = preCheckFunName(this.funName);
+    const inputParams = makeNewParams(this.factory, this.spec.call.args, this.params.vParameters);
+    const allParams = new ParameterList(0, '', [...inputParams]);
+    const preFunDef = this.makeFlatCheckFun(preFunName, this.spec.preCond, allParams);
+    return preFunDef;
+  }
+
+  postCondCheckFun(): FunctionDefinition | undefined {
+    if (this.spec.postCond === undefined) return undefined;
+    const postFunName = postCheckFunName(this.funName);
+    const inputParams = makeNewParams(this.factory, this.spec.call.args, this.params.vParameters);
+    const retParams = makeNewParams(this.factory, this.spec.call.rets, this.retParams.vParameters);
+    const allParams = new ParameterList(0, '', [...inputParams, ...retParams]);
+    const postCondFunc = this.makeFlatCheckFun(postFunName, this.spec.postCond, allParams);
+    return postCondFunc;
+  }
+
+  wrapperFun(preCondFun: FunctionDefinition|undefined, postCondFun: FunctionDefinition|undefined): FunctionDefinition|undefined {
+    if (preCondFun === undefined && postCondFun === undefined) return undefined;
+
+    const retTypes: TypeName[] = this.retParams.vParameters
       ?.map((param) => param.vType)
       .filter((vType): vType is TypeName => vType !== undefined); // filter out the undefined object
-    assert(retTypes.length === spec.call.rets.length, 'some return parameters are missing type');
-    const retVarNames: string[] = spec.call.rets;
+    assert(retTypes.length === this.spec.call.rets.length, 'some return parameters are missing type');
 
-    const wrapperFun = makeWrapperFun(
-      ctx,
-      factory,
-      node.id,
-      funName,
-      originalFunName,
-      isConstructor(node) ? FunctionKind.Constructor : FunctionKind.Function,
-      node.stateMutability,
-      (node as FunctionDefinition).vParameters,
-      retTypes,
-      retVarNames,
-      preFunName,
-      postFunName,
-    );
-    node.vScope.appendChild(wrapperFun);
-    node.visibility = FunctionVisibility.Private;
-    // TODO: stateMutability: pure/payable/nonpayable ...
-    // TODO: data localtion
-    if (node.isConstructor) {
-      node.isConstructor = false;
-      node.kind = FunctionKind.Function;
+    const retTypeStr = retTypes.length > 0 ? '(' + retTypes.map((t) => t.typeString).toString() + ')' : 'void';
+    const retTypeDecls = this.makeTypeDecls(retTypes, this.spec.call.rets);
+    const stmts = [];
+
+    // Generate function call to check pre-condition (if any)
+    if (preCondFun) {
+      const errorMsg = 'Violate the precondition for function ' + this.funName;
+      const preCondRequireStmt = this.makeCheckStmt(
+	preCondFun.name,
+	makeIdsFromVarDecls(this.factory, this.params.vParameters),
+	errorMsg,
+      );
+      stmts.push(preCondRequireStmt);
     }
+
+    // Generate function call to the original function
+    const uncheckedCall = this.factory.makeFunctionCall(
+      retTypeStr,
+      FunctionCallKind.FunctionCall,
+      this.factory.makeIdentifier('function', uncheckedFunName(this.funName), -1),
+      makeIdsFromVarDecls(this.factory, this.params.vParameters),
+    );
+    if (retTypeDecls.length > 0) {
+      const retIds = retTypeDecls.map((r) => r.id);
+      const callAndAssignStmt = this.factory.makeVariableDeclarationStatement(retIds, retTypeDecls, uncheckedCall);
+      stmts.push(callAndAssignStmt);
+    } else {
+      const uncheckedCallStmt = this.factory.makeExpressionStatement(uncheckedCall);
+      stmts.push(uncheckedCallStmt);
+    }
+
+    // Generate function call to check post-condition (if any)
+    if (postCondFun) {
+      let postCallArgs = makeIdsFromVarDecls(this.factory, this.params.vParameters);
+      if (retTypes.length > 0) {
+	postCallArgs = postCallArgs.concat(makeIdsFromVarDecls(this.factory, retTypeDecls));
+      }
+      const errorMsg = 'Violate the postondition for function ' + this.funName;
+      const postRequireStmt = this.makeCheckStmt(postCondFun.name, postCallArgs, errorMsg);
+      stmts.push(postRequireStmt);
+    }
+
+    // Create the return statement (if any)
+    if (retTypeDecls.length > 0) {
+      const retValTuple = this.factory.makeTupleExpression(
+	retTypeStr,
+	false,
+	retTypeDecls.map((r) => this.factory.makeIdentifierFor(r)),
+      );
+      const retStmt = this.factory.makeReturn(retValTuple.id, retValTuple);
+      stmts.push(retStmt);
+    }
+
+    // Build function body
+    const funBody = this.factory.makeBlock(stmts);
+    const funDef = this.factory.makeFunctionDefinition(
+      this.funDef.scope,
+      this.funDef.kind,
+      this.funName,
+      this.funDef.virtual,
+      this.funDef.visibility,
+      this.funDef.stateMutability,
+      this.funDef.kind == FunctionKind.Constructor,
+      this.params,
+      new ParameterList(0, '', retTypeDecls),
+      [], // modifier
+      undefined,
+      funBody,
+    );
+
+    return funDef;
+  }
+
+  apply() {
+    const preFun = this.preCondCheckFun()
+    if (preFun) this.funDef.vScope.appendChild(preFun);
+    const postFun = this.postCondCheckFun()
+    if (postFun) this.funDef.vScope.appendChild(postFun);
+
+    const wrapper = this.wrapperFun(preFun, postFun);
+    if (wrapper) {
+      this.funDef.vScope.appendChild(wrapper);
+      this.funDef.name = uncheckedFunName(this.funName);
+      this.funDef.visibility = FunctionVisibility.Private;
+      if (this.funDef.isConstructor) {
+	// If the spec is attached on a constructor, we generate a new constructo,
+	// and the original constructor becoems an ordinary function.
+	this.funDef.isConstructor = false;
+	this.funDef.kind = FunctionKind.Function;
+      }
+    }
+    // TODO(DX): stateMutability: pure/payable/nonpayable ...
+    // TODO(DX): data localtion
   }
 }
 
@@ -477,8 +438,8 @@ export function handleValSpec<T>(node: ASTNode, spec: ValSpec<T>) {
   console.log(spec);
   console.log(spec.tag);
   if (node instanceof FunctionDefinition) {
-    //const trans = new ValSpecTransformer(node, spec);
-    handleValSpecFunDef(node, spec);
+    const trans = new ValSpecTransformer(node, spec);
+    trans.apply();
   } else if (node instanceof EventDefinition) {
     // TODO: optional
   } else {

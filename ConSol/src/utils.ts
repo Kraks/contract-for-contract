@@ -49,10 +49,8 @@ export function makeIdsFromVarDecls(factory: ASTNodeFactory, vds: VariableDeclar
   return vds.map((vd) => makeIdFromVarDecl(factory, vd));
 }
 
-export function preCheckFunName(f: string): string {
-  return '_' + f + 'Pre';
-}
-
-export function postCheckFunName(f: string): string {
-  return '_' + f + 'Post';
+export function makeNewParams(factory: ASTNodeFactory, names: string[], decls: VariableDeclaration[]): VariableDeclaration[] {
+  const params = copyNodes(factory, decls);
+  attachNames(names, params);
+  return params;
 }
