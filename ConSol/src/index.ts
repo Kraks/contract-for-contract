@@ -40,8 +40,8 @@ async function main() {
   // }
 
   // const inputPath = args[1];
-  const inputPath = './test/testCallFoo.sol';
-  //const inputPath = './test/Lock.sol';
+  //const inputPath = './test/testCallFoo.sol';
+  const inputPath = './test/Lock.sol';
   const filename = path.basename(inputPath);
   const dirname = path.dirname(inputPath);
 

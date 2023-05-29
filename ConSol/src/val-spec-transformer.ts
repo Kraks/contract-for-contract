@@ -264,13 +264,15 @@ class ValSpecTransformer<T> {
     this.scope = scope;
     this.spec = spec;
     this.tgtName = tgtName;
-    this.params = params;
-    this.retParams = retParams;
     if (factory === undefined) {
       this.factory = new ASTNodeFactory(this.ctx);
     } else {
       this.factory = factory;
     }
+    const args = [...spec.call.kwargs.map((p) => p.fst), ...spec.call.args];
+    this.params = makeNewParams(this.factory, args, params);
+    const rets = [...args, ...this.spec.call.rets];
+    this.retParams = makeNewParams(this.factory, rets, [...params, ...retParams]);
   }
 
   makeFlatCheckFun(funName: string, condExpr: T, params: ParameterList): FunctionDefinition {
@@ -307,6 +309,7 @@ class ValSpecTransformer<T> {
   }
 
   makeTypedVarDecls(types: TypeName[], names: string[]): VariableDeclaration[] {
+    assert
     return types.map((ty, i) => {
       const retTypeDecl = this.factory.makeVariableDeclaration(
         false,
@@ -347,8 +350,8 @@ class ValSpecTransformer<T> {
   preCondCheckFun(): FunctionDefinition | undefined {
     if (this.spec.preCond === undefined) return undefined;
     const preFunName = preCheckFunName(this.tgtName);
-    const inputParams = makeNewParams(this.factory, this.spec.call.args, this.params);
-    const allParams = new ParameterList(0, '', [...inputParams]);
+    // FIXME(GW): should use factory.makeParameterList...
+    const allParams = new ParameterList(0, '', [...this.params]);
     const preFunDef = this.makeFlatCheckFun(preFunName, this.spec.preCond, allParams);
     return preFunDef;
   }
@@ -356,9 +359,7 @@ class ValSpecTransformer<T> {
   postCondCheckFun(): FunctionDefinition | undefined {
     if (this.spec.postCond === undefined) return undefined;
     const postFunName = postCheckFunName(this.tgtName);
-    const inputParams = makeNewParams(this.factory, this.spec.call.args, this.params);
-    const retParams = makeNewParams(this.factory, this.spec.call.rets, this.retParams);
-    const allParams = new ParameterList(0, '', [...inputParams, ...retParams]);
+    const allParams = new ParameterList(0, '', [...this.retParams]);
     const postCondFunc = this.makeFlatCheckFun(postFunName, this.spec.postCond, allParams);
     return postCondFunc;
   }
@@ -491,13 +492,17 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
 class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   funDef: FunctionDefinition;
   retTypes: TypeName[];
+  declaredParams: VariableDeclaration[];
+  declaredRetParams: VariableDeclaration[];
 
   constructor(funDef: FunctionDefinition, spec: ValSpec<T>) {
-    const params = (funDef as FunctionDefinition).vParameters.vParameters;
-    const retParams = (funDef as FunctionDefinition).vReturnParameters.vParameters;
-    super(funDef.context as ASTContext, funDef.scope, spec, extractFunName(funDef), params, retParams);
+    const declaredParams = (funDef as FunctionDefinition).vParameters.vParameters;
+    const declaredRetParams = (funDef as FunctionDefinition).vReturnParameters.vParameters;
+    super(funDef.context as ASTContext, funDef.scope, spec, extractFunName(funDef), declaredParams, declaredRetParams);
+    this.declaredParams = declaredParams;
+    this.declaredRetParams = declaredRetParams;
     this.funDef = funDef;
-    this.retTypes = this.retParams
+    this.retTypes = this.declaredRetParams
       .map((param) => param.vType)
       .filter((vType): vType is TypeName => vType !== undefined); // filter out the undefined object
   }
@@ -520,7 +525,7 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
       const errorMsg = 'Violate the precondition for function ' + this.tgtName;
       const preCondRequireStmt = this.makeCheckStmt(
         preCondFun.name,
-        makeIdsFromVarDecls(this.factory, this.params),
+        makeIdsFromVarDecls(this.factory, this.declaredParams),
         errorMsg,
       );
       stmts.push(preCondRequireStmt);
@@ -531,7 +536,7 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
       retTypeStr,
       FunctionCallKind.FunctionCall,
       this.factory.makeIdentifier('function', uncheckedFunName(this.tgtName), -1),
-      makeIdsFromVarDecls(this.factory, this.params),
+      makeIdsFromVarDecls(this.factory, this.declaredParams),
     );
     if (retTypeDecls.length > 0) {
       const retIds = retTypeDecls.map((r) => r.id);
@@ -544,7 +549,7 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
 
     // Generate function call to check post-condition (if any)
     if (postCondFun) {
-      let postCallArgs = makeIdsFromVarDecls(this.factory, this.params);
+      let postCallArgs = makeIdsFromVarDecls(this.factory, this.declaredParams);
       if (this.retTypes.length > 0) {
         postCallArgs = postCallArgs.concat(makeIdsFromVarDecls(this.factory, retTypeDecls));
       }
