@@ -21,7 +21,12 @@ contract Caller {
         return flag==true;
     }
 
-    function dummy() private {}
+    function guarded_addr(address addr, uint256 value, uint256 gas, string memory mymsg,  uint256 x) public payable returns (bool flag, bytes memory data) {
+        require(_addrPre(value, gas, mymsg, x), "Violate the precondition for addressaddr");
+        (bool flag, bytes memory data) = _addr.call{value: msg.value, gas: 5000};
+        require(_addrPost(value, gas, mymsg, x, flag, data), "Violate the postondition for address addr");
+        return (flag, data);
+    }
 
     function testCallFoo(address payable _addr, int256 x) public payable {
         require(_testCallFooPre(_addr, x), "Violate the precondition for function testCallFoo");

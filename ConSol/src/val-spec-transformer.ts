@@ -393,6 +393,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
   member: string;
   tgtAddr: VariableDeclaration;
   callsites: (FunctionCallOptions | FunctionCall)[] = [];
+  argTypes: TypeName[];
+  retTypes: TypeName[];
 
   constructor(
     parent: FunctionDefinition,
@@ -410,6 +412,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     this.tgtAddr = tgtAddr;
     this.parentFunDef = parent;
     const [argTypes, retTypes] = this.findAddressSignature(properAddrName(tgtAddr.name, this.member));
+    this.argTypes = argTypes;
+    this.retTypes = retTypes;
     this.params = this.makeNamelessTypedVarDecls(argTypes);
     this.retParams = this.makeNamelessTypedVarDecls(retTypes);
   }
@@ -491,21 +495,78 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     return [argTypes, retTypes];
   }
 
-  guardedFun(): FunctionDefinition {
-    return this.factory.makeFunctionDefinition(
-      this.scope,
-      FunctionKind.Function,
-      'dummy',
+  guardedFun(
+    preCondFun: FunctionDefinition | undefined,
+    postCondFun: FunctionDefinition | undefined,
+  ): FunctionDefinition | undefined {
+    if (preCondFun === undefined && postCondFun === undefined) return undefined;
+
+    const retTypeStr = '(' + this.retTypes.map((t) => t.typeString).toString() + ')';
+    const retTypeDecls = this.makeTypedVarDecls(this.retTypes, this.spec.call.rets);
+
+    const args = [...this.spec.call.kwargs.map((p) => p.fst), ...this.spec.call.args];
+    const params = makeNewParams(this.factory, args, this.params);
+    const rets = [...args, ...this.spec.call.rets];
+    const retParams = makeNewParams(this.factory, rets, [...this.params, ...this.retParams]);
+
+    const stmts = [];
+
+    // Generate function call to check pre-condition (if any)
+    if (preCondFun) {
+      const errorMsg = 'Violate the precondition for address ' + this.tgtName;
+      const preCondRequireStmt = this.makeCheckStmt(
+        preCondFun.name,
+        makeIdsFromVarDecls(this.factory, params),
+        errorMsg,
+      );
+      stmts.push(preCondRequireStmt);
+    }
+
+    // Generate address call to the original addr
+    const uncheckedCall = this.callsites[0]; // FIXME (GW): replace arguments, renaming, etc.
+    const retIds = retTypeDecls.map((r) => r.id);
+    const callAndAssignStmt = this.factory.makeVariableDeclarationStatement(retIds, retTypeDecls, uncheckedCall);
+    stmts.push(callAndAssignStmt);
+
+    // Generate function call to check post-condition (if any)
+    if (postCondFun) {
+      let postCallArgs = makeIdsFromVarDecls(this.factory, retParams);
+      const errorMsg = 'Violate the postondition for address ' + this.tgtName;
+      const postRequireStmt = this.makeCheckStmt(postCondFun.name, postCallArgs, errorMsg);
+      stmts.push(postRequireStmt);
+    }
+
+    // Create the return statement (if any)
+    const retValTuple = this.factory.makeTupleExpression(
+      retTypeStr,
       false,
-      FunctionVisibility.Private,
-      FunctionStateMutability.NonPayable,
-      false,
-      new ParameterList(0, '', []),
-      new ParameterList(0, '', []),
-      [],
-      undefined,
-      this.factory.makeBlock([]),
+      retTypeDecls.map((r) => this.factory.makeIdentifierFor(r)),
     );
+    const retStmt = this.factory.makeReturn(retValTuple.id, retValTuple);
+    stmts.push(retStmt);
+
+    // Build function body
+    const funBody = this.factory.makeBlock(stmts);
+    const addrParam = this.makeNamelessTypedVarDecls([strToTypeName(this.factory, 'address')]);
+    const guardedParams = makeNewParams(this.factory, [this.addr, ...args], [addrParam[0], ...this.params]);
+    const guardedRetParams = makeNewParams(this.factory, this.spec.call.rets, this.makeNamelessTypedVarDecls(this.defaultAddrRetTypes()));
+    // TODO: double check following arguments
+    const funDef = this.factory.makeFunctionDefinition(
+      this.parentFunDef.scope,
+      FunctionKind.Function,
+      'guarded_' + this.tgtName,
+      this.parentFunDef.virtual,
+      this.parentFunDef.visibility,
+      this.parentFunDef.stateMutability,
+      false,
+      new ParameterList(0, '', guardedParams),
+      new ParameterList(0, '', guardedRetParams),
+      [], // modifier
+      undefined,
+      funBody,
+    );
+
+    return funDef;
   }
 
   apply(): void {
@@ -514,7 +575,14 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     const postFun = this.postCondCheckFun();
     if (postFun) this.parentFunDef.vScope.appendChild(postFun);
 
-    this.parentFunDef.vScope.appendChild(this.guardedFun());
+    // step 1: generate guarded address call function
+    const wrapper = this.guardedFun(preFun, postFun);
+    if (wrapper) {
+      this.parentFunDef.vScope.appendChild(wrapper);
+
+      // step 2: replace all address call with the guarded address call
+      // TODO
+    }
   }
 }
 
@@ -633,8 +701,6 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     const postFun = this.postCondCheckFun();
     if (postFun) this.funDef.vScope.appendChild(postFun);
 
-    // step 1: generate guarded address call function
-    // step 2: replace all address call with the guarded address call
     if (this.spec.preFunSpec !== undefined) { // XXX(GW): this seems unnecessary; preFunSpepc is an array
       const addrTrans = this.spec.preFunSpec.map((s) => this.addrTransformers(s));
       addrTrans.forEach((tr) => {
