@@ -13,6 +13,14 @@ contract Caller {
         return x>0;
     }
 
+    function _addrPre(uint256 value, uint256 gas, string memory mymsg,  uint256 x) private returns (bool) {
+        return v>5&&g<10000&&x!=0;
+    }
+
+    function _addrPost(uint256 value, uint256 gas, string memory mymsg,  uint256 x, bool flag, bytes memory data) private returns (bool) {
+        return flag==true;
+    }
+
     function dummy() private {}
 
     function testCallFoo(address payable _addr, int256 x) public payable {

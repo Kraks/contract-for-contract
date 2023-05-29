@@ -507,6 +507,15 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
       this.factory.makeBlock([]),
     );
   }
+
+  apply(): void {
+    const preFun = this.preCondCheckFun();
+    if (preFun) this.parentFunDef.vScope.appendChild(preFun);
+    const postFun = this.postCondCheckFun();
+    if (postFun) this.parentFunDef.vScope.appendChild(postFun);
+
+    this.parentFunDef.vScope.appendChild(this.guardedFun());
+  }
 }
 
 class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
@@ -629,7 +638,7 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     if (this.spec.preFunSpec !== undefined) { // XXX(GW): this seems unnecessary; preFunSpepc is an array
       const addrTrans = this.spec.preFunSpec.map((s) => this.addrTransformers(s));
       addrTrans.forEach((tr) => {
-	this.funDef.vScope.appendChild(tr.guardedFun());
+	tr.apply();
       });
     }
 
