@@ -66,7 +66,7 @@ contract Lock {
         return a>0&&b>0;
     }
 
-    function getSum(int256 a, int256 b) public pure returns (int256 c) {
+    function getSum(int256 a, int256 b) public pure returns (int256) {
         require(_getSumPre(a, b), "Violate the precondition for function getSum");
         int256 c = getSum_original(a, b);
         return (c);
@@ -80,7 +80,7 @@ contract Lock {
         return c>0;
     }
 
-    function getSum2Ret(int256 a, int256 b) public pure returns (int256 c, int256 d) {
+    function getSum2Ret(int256 a, int256 b) public pure returns (int256, int256) {
         require(_getSum2RetPre(a, b), "Violate the precondition for function getSum2Ret");
         (int256 c, int256 d) = getSum2Ret_original(a, b);
         require(_getSum2RetPost(a, b, c, d), "Violate the postondition for function getSum2Ret");

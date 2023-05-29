@@ -223,20 +223,21 @@ function uncheckedFunName(f: string): string {
 class ValSpecTransformer<T> {
   ctx: ASTContext;
   factory: ASTNodeFactory;
-  funDef: FunctionDefinition;
-  funName: string;
+  scope: number;
   spec: ValSpec<T>;
-  params: ParameterList;
-  retParams: ParameterList;
+  tgtName: string;
+  params: VariableDeclaration[];
+  retParams: VariableDeclaration[];
 
-  constructor(funDef: FunctionDefinition, spec: ValSpec<T>) {
-    this.funDef = funDef;
-    this.funName = extractFunName(funDef);
-    this.spec = spec;
-    this.ctx = funDef.context as ASTContext;
+  constructor(ctx: ASTContext, scope: number, spec: ValSpec<T>, tgtName: string,
+	      params: VariableDeclaration[], retParams: VariableDeclaration[]) {
+    this.ctx = ctx;
     this.factory = new ASTNodeFactory(this.ctx);
-    this.params = (this.funDef as FunctionDefinition).vParameters;
-    this.retParams = (this.funDef as FunctionDefinition).vReturnParameters;
+    this.scope = scope;
+    this.spec = spec;
+    this.tgtName = tgtName;
+    this.params = params;
+    this.retParams = retParams;
   }
 
   makeFlatCheckFun(funName: string, condExpr: T, params: ParameterList): FunctionDefinition {
@@ -255,8 +256,8 @@ class ValSpecTransformer<T> {
     const retParams = new ParameterList(0, '', [boolRetVar]);
     const retStmt = this.factory.makeReturn(retNode.id, retNode);
     const funBody = this.factory.makeBlock([retStmt]);
-    const funDef = this.factory.makeFunctionDefinition(
-      this.funDef.scope, // XXX(GW): why?
+    const checkFunDef = this.factory.makeFunctionDefinition(
+      this.scope,
       FunctionKind.Function,
       funName,
       false, // virtual
@@ -269,7 +270,7 @@ class ValSpecTransformer<T> {
       undefined,
       funBody,
     );
-    return funDef;
+    return checkFunDef;
   }
 
   makeTypeDecls(types: TypeName[], names: string[]): VariableDeclaration[] {
@@ -278,7 +279,7 @@ class ValSpecTransformer<T> {
         false,
         false,
         names[i],
-        this.funDef.scope,
+        this.scope,
         false,
         DataLocation.Default,
         StateVariableVisibility.Default,
@@ -312,8 +313,8 @@ class ValSpecTransformer<T> {
 
   preCondCheckFun(): FunctionDefinition | undefined {
     if (this.spec.preCond === undefined) return undefined;
-    const preFunName = preCheckFunName(this.funName);
-    const inputParams = makeNewParams(this.factory, this.spec.call.args, this.params.vParameters);
+    const preFunName = preCheckFunName(this.tgtName);
+    const inputParams = makeNewParams(this.factory, this.spec.call.args, this.params);
     const allParams = new ParameterList(0, '', [...inputParams]);
     const preFunDef = this.makeFlatCheckFun(preFunName, this.spec.preCond, allParams);
     return preFunDef;
@@ -321,21 +322,32 @@ class ValSpecTransformer<T> {
 
   postCondCheckFun(): FunctionDefinition | undefined {
     if (this.spec.postCond === undefined) return undefined;
-    const postFunName = postCheckFunName(this.funName);
-    const inputParams = makeNewParams(this.factory, this.spec.call.args, this.params.vParameters);
-    const retParams = makeNewParams(this.factory, this.spec.call.rets, this.retParams.vParameters);
+    const postFunName = postCheckFunName(this.tgtName);
+    const inputParams = makeNewParams(this.factory, this.spec.call.args, this.params);
+    const retParams = makeNewParams(this.factory, this.spec.call.rets, this.retParams);
     const allParams = new ParameterList(0, '', [...inputParams, ...retParams]);
     const postCondFunc = this.makeFlatCheckFun(postFunName, this.spec.postCond, allParams);
     return postCondFunc;
   }
+}
 
-  wrapperFun(
+class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
+  funDef: FunctionDefinition;
+
+  constructor(funDef: FunctionDefinition, spec: ValSpec<T>) {
+    const params = (funDef as FunctionDefinition).vParameters.vParameters;;
+    const retParams = (funDef as FunctionDefinition).vReturnParameters.vParameters;
+    super(funDef.context as ASTContext, funDef.scope, spec, extractFunName(funDef), params, retParams);
+    this.funDef = funDef;
+  }
+
+  guardedFun(
     preCondFun: FunctionDefinition | undefined,
     postCondFun: FunctionDefinition | undefined,
   ): FunctionDefinition | undefined {
     if (preCondFun === undefined && postCondFun === undefined) return undefined;
 
-    const retTypes: TypeName[] = this.retParams.vParameters
+    const retTypes: TypeName[] = this.retParams
       ?.map((param) => param.vType)
       .filter((vType): vType is TypeName => vType !== undefined); // filter out the undefined object
     assert(retTypes.length === this.spec.call.rets.length, 'some return parameters are missing type');
@@ -346,10 +358,10 @@ class ValSpecTransformer<T> {
 
     // Generate function call to check pre-condition (if any)
     if (preCondFun) {
-      const errorMsg = 'Violate the precondition for function ' + this.funName;
+      const errorMsg = 'Violate the precondition for function ' + this.tgtName;
       const preCondRequireStmt = this.makeCheckStmt(
         preCondFun.name,
-        makeIdsFromVarDecls(this.factory, this.params.vParameters),
+        makeIdsFromVarDecls(this.factory, this.params),
         errorMsg,
       );
       stmts.push(preCondRequireStmt);
@@ -359,8 +371,8 @@ class ValSpecTransformer<T> {
     const uncheckedCall = this.factory.makeFunctionCall(
       retTypeStr,
       FunctionCallKind.FunctionCall,
-      this.factory.makeIdentifier('function', uncheckedFunName(this.funName), -1),
-      makeIdsFromVarDecls(this.factory, this.params.vParameters),
+      this.factory.makeIdentifier('function', uncheckedFunName(this.tgtName), -1),
+      makeIdsFromVarDecls(this.factory, this.params),
     );
     if (retTypeDecls.length > 0) {
       const retIds = retTypeDecls.map((r) => r.id);
@@ -373,11 +385,11 @@ class ValSpecTransformer<T> {
 
     // Generate function call to check post-condition (if any)
     if (postCondFun) {
-      let postCallArgs = makeIdsFromVarDecls(this.factory, this.params.vParameters);
+      let postCallArgs = makeIdsFromVarDecls(this.factory, this.params);
       if (retTypes.length > 0) {
         postCallArgs = postCallArgs.concat(makeIdsFromVarDecls(this.factory, retTypeDecls));
       }
-      const errorMsg = 'Violate the postondition for function ' + this.funName;
+      const errorMsg = 'Violate the postondition for function ' + this.tgtName;
       const postRequireStmt = this.makeCheckStmt(postCondFun.name, postCallArgs, errorMsg);
       stmts.push(postRequireStmt);
     }
@@ -398,13 +410,13 @@ class ValSpecTransformer<T> {
     const funDef = this.factory.makeFunctionDefinition(
       this.funDef.scope,
       this.funDef.kind,
-      this.funName,
+      this.tgtName,
       this.funDef.virtual,
       this.funDef.visibility,
       this.funDef.stateMutability,
       this.funDef.kind == FunctionKind.Constructor,
-      this.params,
-      new ParameterList(0, '', retTypeDecls),
+      this.funDef.vParameters,
+      this.funDef.vReturnParameters, //new ParameterList(0, '', retTypeDecls),
       [], // modifier
       undefined,
       funBody,
@@ -413,16 +425,27 @@ class ValSpecTransformer<T> {
     return funDef;
   }
 
+  //guardedAddressFun(spec: ValSpec): FunctionDefinition {}
+
+  guardedAddressFuns(): FunctionDefinition[] {
+    this.spec.preFunSpec;
+    return [];
+  }
+
   apply() {
     const preFun = this.preCondCheckFun();
     if (preFun) this.funDef.vScope.appendChild(preFun);
     const postFun = this.postCondCheckFun();
     if (postFun) this.funDef.vScope.appendChild(postFun);
 
-    const wrapper = this.wrapperFun(preFun, postFun);
+    // generate guarded address call function
+    // replace all address call with the guarded address call
+    this.guardedAddressFuns();
+
+    const wrapper = this.guardedFun(preFun, postFun);
     if (wrapper) {
       this.funDef.vScope.appendChild(wrapper);
-      this.funDef.name = uncheckedFunName(this.funName);
+      this.funDef.name = uncheckedFunName(this.tgtName);
       this.funDef.visibility = FunctionVisibility.Private;
       if (this.funDef.isConstructor) {
         // If the spec is attached on a constructor, we generate a new constructo,
@@ -441,7 +464,7 @@ export function handleValSpec<T>(node: ASTNode, spec: ValSpec<T>) {
   console.log(spec);
   console.log(spec.tag);
   if (node instanceof FunctionDefinition) {
-    const trans = new ValSpecTransformer(node, spec);
+    const trans = new FunDefValSpecTransformer(node, spec);
     trans.apply();
   } else if (node instanceof EventDefinition) {
     // TODO: optional
