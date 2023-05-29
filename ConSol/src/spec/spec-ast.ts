@@ -71,7 +71,6 @@ export type TempSpec<T> = Opaque<$TempSpec<T>, 'TempSpec'>;
 
 export type CSSpec<T> = ValSpec<T> | TempSpec<T>;
 
-// Note: this is not safe yet -- should narrow the `any` type
 export function makeValSpec<T>(obj: $ValSpec<T>): ValSpec<T> {
   return {
     ...obj,

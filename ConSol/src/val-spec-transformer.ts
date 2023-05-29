@@ -23,6 +23,8 @@ import {
   Assignment,
   VariableDeclarationStatement,
   FunctionCallOptions,
+  MemberAccess,
+  Identifier
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -208,6 +210,8 @@ function handlePreFunSpec<T>(
   } // end for
 }
 
+/////////////////////////////////////////////////////////////////////
+
 function preCheckFunName(f: string): string {
   return '_' + f + 'Pre';
 }
@@ -220,6 +224,30 @@ function uncheckedFunName(f: string): string {
   return f + '_original';
 }
 
+function properAddrName<T>(addr: string, member: string): string {
+  return addr + "_" + member;
+}
+
+function extractRawAddr<T>(spec: ValSpec<T>): string {
+  // Note(GW): spec.call.addr is optional by the definition of garmmar.
+  // If it is undefined, then we are handling an address spec that only has a single callee.
+  // In this case, the funName field is actually the variable name for the address,
+  // and we synthesis the default callable member name (i.e. call);
+  // Otherwise, we are handling member access call (e.g. addr.send).
+  // TODO(GW): need test the "oterhwise" case.
+  if (spec.call.addr === undefined)
+    return spec.call.funName;
+  else
+    return spec.call.addr;
+}
+
+function extractAddrMember<T>(spec: ValSpec<T>): string {
+  if (spec.call.addr === undefined)
+    return "call";
+  else
+    return spec.call.funName;
+}
+
 class ValSpecTransformer<T> {
   ctx: ASTContext;
   factory: ASTNodeFactory;
@@ -230,14 +258,18 @@ class ValSpecTransformer<T> {
   retParams: VariableDeclaration[];
 
   constructor(ctx: ASTContext, scope: number, spec: ValSpec<T>, tgtName: string,
-	      params: VariableDeclaration[], retParams: VariableDeclaration[]) {
+	      params: VariableDeclaration[], retParams: VariableDeclaration[], factory?: ASTNodeFactory) {
     this.ctx = ctx;
-    this.factory = new ASTNodeFactory(this.ctx);
     this.scope = scope;
     this.spec = spec;
     this.tgtName = tgtName;
     this.params = params;
     this.retParams = retParams;
+    if (factory === undefined) {
+      this.factory = new ASTNodeFactory(this.ctx);
+    } else {
+      this.factory = factory;
+    }
   }
 
   makeFlatCheckFun(funName: string, condExpr: T, params: ParameterList): FunctionDefinition {
@@ -273,7 +305,7 @@ class ValSpecTransformer<T> {
     return checkFunDef;
   }
 
-  makeTypeDecls(types: TypeName[], names: string[]): VariableDeclaration[] {
+  makeTypedVarDecls(types: TypeName[], names: string[]): VariableDeclaration[] {
     return types.map((ty, i) => {
       const retTypeDecl = this.factory.makeVariableDeclaration(
         false,
@@ -331,14 +363,80 @@ class ValSpecTransformer<T> {
   }
 }
 
+class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
+  parentFunDef: FunctionDefinition;
+  addr: string;
+  member: string;
+  tgtAddr: VariableDeclaration;
+  callsites: Expression[] = [];
+
+  constructor(parent: FunctionDefinition, tgtAddr: VariableDeclaration, spec: ValSpec<T>,
+	      ctx: ASTContext, scope: number, factory?: ASTNodeFactory) {
+    const addr = extractRawAddr(spec);
+    const member = extractAddrMember(spec);
+    super(ctx, scope, spec, addr, [], [], factory);
+    this.addr = addr;
+    this.member = member;
+    this.tgtAddr = tgtAddr;
+    this.parentFunDef = parent;
+    this.findAddressSignature(properAddrName(tgtAddr.name, this.member));
+
+    // TODO(GW): need to setup these fields using findAddressSignature
+    this.params = [];
+    this.retParams = [];
+  }
+
+  findAddressSignature(properAddr: string) {
+    assert(this.parentFunDef.vBody !== undefined, "Empty function body");
+    const argTypes: TypeName[] = [];
+    const retTypes: TypeName[] = [];
+    
+    this.callsites = this.parentFunDef.vBody.getChildrenBySelector((node: ASTNode) => {
+      if (!(node instanceof FunctionCallOptions || node instanceof FunctionCall)) return false;
+      if (!(node.vExpression instanceof MemberAccess)) return false;
+      if (!(node.vExpression.vExpression instanceof Identifier)) return false;
+      // TODO(GW): simply comparing address identifier expression is not enough,
+      // consider address value flow...
+      const found = properAddrName(node.vExpression.vExpression.name, node.vExpression.memberName);
+      console.log(found + " and " + properAddr);
+      return found == properAddr;
+    });
+
+    // Note(GW): if there are mutiple call-sites, their signatures has to be the same,
+    console.log(this.callsites);
+    // WIP... should further find the child abi_encodeWithSignature
+  }
+
+  guardedFun(): FunctionDefinition {
+    return this.factory.makeFunctionDefinition(
+      this.scope,
+      FunctionKind.Function,
+      "dummy",
+      false,
+      FunctionVisibility.Private,
+      FunctionStateMutability.NonPayable,
+      false,
+      new ParameterList(0, '', []),
+      new ParameterList(0, '', []),
+      [],
+      undefined,
+      this.factory.makeBlock([])
+    );
+  }
+}
+
 class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   funDef: FunctionDefinition;
+  retTypes: TypeName[];
 
   constructor(funDef: FunctionDefinition, spec: ValSpec<T>) {
     const params = (funDef as FunctionDefinition).vParameters.vParameters;;
     const retParams = (funDef as FunctionDefinition).vReturnParameters.vParameters;
     super(funDef.context as ASTContext, funDef.scope, spec, extractFunName(funDef), params, retParams);
     this.funDef = funDef;
+    this.retTypes = this.retParams
+      .map((param) => param.vType)
+      .filter((vType): vType is TypeName => vType !== undefined); // filter out the undefined object
   }
 
   guardedFun(
@@ -347,13 +445,10 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   ): FunctionDefinition | undefined {
     if (preCondFun === undefined && postCondFun === undefined) return undefined;
 
-    const retTypes: TypeName[] = this.retParams
-      ?.map((param) => param.vType)
-      .filter((vType): vType is TypeName => vType !== undefined); // filter out the undefined object
-    assert(retTypes.length === this.spec.call.rets.length, 'some return parameters are missing type');
+    assert(this.retTypes.length === this.spec.call.rets.length, 'some return parameters are missing type');
 
-    const retTypeStr = retTypes.length > 0 ? '(' + retTypes.map((t) => t.typeString).toString() + ')' : 'void';
-    const retTypeDecls = this.makeTypeDecls(retTypes, this.spec.call.rets);
+    const retTypeStr = this.retTypes.length > 0 ? '(' + this.retTypes.map((t) => t.typeString).toString() + ')' : 'void';
+    const retTypeDecls = this.makeTypedVarDecls(this.retTypes, this.spec.call.rets);
     const stmts = [];
 
     // Generate function call to check pre-condition (if any)
@@ -386,7 +481,7 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     // Generate function call to check post-condition (if any)
     if (postCondFun) {
       let postCallArgs = makeIdsFromVarDecls(this.factory, this.params);
-      if (retTypes.length > 0) {
+      if (this.retTypes.length > 0) {
         postCallArgs = postCallArgs.concat(makeIdsFromVarDecls(this.factory, retTypeDecls));
       }
       const errorMsg = 'Violate the postondition for function ' + this.tgtName;
@@ -416,7 +511,7 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
       this.funDef.stateMutability,
       this.funDef.kind == FunctionKind.Constructor,
       this.funDef.vParameters,
-      this.funDef.vReturnParameters, //new ParameterList(0, '', retTypeDecls),
+      this.funDef.vReturnParameters,
       [], // modifier
       undefined,
       funBody,
@@ -425,11 +520,19 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     return funDef;
   }
 
-  //guardedAddressFun(spec: ValSpec): FunctionDefinition {}
+  findTargetAddr(def: FunctionDefinition, parentSpec: ValSpec<T>, addr: string): VariableDeclaration {
+    return def.vParameters.vParameters[parentSpec.call.args.findIndex((a) => a === addr)];
+  }
+
+  guardedAddressFun(spec: ValSpec<T>): FunctionDefinition {
+    const tgtAddr = this.findTargetAddr(this.funDef, this.spec, extractRawAddr(spec));
+    const tr = new AddrValSpecTransformer(this.funDef, tgtAddr, spec, this.ctx, this.scope, this.factory);
+    return tr.guardedFun();
+  }
 
   guardedAddressFuns(): FunctionDefinition[] {
-    this.spec.preFunSpec;
-    return [];
+    if (this.spec.preFunSpec === undefined) return []; // XXX(GW): this seems unnecessary; preFunSpepc is an array
+    return this.spec.preFunSpec.map((s) => this.guardedAddressFun(s));
   }
 
   apply() {
@@ -438,9 +541,11 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     const postFun = this.postCondCheckFun();
     if (postFun) this.funDef.vScope.appendChild(postFun);
 
-    // generate guarded address call function
-    // replace all address call with the guarded address call
-    this.guardedAddressFuns();
+    // step 1: generate guarded address call function
+    // step 2: replace all address call with the guarded address call
+    const gaddrs = this.guardedAddressFuns();
+    console.log(gaddrs.length);
+    gaddrs.forEach((f) => this.funDef.vScope.appendChild(f));
 
     const wrapper = this.guardedFun(preFun, postFun);
     if (wrapper) {

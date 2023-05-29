@@ -13,6 +13,8 @@ contract Caller {
         return x>0;
     }
 
+    function dummy() private {}
+
     function testCallFoo(address payable _addr, int256 x) public payable {
         require(_testCallFooPre(_addr, x), "Violate the precondition for function testCallFoo");
         testCallFoo_original(_addr, x);
