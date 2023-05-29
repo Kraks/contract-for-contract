@@ -247,7 +247,7 @@ class ValSpecTransformer<T> {
   factory: ASTNodeFactory;
   scope: number;
   spec: ValSpec<T>;
-  tgtName: string
+  tgtName: string;
   // Note(GW): these are parameters used for generating check functions, but they may not have correct binding names
   params: VariableDeclaration[];
   retParams: VariableDeclaration[];
@@ -308,7 +308,7 @@ class ValSpecTransformer<T> {
   }
 
   makeTypedVarDecls(types: TypeName[], names: string[]): VariableDeclaration[] {
-    assert(types.length == names.length, "The number of types should equal to the number of names");
+    assert(types.length == names.length, 'The number of types should equal to the number of names');
     return types.map((ty, i) => {
       const retTypeDecl = this.factory.makeVariableDeclaration(
         false,
@@ -331,7 +331,7 @@ class ValSpecTransformer<T> {
       const retTypeDecl = this.factory.makeVariableDeclaration(
         false,
         false,
-	'',
+        '',
         this.scope,
         false,
         DataLocation.Default,
@@ -530,7 +530,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
 
     // Generate function call to check post-condition (if any)
     if (postCondFun) {
-      let postCallArgs = makeIdsFromVarDecls(this.factory, retParams);
+      const postCallArgs = makeIdsFromVarDecls(this.factory, retParams);
       const errorMsg = 'Violate the postondition for address ' + this.tgtName;
       const postRequireStmt = this.makeCheckStmt(postCondFun.name, postCallArgs, errorMsg);
       stmts.push(postRequireStmt);
@@ -549,7 +549,11 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     const funBody = this.factory.makeBlock(stmts);
     const addrParam = this.makeNamelessTypedVarDecls([strToTypeName(this.factory, 'address')]);
     const guardedParams = makeNewParams(this.factory, [this.addr, ...args], [addrParam[0], ...this.params]);
-    const guardedRetParams = makeNewParams(this.factory, this.spec.call.rets, this.makeNamelessTypedVarDecls(this.defaultAddrRetTypes()));
+    const guardedRetParams = makeNewParams(
+      this.factory,
+      this.spec.call.rets,
+      this.makeNamelessTypedVarDecls(this.defaultAddrRetTypes()),
+    );
     // TODO: double check following arguments
     const funDef = this.factory.makeFunctionDefinition(
       this.parentFunDef.scope,
@@ -701,10 +705,11 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     const postFun = this.postCondCheckFun();
     if (postFun) this.funDef.vScope.appendChild(postFun);
 
-    if (this.spec.preFunSpec !== undefined) { // XXX(GW): this seems unnecessary; preFunSpepc is an array
+    if (this.spec.preFunSpec !== undefined) {
+      // XXX(GW): this seems unnecessary; preFunSpepc is an array
       const addrTrans = this.spec.preFunSpec.map((s) => this.addrTransformers(s));
       addrTrans.forEach((tr) => {
-	tr.apply();
+        tr.apply();
       });
     }
 
