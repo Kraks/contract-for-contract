@@ -13,6 +13,12 @@ contract Caller {
       abi.encodeWithSignature("foo(string, uint256)", "call foo", x)
     );
 
+    /*
+    (bool success1, bytes memory data1) = _addr.call(
+      abi.encodeWithSignature("foo(string, uint256)", "call foo", 456)
+    );
+   */
+
     emit Response(success, data);
   }
 }
