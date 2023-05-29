@@ -1,4 +1,12 @@
-import { ASTNodeFactory, FunctionDefinition, VariableDeclaration, Identifier, ASTNode, TypeName, assert } from 'solc-typed-ast';
+import {
+  ASTNodeFactory,
+  FunctionDefinition,
+  VariableDeclaration,
+  Identifier,
+  ASTNode,
+  TypeName,
+  assert,
+} from 'solc-typed-ast';
 
 import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
 
@@ -60,10 +68,8 @@ export function makeNewParams(
 }
 
 export function strToTypeName(factory: ASTNodeFactory, str: string): TypeName {
-  if (str === 'bytes')
-    return factory.makeElementaryTypeName('', 'bytes memory');
-  if (str === 'string')
-    return factory.makeElementaryTypeName('', 'string memory');
+  if (str === 'bytes') return factory.makeElementaryTypeName('', 'bytes memory');
+  if (str === 'string') return factory.makeElementaryTypeName('', 'string memory');
   // TODO(GW): other types with storage modifier
   return factory.makeElementaryTypeName('', str);
 }

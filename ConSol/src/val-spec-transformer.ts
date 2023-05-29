@@ -25,7 +25,7 @@ import {
   FunctionCallOptions,
   MemberAccess,
   Identifier,
-  Literal
+  Literal,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -192,10 +192,7 @@ function handlePreFunSpec<T>(
         arg.typeString,
       ),
     );
-    const retType: TypeName[] = [
-      strToTypeName(factory, 'bool'),
-      strToTypeName(factory, 'bytes memory')
-    ];
+    const retType: TypeName[] = [strToTypeName(factory, 'bool'), strToTypeName(factory, 'bytes memory')];
     const retVarName: string[] = ['flag', 'data'];
     const guardedCallFun = makeGuardedCallFun(
       ctx,
@@ -372,7 +369,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
   addr: string;
   member: string;
   tgtAddr: VariableDeclaration;
-  callsites: (FunctionCallOptions|FunctionCall)[] = [];
+  callsites: (FunctionCallOptions | FunctionCall)[] = [];
 
   constructor(
     parent: FunctionDefinition,
@@ -398,14 +395,17 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
 
   extractSigFromFuncCallOptions(call: FunctionCallOptions): string {
     const parentCall = call.parent;
-    assert(parentCall instanceof FunctionCall, "Must have a parent");
-    assert(parentCall.vExpression instanceof FunctionCallOptions, "This is the callee w/ options (ie the current call itself)");
+    assert(parentCall instanceof FunctionCall, 'Must have a parent');
+    assert(
+      parentCall.vExpression instanceof FunctionCallOptions,
+      'This is the callee w/ options (ie the current call itself)',
+    );
     return this.extractSigFromFuncCall(parentCall);
   }
   extractSigFromFuncCall(call: FunctionCall): string {
     const encodeCall = call.vArguments[0];
     // TODO(GW): this is not enough, consider the data can be encoded else where and passed to here.
-    assert(encodeCall instanceof FunctionCall, "This is the abi.encodeWithSignature call");
+    assert(encodeCall instanceof FunctionCall, 'This is the abi.encodeWithSignature call');
     // TODO(GW): again, this is not enough, consider the signature
     // string could be an aribrary expression instead of literal string.
     // Note(GW): for those cases that we cannot infer cheaply, we should ask user to provide more precise signature...
@@ -418,7 +418,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     if (call instanceof FunctionCall) {
       return this.extractSigFromFuncCall(call);
     }
-    assert(false, "dumbo type checker");
+    assert(false, 'dumbo type checker');
   }
   extractOptions(call: FunctionCallOptions | FunctionCall): Array<string> {
     if (call instanceof FunctionCallOptions) {
@@ -435,15 +435,14 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     });
   }
   signatureArgsToTypeName(sig: string): Array<TypeName> {
-    const args = sig.substring(sig.indexOf('(')+1, sig.lastIndexOf(')'));
+    const args = sig.substring(sig.indexOf('(') + 1, sig.lastIndexOf(')'));
     return args.split(',').map((ty) => {
       if (ty === 'string') return strToTypeName(this.factory, 'string');
       return strToTypeName(this.factory, ty);
     });
   }
   defaultAddrRetTypes(): Array<TypeName> {
-    return [strToTypeName(this.factory, 'bool'),
-	    strToTypeName(this.factory, 'bytes')];
+    return [strToTypeName(this.factory, 'bool'), strToTypeName(this.factory, 'bytes')];
   }
 
   findAddressSignature(properAddr: string): [Array<TypeName>, Array<TypeName>] {
@@ -459,14 +458,14 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
       console.log(found + ' and ' + properAddr);
       return found == properAddr;
     });
-    assert(this.callsites.length > 0, "Cannot find any call site for " + properAddr);
+    assert(this.callsites.length > 0, 'Cannot find any call site for ' + properAddr);
 
     // If there are mutiple call-sites, their signatures has to be the same, so let's pick a lucky one
     const callsite = this.callsites[0];
     const options = this.extractOptions(callsite);
     const signature = this.extractSigFromCall(callsite);
     const argTypes = this.optionsToTypeName(options);
-    argTypes.push(...(this.signatureArgsToTypeName(signature)));
+    argTypes.push(...this.signatureArgsToTypeName(signature));
     const retTypes = this.defaultAddrRetTypes();
     return [argTypes, retTypes];
   }
