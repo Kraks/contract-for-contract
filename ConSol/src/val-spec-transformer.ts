@@ -247,7 +247,8 @@ class ValSpecTransformer<T> {
   factory: ASTNodeFactory;
   scope: number;
   spec: ValSpec<T>;
-  tgtName: string;
+  tgtName: string
+  // Note(GW): these are parameters used for generating check functions, but they may not have correct binding names
   params: VariableDeclaration[];
   retParams: VariableDeclaration[];
 
@@ -269,10 +270,8 @@ class ValSpecTransformer<T> {
     } else {
       this.factory = factory;
     }
-    const args = [...spec.call.kwargs.map((p) => p.fst), ...spec.call.args];
-    this.params = makeNewParams(this.factory, args, params);
-    const rets = [...args, ...this.spec.call.rets];
-    this.retParams = makeNewParams(this.factory, rets, [...params, ...retParams]);
+    this.params = params;
+    this.retParams = retParams;
   }
 
   makeFlatCheckFun(funName: string, condExpr: T, params: ParameterList): FunctionDefinition {
@@ -280,7 +279,7 @@ class ValSpecTransformer<T> {
     const boolRetVar = this.factory.makeVariableDeclaration(
       false, // constant
       false, // indexed
-      'bool', // name
+      'bool', // name // FIME(GW): this doesn't look right
       0, // scope
       false, // stateVariable
       DataLocation.Default, // storageLocation
@@ -309,12 +308,30 @@ class ValSpecTransformer<T> {
   }
 
   makeTypedVarDecls(types: TypeName[], names: string[]): VariableDeclaration[] {
-    assert
+    assert(types.length == names.length, "The number of types should equal to the number of names");
     return types.map((ty, i) => {
       const retTypeDecl = this.factory.makeVariableDeclaration(
         false,
         false,
         names[i],
+        this.scope,
+        false,
+        DataLocation.Default,
+        StateVariableVisibility.Default,
+        Mutability.Mutable,
+        types[i].typeString,
+      );
+      retTypeDecl.vType = ty;
+      return retTypeDecl;
+    });
+  }
+
+  makeNamelessTypedVarDecls(types: TypeName[]): VariableDeclaration[] {
+    return types.map((ty, i) => {
+      const retTypeDecl = this.factory.makeVariableDeclaration(
+        false,
+        false,
+	'',
         this.scope,
         false,
         DataLocation.Default,
@@ -351,7 +368,9 @@ class ValSpecTransformer<T> {
     if (this.spec.preCond === undefined) return undefined;
     const preFunName = preCheckFunName(this.tgtName);
     // FIXME(GW): should use factory.makeParameterList...
-    const allParams = new ParameterList(0, '', [...this.params]);
+    const args = [...this.spec.call.kwargs.map((p) => p.fst), ...this.spec.call.args];
+    const params = makeNewParams(this.factory, args, this.params);
+    const allParams = new ParameterList(0, '', [...params]);
     const preFunDef = this.makeFlatCheckFun(preFunName, this.spec.preCond, allParams);
     return preFunDef;
   }
@@ -359,7 +378,10 @@ class ValSpecTransformer<T> {
   postCondCheckFun(): FunctionDefinition | undefined {
     if (this.spec.postCond === undefined) return undefined;
     const postFunName = postCheckFunName(this.tgtName);
-    const allParams = new ParameterList(0, '', [...this.retParams]);
+    const args = [...this.spec.call.kwargs.map((p) => p.fst), ...this.spec.call.args];
+    const rets = [...args, ...this.spec.call.rets];
+    const retParams = makeNewParams(this.factory, rets, [...this.params, ...this.retParams]);
+    const allParams = new ParameterList(0, '', [...retParams]);
     const postCondFunc = this.makeFlatCheckFun(postFunName, this.spec.postCond, allParams);
     return postCondFunc;
   }
@@ -388,10 +410,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     this.tgtAddr = tgtAddr;
     this.parentFunDef = parent;
     const [argTypes, retTypes] = this.findAddressSignature(properAddrName(tgtAddr.name, this.member));
-
-    // TODO(GW): need to setup these fields using findAddressSignature
-    this.params = [];
-    this.retParams = [];
+    this.params = this.makeNamelessTypedVarDecls(argTypes);
+    this.retParams = this.makeNamelessTypedVarDecls(retTypes);
   }
 
   extractSigFromFuncCallOptions(call: FunctionCallOptions): string {
@@ -593,18 +613,12 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     return def.vParameters.vParameters[parentSpec.call.args.findIndex((a) => a === addr)];
   }
 
-  guardedAddressFun(spec: ValSpec<T>): FunctionDefinition {
-    const tgtAddr = this.findTargetAddr(this.funDef, this.spec, extractRawAddr(spec));
-    const tr = new AddrValSpecTransformer(this.funDef, tgtAddr, spec, this.ctx, this.scope, this.factory);
-    return tr.guardedFun();
+  addrTransformers(addrSpec: ValSpec<T>): AddrValSpecTransformer<T> {
+    const tgtAddr = this.findTargetAddr(this.funDef, this.spec, extractRawAddr(addrSpec));
+    return new AddrValSpecTransformer(this.funDef, tgtAddr, addrSpec, this.ctx, this.scope, this.factory);
   }
 
-  guardedAddressFuns(): FunctionDefinition[] {
-    if (this.spec.preFunSpec === undefined) return []; // XXX(GW): this seems unnecessary; preFunSpepc is an array
-    return this.spec.preFunSpec.map((s) => this.guardedAddressFun(s));
-  }
-
-  apply() {
+  apply(): void {
     const preFun = this.preCondCheckFun();
     if (preFun) this.funDef.vScope.appendChild(preFun);
     const postFun = this.postCondCheckFun();
@@ -612,8 +626,12 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
 
     // step 1: generate guarded address call function
     // step 2: replace all address call with the guarded address call
-    const gaddrs = this.guardedAddressFuns();
-    gaddrs.forEach((f) => this.funDef.vScope.appendChild(f));
+    if (this.spec.preFunSpec !== undefined) { // XXX(GW): this seems unnecessary; preFunSpepc is an array
+      const addrTrans = this.spec.preFunSpec.map((s) => this.addrTransformers(s));
+      addrTrans.forEach((tr) => {
+	this.funDef.vScope.appendChild(tr.guardedFun());
+      });
+    }
 
     const wrapper = this.guardedFun(preFun, postFun);
     if (wrapper) {
