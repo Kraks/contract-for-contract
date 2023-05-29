@@ -24,7 +24,7 @@ import {
   VariableDeclarationStatement,
   FunctionCallOptions,
   MemberAccess,
-  Identifier
+  Identifier,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -225,7 +225,7 @@ function uncheckedFunName(f: string): string {
 }
 
 function properAddrName<T>(addr: string, member: string): string {
-  return addr + "_" + member;
+  return addr + '_' + member;
 }
 
 function extractRawAddr<T>(spec: ValSpec<T>): string {
@@ -235,17 +235,13 @@ function extractRawAddr<T>(spec: ValSpec<T>): string {
   // and we synthesis the default callable member name (i.e. call);
   // Otherwise, we are handling member access call (e.g. addr.send).
   // TODO(GW): need test the "oterhwise" case.
-  if (spec.call.addr === undefined)
-    return spec.call.funName;
-  else
-    return spec.call.addr;
+  if (spec.call.addr === undefined) return spec.call.funName;
+  else return spec.call.addr;
 }
 
 function extractAddrMember<T>(spec: ValSpec<T>): string {
-  if (spec.call.addr === undefined)
-    return "call";
-  else
-    return spec.call.funName;
+  if (spec.call.addr === undefined) return 'call';
+  else return spec.call.funName;
 }
 
 class ValSpecTransformer<T> {
@@ -257,8 +253,15 @@ class ValSpecTransformer<T> {
   params: VariableDeclaration[];
   retParams: VariableDeclaration[];
 
-  constructor(ctx: ASTContext, scope: number, spec: ValSpec<T>, tgtName: string,
-	      params: VariableDeclaration[], retParams: VariableDeclaration[], factory?: ASTNodeFactory) {
+  constructor(
+    ctx: ASTContext,
+    scope: number,
+    spec: ValSpec<T>,
+    tgtName: string,
+    params: VariableDeclaration[],
+    retParams: VariableDeclaration[],
+    factory?: ASTNodeFactory,
+  ) {
     this.ctx = ctx;
     this.scope = scope;
     this.spec = spec;
@@ -370,8 +373,14 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
   tgtAddr: VariableDeclaration;
   callsites: Expression[] = [];
 
-  constructor(parent: FunctionDefinition, tgtAddr: VariableDeclaration, spec: ValSpec<T>,
-	      ctx: ASTContext, scope: number, factory?: ASTNodeFactory) {
+  constructor(
+    parent: FunctionDefinition,
+    tgtAddr: VariableDeclaration,
+    spec: ValSpec<T>,
+    ctx: ASTContext,
+    scope: number,
+    factory?: ASTNodeFactory,
+  ) {
     const addr = extractRawAddr(spec);
     const member = extractAddrMember(spec);
     super(ctx, scope, spec, addr, [], [], factory);
@@ -387,10 +396,10 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
   }
 
   findAddressSignature(properAddr: string) {
-    assert(this.parentFunDef.vBody !== undefined, "Empty function body");
+    assert(this.parentFunDef.vBody !== undefined, 'Empty function body');
     const argTypes: TypeName[] = [];
     const retTypes: TypeName[] = [];
-    
+
     this.callsites = this.parentFunDef.vBody.getChildrenBySelector((node: ASTNode) => {
       if (!(node instanceof FunctionCallOptions || node instanceof FunctionCall)) return false;
       if (!(node.vExpression instanceof MemberAccess)) return false;
@@ -398,7 +407,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
       // TODO(GW): simply comparing address identifier expression is not enough,
       // consider address value flow...
       const found = properAddrName(node.vExpression.vExpression.name, node.vExpression.memberName);
-      console.log(found + " and " + properAddr);
+      console.log(found + ' and ' + properAddr);
       return found == properAddr;
     });
 
@@ -411,7 +420,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     return this.factory.makeFunctionDefinition(
       this.scope,
       FunctionKind.Function,
-      "dummy",
+      'dummy',
       false,
       FunctionVisibility.Private,
       FunctionStateMutability.NonPayable,
@@ -420,7 +429,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
       new ParameterList(0, '', []),
       [],
       undefined,
-      this.factory.makeBlock([])
+      this.factory.makeBlock([]),
     );
   }
 }
@@ -430,7 +439,7 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   retTypes: TypeName[];
 
   constructor(funDef: FunctionDefinition, spec: ValSpec<T>) {
-    const params = (funDef as FunctionDefinition).vParameters.vParameters;;
+    const params = (funDef as FunctionDefinition).vParameters.vParameters;
     const retParams = (funDef as FunctionDefinition).vReturnParameters.vParameters;
     super(funDef.context as ASTContext, funDef.scope, spec, extractFunName(funDef), params, retParams);
     this.funDef = funDef;
@@ -447,7 +456,8 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
 
     assert(this.retTypes.length === this.spec.call.rets.length, 'some return parameters are missing type');
 
-    const retTypeStr = this.retTypes.length > 0 ? '(' + this.retTypes.map((t) => t.typeString).toString() + ')' : 'void';
+    const retTypeStr =
+      this.retTypes.length > 0 ? '(' + this.retTypes.map((t) => t.typeString).toString() + ')' : 'void';
     const retTypeDecls = this.makeTypedVarDecls(this.retTypes, this.spec.call.rets);
     const stmts = [];
 
