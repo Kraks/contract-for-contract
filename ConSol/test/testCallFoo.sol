@@ -13,12 +13,17 @@ contract Caller {
       abi.encodeWithSignature("foo(string, uint256)", "call foo", x)
     );
 
-    /*
-    (bool success1, bytes memory data1) = _addr.call(
-      abi.encodeWithSignature("foo(string, uint256)", "call foo", 456)
-    );
-   */
-
     emit Response(success, data);
   }
+
+  // This one doesn't have value and gas
+
+  /// @custom:consol { testCallFoo(addr, x) requires {x > 0} where { addr(mymsg, x) returns (flag, data) requires { v > 5 && g < 10000 && x != 0 } ensures { flag == true } }}
+  function anotherTest(address payable _addr, int256 x) public payable {
+    (bool success, bytes memory data) = _addr.call(
+      abi.encodeWithSignature("foo(string, uint256)", "call foo", 456)
+    );
+    emit Response(success, data);
+  }
+
 }
