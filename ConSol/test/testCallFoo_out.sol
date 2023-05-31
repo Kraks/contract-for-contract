@@ -22,8 +22,8 @@ contract Caller {
     }
 
     function guarded_addr(address addr, uint256 value, uint256 gas, string memory mymsg,  uint256 x) public payable returns (bool flag, bytes memory data) {
-        require(_addrPre(value, gas, mymsg, x), "Violate the precondition for addressaddr");
-        (bool flag, bytes memory data) = _addr.call{value: msg.value, gas: 5000};
+        require(_addrPre(value, gas, mymsg, x), "Violate the precondition for address addr");
+        (bool flag, bytes memory data) = _addr.call{value: msg.value, gas: 5000}(abi.encodeWithSignature("foo(string, uint256)", "call foo", x));
         require(_addrPost(value, gas, mymsg, x, flag, data), "Violate the postondition for address addr");
         return (flag, data);
     }

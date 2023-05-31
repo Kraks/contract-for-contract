@@ -392,7 +392,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
   addr: string;
   member: string;
   tgtAddr: VariableDeclaration;
-  callsites: (FunctionCallOptions | FunctionCall)[] = [];
+  callsites: FunctionCall[] = [];
   argTypes: TypeName[];
   retTypes: TypeName[];
 
@@ -425,9 +425,9 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
       parentCall.vExpression instanceof FunctionCallOptions,
       'This is the callee w/ options (ie the current call itself)',
     );
-    return this.extractSigFromFuncCall(parentCall);
+    return this.extractSigFromCall(parentCall);
   }
-  extractSigFromFuncCall(call: FunctionCall): string {
+  extractSigFromCall(call: FunctionCall): string {
     const encodeCall = call.vArguments[0];
     // TODO(GW): this is not enough, consider the data can be encoded else where and passed to here.
     assert(encodeCall instanceof FunctionCall, 'This is the abi.encodeWithSignature call');
@@ -436,19 +436,10 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     // Note(GW): for those cases that we cannot infer cheaply, we should ask user to provide more precise signature...
     return (encodeCall.vArguments[0] as Literal).value;
   }
-  extractSigFromCall(call: FunctionCallOptions | FunctionCall): string {
-    if (call instanceof FunctionCallOptions) {
-      return this.extractSigFromFuncCallOptions(call);
-    }
-    if (call instanceof FunctionCall) {
-      return this.extractSigFromFuncCall(call);
-    }
-    assert(false, 'dumbo type checker');
-  }
-  extractOptions(call: FunctionCallOptions | FunctionCall): Array<string> {
-    if (call instanceof FunctionCallOptions) {
+  extractOptions(call: FunctionCall): Array<string> {
+    if (call.vExpression instanceof FunctionCallOptions) {
       // Caveat(GW): call.names is an iterator over keys of map; the order may not be the same as in the program
-      return [...call.names];
+      return [...call.vExpression.names];
     }
     return [];
   }
@@ -482,6 +473,20 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
       const found = properAddrName(node.vExpression.vExpression.name, node.vExpression.memberName);
       console.log(found + ' and ' + properAddr);
       return found == properAddr;
+    }).map((call: ASTNode) => {
+      if (call instanceof FunctionCallOptions) {
+	const parentCall = call.parent;
+	assert(parentCall instanceof FunctionCall, 'Must have a parent');
+	assert(
+	  parentCall.vExpression instanceof FunctionCallOptions,
+	  'This is the callee w/ options (ie the current call itself)',
+	);
+	return parentCall;
+      }
+      if (call instanceof FunctionCall) {
+	return call;
+      }
+      assert(false, "dumbo type checker");
     });
     assert(this.callsites.length > 0, 'Cannot find any call site for ' + properAddr);
 
@@ -524,6 +529,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
 
     // Generate address call to the original addr
     const uncheckedCall = this.callsites[0]; // FIXME (GW): replace arguments, renaming, etc.
+    assert(uncheckedCall !== undefined, "what");
+    console.log(uncheckedCall)
     const retIds = retTypeDecls.map((r) => r.id);
     const callAndAssignStmt = this.factory.makeVariableDeclarationStatement(retIds, retTypeDecls, uncheckedCall);
     stmts.push(callAndAssignStmt);
