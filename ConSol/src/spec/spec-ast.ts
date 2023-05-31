@@ -163,13 +163,14 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
             assert(false, 'Undefined fs or fs.call:' + funspec);
             // continue;
           }
-
-          if (call.args.includes(funspec.call.funName)) {
+	  const rawAddr = funspec.call.addr;
+	  const tgt = rawAddr === undefined ? funspec.call.funName : rawAddr;
+          if (call.args.includes(tgt)) {
             vspec.preFunSpec.push(funspec);
-          } else if (call.rets.includes(funspec.call.funName)) {
+          } else if (call.rets.includes(tgt)) {
             vspec.postFunSpec.push(funspec);
           } else {
-            assert(false, "invalid keyword (which shouldn't happen at all)");
+            assert(false, "Unknown address " + tgt);
           }
           i = i + 1;
         }
