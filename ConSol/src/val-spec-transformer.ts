@@ -396,7 +396,11 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     } else if (newCall.vExpression instanceof Identifier) {
       newCall.vExpression = callee;
     }
-    newCall.vArguments = this.makeTypedIds(this.spec.call.args, this.argTypes);
+    const encodeCall = newCall.vArguments[0];
+    // TODO(GW): this is not enough, consider the data can be encoded else where and passed to here.
+    assert(encodeCall instanceof FunctionCall, 'This is the abi.encodeWithSignature call');
+    const sig = encodeCall.vArguments[0];
+    encodeCall.vArguments = [sig, ...this.makeTypedIds(this.spec.call.args, this.argTypes)];
     return newCall;
   }
 
@@ -449,7 +453,6 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     // Generate address call to the address, replace arguments
     const uncheckedCall = this.makeNewAddressCall(this.callsites[0]);
     assert(uncheckedCall !== undefined, 'what');
-    console.log(uncheckedCall);
     const retIds = retTypeDecls.map((r) => r.id);
     const callAndAssignStmt = this.factory.makeVariableDeclarationStatement(retIds, retTypeDecls, uncheckedCall);
     stmts.push(callAndAssignStmt);
