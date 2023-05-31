@@ -87,6 +87,9 @@ class ValSpecTransformer<T> {
   // Note(GW): these are parameters used for generating check functions, but they may not have correct binding names
   params: VariableDeclaration[];
   retParams: VariableDeclaration[];
+  guardedParamNames: string[];
+  guardedRetParamNames: string[];
+  guardedAllParamNames: string[];
 
   constructor(
     ctx: ASTContext,
@@ -108,6 +111,9 @@ class ValSpecTransformer<T> {
     }
     this.params = params;
     this.retParams = retParams;
+    this.guardedParamNames = [...this.spec.call.kwargs.map((p) => p.snd), ...this.spec.call.args];
+    this.guardedRetParamNames = this.spec.call.rets;
+    this.guardedAllParamNames = [...this.guardedParamNames, ...this.guardedRetParamNames];
   }
 
   makeFlatCheckFun(funName: string, condExpr: T, params: ParameterList): FunctionDefinition {
@@ -204,8 +210,7 @@ class ValSpecTransformer<T> {
     if (this.spec.preCond === undefined) return undefined;
     const preFunName = preCheckFunName(this.tgtName);
     // FIXME(GW): should use factory.makeParameterList...
-    const args = [...this.spec.call.kwargs.map((p) => p.snd), ...this.spec.call.args];
-    const params = makeNewParams(this.factory, args, this.params);
+    const params = makeNewParams(this.factory, this.guardedParamNames, this.params);
     const allParams = new ParameterList(0, '', [...params]);
     const preFunDef = this.makeFlatCheckFun(preFunName, this.spec.preCond, allParams);
     return preFunDef;
@@ -214,8 +219,7 @@ class ValSpecTransformer<T> {
   postCondCheckFun(): FunctionDefinition | undefined {
     if (this.spec.postCond === undefined) return undefined;
     const postFunName = postCheckFunName(this.tgtName);
-    const args = [...this.spec.call.kwargs.map((p) => p.snd), ...this.spec.call.args];
-    const rets = [...args, ...this.spec.call.rets];
+    const rets = [...this.guardedParamNames, ...this.guardedRetParamNames];
     const retParams = makeNewParams(this.factory, rets, [...this.params, ...this.retParams]);
     const allParams = new ParameterList(0, '', [...retParams]);
     const postCondFunc = this.makeFlatCheckFun(postFunName, this.spec.postCond, allParams);
@@ -370,10 +374,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     const retTypeStr = '(' + this.retTypes.map((t) => t.typeString).toString() + ')';
     const retTypeDecls = this.makeTypedVarDecls(this.retTypes, this.spec.call.rets);
 
-    const args = [...this.spec.call.kwargs.map((p) => p.snd), ...this.spec.call.args];
-    const params = makeNewParams(this.factory, args, this.params);
-    const rets = [...args, ...this.spec.call.rets];
-    const retParams = makeNewParams(this.factory, rets, [...this.params, ...this.retParams]);
+    const params = makeNewParams(this.factory, this.guardedParamNames, this.params);
+    const retParams = makeNewParams(this.factory, this.guardedAllParamNames, [...this.params, ...this.retParams]);
 
     const stmts = [];
 
@@ -416,7 +418,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     // Build function body
     const funBody = this.factory.makeBlock(stmts);
     const addrParam = this.makeNamelessTypedVarDecls([strToTypeName(this.factory, 'address')]);
-    const guardedParams = makeNewParams(this.factory, [this.addr, ...args], [addrParam[0], ...this.params]);
+    const guardedParams = makeNewParams(this.factory, [this.addr, ...this.guardedParamNames],
+					[addrParam[0], ...this.params]);
     const guardedRetParams = makeNewParams(
       this.factory,
       this.spec.call.rets,
