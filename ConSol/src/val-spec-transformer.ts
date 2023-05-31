@@ -23,7 +23,7 @@ import {
   MemberAccess,
   Identifier,
   Literal,
-  replaceNode
+  replaceNode,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -127,9 +127,7 @@ class ConSolTransformer {
 
   makeTypedIds(xs: string[], ts: TypeName[]): Identifier[] {
     // Note(GW): is it necessary to make variable declaration first???
-    return this.makeIdsFromVarDecs(
-      this.makeVarDecs(xs, this.makeNamelessTypedVarDecls(ts)),
-    );
+    return this.makeIdsFromVarDecs(this.makeVarDecs(xs, this.makeNamelessTypedVarDecls(ts)));
   }
 }
 
@@ -405,7 +403,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
   }
 
   makeWrapperCallArgs(f: FunctionDefinition, addrCall: FunctionCall): Expression[] {
-    const args: Expression[] = []
+    const args: Expression[] = [];
     if (addrCall.vExpression instanceof FunctionCallOptions) {
       // Caveat(GW): values() is an iterator over keys of map; the order may not be the same as in the program
       const ma = addrCall.vExpression.vExpression as MemberAccess;
@@ -478,7 +476,10 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     const funBody = this.factory.makeBlock(stmts);
     const addrParam = this.makeNamelessTypedVarDecls([strToTypeName(this.factory, 'address')]);
     const guardedVars = this.makeVarDecs([this.addr, ...this.guardedParamNames], [addrParam[0], ...this.paramVarDecs]);
-    const guardedRetVars = this.makeVarDecs(this.spec.call.rets, this.makeNamelessTypedVarDecls(this.defaultAddrRetTypes()));
+    const guardedRetVars = this.makeVarDecs(
+      this.spec.call.rets,
+      this.makeNamelessTypedVarDecls(this.defaultAddrRetTypes()),
+    );
     // TODO: double check following arguments
     const funDef = this.factory.makeFunctionDefinition(
       this.parentFunDef.scope,
@@ -510,8 +511,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
       this.parentFunDef.vScope.appendChild(wrapper);
       // step 2: replace old address call with the new wrapper call
       this.callsites.forEach((addrCall) => {
-	const wrapperCall = this.makeWrapperCall(wrapper, addrCall);
-	replaceNode(addrCall, wrapperCall);
+        const wrapperCall = this.makeWrapperCall(wrapper, addrCall);
+        replaceNode(addrCall, wrapperCall);
       });
     }
   }
