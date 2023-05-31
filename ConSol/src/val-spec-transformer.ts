@@ -27,7 +27,7 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
-import { attachNames, extractFunName, strToTypeName } from './utils.js';
+import { attachNames, extractFunName } from './utils.js';
 
 export function makeRequireStmt(
   ctx: ASTContext,
@@ -83,6 +83,13 @@ class ConSolTransformer {
   constructor(factory: ASTNodeFactory, scope: number) {
     this.factory = factory;
     this.scope = scope;
+  }
+
+  strToTypeName(str: string): TypeName {
+    if (str === 'bytes') return this.factory.makeElementaryTypeName('', 'bytes memory');
+    if (str === 'string') return this.factory.makeElementaryTypeName('', 'string memory');
+    // TODO(GW): other types with storage modifier
+    return this.factory.makeElementaryTypeName('', str);
   }
 
   copyNodes<T extends ASTNode>(nodes: Array<T>): Array<T> {
@@ -319,20 +326,28 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
   }
   optionsToTypeName(keys: Array<string>): Array<TypeName> {
     return keys.map((key) => {
-      if (key === 'value') return strToTypeName(this.factory, 'uint256');
-      if (key === 'gas') return strToTypeName(this.factory, 'uint256');
+      if (key === 'value') return this.strToTypeName('uint256');
+      if (key === 'gas') return this.strToTypeName('uint256');
       assert(false, 'what else?');
     });
   }
   signatureArgsToTypeName(sig: string): Array<TypeName> {
     const args = sig.substring(sig.indexOf('(') + 1, sig.lastIndexOf(')'));
     return args.split(',').map((ty) => {
-      if (ty === 'string') return strToTypeName(this.factory, 'string');
-      return strToTypeName(this.factory, ty);
+      if (ty === 'string') return this.strToTypeName('string');
+      return this.strToTypeName(ty);
     });
   }
   defaultAddrRetTypes(): Array<TypeName> {
-    return [strToTypeName(this.factory, 'bool'), strToTypeName(this.factory, 'bytes')];
+    if (this.member === 'call' || this.member === 'delegatecall' || this.member === 'staticcall') {
+      return [this.strToTypeName('bool'), this.strToTypeName('bytes')];
+    }
+    if (this.member === 'balance') return [this.strToTypeName('uint256')];
+    if (this.member === 'code') return [this.strToTypeName('bytes')];
+    if (this.member === 'codehash') return [this.strToTypeName('bytes32')];
+    if (this.member === 'transfer') return [];
+    if (this.member === 'send') return [this.strToTypeName('bool')];
+    assert(false, "Unknown address member");
   }
 
   findAddressSignature(properAddr: string): [Array<TypeName>, Array<TypeName>, Array<TypeName>] {
@@ -475,7 +490,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
 
     // Build function body
     const funBody = this.factory.makeBlock(stmts);
-    const addrParam = this.makeNamelessTypedVarDecls([strToTypeName(this.factory, 'address')]);
+    const addrParam = this.makeNamelessTypedVarDecls([this.strToTypeName('address')]);
     const guardedVars = this.makeVarDecs([this.addr, ...this.guardedParamNames], [addrParam[0], ...this.paramVarDecs]);
     const guardedRetVars = this.makeVarDecs(
       this.spec.call.rets,
