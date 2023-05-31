@@ -66,7 +66,7 @@ function extractRawAddr<T>(spec: ValSpec<T>): string {
   // In this case, the funName field is actually the variable name for the address,
   // and we synthesis the default callable member name (i.e. call);
   // Otherwise, we are handling member access call (e.g. addr.send).
-  // TODO(GW): need test the "oterhwise" case.
+  // FIXME(GW): parser error for the "otherwise" case
   if (spec.call.addr === undefined) return spec.call.funName;
   else return spec.call.addr;
 }
@@ -241,7 +241,7 @@ class ValSpecTransformer<T> extends ConSolTransformer {
   preCondCheckFun(): FunctionDefinition | undefined {
     if (this.spec.preCond === undefined) return undefined;
     const preFunName = preCheckFunName(this.tgtName);
-    // FIXME(GW): should use factory.makeParameterList...
+    // TODO(GW): should use factory.makeParameterList...
     const varDecs = this.makeVarDecs(this.guardedParamNames, this.paramVarDecs);
     const allParams = new ParameterList(0, '', [...varDecs]);
     const preFunDef = this.makeFlatCheckFun(preFunName, this.spec.preCond, allParams);
@@ -391,7 +391,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
           return [k, this.factory.makeIdentifier('', keyArg, -1)];
         }),
       );
-    } else if (newCall.vExpression instanceof Identifier) {
+    } else if (newCall.vExpression instanceof Identifier) { // FIXME(GW): it won't be an identifier at all
       newCall.vExpression = callee;
     }
     const encodeCall = newCall.vArguments[0];
