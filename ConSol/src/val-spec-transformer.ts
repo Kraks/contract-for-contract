@@ -45,7 +45,7 @@ export function makeRequireStmt(
 }
 
 function needAbiEncoding(member: string): boolean {
-  return (member === 'call' || member === 'delegatecall' || member === 'staticcall');
+  return member === 'call' || member === 'delegatecall' || member === 'staticcall';
 }
 
 function preCheckFunName(f: string): string {
@@ -425,7 +425,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     }
     if (needAbiEncoding(this.member)) {
       const encodeCall = newCall.vArguments[0];
-      assert(encodeCall instanceof FunctionCall, "This is the Abi.encodeWithSignature call");
+      assert(encodeCall instanceof FunctionCall, 'This is the Abi.encodeWithSignature call');
       // Note(GW): assuming for `call`, the first argument is the abi.encodeWithSignature call.
       // TODO(GW): but this is not enough, consider the data can be encoded else where and passed to here.
       const sig = encodeCall.vArguments[0];
@@ -450,12 +450,12 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     }
     if (needAbiEncoding(this.member)) {
       const encodeCall = addrCall.vArguments[0];
-      assert(encodeCall instanceof FunctionCall, "This is the Abi.encodeWithSignature call");
+      assert(encodeCall instanceof FunctionCall, 'This is the Abi.encodeWithSignature call');
       // Note(GW): assuming for `call`, the first argument is the abi.encodeWithSignature call.
       // TODO(GW): but this is not enough, consider the data can be encoded else where and passed to here.
       args.push(...encodeCall.vArguments.slice(1));
     } else {
-      args.push(...this.copyNodes(addrCall.vArguments))
+      args.push(...this.copyNodes(addrCall.vArguments));
     }
     return args;
   }
