@@ -381,7 +381,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
   // replace address, replace value, gas, all other arguments
   makeNewAddressCall(original: FunctionCall): FunctionCall {
     const newCall = this.factory.copy(original);
-    const callee = this.factory.makeIdentifier('', this.addr, -1);
+    const callee = this.factory.makeIdentifier('', this.addr, -1); // FIXME(GW): this is not correct, should be member access
     if (newCall.vExpression instanceof FunctionCallOptions) {
       newCall.vExpression.vExpression = callee;
       // TODO(GW): kwargs should be stored as a map at the very beginning
