@@ -368,7 +368,7 @@ class ValSpecTransformer<T> {
     if (this.spec.preCond === undefined) return undefined;
     const preFunName = preCheckFunName(this.tgtName);
     // FIXME(GW): should use factory.makeParameterList...
-    const args = [...this.spec.call.kwargs.map((p) => p.fst), ...this.spec.call.args];
+    const args = [...this.spec.call.kwargs.map((p) => p.snd), ...this.spec.call.args];
     const params = makeNewParams(this.factory, args, this.params);
     const allParams = new ParameterList(0, '', [...params]);
     const preFunDef = this.makeFlatCheckFun(preFunName, this.spec.preCond, allParams);
@@ -378,7 +378,7 @@ class ValSpecTransformer<T> {
   postCondCheckFun(): FunctionDefinition | undefined {
     if (this.spec.postCond === undefined) return undefined;
     const postFunName = postCheckFunName(this.tgtName);
-    const args = [...this.spec.call.kwargs.map((p) => p.fst), ...this.spec.call.args];
+    const args = [...this.spec.call.kwargs.map((p) => p.snd), ...this.spec.call.args];
     const rets = [...args, ...this.spec.call.rets];
     const retParams = makeNewParams(this.factory, rets, [...this.params, ...this.retParams]);
     const allParams = new ParameterList(0, '', [...retParams]);
@@ -393,6 +393,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
   member: string;
   tgtAddr: VariableDeclaration;
   callsites: FunctionCall[] = [];
+  optTypes: TypeName[];
   argTypes: TypeName[];
   retTypes: TypeName[];
 
@@ -411,10 +412,11 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     this.member = member;
     this.tgtAddr = tgtAddr;
     this.parentFunDef = parent;
-    const [argTypes, retTypes] = this.findAddressSignature(properAddrName(tgtAddr.name, this.member));
+    const [optTypes, argTypes, retTypes] = this.findAddressSignature(properAddrName(tgtAddr.name, this.member));
+    this.optTypes = optTypes;
     this.argTypes = argTypes;
     this.retTypes = retTypes;
-    this.params = this.makeNamelessTypedVarDecls(argTypes);
+    this.params = this.makeNamelessTypedVarDecls([...optTypes, ...argTypes]);
     this.retParams = this.makeNamelessTypedVarDecls(retTypes);
   }
 
@@ -461,7 +463,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     return [strToTypeName(this.factory, 'bool'), strToTypeName(this.factory, 'bytes')];
   }
 
-  findAddressSignature(properAddr: string): [Array<TypeName>, Array<TypeName>] {
+  findAddressSignature(properAddr: string): [Array<TypeName>, Array<TypeName>, Array<TypeName>] {
     assert(this.parentFunDef.vBody !== undefined, 'Empty function body');
     this.callsites = this.parentFunDef.vBody.getChildrenBySelector((node: ASTNode) => {
       if (!(node instanceof FunctionCallOptions || node instanceof FunctionCall)) return false;
@@ -494,10 +496,33 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     const callsite = this.callsites[0];
     const options = this.extractOptions(callsite);
     const signature = this.extractSigFromCall(callsite);
-    const argTypes = this.optionsToTypeName(options);
-    argTypes.push(...this.signatureArgsToTypeName(signature));
+    const optTypes = this.optionsToTypeName(options);
+    const argTypes = this.signatureArgsToTypeName(signature);
     const retTypes = this.defaultAddrRetTypes();
-    return [argTypes, retTypes];
+    return [optTypes, argTypes, retTypes];
+  }
+
+  // replace address, replace value, gas, all other arguments
+  makeNewAddressCall(original: FunctionCall): FunctionCall {
+    const newCall = this.factory.copy(original);
+    const callee = this.factory.makeIdentifier('', this.addr, -1);
+    if (newCall.vExpression instanceof FunctionCallOptions) {
+      newCall.vExpression.vExpression = callee
+      // TODO(GW): kwargs should be stored as a map at the very beginning
+      const options = new Map(Array.from(this.spec.call.kwargs, (p) => [p.fst, p.snd]));
+      newCall.vExpression.vOptionsMap = new Map(Array.from(newCall.vExpression.vOptionsMap, ([k, v]) => {
+	const keyArg = options.get(k);
+	assert(keyArg !== undefined, "Specification doesn't have key " + k);
+	return [k, this.factory.makeIdentifier('', keyArg, -1)];
+      }));
+    } else if (newCall.vExpression instanceof Identifier) {
+      newCall.vExpression = callee
+    }
+    const newArgs = makeIdsFromVarDecls(this.factory,
+					makeNewParams(this.factory, this.spec.call.args,
+						      this.makeNamelessTypedVarDecls(this.argTypes)));
+    newCall.vArguments = newArgs;
+    return newCall;
   }
 
   guardedFun(
@@ -509,7 +534,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     const retTypeStr = '(' + this.retTypes.map((t) => t.typeString).toString() + ')';
     const retTypeDecls = this.makeTypedVarDecls(this.retTypes, this.spec.call.rets);
 
-    const args = [...this.spec.call.kwargs.map((p) => p.fst), ...this.spec.call.args];
+    const args = [...this.spec.call.kwargs.map((p) => p.snd), ...this.spec.call.args];
     const params = makeNewParams(this.factory, args, this.params);
     const rets = [...args, ...this.spec.call.rets];
     const retParams = makeNewParams(this.factory, rets, [...this.params, ...this.retParams]);
@@ -527,8 +552,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
       stmts.push(preCondRequireStmt);
     }
 
-    // Generate address call to the original addr
-    const uncheckedCall = this.callsites[0]; // FIXME (GW): replace arguments, renaming, etc.
+    // Generate address call to the address, replace arguments
+    const uncheckedCall = this.makeNewAddressCall(this.callsites[0]);
     assert(uncheckedCall !== undefined, "what");
     console.log(uncheckedCall)
     const retIds = retTypeDecls.map((r) => r.id);
