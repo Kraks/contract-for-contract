@@ -338,6 +338,16 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
       return this.strToTypeName(ty);
     });
   }
+  extractAddrArgTypes(callsite: FunctionCall): Array<TypeName> {
+    if (this.member === 'call' || this.member === 'delegatecall' || this.member === 'staticcall') {
+      const signature = this.extractSigFromCall(callsite);
+      return this.signatureArgsToTypeName(signature);
+    }
+    if (this.member === 'balance' || this.member === 'code' || this.member === 'codehash') return [];
+    if (this.member === 'transfer') return [this.strToTypeName('uint256')];
+    if (this.member === 'send') return [this.strToTypeName('uint256')];
+    assert(false, 'Unknown address member');
+  }
   defaultAddrRetTypes(): Array<TypeName> {
     if (this.member === 'call' || this.member === 'delegatecall' || this.member === 'staticcall') {
       return [this.strToTypeName('bool'), this.strToTypeName('bytes')];
@@ -384,9 +394,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     // If there are mutiple call-sites, their signatures has to be the same, so let's pick a lucky one
     const callsite = this.callsites[0];
     const options = this.extractOptions(callsite);
-    const signature = this.extractSigFromCall(callsite);
     const optTypes = this.optionsToTypeName(options);
-    const argTypes = this.signatureArgsToTypeName(signature);
+    const argTypes = this.extractAddrArgTypes(callsite);
     const retTypes = this.defaultAddrRetTypes();
     return [optTypes, argTypes, retTypes];
   }
@@ -410,11 +419,15 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     } else if (newCall.vExpression instanceof MemberAccess) {
       newCall.vExpression.vExpression = addrId;
     }
-    const encodeCall = newCall.vArguments[0];
-    // TODO(GW): this is not enough, consider the data can be encoded else where and passed to here.
-    assert(encodeCall instanceof FunctionCall, 'This is the abi.encodeWithSignature call');
-    const sig = encodeCall.vArguments[0];
-    encodeCall.vArguments = [sig, ...this.makeTypedIds(this.spec.call.args, this.argTypes)];
+    const firstArg = newCall.vArguments[0];
+    if (firstArg instanceof FunctionCall && true /* TODO(GW): check callee and member name */) {
+      // Note(GW): assuming for `call`, the first argument is the abi.encodeWithSignature call.
+      // TODO(GW): but this is not enough, consider the data can be encoded else where and passed to here.
+      const sig = firstArg.vArguments[0];
+      firstArg.vArguments = [sig, ...this.makeTypedIds(this.spec.call.args, this.argTypes)];
+    } else {
+      newCall.vArguments = [...this.makeTypedIds(this.spec.call.args, this.argTypes)];
+    }
     return newCall;
   }
 
@@ -430,10 +443,15 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
       const ma = addrCall.vExpression as MemberAccess;
       args.push(ma.vExpression);
     }
-    const encodeCall = addrCall.vArguments[0];
-    // TODO(GW): this is not enough, consider the data can be encoded else where and passed to here.
-    assert(encodeCall instanceof FunctionCall, 'This is the abi.encodeWithSignature call');
-    args.push(...encodeCall.vArguments.slice(1));
+    const firstArg = addrCall.vArguments[0];
+    if (firstArg instanceof FunctionCall && true /* TODO(GW): check callee and member name */) {
+      // Note(GW): assuming for `call`, the first argument is the abi.encodeWithSignature call.
+      // TODO(GW): but this is not enough, consider the data can be encoded else where and passed to here.
+      args.push(...firstArg.vArguments.slice(1));
+    } else {
+      args.push(...this.copyNodes(addrCall.vArguments))
+    }
+
     return args;
   }
 

@@ -3,9 +3,10 @@ pragma solidity ^0.8.9;
 contract Caller {
     event Response(bool success, bytes data);
 
-    /// @custom:consol { testCallFoo(addr, x) requires {x > 0} where { addr{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v > 5 && g < 10000 && x != 0 } ensures { flag == true } }}
-    function testCallFoo_original(address payable _addr, int256 x) private payable {
+    /// @custom:consol { testCallFoo(addr, x) requires {x > 0} where { addr{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v > 5 && g < 10000 && x != 0 } ensures { flag == true } } { addr.send(x) returns (b) requires { x < 1024 } ensures {b == true} }}
+    function testCallFoo_original(address payable _addr, uint256 x) private payable {
         (bool success, bytes memory data) = guarded_testCallFoo_addr(_addr, msg.value, 5000, "call foo", x);
+        bool res = guarded_testCallFoo_addr(_addr, x);
         emit Response(success, data);
     }
 
@@ -15,7 +16,7 @@ contract Caller {
         emit Response(success, data);
     }
 
-    function _testCallFooPre(address payable addr, int256 x) private returns (bool) {
+    function _testCallFooPre(address payable addr, uint256 x) private returns (bool) {
         return x>0;
     }
 
@@ -34,7 +35,22 @@ contract Caller {
         return (flag, data);
     }
 
-    function testCallFoo(address payable _addr, int256 x) public payable {
+    function _addrPre(uint256 x) private returns (bool) {
+        return x<1024;
+    }
+
+    function _addrPost(uint256 x, bool b) private returns (bool) {
+        return b==true;
+    }
+
+    function guarded_testCallFoo_addr(address addr, uint256 x) public payable returns (bool b) {
+        require(_addrPre(x), "Violate the precondition for address addr");
+        bool b = addr.send(x);
+        require(_addrPost(x, b), "Violate the postondition for address addr");
+        return (b);
+    }
+
+    function testCallFoo(address payable _addr, uint256 x) public payable {
         require(_testCallFooPre(_addr, x), "Violate the precondition for function testCallFoo");
         testCallFoo_original(_addr, x);
     }
