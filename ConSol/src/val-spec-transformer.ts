@@ -379,9 +379,10 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
   // replace address, replace value, gas, all other arguments
   makeNewAddressCall(original: FunctionCall): FunctionCall {
     const newCall = this.factory.copy(original);
-    const callee = this.factory.makeIdentifier('', this.addr, -1); // FIXME(GW): this is not correct, should be member access
+    const addrId = this.factory.makeIdentifier('', this.addr, -1);
     if (newCall.vExpression instanceof FunctionCallOptions) {
-      newCall.vExpression.vExpression = callee;
+      assert(newCall.vExpression.vExpression instanceof MemberAccess, "Callee is not member access");
+      newCall.vExpression.vExpression.vExpression = addrId;
       // TODO(GW): kwargs should be stored as a map at the very beginning
       const options = new Map(Array.from(this.spec.call.kwargs, (p) => [p.fst, p.snd]));
       newCall.vExpression.vOptionsMap = new Map(
@@ -391,9 +392,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
           return [k, this.factory.makeIdentifier('', keyArg, -1)];
         }),
       );
-    } else if (newCall.vExpression instanceof Identifier) {
-      // FIXME(GW): it won't be an identifier at all
-      newCall.vExpression = callee;
+    } else if (newCall.vExpression instanceof MemberAccess) {
+      newCall.vExpression.vExpression = addrId;
     }
     const encodeCall = newCall.vArguments[0];
     // TODO(GW): this is not enough, consider the data can be encoded else where and passed to here.
