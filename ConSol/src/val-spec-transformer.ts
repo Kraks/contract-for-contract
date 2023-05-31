@@ -347,7 +347,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     if (this.member === 'codehash') return [this.strToTypeName('bytes32')];
     if (this.member === 'transfer') return [];
     if (this.member === 'send') return [this.strToTypeName('bool')];
-    assert(false, "Unknown address member");
+    assert(false, 'Unknown address member');
   }
 
   findAddressSignature(properAddr: string): [Array<TypeName>, Array<TypeName>, Array<TypeName>] {
@@ -396,7 +396,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     const newCall = this.factory.copy(original);
     const addrId = this.factory.makeIdentifier('', this.addr, -1);
     if (newCall.vExpression instanceof FunctionCallOptions) {
-      assert(newCall.vExpression.vExpression instanceof MemberAccess, "Callee is not member access");
+      assert(newCall.vExpression.vExpression instanceof MemberAccess, 'Callee is not member access');
       newCall.vExpression.vExpression.vExpression = addrId;
       // TODO(GW): kwargs should be stored as a map at the very beginning
       const options = new Map(Array.from(this.spec.call.kwargs, (p) => [p.fst, p.snd]));

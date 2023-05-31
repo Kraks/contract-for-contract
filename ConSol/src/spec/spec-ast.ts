@@ -76,11 +76,9 @@ export function makeValSpec<T>(obj: any): ValSpec<T> {
   const ret = {
     ...obj,
     tag: 'ValSpec',
-  }
-  if (ret.preFunSpec === undefined)
-    ret.preFunSpec = [];
-  if (ret.postFunSpec === undefined)
-    ret.postFunSpec = [];
+  };
+  if (ret.preFunSpec === undefined) ret.preFunSpec = [];
+  if (ret.postFunSpec === undefined) ret.postFunSpec = [];
   return ret as ValSpec<T>;
 }
 
@@ -163,19 +161,19 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
             assert(false, 'Undefined fs or fs.call:' + funspec);
             // continue;
           }
-	  const rawAddr = funspec.call.addr;
-	  const tgt = rawAddr === undefined ? funspec.call.funName : rawAddr;
+          const rawAddr = funspec.call.addr;
+          const tgt = rawAddr === undefined ? funspec.call.funName : rawAddr;
           if (call.args.includes(tgt)) {
             vspec.preFunSpec.push(funspec);
           } else if (call.rets.includes(tgt)) {
             vspec.postFunSpec.push(funspec);
           } else {
-            assert(false, "Unknown address " + tgt);
+            assert(false, 'Unknown address ' + tgt);
           }
           i = i + 1;
         }
       } else {
-        assert(false, "invalid keyword " + prompt);
+        assert(false, 'invalid keyword ' + prompt);
       }
     }
     return vspec;
