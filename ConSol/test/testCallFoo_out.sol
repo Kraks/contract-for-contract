@@ -5,13 +5,13 @@ contract Caller {
 
     /// @custom:consol { testCallFoo(addr, x) requires {x > 0} where { addr{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v > 5 && g < 10000 && x != 0 } ensures { flag == true } }}
     function testCallFoo_original(address payable _addr, int256 x) private payable {
-        (bool success, bytes memory data) = _addr.call{value: msg.value, gas: 5000}(abi.encodeWithSignature("foo(string, uint256)", "call foo", x));
+        (bool success, bytes memory data) = guarded_testCallFoo_addr(_addr, msg.value, 5000, "call foo", x);
         emit Response(success, data);
     }
 
     /// @custom:consol { testCallFoo(addr, x) requires {x > 0} where { addr(mymsg, x) returns (flag, data) requires { v > 5 && g < 10000 && x != 0 } ensures { flag == true } }}
     function anotherTest_original(address payable _addr, int256 x) private payable {
-        (bool success, bytes memory data) = _addr.call(abi.encodeWithSignature("foo(string, uint256)", "call foo", 456));
+        (bool success, bytes memory data) = guarded_anotherTest_addr(_addr, "call foo", 456);
         emit Response(success, data);
     }
 

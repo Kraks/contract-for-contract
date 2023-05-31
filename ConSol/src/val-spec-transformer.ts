@@ -23,6 +23,7 @@ import {
   MemberAccess,
   Identifier,
   Literal,
+  replaceNode
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -399,6 +400,31 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     return newCall;
   }
 
+  makeWrapperCallArgs(f: FunctionDefinition, addrCall: FunctionCall): Expression[] {
+    const args: Expression[] = []
+    if (addrCall.vExpression instanceof FunctionCallOptions) {
+      // Caveat(GW): values() is an iterator over keys of map; the order may not be the same as in the program
+      const ma = addrCall.vExpression.vExpression as MemberAccess;
+      args.push(ma.vExpression);
+      args.push(...addrCall.vExpression.vOptionsMap.values());
+    } else {
+      // Without call options
+      const ma = addrCall.vExpression as MemberAccess;
+      args.push(ma.vExpression);
+    }
+    const encodeCall = addrCall.vArguments[0];
+    // TODO(GW): this is not enough, consider the data can be encoded else where and passed to here.
+    assert(encodeCall instanceof FunctionCall, 'This is the abi.encodeWithSignature call');
+    args.push(...encodeCall.vArguments.slice(1));
+    return args;
+  }
+
+  makeWrapperCall(f: FunctionDefinition, addrCall: FunctionCall): FunctionCall {
+    const callee = this.factory.makeIdentifier('function', f.name, -1);
+    const args = this.makeWrapperCallArgs(f, addrCall);
+    return this.factory.makeFunctionCall(addrCall.typeString, FunctionCallKind.FunctionCall, callee, args);
+  }
+
   guardedFun(
     preCondFun: FunctionDefinition | undefined,
     postCondFun: FunctionDefinition | undefined,
@@ -479,9 +505,11 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     const wrapper = this.guardedFun(preFun, postFun);
     if (wrapper) {
       this.parentFunDef.vScope.appendChild(wrapper);
-
-      // step 2: replace all address call with the guarded address call
-      // TODO
+      // step 2: replace old address call with the new wrapper call
+      this.callsites.forEach((addrCall) => {
+	const wrapperCall = this.makeWrapperCall(wrapper, addrCall);
+	replaceNode(addrCall, wrapperCall);
+      });
     }
   }
 }
