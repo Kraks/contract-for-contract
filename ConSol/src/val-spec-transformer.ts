@@ -77,9 +77,11 @@ function extractAddrMember<T>(spec: ValSpec<T>): string {
 
 class ConSolTransformer {
   factory: ASTNodeFactory;
+  scope: number;
 
-  constructor(factory: ASTNodeFactory) {
+  constructor(factory: ASTNodeFactory, scope: number) {
     this.factory = factory;
+    this.scope = scope;
   }
 
   copyNodes<T extends ASTNode>(nodes: Array<T>): Array<T> {
@@ -90,29 +92,53 @@ class ConSolTransformer {
     return newNodes;
   }
 
-  makeNewParams(names: string[], decls: VariableDeclaration[]): VariableDeclaration[] {
+  makeVarDecs(names: string[], decls: VariableDeclaration[]): VariableDeclaration[] {
     const params = this.copyNodes(decls);
     attachNames(names, params);
     return params;
   }
 
-  makeIdFromVarDecl(vd: VariableDeclaration): Identifier {
+  makeIdFromVarDec(vd: VariableDeclaration): Identifier {
     return this.factory.makeIdentifierFor(vd);
   }
 
-  makeIdsFromVarDecls(vds: VariableDeclaration[]): Identifier[] {
-    return vds.map((vd) => this.makeIdFromVarDecl(vd));
+  makeIdsFromVarDecs(vds: VariableDeclaration[]): Identifier[] {
+    return vds.map((vd) => this.makeIdFromVarDec(vd));
+  }
+
+  makeNamelessTypedVarDecls(types: TypeName[]): VariableDeclaration[] {
+    return types.map((ty, i) => {
+      const retTypeDecl = this.factory.makeVariableDeclaration(
+        false,
+        false,
+        '',
+        this.scope,
+        false,
+        DataLocation.Default,
+        StateVariableVisibility.Default,
+        Mutability.Mutable,
+        types[i].typeString,
+      );
+      retTypeDecl.vType = ty;
+      return retTypeDecl;
+    });
+  }
+
+  makeTypedIds(xs: string[], ts: TypeName[]): Identifier[] {
+    // Note(GW): is it necessary to make variable declaration first???
+    return this.makeIdsFromVarDecs(
+      this.makeVarDecs(xs, this.makeNamelessTypedVarDecls(ts)),
+    );
   }
 }
 
 class ValSpecTransformer<T> extends ConSolTransformer {
   ctx: ASTContext;
-  scope: number;
   spec: ValSpec<T>;
   tgtName: string;
   // Note(GW): these are parameters used for generating check functions, but they may not have correct binding names
-  params: VariableDeclaration[];
-  retParams: VariableDeclaration[];
+  paramVarDecs: VariableDeclaration[];
+  retVarDecs: VariableDeclaration[];
   guardedParamNames: string[];
   guardedRetParamNames: string[];
   guardedAllParamNames: string[];
@@ -123,20 +149,19 @@ class ValSpecTransformer<T> extends ConSolTransformer {
     spec: ValSpec<T>,
     tgtName: string,
     params: VariableDeclaration[],
-    retParams: VariableDeclaration[],
+    retVarDecs: VariableDeclaration[],
     factory?: ASTNodeFactory,
   ) {
     if (factory === undefined) {
-      super(new ASTNodeFactory(ctx));
+      super(new ASTNodeFactory(ctx), scope);
     } else {
-      super(factory);
+      super(factory, scope);
     }
     this.ctx = ctx;
-    this.scope = scope;
     this.spec = spec;
     this.tgtName = tgtName;
-    this.params = params;
-    this.retParams = retParams;
+    this.paramVarDecs = params;
+    this.retVarDecs = retVarDecs;
     this.guardedParamNames = [...this.spec.call.kwargs.map((p) => p.snd), ...this.spec.call.args];
     this.guardedRetParamNames = this.spec.call.rets;
     this.guardedAllParamNames = [...this.guardedParamNames, ...this.guardedRetParamNames];
@@ -155,7 +180,7 @@ class ValSpecTransformer<T> extends ConSolTransformer {
       Mutability.Constant, // mutability
       'bool', // typeString, "bool"
     );
-    const retParams = new ParameterList(0, '', [boolRetVar]);
+    const retVarDecs = new ParameterList(0, '', [boolRetVar]);
     const retStmt = this.factory.makeReturn(retNode.id, retNode);
     const funBody = this.factory.makeBlock([retStmt]);
     const checkFunDef = this.factory.makeFunctionDefinition(
@@ -167,7 +192,7 @@ class ValSpecTransformer<T> extends ConSolTransformer {
       FunctionStateMutability.NonPayable,
       false, // funKind == FunctionKind.Constructor,
       params,
-      retParams,
+      retVarDecs,
       [], //modifier
       undefined,
       funBody,
@@ -182,24 +207,6 @@ class ValSpecTransformer<T> extends ConSolTransformer {
         false,
         false,
         names[i],
-        this.scope,
-        false,
-        DataLocation.Default,
-        StateVariableVisibility.Default,
-        Mutability.Mutable,
-        types[i].typeString,
-      );
-      retTypeDecl.vType = ty;
-      return retTypeDecl;
-    });
-  }
-
-  makeNamelessTypedVarDecls(types: TypeName[]): VariableDeclaration[] {
-    return types.map((ty, i) => {
-      const retTypeDecl = this.factory.makeVariableDeclaration(
-        false,
-        false,
-        '',
         this.scope,
         false,
         DataLocation.Default,
@@ -236,8 +243,8 @@ class ValSpecTransformer<T> extends ConSolTransformer {
     if (this.spec.preCond === undefined) return undefined;
     const preFunName = preCheckFunName(this.tgtName);
     // FIXME(GW): should use factory.makeParameterList...
-    const params = this.makeNewParams(this.guardedParamNames, this.params);
-    const allParams = new ParameterList(0, '', [...params]);
+    const varDecs = this.makeVarDecs(this.guardedParamNames, this.paramVarDecs);
+    const allParams = new ParameterList(0, '', [...varDecs]);
     const preFunDef = this.makeFlatCheckFun(preFunName, this.spec.preCond, allParams);
     return preFunDef;
   }
@@ -246,8 +253,8 @@ class ValSpecTransformer<T> extends ConSolTransformer {
     if (this.spec.postCond === undefined) return undefined;
     const postFunName = postCheckFunName(this.tgtName);
     const rets = [...this.guardedParamNames, ...this.guardedRetParamNames];
-    const retParams = this.makeNewParams(rets, [...this.params, ...this.retParams]);
-    const allParams = new ParameterList(0, '', [...retParams]);
+    const retVarDecs = this.makeVarDecs(rets, [...this.paramVarDecs, ...this.retVarDecs]);
+    const allParams = new ParameterList(0, '', [...retVarDecs]);
     const postCondFunc = this.makeFlatCheckFun(postFunName, this.spec.postCond, allParams);
     return postCondFunc;
   }
@@ -282,8 +289,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     this.optTypes = optTypes;
     this.argTypes = argTypes;
     this.retTypes = retTypes;
-    this.params = this.makeNamelessTypedVarDecls([...optTypes, ...argTypes]);
-    this.retParams = this.makeNamelessTypedVarDecls(retTypes);
+    this.paramVarDecs = this.makeNamelessTypedVarDecls([...optTypes, ...argTypes]);
+    this.retVarDecs = this.makeNamelessTypedVarDecls(retTypes);
   }
 
   extractSigFromFuncCallOptions(call: FunctionCallOptions): string {
@@ -388,10 +395,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     } else if (newCall.vExpression instanceof Identifier) {
       newCall.vExpression = callee;
     }
-    const newArgs = this.makeIdsFromVarDecls(
-      this.makeNewParams(this.spec.call.args, this.makeNamelessTypedVarDecls(this.argTypes)),
-    );
-    newCall.vArguments = newArgs;
+    newCall.vArguments = this.makeTypedIds(this.spec.call.args, this.argTypes);
     return newCall;
   }
 
@@ -404,15 +408,15 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     const retTypeStr = '(' + this.retTypes.map((t) => t.typeString).toString() + ')';
     const retTypeDecls = this.makeTypedVarDecls(this.retTypes, this.spec.call.rets);
 
-    const params = this.makeNewParams(this.guardedParamNames, this.params);
-    const retParams = this.makeNewParams(this.guardedAllParamNames, [...this.params, ...this.retParams]);
+    const params = this.makeVarDecs(this.guardedParamNames, this.paramVarDecs);
+    const retVarDecs = this.makeVarDecs(this.guardedAllParamNames, [...this.paramVarDecs, ...this.retVarDecs]);
 
     const stmts = [];
 
     // Generate function call to check pre-condition (if any)
     if (preCondFun) {
       const errorMsg = 'Violate the precondition for address ' + this.tgtName;
-      const preCondRequireStmt = this.makeCheckStmt(preCondFun.name, this.makeIdsFromVarDecls(params), errorMsg);
+      const preCondRequireStmt = this.makeCheckStmt(preCondFun.name, this.makeIdsFromVarDecs(params), errorMsg);
       stmts.push(preCondRequireStmt);
     }
 
@@ -426,7 +430,7 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
 
     // Generate function call to check post-condition (if any)
     if (postCondFun) {
-      const postCallArgs = this.makeIdsFromVarDecls(retParams);
+      const postCallArgs = this.makeIdsFromVarDecs(retVarDecs);
       const errorMsg = 'Violate the postondition for address ' + this.tgtName;
       const postRequireStmt = this.makeCheckStmt(postCondFun.name, postCallArgs, errorMsg);
       stmts.push(postRequireStmt);
@@ -444,11 +448,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     // Build function body
     const funBody = this.factory.makeBlock(stmts);
     const addrParam = this.makeNamelessTypedVarDecls([strToTypeName(this.factory, 'address')]);
-    const guardedParams = this.makeNewParams([this.addr, ...this.guardedParamNames], [addrParam[0], ...this.params]);
-    const guardedRetParams = this.makeNewParams(
-      this.spec.call.rets,
-      this.makeNamelessTypedVarDecls(this.defaultAddrRetTypes()),
-    );
+    const guardedVars = this.makeVarDecs([this.addr, ...this.guardedParamNames], [addrParam[0], ...this.paramVarDecs]);
+    const guardedRetVars = this.makeVarDecs(this.spec.call.rets, this.makeNamelessTypedVarDecls(this.defaultAddrRetTypes()));
     // TODO: double check following arguments
     const funDef = this.factory.makeFunctionDefinition(
       this.parentFunDef.scope,
@@ -458,8 +459,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
       this.parentFunDef.visibility,
       this.parentFunDef.stateMutability,
       false,
-      new ParameterList(0, '', guardedParams),
-      new ParameterList(0, '', guardedRetParams),
+      new ParameterList(0, '', guardedVars),
+      new ParameterList(0, '', guardedRetVars),
       [], // modifier
       undefined,
       funBody,
@@ -521,7 +522,7 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
       const errorMsg = 'Violate the precondition for function ' + this.tgtName;
       const preCondRequireStmt = this.makeCheckStmt(
         preCondFun.name,
-        this.makeIdsFromVarDecls(this.declaredParams),
+        this.makeIdsFromVarDecs(this.declaredParams),
         errorMsg,
       );
       stmts.push(preCondRequireStmt);
@@ -532,7 +533,7 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
       retTypeStr,
       FunctionCallKind.FunctionCall,
       this.factory.makeIdentifier('function', uncheckedFunName(this.tgtName), -1),
-      this.makeIdsFromVarDecls(this.declaredParams),
+      this.makeIdsFromVarDecs(this.declaredParams),
     );
     if (retTypeDecls.length > 0) {
       const retIds = retTypeDecls.map((r) => r.id);
@@ -545,9 +546,9 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
 
     // Generate function call to check post-condition (if any)
     if (postCondFun) {
-      let postCallArgs = this.makeIdsFromVarDecls(this.declaredParams);
+      let postCallArgs = this.makeIdsFromVarDecs(this.declaredParams);
       if (this.retTypes.length > 0) {
-        postCallArgs = postCallArgs.concat(this.makeIdsFromVarDecls(retTypeDecls));
+        postCallArgs = postCallArgs.concat(this.makeIdsFromVarDecs(retTypeDecls));
       }
       const errorMsg = 'Violate the postondition for function ' + this.tgtName;
       const postRequireStmt = this.makeCheckStmt(postCondFun.name, postCallArgs, errorMsg);
