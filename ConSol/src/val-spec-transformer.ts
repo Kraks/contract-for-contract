@@ -391,7 +391,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
           return [k, this.factory.makeIdentifier('', keyArg, -1)];
         }),
       );
-    } else if (newCall.vExpression instanceof Identifier) { // FIXME(GW): it won't be an identifier at all
+    } else if (newCall.vExpression instanceof Identifier) {
+      // FIXME(GW): it won't be an identifier at all
       newCall.vExpression = callee;
     }
     const encodeCall = newCall.vArguments[0];
