@@ -649,13 +649,10 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     const postFun = this.postCondCheckFun();
     if (postFun) this.funDef.vScope.appendChild(postFun);
 
-    if (this.spec.preFunSpec !== undefined) {
-      // XXX(GW): this seems unnecessary; preFunSpepc is an array
-      const addrTrans = this.spec.preFunSpec.map((s) => this.addrTransformers(s));
-      addrTrans.forEach((tr) => {
-        tr.apply();
-      });
-    }
+    const addrTrans = this.spec.preFunSpec.map((s) => this.addrTransformers(s));
+    addrTrans.forEach((tr) => {
+      tr.apply();
+    });
 
     const wrapper = this.guardedFun(preFun, postFun);
     if (wrapper) {

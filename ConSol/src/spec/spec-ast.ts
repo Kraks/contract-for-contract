@@ -27,9 +27,9 @@ export type Opaque<T, Tag> = T & Tagged<Tag>;
 export interface $ValSpec<T> {
   call: Call;
   preCond?: T;
-  preFunSpec?: Array<Opaque<$ValSpec<T>, 'ValSpec'>>;
+  preFunSpec: Array<Opaque<$ValSpec<T>, 'ValSpec'>>;
   postCond?: T;
-  postFunSpec?: Array<Opaque<$ValSpec<T>, 'ValSpec'>>;
+  postFunSpec: Array<Opaque<$ValSpec<T>, 'ValSpec'>>;
 }
 
 export enum TempConn {
@@ -71,11 +71,17 @@ export type TempSpec<T> = Opaque<$TempSpec<T>, 'TempSpec'>;
 
 export type CSSpec<T> = ValSpec<T> | TempSpec<T>;
 
-export function makeValSpec<T>(obj: $ValSpec<T>): ValSpec<T> {
-  return {
+// FIXME(GW): narrowing obj properly
+export function makeValSpec<T>(obj: any): ValSpec<T> {
+  const ret = {
     ...obj,
     tag: 'ValSpec',
-  } as ValSpec<T>;
+  }
+  if (ret.preFunSpec === undefined)
+    ret.preFunSpec = [];
+  if (ret.postFunSpec === undefined)
+    ret.postFunSpec = [];
+  return ret as ValSpec<T>;
 }
 
 export function makeTempSpec<T>(obj: $TempSpec<T>): TempSpec<T> {
@@ -159,14 +165,8 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
           }
 
           if (call.args.includes(funspec.call.funName)) {
-            if (!vspec.preFunSpec) {
-              vspec.preFunSpec = [];
-            }
             vspec.preFunSpec.push(funspec);
           } else if (call.rets.includes(funspec.call.funName)) {
-            if (!vspec.postFunSpec) {
-              vspec.postFunSpec = [];
-            }
             vspec.postFunSpec.push(funspec);
           } else {
             assert(false, "invalid keyword (which shouldn't happen at all)");
@@ -174,7 +174,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
           i = i + 1;
         }
       } else {
-        assert(false, "invalid keyword (which shouldn't happen at all)");
+        assert(false, "invalid keyword " + prompt);
       }
     }
     return vspec;
