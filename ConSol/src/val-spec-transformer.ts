@@ -16,12 +16,9 @@ import {
   FunctionCallKind,
   ExpressionStatement,
   Expression,
-  Statement,
   assert,
   TypeName,
   FunctionCall,
-  Assignment,
-  VariableDeclarationStatement,
   FunctionCallOptions,
   MemberAccess,
   Identifier,
@@ -79,7 +76,7 @@ function extractAddrMember<T>(spec: ValSpec<T>): string {
 }
 
 class ConSolTransformer {
-  factory: ASTNodeFactory
+  factory: ASTNodeFactory;
 
   constructor(factory: ASTNodeFactory) {
     this.factory = factory;
@@ -334,31 +331,33 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
 
   findAddressSignature(properAddr: string): [Array<TypeName>, Array<TypeName>, Array<TypeName>] {
     assert(this.parentFunDef.vBody !== undefined, 'Empty function body');
-    this.callsites = this.parentFunDef.vBody.getChildrenBySelector((node: ASTNode) => {
-      if (!(node instanceof FunctionCallOptions || node instanceof FunctionCall)) return false;
-      if (!(node.vExpression instanceof MemberAccess)) return false;
-      if (!(node.vExpression.vExpression instanceof Identifier)) return false;
-      // TODO(GW): simply comparing address identifier expression is not enough,
-      // consider address value flow...
-      // TODO(GW): should also check if the call-site arity matches `spec`.
-      const found = properAddrName(node.vExpression.vExpression.name, node.vExpression.memberName);
-      console.log(found + ' and ' + properAddr);
-      return found == properAddr;
-    }).map((call: ASTNode) => {
-      if (call instanceof FunctionCallOptions) {
-	const parentCall = call.parent;
-	assert(parentCall instanceof FunctionCall, 'Must have a parent');
-	assert(
-	  parentCall.vExpression instanceof FunctionCallOptions,
-	  'This is the callee w/ options (ie the current call itself)',
-	);
-	return parentCall;
-      }
-      if (call instanceof FunctionCall) {
-	return call;
-      }
-      assert(false, "dumbo type checker");
-    });
+    this.callsites = this.parentFunDef.vBody
+      .getChildrenBySelector((node: ASTNode) => {
+        if (!(node instanceof FunctionCallOptions || node instanceof FunctionCall)) return false;
+        if (!(node.vExpression instanceof MemberAccess)) return false;
+        if (!(node.vExpression.vExpression instanceof Identifier)) return false;
+        // TODO(GW): simply comparing address identifier expression is not enough,
+        // consider address value flow...
+        // TODO(GW): should also check if the call-site arity matches `spec`.
+        const found = properAddrName(node.vExpression.vExpression.name, node.vExpression.memberName);
+        console.log(found + ' and ' + properAddr);
+        return found == properAddr;
+      })
+      .map((call: ASTNode) => {
+        if (call instanceof FunctionCallOptions) {
+          const parentCall = call.parent;
+          assert(parentCall instanceof FunctionCall, 'Must have a parent');
+          assert(
+            parentCall.vExpression instanceof FunctionCallOptions,
+            'This is the callee w/ options (ie the current call itself)',
+          );
+          return parentCall;
+        }
+        if (call instanceof FunctionCall) {
+          return call;
+        }
+        assert(false, 'dumbo type checker');
+      });
     assert(this.callsites.length > 0, 'Cannot find any call site for ' + properAddr);
 
     // If there are mutiple call-sites, their signatures has to be the same, so let's pick a lucky one
@@ -376,18 +375,22 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     const newCall = this.factory.copy(original);
     const callee = this.factory.makeIdentifier('', this.addr, -1);
     if (newCall.vExpression instanceof FunctionCallOptions) {
-      newCall.vExpression.vExpression = callee
+      newCall.vExpression.vExpression = callee;
       // TODO(GW): kwargs should be stored as a map at the very beginning
       const options = new Map(Array.from(this.spec.call.kwargs, (p) => [p.fst, p.snd]));
-      newCall.vExpression.vOptionsMap = new Map(Array.from(newCall.vExpression.vOptionsMap, ([k, v]) => {
-	const keyArg = options.get(k);
-	assert(keyArg !== undefined, "Specification doesn't have key " + k);
-	return [k, this.factory.makeIdentifier('', keyArg, -1)];
-      }));
+      newCall.vExpression.vOptionsMap = new Map(
+        Array.from(newCall.vExpression.vOptionsMap, ([k, v]) => {
+          const keyArg = options.get(k);
+          assert(keyArg !== undefined, "Specification doesn't have key " + k);
+          return [k, this.factory.makeIdentifier('', keyArg, -1)];
+        }),
+      );
     } else if (newCall.vExpression instanceof Identifier) {
-      newCall.vExpression = callee
+      newCall.vExpression = callee;
     }
-    const newArgs = this.makeIdsFromVarDecls(this.makeNewParams(this.spec.call.args, this.makeNamelessTypedVarDecls(this.argTypes)));
+    const newArgs = this.makeIdsFromVarDecls(
+      this.makeNewParams(this.spec.call.args, this.makeNamelessTypedVarDecls(this.argTypes)),
+    );
     newCall.vArguments = newArgs;
     return newCall;
   }
@@ -409,18 +412,14 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     // Generate function call to check pre-condition (if any)
     if (preCondFun) {
       const errorMsg = 'Violate the precondition for address ' + this.tgtName;
-      const preCondRequireStmt = this.makeCheckStmt(
-        preCondFun.name,
-        this.makeIdsFromVarDecls(params),
-        errorMsg,
-      );
+      const preCondRequireStmt = this.makeCheckStmt(preCondFun.name, this.makeIdsFromVarDecls(params), errorMsg);
       stmts.push(preCondRequireStmt);
     }
 
     // Generate address call to the address, replace arguments
     const uncheckedCall = this.makeNewAddressCall(this.callsites[0]);
-    assert(uncheckedCall !== undefined, "what");
-    console.log(uncheckedCall)
+    assert(uncheckedCall !== undefined, 'what');
+    console.log(uncheckedCall);
     const retIds = retTypeDecls.map((r) => r.id);
     const callAndAssignStmt = this.factory.makeVariableDeclarationStatement(retIds, retTypeDecls, uncheckedCall);
     stmts.push(callAndAssignStmt);
