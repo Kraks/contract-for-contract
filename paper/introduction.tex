@@ -33,11 +33,11 @@ economic outcome of transactions.
 
 Indeed, in recent years, we have seen a number of failures of smart contract
 systems due to attacks utilizing vulnerable contract programs.
-For example, in the famous DAO hack\note{cite}, the attacker is able to utilize the
-callback mechanism to create recursive function calls and temporarily stole
-money, causing a total lose of \$50 million.
-The root cause of this attack is that the contract does not deploy defensive
-checks before performing critical actions.
+For example, in the famous DAO hack\note{cite}, the unauthorized attacker is
+able transfer money by constructing recursive function calls with
+the callback mechanism, causing a total lose of \$50 million.
+The root cause of this attack is that the deployed contract does not
+checks reentrancy defensively before performing critical actions.
 
 %\zz{ On the other hand, assertion primitives are crucial for ensuring the
 %accuracy and integrity of a smart contract's business model. }
@@ -53,17 +53,19 @@ checks before performing critical actions.
 %\todo{can we attach modifier to callbacks?}
 %\todo{can we use modifier to check function's argument?}
 
-We observe that popular smart contract languages (such as Solidity) do
-not provide \emph{rich, effective, convenient} means to specify and enforce
-contract behaviors.
-Simple first-order assertion primitives (e.g., @require@) are indeed common,
-but they cannot effectively check callable addresses or function values, which
+To prevent such attacks, the programmer needs to specify those critical
+conditions. The execution is allowed when those conditions are met.
+However, we observe that existing popular smart contract languages (e.g.
+Solidity) do not provide \emph{rich, effective, convenient} means to specify
+and enforce contract behaviors.
+Simple first-order assertion primitives (e.g., @require@) are indeed available,
+but they cannot effectively examine callable addresses or function values, which
 are a common pattern used in smart contract programs.
-Moreover, many of the critical condition in smart contracts are \emph{temporal} --
-the order of happened events matters.
-For instance, the defense to the DAO attack \note{cite} is to
-prevent ``reentrancy'' via external functions, which requires that the function
-of interest cannot be invoked \emph{before} the current call of this function is finished.
+Moreover, many of the critical condition in smart contracts are \emph{temporal}
+-- the order of happened events matters.
+For instance, to defense the DAO attack caused by reentrancy via
+external functions, it requires to check that the function of interest cannot
+be invoked \emph{before} the current call of the same function is finished.
 
 The lack of sufficient linguistic means to specify and enforce subtle but
 critical behaviors discourages programmers to use concise higher-level
@@ -71,55 +73,69 @@ abstractions when writing smart contract code.
 Instead, to be secure, programmers are obliged to write verbose code with
 lower-level or no abstractions, which conflates the main business logic with
 behavioral checks, further leading to poor readability and maintainability.
-For example, a common way to implement ``reentrancy guards'' is to manually
-make an additional boolean state, marking if the function is finished.
+Taking the DAO attack as example again, a common way to implement ``reentrancy
+guards'' is to manually define an additional boolean state, indicating
+if the function is finished.
 And often worse, defensive checks can be easily forgotten or disregarded,
 leading to vulnerable code causing real monetary lose.
 
 %Apart from the investigating effort to certify and verify smart contract
 %programs, language designers are responsible to empower programmers with better
 %linguistic solutions to secure smart contracts in the first place.
-In this paper, we develop practical \emph{behavioral
-software contracts} that provide a lightweight solution to secure
-\emph{smart contracts}.
-In particular, we develop a specification language and monitor for higher-order
-and temporal behaviors in the Solidity language, demonstrating that they
-are an effective approach to
+In this paper, we argue that \emph{behavioral software contracts}
+\cite{DBLP:conf/tools/Meyer98a} should play a fundamental role in the
+development of \emph{smart contract} programs.  Similar to smart contracts,
+behavioral contracts is an agreement too. They specify the assumptions and
+guarantees between software components. The specified assumptions and
+guarantees will be monitored and reported when violated in languages with
+behavioral contracts.
 
-\subsection*{\textbf{Behavioral Contracts for Solidty}}
-
-Similar to smart contracts, behavioral contracts is an agreement too.  They
-specify the assumptions and guarantees between software components.
-In languages with behavioral contracts, the specified assumptions and
-guarantees will be monitored and reported when violated.
 Pioneered by the Eiffel language \cite{DBLP:books/ph/Meyer91} and the
-Design-by-Contract methodology \cite{DBLP:conf/tools/Meyer98a}, behavioral
-contracts have been widely adopted in Java, Haskell, C\#, Python, Racket,
-Elixir \cite{DBLP:conf/erlang/0001BBHMEF22}, etc. \note{cite}
-
+design-by-contract methodology \cite{DBLP:conf/tools/Meyer98a}, various styles
+of behavioral contracts have been widely adopted in Java, Haskell, C\#, Python,
+Racket, Elixir \cite{DBLP:conf/erlang/0001BBHMEF22}, etc. \note{cite}
+In this paper, we develop a behavioral contract system \lang for the Solidity
+language, providing a practical specification and monitoring system
+for both higher-order and temporal behaviors.
 Solidity is a programming language to build smart contract programs that run on
-the Ethereum platform.
-As one of the most popular languages for smart contracts, Solidity has been
-used \todo{to do cool things}.
-However, Solidity and its running platform Ethereum is a complex system.
-Carelessly written contracts can cause serious bugs and loses.
-We identify \todo{solidity's tricky feature}
+the Ethereum platform.  As one of the most popular languages for smart
+contracts, Solidity has been used \todo{to do cool things}.
 
-To build robust smart contract programs, we design and implement a practical
-extension of Solidity, namely \lang.
-The extension enriches the Solidity language with \emph{higher-order} and
-\emph{temporal} behavioral contracts, which are absent in existing approaches.
-With higher-order and temporal behavioral specification, many downstream
-tasks become further amenable, including but not limited to static verification,
-guided testing, or specification extraction.
+We demonstrate that behavioral contracts are an effective approach
+to improve the robustness and quality of smart contract programs.
+\todo{summarize what we can prevent/achieve}
 
-\subsection*{\textbf{Contracts for Callable Addresses and Higher-Order Functions}}
+%\lang enriches the Solidity language with \emph{higher-order} and
+%\emph{temporal} behavioral contracts, which are absent in existing approaches.
+%With higher-order and temporal behavioral specification, many downstream
+%tasks become further amenable, including but not limited to static verification,
+%guided testing, or specification extraction.
 
-In Solidity, callbacks can be in two forms, addresses and higher-order functions.
+%However, Solidity and its running platform Ethereum is a complex system.
+%Carelessly written contracts can cause serious bugs and loses.
+%We identify \todo{solidity's tricky feature}
+
+
+\subsection*{\textbf{Contracts for Higher-Order Values}}
+
+One type of values in Solidity that exhibits higher-order behaviors is \emph{addresses}.
+
+Functions in Solidity are first-class too, meaning that functions can be used as
+arguments for and returned from functions. However, at this moment
+\footnote{Solidity version 8.20} Solidity has not supported writing anonymous
+functions (lambda expressions) or nested (named) functions.
+Only explicitly defined top-level functions can be used in first-class ways,
+which discourages programmers to use higher-order functions due to its
+inconvenience and verbosity.
+Moreover, this restriction poses challenges to seamless implement first-class
+behavioral contract and monitor system (e.g. as in \cite{DBLP:conf/icfp/FindlerF02})
+without an expensive whole program transformation.
+Therefore, in this paper we focus on the contract and monitoring of addresses values
+and leave monitoring for higher-order functions as future work when
+Solidity has a proper support for lambda expressions.
 
 \todo{restrict possible call targets}
 \todo{why static verification fails}
-\zz{address vs. function call?}
 
 \subsection*{\textbf{Contracts for Temporal Properties}}
 
