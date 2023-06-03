@@ -2,17 +2,17 @@ SHELL=/usr/bin/env bash
 
 all:
 	mkdir -p build
-	xelatex -output-directory=build paper.tex > /dev/null 2>&1
-	biber build/paper                         > /dev/null 2>&1
-	xelatex -output-directory=build paper.tex > /dev/null 2>&1
-	xelatex -output-directory=build paper.tex > /dev/null 2>&1
+	pdflatex -output-directory=build paper.tex > /dev/null 2>&1
+	bibtex build/paper                         > /dev/null 2>&1
+	pdflatex -output-directory=build paper.tex > /dev/null 2>&1
+	pdflatex -output-directory=build paper.tex > /dev/null 2>&1
 
 verbose:
 	mkdir -p build
-	xelatex -output-directory=build paper.tex
-	biber build/paper
-	xelatex -output-directory=build paper.tex
-	xelatex -output-directory=build paper.tex
+	pdflatex -output-directory=build paper.tex
+	bibtex build/paper
+	pdflatex -output-directory=build paper.tex
+	pdflatex -output-directory=build paper.tex
 
 appendix:
 	mkdir -p build

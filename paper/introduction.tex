@@ -1,5 +1,4 @@
-\section{Introduction}
-\label{sec:intro}
+\section{Introduction} \label{sec:intro}
 
 %https://se.inf.ethz.ch/~meyer/publications/old/dbc_chapter.pdf
 %https://docs.soliditylang.org/en/v0.8.17/control-structures.html?highlight=require#panic-via-assert-and-error-via-require
@@ -15,6 +14,7 @@
 
 %Building trustworthy and secure smart contract programs requires solid
 %understanding and reliable enforcement of program invariants.
+
 
 Smart contracts are programs to automate the execution of agreement so that all
 parties involved in the agreement can be certain about the outcome.
@@ -35,7 +35,7 @@ Indeed, in recent years, we have seen a number of failures of smart contract
 systems due to attacks utilizing vulnerable contract programs.
 For example, in the famous DAO hack\note{cite}, the unauthorized attacker is
 able transfer money by constructing recursive function calls with
-the callback mechanism, causing a total lose of \$50 million.
+the callback mechanism, causing a total lose of \textdollar50 million.
 The root cause of this attack is that the deployed contract does not
 checks reentrancy defensively before performing critical actions.
 
@@ -58,7 +58,7 @@ conditions. The execution is allowed when those conditions are met.
 However, we observe that existing popular smart contract languages (e.g.
 Solidity) do not provide \emph{rich, effective, convenient} means to specify
 and enforce contract behaviors.
-Simple first-order assertion primitives (e.g., @require@) are indeed available,
+Simple first-order assertion primitives (e.g., \code{require}) are indeed available,
 but they cannot effectively examine callable addresses or function values, which
 are a common pattern used in smart contract programs.
 Moreover, many of the critical condition in smart contracts are \emph{temporal}
@@ -66,6 +66,8 @@ Moreover, many of the critical condition in smart contracts are \emph{temporal}
 For instance, to defense the DAO attack caused by reentrancy via
 external functions, it requires to check that the function of interest cannot
 be invoked \emph{before} the current call of the same function is finished.
+
+% encode temporal behavioral checks using ad-hoc lower-level value behaviors
 
 The lack of sufficient linguistic means to specify and enforce subtle but
 critical behaviors discourages programmers to use concise higher-level
@@ -79,11 +81,13 @@ if the function is finished.
 And often worse, defensive checks can be easily forgotten or disregarded,
 leading to vulnerable code causing real monetary lose.
 
+
 %Apart from the investigating effort to certify and verify smart contract
 %programs, language designers are responsible to empower programmers with better
 %linguistic solutions to secure smart contracts in the first place.
-In this paper, we argue that \emph{behavioral software contracts}
-\cite{DBLP:conf/tools/Meyer98a} should play a fundamental role in the
+In this paper, we argue that \emph{behavioral software
+contracts}~\cite{DBLP:conf/tools/Meyer98a} should play a fundamental role in
+the
 development of \emph{smart contract} programs.  Similar to smart contracts,
 behavioral contracts is an agreement too. They specify the assumptions and
 guarantees between software components. The specified assumptions and
@@ -142,7 +146,7 @@ Solidity has a proper support for lambda expressions.
 Temporal contracts provides a way to \todo{...}.
 \todo{why static verification fails}
 
-\paragraph{}
+\paragraph{hey}
 
 We develop a core model of \lang, including its syntax, operational semantics,
 and discuss its soundness guarantee.
@@ -175,5 +179,6 @@ compared to manually inserted assertion checks, showing that \todo{...}
         assertions and checks, showing that our approach does not introduce
         additional runtime overhead.
 \end{itemize}
+
 \lang is open-sourced and publicly available at \note{url}.
 

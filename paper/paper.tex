@@ -1,136 +1,65 @@
-% -*- coding: utf-8; -*-
-% vim: set fileencoding=utf-8 :
-\documentclass[english,submission,code=tt]{programming}
-%% First parameter: the language is 'english'.
-%% Second parameter: use 'submission' for initial submission, remove it for camera-ready (see 5.1)
-
-\usepackage[backend=biber]{biblatex}
-\addbibresource{references.bib}
-
-%
-% Packages and Commands specific to article (see 3)
-%
-% These ones  are used in the guide, replace with your own.
-
-%% Some recommended packages.
-\usepackage{booktabs}   %% For formal tables:
-%% http://ctan.org/pkg/booktabs
-\usepackage{subcaption} %% For complex figures with subfigures/subcaptions
-%% http://ctan.org/pkg/subcaption
-
-%\usepackage[uft8]{inputenc}
-%\usepackage[T1]{fontenc}
-%\usepackage[scaled=0.8]{beramono}
-\usepackage{amsmath}
+\documentclass[10pt,conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
 \usepackage{color}
-\usepackage{xcolor,colortbl}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{colortbl}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[scaled=0.8]{beramono}
 \usepackage{url}
 \usepackage{listings}
-\usepackage{paralist}
-%\usepackage[compact]{titlesec}
 \usepackage{caption}
-\usepackage{wrapfig}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+\usepackage{cleveref}
+\usepackage{xspace}
 \usepackage{enumitem}
+\usepackage{stmaryrd}
+\usepackage{subcaption}
+\usepackage{cancel}
+\usepackage{multirow}
+\usepackage{booktabs}
+
+\iffalse
+\usepackage{paralist}
+\usepackage{wrapfig}
 \usepackage{multicol}
 \usepackage{flushend}
-\usepackage{textcomp}
 \usepackage{pdfpages}
-%\usepackage{cleveref}
-\usepackage{xspace}
+\fi
 
 \input{macros}
 
-\newcommand*{\CTAN}[1]{\href{http://ctan.org/tex-archive/#1}{\nolinkurl{CTAN:#1}}}
-%%
-
-%%%%%%%%%%%%%%%%%%
-%% These data MUST be filled for your submission. (see 5.3)
-\paperdetails{
-  %% perspective options are: art, sciencetheoretical, scienceempirical, engineering.
-  %% Choose exactly the one that best describes this work. (see 2.1)
-  perspective=art,
-  %% State one or more areas, separated by a comma. (see 2.2)
-  %% Please see list of areas in http://programming-journal.org/cfp/
-  %% The list is open-ended, so use other areas if yours is/are not listed.
-  area={Social Coding, General-purpose programming},
-  %% You may choose the license for your paper (see 3.)
-  %% License options include: cc-by (default), cc-by-nc
-  % license=cc-by,
-}
-%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%
-%% These data are provided by the editors. May be left out on submission.
-%\paperdetails{
-%  submitted=2016-08-10,
-%  published=2016-10-11,
-%  year=2016,
-%  volume=1,
-%  issue=1,
-%  articlenumber=1,
-%}
-%%%%%%%%%%%%%%%%%%
-
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
 \begin{document}
 
 \title{Contracts for Contracts}
+%\subtitle{Securing Smart Contracts with Higher-Order Temporal Behavioral Contracts}% optional
 
-\subtitle{Securing Smart Contracts with Higher-Order Temporal Behavioral Contracts}% optional
+\author{ }
 
-\titlerunning{Contracts for Contracts} %optional, in case that the title is too long; the running title should fit into the top page column
-
-\author[a]{Tobias Pape}
-\authorinfo{is the author of this {LaTeX} class. Contact him at
-  \email{tobias.pape@hpi.uni-potsdam.de}.}
-\affiliation[a]{Hasso Plattner Institute, University of Potsdam, Germany}
-
-\author{Cristina V. Lopes}
-\authorinfo{is associate editor for the first two issues of The Art, Science,
-  and Engineering of Programming. Contact her at \email{lopes@ics.uci.edu}.}
-\affiliation{University of California, Irvine, USA}
-
-\author[a]{Robert Hirschfeld}
-\authorinfo{is chair of the AOSA steering committee. The Art, Science,
-  and Engineering of Programming is published by AOSA. Contact Robert at \email{hirschfeld@hpi.uni-potsdam.de}.}
-
-% \authorrunning{T. Pape, C. Lopes, R. Hirschfeld} % Optional, for long author lists
-
-\keywords{programming journal, paper formatting, submission preparation} % please provide 1--5 keywords
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Please go to https://dl.acm.org/ccs/ccs.cfm and generate your Classification
-% System [view CCS TeX Code] stanz and copy _all of it_ to this place.
-%% From HERE
-\begin{CCSXML}
-<ccs2012>
-<concept>
-<concept_id>10002944.10011122.10003459</concept_id>
-<concept_desc>General and reference~Computing standards, RFCs and guidelines</concept_desc>
-<concept_significance>300</concept_significance>
-</concept>
-<concept>
-<concept_id>10010405.10010476.10010477</concept_id>
-<concept_desc>Applied computing~Publishing</concept_desc>
-<concept_significance>300</concept_significance>
-</concept>
-</ccs2012>
-\end{CCSXML}
-
-\ccsdesc[300]{General and reference~Computing standards, RFCs and guidelines}
-\ccsdesc[500]{Applied computing~Publishing}
-
-% To HERE
-%%%%%%%%%%%%%%%%%%%%%%%
 
 \maketitle
 
-\lstMakeShortInline[keywordstyle=,%
-	flexiblecolumns=false,%
-	%basewidth={0.56em, 0.52em},%
-	mathescape=false,%
-	basicstyle=\ttfamily\small]@
+%\lstMakeShortInline[keywordstyle=,%
+%	flexiblecolumns=false,%
+%	%basewidth={0.56em, 0.52em},%
+%	mathescape=false,%
+%	basicstyle=\ttfamily\small]@
 
 % Please always include the abstract.
 % The abstract MUST be written according to the directives stated in
@@ -144,15 +73,17 @@
 % Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?
 % Importance: Why does this work matter?
 \begin{abstract}
-  \begin{description}
-    \item[Context] blockchain, smart contracts
-    \item[Inquiry] improve reliability and security of smart contract programs
-    \item[Approach] design a language extension of higher-order temporal behavioral contracts
-    \item[Knowledge] programmers are able to express temporal constraints
-    \item[Grounding] language design, implementation, case studies
-    \item[Importance] money
-  \end{description}
+  Context: blockchain, smart contracts
+    Inquiry: improve reliability and security of smart contract programs
+    Approach: design a language extension of higher-order temporal behavioral contracts
+    Knowledge: programmers are able to express temporal constraints
+    Grounding: language design, implementation, case studies
+    Importance: money
 \end{abstract}
+
+\begin{IEEEkeywords}
+  smart contracts, behavioral contracts, runtime verification
+\end{IEEEkeywords}
 
 \input{introduction}
 \input{contract_solidity}
@@ -163,11 +94,10 @@
 \input{related_work}
 \input{conclusion}
 
-\acks
-We want to thank you for using this class to prepare articles for The Art, Science, and Engineering of Programming.
+%\section*{Acknowledgement}
 
-%\appendix
-\printbibliography
+\bibliographystyle{IEEEtran}
+\bibliography{references}
 
 \end{document}
 

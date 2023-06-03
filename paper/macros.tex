@@ -94,6 +94,8 @@
 
 \newcommand{\code}[1]{\lstinline[language=Solidity,columns=fixed,basicstyle=\ttfamily]|#1|}
 
+\renewcommand{\paragraph}[1]{\vspace{0.15em}\noindent\textbf{#1.}}
+
 % ----- formal
 
 \newcommand{\judgement}[2]{{\bf #1} \hfill #2}
@@ -110,7 +112,7 @@
 \newcommand{\silent}[1]{}
 \newcommand{\hl}[1]{\setlength{\fboxsep}{0pt}\colorbox{light-gray}{#1}}
 
-\newcommand{\lang}{\textsf{ConSol}\xspace}
+\newcommand{\lang}{\textsc{ConSol}\xspace}
 
 \newcommand{\lb}{\{~}
 \newcommand{\rb}{~\}}
