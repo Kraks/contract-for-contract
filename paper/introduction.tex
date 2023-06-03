@@ -31,10 +31,10 @@ This unfortunate reality leads to poor quality of programs.
 Without ensuring the quality of programs, it is impossible to ensure the
 economic outcome of transactions.
 
-Indeed, in recent years, we have seen a number of failures of smart contract
-systems due to attacks utilizing vulnerable contract programs.
-For example, in the famous DAO hack\note{cite}, the unauthorized attacker is
-able transfer money by constructing recursive function calls with
+Indeed, in recent years, we have seen a number of catastrophic failures of
+blockchain systems due to attacks to vulnerable contract programs.
+For example, in the famous DAO hack \note{cite}, the unauthorized attacker is
+able siphon off money by constructing recursive function calls with
 the callback mechanism, causing a total lose of \textdollar50 million.
 The root cause of this attack is that the deployed contract does not
 checks reentrancy defensively before performing critical actions.
@@ -54,27 +54,29 @@ checks reentrancy defensively before performing critical actions.
 %\todo{can we use modifier to check function's argument?}
 
 To prevent such attacks, the programmer needs to specify those critical
-conditions. The execution is allowed when those conditions are met.
-However, we observe that existing popular smart contract languages (e.g.
+conditions. The execution is allowed only when those conditions are met.
+However, we observe that existing popular smart contract languages (e.g.,
 Solidity) do not provide \emph{rich, effective, convenient} means to specify
 and enforce contract behaviors.
 Simple first-order assertion primitives (e.g., \code{require}) are indeed available,
 but they cannot effectively examine callable addresses or function values, which
-are a common pattern used in smart contract programs.
-Moreover, many of the critical condition in smart contracts are \emph{temporal}
+exhibit higher-order behaviors and are a common pattern used in smart contract programs.
+Moreover, many of the critical conditions in smart contracts are \emph{temporal}
 -- the order of happened events matters.
 For instance, to defense the DAO attack caused by reentrancy via
 external functions, it requires to check that the function of interest cannot
 be invoked \emph{before} the current call of the same function is finished.
 
-% encode temporal behavioral checks using ad-hoc lower-level value behaviors
 
 The lack of sufficient linguistic means to specify and enforce subtle but
-critical behaviors discourages programmers to use concise higher-level
-abstractions when writing smart contract code.
-Instead, to be secure, programmers are obliged to write verbose code with
-lower-level or no abstractions, which conflates the main business logic with
+critical behaviors discourages programmers to write clean and maintainable
+code with higher-level abstractions.
+Instead, programmers are obliged to write verbose low-level code
+to implement security checks, which conflates the main business logic with
 behavioral checks, further leading to poor readability and maintainability.
+The pervasive temporal conditions in distributed blockchain systems further
+complicates the situation: these temporal behavioral checks are usually
+encoded using value-level checks in ad-hoc manners.
 Taking the DAO attack as example again, a common way to implement ``reentrancy
 guards'' is to manually define an additional boolean state, indicating
 if the function is finished.
@@ -85,14 +87,14 @@ leading to vulnerable code causing real monetary lose.
 %Apart from the investigating effort to certify and verify smart contract
 %programs, language designers are responsible to empower programmers with better
 %linguistic solutions to secure smart contracts in the first place.
-In this paper, we argue that \emph{behavioral software
+To address these issues, we argue that \emph{behavioral software
 contracts}~\cite{DBLP:conf/tools/Meyer98a} should play a fundamental role in
-the
-development of \emph{smart contract} programs.  Similar to smart contracts,
-behavioral contracts is an agreement too. They specify the assumptions and
-guarantees between software components. The specified assumptions and
-guarantees will be monitored and reported when violated in languages with
-behavioral contracts.
+the development of \emph{smart contract} programs.
+Similar to smart contracts, behavioral contracts is an agreement too. They
+specify assumptions and guarantees between software components, just as
+smart contracts specify assumptions and guarantees between economic parties.
+In languages with behavioral contracts, the specified assumptions and
+guarantees will be monitored and reported when violated.
 
 Pioneered by the Eiffel language \cite{DBLP:books/ph/Meyer91} and the
 design-by-contract methodology \cite{DBLP:conf/tools/Meyer98a}, various styles
@@ -102,7 +104,7 @@ In this paper, we develop a behavioral contract system \lang for the Solidity
 language, providing a practical specification and monitoring system
 for both higher-order and temporal behaviors.
 Solidity is a programming language to build smart contract programs that run on
-the Ethereum platform.  As one of the most popular languages for smart
+the Ethereum platform.  As one of the most popular ecosystem of smart
 contracts, Solidity has been used \todo{to do cool things}.
 
 We demonstrate that behavioral contracts are an effective approach
