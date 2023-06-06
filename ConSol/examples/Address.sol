@@ -41,7 +41,7 @@ contract Caller {
   }
 }
 
-contract Call_Translated {
+contract Caller_Translated {
   event Response(bool success, bytes data);
 
   function guardedCall(address payable addr, uint256 v, uint256 g,
