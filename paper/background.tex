@@ -1,0 +1,21 @@
+\section{Background: The Solidity Language}
+
+brief introduction of the Solidity language, why it is complicated
+
+address: they are callable and can perform arbitrary computation, but we cannot always
+inspect the computation other than checking the underlying numeric addressing value.
+
+\paragraph{Challenges}
+The unique features of the Solidity language and blockchain computation impose
+several challenges that demand us exploring different design choices.
+Here we summarize these challenges and in the next section we introduce the
+design of \lang.
+
+\begin{itemize}
+  \item Rich higher-order computation:
+    address are \emph{opaque first-class values carrying higher-order computation}.
+  \item Distributed execution model
+  \item Open-world assumption: unknown/adversarial caller, we do not know all the programs
+    and cannot modify them
+  \item Efficiency requirement: gas consumption
+\end{itemize}
