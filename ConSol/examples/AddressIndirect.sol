@@ -19,7 +19,7 @@ contract Receiver {
 contract Caller {
   event Response(bool success, bytes data);
 
-  function id(address a) private pure returns (address)  { return a; }
+  function id(address payable a) private pure returns (address payable)  { return a; }
 
   // Let's imagine that contract Caller does not have the source code for the
   // contract Receiver, but we do know the address of contract Receiver and the function to call.
@@ -35,13 +35,26 @@ contract Caller {
   function testCallFoo(address payable _addr, int256 x) public payable {
     // You can send ether and specify a custom gas amount
     address whoow = id(_addr);
-    // now we have a call to whoow, but we don't how what it is statically
+    /*
+    Now we have a call to whoow, but we don't how what it is statically.
+    So in the translated code, we will have a mapping that records addresses to functions,
+    and this call-site will be translated to lookup of that mapping to find the right guard function.
+    This approach should work in principle, but only when this address call is ``indirect'' due to the overhead (how much??).
+    By "indirect", we mean those address calls that potentially should be guarded but we cannot
+    be certain about which guard should be used by syntactically analyzing the program.
+    Consider another example:
+      address addr = select_one_based_on_dynamic_cond(addr1, addr2)
+      addr.call(...)
+    where both addr1 and addr2 have their own specifications from the user.
+    For direct address calls, we can just rewrite the call-sites to guarded functions (see Address.sol).
+    */
     (bool success, bytes memory data) = whoow.call{value: msg.value, gas: 5000}(
       abi.encodeWithSignature("foo(string, uint256)", "call foo", 123 + x)
     );
 
     emit Response(success, data);
   }
+
 }
 
 contract Caller_Translated {
