@@ -3,101 +3,83 @@
 We now introduce \lang informally with examples.
 \lang is a non-breaking extension that additionally provides means
 to specify behavioral contracts on top of the Solidity language.
-We provide a brief introduction of Solidity first, then discuss our extension
-of behavioral contracts.
 We often use \emph{specification} for behavioral contracts to avoid terminological ambiguity.
 
 \paragraph{Design Rationale}
 This paper concerns about designing an extension for Solidity that enhances the
-language with higher-order temporal behavioral contracts.
+language with contracts for higher-order temporal behaviors.
 The extension should be
-\todo{non-intrusive, easy to use, expressive, gradual (you do not need to pay the overhead
-	if you don't use contracts), efficient (little overhead)}
-
+\begin{itemize}
+  \item non-intrusive
+  \item expressive
+  \item gradual (you do not need to pay the overhead if you don't use contracts)
+  \item efficient (no or little overhead)
+\end{itemize}
 
 \subsection{Flat Contracts for First-Order Values}
 
-Specifying the pre-condition and post-condition, where the post-condition
-can depend on the argument value:
-
-% \begin{lstlisting}[language=Solidity]
-%   # {x | x > 0}
-%   # {y | y > x + 1}
-%   function f(uint x) returns (uint y) { ... }
-% \end{lstlisting}
-
+We begin with specifying pre-condition and post-condition for functions
+involving first-order values. Consider the following \code{toEither} example
+that converts \note{Wei?} to Either:
 \begin{lstlisting}[language=Solidity]
-  # {x | x % 1e18 < 1e17}
-  # {y | y < type(uint).max / 1e18}
-  function toEther(uint x) returns (uint y) { ... }
+# { toEither(x) returns (y)
+    requires x % 1e18 < 1e17
+    ensures  y < type(uint).max / 1e18 }
+function toEther(uint x) returns (uint y) { ... }
 \end{lstlisting}
 
-It is also equivalent to core syntax:
-% \begin{lstlisting}
-%   # {x | x > 0} -> {y | y > x + 1}
-% \end{lstlisting}
+The first line introduces bindings for \code{toEither}'s arguments and return
+values, which are \code{x} and \code{y}, respectively.
+The binding names in the specification do not have to match those in the function definition.
+The \code{requires}-clause specifies the pre-condition to call \code{toEither},
+and the \code{ensures}-clause specifies the post-condition.
+Any occurrences of \code{x} in the \code{requires}-clause refer to the actual
+argument value, and similarly, occurrences of \code{y} in the \code{ensures}-clause
+refer to the actual returned value.
 
+\paragraph{Omitting}
+We can omit any part of the argument or return value specification:
+\begin{lstlisting}
+# { toWei(x) returns (_)
+    ensures x < type(uint).max / 1e18 }
+function toWei(uint x) returns (uint) { ... }
+\end{lstlisting}
+which is equivalent to core form where the omitted part is simply the boolean expression
+\code{true}:
 \begin{lstlisting}[language=Solidity]
-  # {x | x % 1e18 < 1e17} -> {y | y < type(uint).max / 1e18}
-  function toEther(uint x) returns (uint y) { ... }
+# { toWei(x) returns (_)
+    ensures x < type(uint).max / 1e18
+    requires true }
 \end{lstlisting}
 
-We can omit any part of the argument or return value contracts:
+\paragraph{Dependent Contract}
+Note that post-condition can depend on the argument as well.
+\todo{example}
 
-% \begin{lstlisting}[language=Solidity]
-%   # {x | x > 0}
-%   function f(uint x) returns (uint y) { ... }
-% \end{lstlisting}
+%Another way is to use the `any` flat contract, which is defined as
+%\code{any = { _ | true }}:
+%\begin{lstlisting}
+%  # {x | x < type(uint).max / 1e18} -> any
+%\end{lstlisting}
 
-\begin{lstlisting}[language=Solidity]
-  # {x | x < type(uint).max / 1e18}
-  function toWei(uint x) returns (uint y) { ... }
-\end{lstlisting}
-
-It is equivalent to core syntax where the omitted part is simply \code{true}:
-
-\begin{lstlisting}[language=Solidity]
-  # {x | x < type(uint).max / 1e18} -> {y | true}
-\end{lstlisting}
-
-Another way is to use the `any` flat contract, which is defined as
-\code{any = { _ | true }}:
+\paragraph{Any Expression is Allowed}
+When specifying the pre-/post-conditions of functions, the programmer
+can use any valid Solidity expression to from the condition.
+For example, Solidity has a number of built-in special variables
+carrying important data (e.g. \code{msg.value}) or metadata (e.g. \code{block.timestamp})
+of the transacation.
+The programmer may want to check conditions against with those transactional
+information.
+The following code snippet shows an example that examines
+\code{msg.value} as the pre-condition of a payable function:
 \begin{lstlisting}
-  # {x | x < type(uint).max / 1e18} -> any
+# { byTickets(n) ensures msg.value >= 1e15 * n }
+function buyTickets(int n) payable { ... }
 \end{lstlisting}
+%\zz{How about other special variables, such as `block.chainid` and `tx.origin`?. Perhaps we could redesign a universal syntax for these variables in Section 2.5, where we discuss where to add the message sender}
+%\url{https://docs.soliditylang.org/en/develop/units-and-global-variables.html#block-and-transaction-properties}
 
-For multi-argument functions, we use multiple \code{->} to compose larger function
-contracts:
-
-\begin{lstlisting}
-  # {x | x > 0} -> {y | y < 100} -> {z | z == x + y }
-  function f(int x, int y) returns (int z) { returns x + y; }
-\end{lstlisting}
-
-% \begin{lstlisting}[language=Solidity]
-% # {rate | rate > 0 && rate < 100}
-% # {time | time != 0}
-% function simpleInterest(uint principle, uint rate, uint time) returns (uint interest) { ... }
-% \end{lstlisting}
-
-Or, we could write a single flat contract for the argument introducing
-multiple argument binders:
-
-\begin{lstlisting}
-  # { (x, y) | x > 0 && y < 100 } -> {z | z == x + y }
-  function f(int x, int y) returns (int z) { returns x + y; }
-\end{lstlisting}
-
-When specifying the spec of functions, two special variables are available
-`msg.sender` the address of the caller and `block.timestamp` the current
-block timestamp.
-\zz{How about other special variables, such as `block.chainid` and `tx.origin`?. Perhaps we could redesign a universal syntax for these variables in Section 2.5, where we discuss where to add the message sender}
-\url{https://docs.soliditylang.org/en/develop/units-and-global-variables.html#block-and-transaction-properties}
-
-\begin{lstlisting}
-  # { n | msg.value >= 1e15 * n }
-  function buyTickets(int n) payable { ... }
-\end{lstlisting}
+So far, boring.
 
 Behavioral contracts for first-order values are straightforward,
 and can be directly mapped to \code{assert} or \code{require} statements
