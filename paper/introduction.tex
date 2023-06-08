@@ -15,29 +15,29 @@
 %Building trustworthy and secure smart contract programs requires solid
 %understanding and reliable enforcement of program invariants.
 
-
-Smart contracts are programs to automate the execution of agreement so that all
+Smart contracts are programs to automate the execution of agreements so that all
 parties involved in the agreement can be certain about the outcome.
-Smart contracts are ``smart'' since by using blockchains they provide a
+Smart contract programs run on blockchains, implementing a consensus
+protocol of Byzantine-fault-tolerant distributed ledgers.
+By using blockchains, smart contracts are ``smart'' since they are an
 mechanism to \emph{ensure the economic outcome of transactions} without a
 central authority.
-A blockchain implements a consensus protocol of Byzantine-fault-tolerant
-distributed ledgers.
 
-It is however ironic that many popular smart contract languages, which hold the
-great promise to ensure transactional outcomes via consensus and distributed
-ledgers, do not provide enough means to \emph{ensure the computational outcomes}.
-This unfortunate reality leads to poor quality of programs.
-Without ensuring the quality of programs, it is impossible to ensure the
-economic outcome of transactions.
+It is however ironic that many popular smart contract \emph{languages}, which hold the
+promise to build programs that ensure transactional outcomes,
+%via consensus and distributed ledgers,
+do not provide enough means to \emph{ensure the computational outcomes}.
+This unfortunate reality leads to poor quality of smart contract programs.
+Without ensuring the quality of these programs, ensuring the economic outcome
+of transactions is only a good wish.
 
 Indeed, in recent years, we have seen a number of catastrophic failures of
 blockchain systems due to attacks to vulnerable contract programs.
 For example, in the famous DAO hack \note{cite}, the unauthorized attacker is
-able siphon off money by constructing recursive function calls with
+able to siphon off money by constructing recursive function calls with
 the callback mechanism, causing a total lose of \textdollar50 million.
-The root cause of this attack is that the deployed contract does not
-checks reentrancy defensively before performing critical actions.
+The root cause of this attack is that the deployed contract should
+not allow reentrancy when performing critical actions.
 
 %\zz{ On the other hand, assertion primitives are crucial for ensuring the
 %accuracy and integrity of a smart contract's business model. }
@@ -56,17 +56,17 @@ checks reentrancy defensively before performing critical actions.
 To prevent such attacks, the programmer needs to specify those critical
 conditions. The execution is allowed only when those conditions are met.
 However, we observe that existing popular smart contract languages (e.g.,
-Solidity) do not provide \emph{rich, effective, convenient} means to specify
-and enforce contract behaviors.
-Simple first-order assertion primitives (e.g., \code{require}) are indeed available,
-but they cannot effectively examine callable addresses or function values, which
-exhibit higher-order behaviors and are a common pattern used in smart contract programs.
+Solidity) do not provide \emph{expressive, effective, convenient} means to
+specify and enforce contract behaviors.
+Simple first-order assertion primitives (e.g., \code{require} and \code{modifier})
+are indeed available, but they cannot effectively examine callable addresses or
+function values, which exhibit higher-order behaviors and are a common pattern
+used in smart contract programs.
 Moreover, many of the critical conditions in smart contracts are \emph{temporal}
--- the order of happened events matters.
+-- the order of events matters.
 For instance, to defense the DAO attack caused by reentrancy via
 external functions, it requires to check that the function of interest cannot
 be invoked \emph{before} the current call of the same function is finished.
-
 
 The lack of sufficient linguistic means to specify and enforce subtle but
 critical behaviors discourages programmers to write clean and maintainable
@@ -76,13 +76,13 @@ to implement security checks, which conflates the main business logic with
 behavioral checks, further leading to poor readability and maintainability.
 The pervasive temporal conditions in distributed blockchain systems further
 complicates the situation: these temporal behavioral checks are usually
-encoded using value-level checks in ad-hoc manners.
+encoded as value-level checks in ad-hoc manners.
 Taking the DAO attack as example again, a common way to implement ``reentrancy
-guards'' is to manually define an additional boolean state, indicating
-if the function is finished.
-And often worse, defensive checks can be easily forgotten or disregarded,
-leading to vulnerable code causing real monetary lose.
-
+guards'' is to manually define an additional boolean flag, indicating
+whether the function is finished. This is both verbose and error-prone,
+quickly becoming unmanageable for complex behaviors.
+And often worse, defensive checks are forgotten or disregarded, leading to
+vulnerable code causing real monetary lose.
 
 %Apart from the investigating effort to certify and verify smart contract
 %programs, language designers are responsible to empower programmers with better
@@ -90,7 +90,7 @@ leading to vulnerable code causing real monetary lose.
 To address these issues, we argue that \emph{behavioral software
 contracts}~\cite{DBLP:conf/tools/Meyer98a} should play a fundamental role in
 the development of \emph{smart contract} programs.
-Similar to smart contracts, behavioral contracts is an agreement too. They
+Similar to smart contracts, behavioral contracts is an agreement, too. They
 specify assumptions and guarantees between software components, just as
 smart contracts specify assumptions and guarantees between economic parties.
 In languages with behavioral contracts, the specified assumptions and
@@ -98,19 +98,15 @@ guarantees will be monitored and reported when violated.
 
 Pioneered by the Eiffel language \cite{DBLP:books/ph/Meyer91} and the
 design-by-contract methodology \cite{DBLP:conf/tools/Meyer98a}, various styles
-of behavioral contracts have been widely adopted in Java, Haskell, C\#, Python,
+of behavioral contracts have been adopted in Java, Haskell, C\#, Python,
 Racket, Elixir \cite{DBLP:conf/erlang/0001BBHMEF22}, etc. \note{cite}
-In this paper, we develop a behavioral contract system \lang (Contract Solidity) for the Solidity
-language, providing a practical specification and monitoring system
-for both higher-order and temporal behaviors.
+In this paper, we develop a behavioral contract system \lang (Contract
+Solidity) for the Solidity language, providing a practical specification and
+monitoring system for both \emph{higher-order and temporal behaviors}.
 Solidity is a programming language to build smart contract programs that run on
 the Ethereum platform.  As one of the most popular ecosystem of smart
 contracts, Solidity has been used \todo{to do cool things}.
 \todo{explain challenges}
-
-We demonstrate that behavioral contracts are an effective approach
-to improve the robustness and quality of smart contract programs.
-\todo{summarize what we can prevent/achieve}
 
 %\lang enriches the Solidity language with \emph{higher-order} and
 %\emph{temporal} behavioral contracts, which are absent in existing approaches.
@@ -121,7 +117,6 @@ to improve the robustness and quality of smart contract programs.
 %However, Solidity and its running platform Ethereum is a complex system.
 %Carelessly written contracts can cause serious bugs and loses.
 %We identify \todo{solidity's tricky feature}
-
 
 \subsection*{\textbf{Contracts for Higher-Order Values}}
 
@@ -147,18 +142,26 @@ Solidity has a proper support for lambda expressions.
 \subsection*{\textbf{Contracts for Temporal Properties}}
 
 Temporal contracts provides a way to \todo{...}.
+
+\subsection*{\textbf{Evaluation}}
+
+Compared to existing approaches \todo{of what}, our work is both expressive,
+easy-to-use, lightweight, effective, and economical.
+Programmer can use all Solidity expressions to define the desired property,
+which are attached only to relevant functions in a non-intrusive way.
+
+We demonstrate that \lang is an effective approach to improve the robustness
+and quality of smart contract programs.
+By examining several cases of existing vulnerabilities, we show that our
+approach is effective in preventing these attacks.
+\zz{Let's mention the amount of funds we could save if we can prevent these attacks.}
+We also evaluate the overhead (gas consumption) of our approach compared to
+manually inserted assertion checks, showing that \todo{...}
+
 \todo{why static verification fails}
 
-\paragraph{hey}
-
-We develop a core model of \lang, including its syntax, operational semantics,
-and discuss its soundness guarantee.
-With this extension of higher-order temporal behavioral contracts, we examine
-several cases of reported bugs and vulnerabilities and show that
-our approach is effective in preventing these attacks.
-\zz{Let's mention the amount of funds we could save if we can prevent these attacks.}
-We also evaluate the overhead (gas consumption) of our approach
-compared to manually inserted assertion checks, showing that \todo{...}
+%We develop a core model of \lang, including its syntax, operational semantics,
+%and discuss its soundness guarantee.
 
 %\todo{discuss performance/gas consumption}
 
@@ -168,13 +171,12 @@ compared to manually inserted assertion checks, showing that \todo{...}
 
 \paragraph{Contributions} This paper makes the following contributions:
 \begin{itemize}
-  \item We design \lang, an extension for Solidity that allows programmers to
+  \item We design \lang, the first extension for Solidity that allows programmers to
         specify and enforce higher-order and temporal behaviors in smart contracts.
         We demonstrate \lang's use cases through extensive examples and
         implement \lang as a preprocessor for ordinary Solidity programs.
-	\item We present the core formalization $\lambda_\lang$ for our proposed
-	      extension, including its syntax, formal semantics, compilation, and
-	      soundness.
+  \item We present the core formalization \lang, including its syntax, formal
+        semantics, compilation, and soundness.
   \item We examine a number of real-world attacks with \lang, showing that our
         approach is effective in improving safety and reliability of smart contract
         programs.
