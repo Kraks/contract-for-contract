@@ -261,12 +261,12 @@ describe('value (fun) contract', () => {
       preCond: 'xxx',
       postCond: 'yyy',
       preFunSpec: [
-        {
+        makeValSpec({
           call: { funName: 'argfun', kwargs: [], args: [], rets: [] },
           postCond: 'aaa',
           tag: 'ValSpec',
-        },
-        {
+        }),
+        makeValSpec({
           call: {
             funName: 'argfun2',
             kwargs: [],
@@ -275,14 +275,14 @@ describe('value (fun) contract', () => {
           },
           preCond: 'ddd',
           tag: 'ValSpec',
-        },
+        }),
       ],
       postFunSpec: [
-        {
+        makeValSpec({
           call: { funName: 'retFun', kwargs: [], args: [], rets: [] },
           postCond: 'bbb',
           tag: 'ValSpec',
-        },
+        }),
       ],
     });
     const parseSpec = () => {

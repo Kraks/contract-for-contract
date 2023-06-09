@@ -71,9 +71,11 @@ export type TempSpec<T> = Opaque<$TempSpec<T>, 'TempSpec'>;
 
 export type CSSpec<T> = ValSpec<T> | TempSpec<T>;
 
-// FIXME(GW): narrowing obj properly
-export function makeValSpec<T>(obj: any): ValSpec<T> {
+// only field `call` is required to make ValSpec
+export function makeValSpec<T>(obj: Partial<ValSpec<T>> & Pick<$ValSpec<T>, 'call'>): ValSpec<T> {
   const ret = {
+    preFunSpec: [],
+    postFunSpec: [],
     ...obj,
     tag: 'ValSpec',
   };
