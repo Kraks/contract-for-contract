@@ -93,13 +93,18 @@ the development of \emph{smart contract} programs.
 Similar to smart contracts, behavioral contracts is an agreement, too. They
 specify assumptions and guarantees between software components, just as
 smart contracts specify assumptions and guarantees between economic parties.
-In languages with behavioral contracts, the specified assumptions and
-guarantees will be monitored and reported when violated.
-
+The specified assumptions and guarantees are executable specifications
+using the same programming language syntax, and will be monitored and reported
+if violated.
 Pioneered by the Eiffel language \cite{DBLP:books/ph/Meyer91} and the
-design-by-contract methodology \cite{DBLP:conf/tools/Meyer98a}, various styles
-of behavioral contracts have been adopted in Java, Haskell, C\#, Python,
-Racket, Elixir \cite{DBLP:conf/erlang/0001BBHMEF22}, etc. \note{cite}
+design-by-contract methodology \cite{DBLP:conf/tools/Meyer98a,
+DBLP:books/ph/Meyer97}, various styles of behavioral contracts have been
+adopted in Java, Haskell, C\#, Python, Racket, Elixir
+\cite{DBLP:conf/erlang/0001BBHMEF22}, etc. \note{cite}
+Studies \cite{DBLP:conf/rodin/Chalin06, DBLP:books/ph/Meyer97}
+have shown that behavioral contracts can support design, development,
+testing, and debugging of software systems.
+
 In this paper, we develop a behavioral contract system \lang (Contract
 Solidity) for the Solidity language, providing a practical specification and
 monitoring system for both \emph{higher-order and temporal behaviors}.
