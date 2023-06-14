@@ -18,7 +18,7 @@ The extension should be
 
 \subsection{Contracts for First-Order Values}
 
-We begin with specifying pre-condition and post-condition for functions
+We begin with specifying precondition and postcondition for functions
 involving first-order values. Consider the following \code{toEither} example
 that converts \note{Wei?} to Either:
 \begin{lstlisting}[language=Solidity]
@@ -31,14 +31,14 @@ function toEther(uint x) returns (uint y) { ... }
 The first line introduces bindings for \code{toEither}'s arguments and return
 values, which are \code{x} and \code{y}, respectively.
 The binding names in the specification do not have to match those in the function definition.
-The \code{requires}-clause specifies the pre-condition to call \code{toEither},
-and the \code{ensures}-clause specifies the post-condition.
+The \code{requires}-clause specifies the precondition to call \code{toEither},
+and the \code{ensures}-clause specifies the postcondition.
 Any occurrences of \code{x} in the \code{requires}-clause refer to the actual
 argument value, and similarly, occurrences of \code{y} in the \code{ensures}-clause
 refer to the actual returned value.
 
-\paragraph{Omitting}
-We can omit any part of the argument or return value specification:
+\paragraph{Syntactic Sugars}
+We can liberally omit any part of the argument or return value specification:
 \begin{lstlisting}
 # { toWei(x) returns (_)
     ensures x < type(uint).max / 1e18 }
@@ -53,8 +53,13 @@ which is equivalent to core form where the omitted part is simply the boolean ex
 \end{lstlisting}
 
 \paragraph{Dependent Contract}
-Note that post-condition can depend on the argument as well.
-\todo{example}
+Postconditions can depend on the argument as well. In other words,
+the scope of arguments span over both the precondition and postcondition.
+For example, the following snippet is a valid postcondition that requires
+monotonicity.
+\begin{lstlisting}
+# f(x) returns (y) ensures y > x
+\end{lstlisting}
 
 %Another way is to use the `any` flat contract, which is defined as
 %\code{any = { _ | true }}:
@@ -63,19 +68,21 @@ Note that post-condition can depend on the argument as well.
 %\end{lstlisting}
 
 \paragraph{Any Expression is Allowed}
-When specifying the pre-/post-conditions of functions, the programmer
-can use any valid Solidity expression to from the condition.
-For example, Solidity has a number of built-in special variables
-carrying important data (e.g. \code{msg.value}) or metadata (e.g. \code{block.timestamp})
-of the transacation.
-The programmer may want to check conditions against with those transactional
-information.
-The following code snippet shows an example that examines
-\code{msg.value} as the pre-condition of a payable function:
+When specifying the pre-/postconditions of functions, the programmer can use
+any valid Solidity expression to from the condition, including but not limited
+to function calls, memory operations, and built-in special variables carrying
+important transaction data (e.g. \code{msg.value}) or metadata (e.g.
+\code{block.timestamp}) that are only available at runtime.
+The programmers are free to check desired conditions against with these
+transactional information.
+For example, the following snippet examines \code{msg.value} as the
+precondition of a payable function:
 \begin{lstlisting}
 # { byTickets(n) ensures msg.value >= 1e15 * n }
 function buyTickets(int n) payable { ... }
 \end{lstlisting}
+With this kind of flexibility and expressiveness, programmers are able to
+express invariants beyond the capability of static verification.
 %\zz{How about other special variables, such as `block.chainid` and `tx.origin`?. Perhaps we could redesign a universal syntax for these variables in Section 2.5, where we discuss where to add the message sender}
 %\url{https://docs.soliditylang.org/en/develop/units-and-global-variables.html#block-and-transaction-properties}
 
@@ -97,22 +104,23 @@ function f(address payable addr) { ... }
 \end{lstlisting}
 
 However, addresses in Solidity have rich higher-order behaviors: they may
-represent a deployed Ethereum contract and can be invoked in customized ways.
+represent a deployed external Ethereum contract and can be invoked in
+customized ways.
 For example, the following snippet shows a function \code{f} taking an address
 \code{addr} that is called at some point.
 The programmer intends to the specify the precondition and postcondition when
-calling \code{addr}. \note{GW: example abi?}
-Nevertheless, such checks cannot be performed when \code{f} is called,
-even though \code{addr} is a proper argument of \code{f}.
+calling \code{addr}. \note{GW: explain abi?}
+Nevertheless, such checks against \code{addr} cannot be performed when \code{f}
+is called, even though \code{addr} is a proper argument of \code{f}.
 Because \code{addr} in this use case is effectively a function, and
 it is undecidable to statically examine its properties in general.
 Additionally, we may not have access to the source code of the contract
 represented by \code{addr}.
 \begin{lstlisting}
-# { f(addr) where
-    { addr(msg, amount) returns (flag, data)
-      requires amount > 100
-      ensures flag == true }
+# f(addr) where
+  { addr.call(msg, amount) returns (flag, data)
+    requires amount > 100
+    ensures flag == true }
 function f(address payable addr) {
   ... // omitting statements before the call
   (bool success, bytes memory data) =
@@ -131,6 +139,27 @@ in the \code{where}-clause, which requires
 the \code{amount} argument must be greater than 100 and
 the address call must succeed.
 
+Notably, using \lang we have separated the concern of specifications and usages
+--- there is no need to change the function body or manually insert checks
+around the call. This leads to more maintainable code and allows programmers to
+fearlessly refactor the code.
+
+\paragraph{Multiple Targets}
+Multiple callee targets can inhabit in a single address value.
+Other than the \code{call} method, there are other forms of low-level call,
+e.g., \code{delegatecall}, \code{send}, etc.
+% https://docs.soliditylang.org/en/v0.8.20/units-and-global-variables.html#address-related
+Programmers can specify conditions for different callee targets in the
+\code{where}-clause.
+\begin{lstlisting}
+# f(addr) where
+  { addr.send(x) returns (succ) requires ... }
+  { addr.call(msg, x) returns (succ, data) requires ... }
+\end{lstlisting}
+
+\zz{I guess we should educate the audience about the difference between low-level and high-level calls at the beginning of Section 2.4. I'll take care of this later.}
+\note{GW: it seems we need to discern \code{call}s with different signatures}
+
 \paragraph{Additional Arguments}
 Solidity address calls can take additional special arguments
 such as \code{value} and \code{gas}:
@@ -140,20 +169,10 @@ addr.call{value: msg.value, gas: 5000}(...);
 In \lang, programmers can specify their conditions by introducing additional
 bindings using the familiar syntax:
 \begin{lstlisting}
-# addr{value: v, gas: g}(msg, amount) returns (flag, data)
+# addr.call{value: v, gas: g}(msg, amount) ...
 \end{lstlisting}
 \code{v} and \code{g} represent the actual message value and gas
 value, which can be used in \code{requires}/\code{ensures}-clauses.
-
-\paragraph{Multiple Targets}
-Multiple callee targets can inhabit in a single address value.
-Programmers can specify different conditions for different
-callee targets in the \code{where}-clause.
-\begin{lstlisting}
-TODO EXAMPLE
-\end{lstlisting}
-
-\zz{I guess we should educate the audience about the difference between low-level and high-level calls at the beginning of Section 2.4. I'll take care of this later.}
 
 \iffalse
 It would be convenient to directly enforces the success of the call and omit
@@ -184,8 +203,8 @@ address.
 For example, in the following case, \code{b} itself has an ``address contract''
 \code{<b-pre> -> <b-post>} but there is no general way to enforce that.
 Because we do not have the control of the actual callee function of \code{a},
-therefore no way to modify the code of \code{a} to check the pre-condition
-and post-condition when \code{b} is called in \code{a}.
+therefore no way to modify the code of \code{a} to check the precondition
+and postcondition when \code{b} is called in \code{a}.
 
 \begin{lstlisting}
   # { a | { b | <b-pre> -> <b-post> } -> { (true, _) | true } }
@@ -196,7 +215,7 @@ and post-condition when \code{b} is called in \code{a}.
 \end{lstlisting}
 
 Address contracts are \emph{second-class} -- we can only enforce the
-pre-condition and post-condition of addresses within the current calling
+precondition and postcondition of addresses within the current calling
 context.  If the address escapes (e.g. by returning, or stored in a global
 variable), we cannot enforce the contract anymore.
 
