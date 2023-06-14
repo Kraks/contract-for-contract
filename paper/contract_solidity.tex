@@ -22,9 +22,9 @@ We begin with specifying precondition and postcondition for functions
 involving first-order values. Consider the following \code{toEither} example
 that converts \note{Wei?} to Either:
 \begin{lstlisting}[language=Solidity]
-# { toEither(x) returns (y)
-    requires x % 1e18 < 1e17
-    ensures  y < type(uint).max / 1e18 }
+# toEither(x) returns (y)
+# requires x % 1e18 < 1e17
+# ensures  y < type(uint).max / 1e18
 function toEther(uint x) returns (uint y) { ... }
 \end{lstlisting}
 
@@ -40,16 +40,16 @@ refer to the actual returned value.
 \paragraph{Syntactic Sugars}
 We can liberally omit any part of the argument or return value specification:
 \begin{lstlisting}
-# { toWei(x) returns (_)
-    ensures x < type(uint).max / 1e18 }
+# toWei(x) returns (_)
+# ensures x < type(uint).max / 1e18
 function toWei(uint x) returns (uint) { ... }
 \end{lstlisting}
 which is equivalent to core form where the omitted part is simply the boolean expression
 \code{true}:
 \begin{lstlisting}[language=Solidity]
-# { toWei(x) returns (_)
-    ensures x < type(uint).max / 1e18
-    requires true }
+# toWei(x) returns (_)
+# ensures x < type(uint).max / 1e18
+# requires true
 \end{lstlisting}
 
 \paragraph{Dependent Contract}
@@ -78,7 +78,7 @@ transactional information.
 For example, the following snippet examines \code{msg.value} as the
 precondition of a payable function:
 \begin{lstlisting}
-# { byTickets(n) ensures msg.value >= 1e15 * n }
+# byTickets(n) ensures msg.value >= 1e15 * n
 function buyTickets(int n) payable { ... }
 \end{lstlisting}
 With this kind of flexibility and expressiveness, programmers are able to
@@ -99,7 +99,7 @@ from other integer values.
 For instance, the following specification requires that
 the address argument value cannot be 0:
 \begin{lstlisting}
-# { f(addr) requires addr == 0 }
+# f(addr) requires addr == 0
 function f(address payable addr) { ... }
 \end{lstlisting}
 
@@ -116,11 +116,12 @@ Because \code{addr} in this use case is effectively a function, and
 it is undecidable to statically examine its properties in general.
 Additionally, we may not have access to the source code of the contract
 represented by \code{addr}.
+\note{GW: could use a simpler example, and discuss low-level call in the next paragraph section}
 \begin{lstlisting}
 # f(addr) where
-  { addr.call(msg, amount) returns (flag, data)
-    requires amount > 100
-    ensures flag == true }
+# { addr.call(msg, amount) returns (flag, data)
+#   requires amount > 100
+#   ensures flag == true }
 function f(address payable addr) {
   ... // omitting statements before the call
   (bool success, bytes memory data) =
@@ -153,8 +154,8 @@ Programmers can specify conditions for different callee targets in the
 \code{where}-clause.
 \begin{lstlisting}
 # f(addr) where
-  { addr.send(x) returns (succ) requires ... }
-  { addr.call(msg, x) returns (succ, data) requires ... }
+# { addr.send(x) returns (succ) requires ... }
+# { addr.call(msg, x) returns (succ, data) requires ... }
 \end{lstlisting}
 
 \zz{I guess we should educate the audience about the difference between low-level and high-level calls at the beginning of Section 2.4. I'll take care of this later.}
