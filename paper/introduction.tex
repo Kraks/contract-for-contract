@@ -122,20 +122,6 @@ contracts, Solidity has been used \todo{to do cool things}.
 
 One type of values in Solidity that exhibits higher-order behaviors is \emph{addresses}.
 
-Functions in Solidity are first-class too, meaning that functions can be used as
-arguments for and returned from functions. However, at this moment
-\footnote{Solidity version 8.20} Solidity has not supported writing anonymous
-functions (lambda expressions) or nested (named) functions.
-Only explicitly defined top-level functions can be used in first-class ways,
-which discourages programmers to use higher-order functions due to its
-inconvenience and verbosity.
-Moreover, this restriction poses challenges to seamless implement first-class
-behavioral contract and monitor system (e.g. as in \cite{DBLP:conf/icfp/FindlerF02})
-without an expensive whole program transformation.
-Therefore, in this paper we focus on the contract and monitoring of addresses values
-and leave monitoring for higher-order functions as future work when
-Solidity has a proper support for lambda expressions.
-
 \todo{restrict possible call targets}
 \todo{why static verification fails}
 

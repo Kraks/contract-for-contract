@@ -16,7 +16,7 @@ The extension should be
   \item efficient (no or little overhead)
 \end{itemize}
 
-\subsection{Flat Contracts for First-Order Values}
+\subsection{Contracts for First-Order Values}
 
 We begin with specifying pre-condition and post-condition for functions
 involving first-order values. Consider the following \code{toEither} example
@@ -79,73 +79,83 @@ function buyTickets(int n) payable { ... }
 %\zz{How about other special variables, such as `block.chainid` and `tx.origin`?. Perhaps we could redesign a universal syntax for these variables in Section 2.5, where we discuss where to add the message sender}
 %\url{https://docs.soliditylang.org/en/develop/units-and-global-variables.html#block-and-transaction-properties}
 
-So far, boring.
+So far, these flat contracts for first-order values are straightforward,
+and can be directly mapped to assertions wrapping around functions.
 
-Behavioral contracts for first-order values are straightforward,
-and can be directly mapped to \code{assert} or \code{require} statements
-appearing at the beginning of the function.
+\subsection{Contracts for Higher-Order Values}
 
-\subsection{Contracts for Higher-Order Functions}
+\paragraph{Addresses}
+Resembling pointers in C/C++, addresses in Solidity are numerical values
+that can be compared or \note{computed?}.
+In this sense, specifications of addresses are no different
+from other integer values.
+For instance, the following specification requires that
+the address argument value cannot be 0:
+\begin{lstlisting}
+# { f(addr) requires addr == 0 }
+function f(address payable addr) { ... }
+\end{lstlisting}
 
-\iffalse
-	\begin{lstlisting}
-function map(uint[] memory data, function (uint) pure returns (uint) f)
-  internal pure returns (uint[] memory r)
-{
-  r = new uint[](data.length);
-  for (uint i = 0; i < data.length; i++) {
-    r[i] = f(data[i]);
-  }
+However, addresses in Solidity have rich higher-order behaviors: they may
+represent a deployed Ethereum contract and can be invoked in customized ways.
+For example, the following snippet shows a function \code{f} taking an address
+\code{addr} that is called at some point.
+The programmer intends to the specify the precondition and postcondition when
+calling \code{addr}. \note{GW: example abi?}
+Nevertheless, such checks cannot be performed when \code{f} is called,
+even though \code{addr} is a proper argument of \code{f}.
+Because \code{addr} in this use case is effectively a function, and
+it is undecidable to statically examine its properties in general.
+Additionally, we may not have access to the source code of the contract
+represented by \code{addr}.
+\begin{lstlisting}
+# { f(addr) where
+    { addr(msg, amount) returns (flag, data)
+      requires amount > 100
+      ensures flag == true }
+function f(address payable addr) {
+  ... // omitting statements before the call
+  (bool success, bytes memory data) =
+    addr.call(abi.encodeWithSignature(
+        "foo(string, uint256)", "call foo", 128
+      )
+    );
+  ... // omitting statements after the call
 }
 \end{lstlisting}
-\fi
+\lang addresses this issue by adopting lazy checks
+\cite{DBLP:conf/icfp/FindlerF02} that only take place
+when the address is actually invoked \note{GW: fwd ref to impl}.
+The above snippet specifies the condition of \code{addr}
+in the \code{where}-clause, which requires
+the \code{amount} argument must be greater than 100 and
+the address call must succeed.
 
-We can specify the contract for function arguments too:
+\paragraph{Additional Arguments}
+Solidity address calls can take additional special arguments
+such as \code{value} and \code{gas}:
 \begin{lstlisting}
-  # { f | {x | x < 0} -> {y | y > 0} }
-  function map(int[] memory data, function (int) pure returns (int) f) { ... }
+addr.call{value: msg.value, gas: 5000}(...);
 \end{lstlisting}
-It might be too verbose -- so we can define those predicates separately for better readability/maintainability:
+In \lang, programmers can specify their conditions by introducing additional
+bindings using the familiar syntax:
 \begin{lstlisting}
-  function greaterThanZero(int x) pure returns (bool) {
-    return x > 0;
-  }
-  function smallerThanZero(int x) pure returns (bool) {
-    return x < 0;
-  }
-  # { f | smallerThanZero -> greaterThanZero }
-  function map(int[] memory data, function (int) pure returns (int) f) { ... }
+# addr{value: v, gas: g}(msg, amount) returns (flag, data)
 \end{lstlisting}
+\code{v} and \code{g} represent the actual message value and gas
+value, which can be used in \code{requires}/\code{ensures}-clauses.
 
-Functions contracts can be higher-order -- it can take other function contracts
-as part of the spec. For example
-\zz{coooool!}
+\paragraph{Multiple Targets}
+Multiple callee targets can inhabit in a single address value.
+Programmers can specify different conditions for different
+callee targets in the \code{where}-clause.
 \begin{lstlisting}
-  # TODO
-  function f(function (function (int) returns (int) g) h) { ... }
-\end{lstlisting}
-
-Function contracts are first-class -- so if this guarded function is escaped
-(e.g. by returning), the contract is still enforced:
-\begin{lstlisting}
-NEED AN EXAMPLE
+TODO EXAMPLE
 \end{lstlisting}
 
+\zz{I guess we should educate the audience about the difference between low-level and high-level calls at the beginning of Section 2.4. I'll take care of this later.}
 
-\subsection{Contracts for Addresses}
-
-Address contracts share similar syntax as function contracts, but introduces
-additionally more binders for the arguments and returned values:
-
-\begin{lstlisting}
-  # { a | { {value, gas, ...} | <pre-cond-value-gas> }
-          -> { arg | <pre-cond-arg> }
-          -> { (res, data) | <post-cond> } }
-  function f(address a) {
-    (bool success, bytes memory data) = a.call{value: ...}(arg);
-  }
-\end{lstlisting}
-
+\iffalse
 It would be convenient to directly enforces the success of the call and omit
 the data:
 \begin{lstlisting}
@@ -153,8 +163,6 @@ the data:
   function f(address a) { ... }
 \end{lstlisting}
 
-Address call can designate the callee function, therefore it is necessary to
-specify the spec for possible callees.
 \zz{just FYI, `a.f` can also specify `value`, `gas`, etc.}
 
 \begin{lstlisting}
@@ -164,9 +172,12 @@ specify the spec for possible callees.
 \end{lstlisting}
 
 \wac{We may need an example here since the necessity to designate the callee function may not be obvious to reviewers.}
-\zz{I guess we should educate the audience about the difference between low-level and high-level calls at the beginning of Section 2.4. I'll take care of this later.}
+\fi
 
-\subsubsection*{Limitations}
+\paragraph{Second-Class Enforcement}
+\note{GW: an easy option is to discard enforcement of escaped addresses at all.
+But it seems we can guard escaped addresses within the current contract scope.
+We need to think about layered/stacked contracts of addresses (lax/picky).}
 Address contracts are \emph{not} higher-order -- if an address takes another
 address as argument, then we cannot enforce the contract of the argument
 address.
@@ -204,7 +215,68 @@ Once address \code{a} escapes, we cannot enforce the condition anymore.
   function f(address a) returns (address) { return a }
 \end{lstlisting}
 
-\subsection{Temporal Properties}
+\paragraph{Notes on Higher-Order Functions}
+Functions in Solidity are first-class too, meaning that functions can be used
+as arguments for and returned from functions. However, at this moment
+\footnote{Solidity version 8.20} Solidity has not supported writing anonymous
+functions (lambda expressions) or nested, named functions.
+Only explicitly defined top-level functions can be used in first-class ways,
+which effectively do not have capturing from the environment.
+This restriction discourages programmers to use higher-order functions due to
+its inconvenience and verbosity.
+Moreover, it poses challenges to seamlessly implement first-class behavioral
+contract and monitor system (e.g. as in \cite{DBLP:conf/icfp/FindlerF02})
+without an expensive whole program transformation.
+Therefore, in this paper we focus on the contract and monitoring of addresses
+values and leave monitoring for higher-order functions as future work when
+Solidity has a proper support for lambda expressions.
+
+\iffalse
+	\begin{lstlisting}
+function map(uint[] memory data, function (uint) pure returns (uint) f)
+  internal pure returns (uint[] memory r)
+{
+  r = new uint[](data.length);
+  for (uint i = 0; i < data.length; i++) {
+    r[i] = f(data[i]);
+  }
+}
+\end{lstlisting}
+
+We can specify the contract for function arguments too:
+\begin{lstlisting}
+  # { f | {x | x < 0} -> {y | y > 0} }
+  function map(int[] memory data, function (int) pure returns (int) f) { ... }
+\end{lstlisting}
+It might be too verbose -- so we can define those predicates separately for better readability/maintainability:
+\begin{lstlisting}
+  function greaterThanZero(int x) pure returns (bool) {
+    return x > 0;
+  }
+  function smallerThanZero(int x) pure returns (bool) {
+    return x < 0;
+  }
+  # { f | smallerThanZero -> greaterThanZero }
+  function map(int[] memory data, function (int) pure returns (int) f) { ... }
+\end{lstlisting}
+
+Functions contracts can be higher-order --
+it can take other function contracts
+as part of the spec. For example
+\zz{coooool!}
+\begin{lstlisting}
+  # TODO
+  function f(function (function (int) returns (int) g) h) { ... }
+\end{lstlisting}
+
+Function contracts are first-class -- so if this guarded function is escaped
+(e.g. by returning), the contract is still enforced:
+\begin{lstlisting}
+NEED AN EXAMPLE
+\end{lstlisting}
+\fi
+
+\subsection{Contracts for Temporal Behaviors}
 
 Temporal contracts relate two function calls (events) and enforces their
 relation.
