@@ -1,5 +1,3 @@
-// Note: this is a simplified version of AddressIndirectStacked.sol.
-// This file cannot model layered checks.
 
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
@@ -78,10 +76,11 @@ contract Caller_Translated {
     return (flag, data);
   }
 
-  mapping(address => bool) private isSet;
   mapping(address =>
           function(address payable, uint256, uint256, string memory, uint256)
-          returns (bool, bytes memory)) private dispatchMap;
+          returns (bool, bytes memory))[] stackedDispatchMap;
+
+  mapping(address => bool)[] private stackedIsSet;
 
   // Note(GW): this function only handles `call`, for other members of addresses
   // we need other "dispatch" functions since their types are different
@@ -89,24 +88,34 @@ contract Caller_Translated {
                         string memory mymsg, uint256 x)
                         private
                         returns (bool, bytes memory) {
-    if (isSet[addr]) return dispatchMap[addr](addr, v, g, mymsg, x);
+    if (stackedIsSet[stackedIsSet.length-1][addr])
+      return stackedDispatchMap[stackedDispatchMap.length-1][addr](addr, v, g, mymsg, x);
     else return addr.call{value: v, gas: g}(
       abi.encodeWithSignature("foo(string, uint256)", mymsg, x)
     );
   }
 
+  // Note(GW): using a stack of mappings that records the address guards
+  // following the call stack, we should be able to 1) enforce
+  // checks under the current calling context (eg _addr is called in `id`),
+  // and 2) layer checks for the same address.
+  // In this way, we do not enforce guards of escaped address, thus
+  // the enforcement is second-class.
   function testCallFoo(address payable _addr, int256) private {
-    isSet[_addr] = true;
-    dispatchMap[_addr] = guardedCall1;
+    stackedIsSet.push();
+    stackedIsSet[stackedIsSet.length-1][_addr] = true;
+    stackedDispatchMap.push();
+    stackedDispatchMap[stackedDispatchMap.length-1][_addr] = guardedCall1;
     address payable whoow = id(_addr);
     (bool success, bytes memory data) = dispatchCallGuard(whoow, msg.value, 5000, "call foo", 123);
 
     emit Response(success, data);
-    isSet[_addr] = false;
+    stackedIsSet.pop();
+    stackedDispatchMap.pop();
     // GW: so here we set up the monitoring/checking following
     // a stack discipline.
-    // GW: it seems we could also clear the dispatchMap?
   }
 
 }
+
 

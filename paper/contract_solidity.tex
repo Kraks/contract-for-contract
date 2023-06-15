@@ -145,10 +145,10 @@ Notably, using \lang we have separated the concern of specifications and usages
 around the call. This leads to more maintainable code and allows programmers to
 fearlessly refactor the code.
 
-\paragraph{Multiple Targets}
-Multiple callee targets can inhabit in a single address value.
-Other than the \code{call} method, there are other forms of low-level call,
-e.g., \code{delegatecall}, \code{send}, etc.
+\paragraph{Single Address, Multiple Callees}
+Multiple callees can inhabit in a single address value.
+Other than the \code{call} method, there are other forms of low-level calls with
+different signatures, e.g., \code{delegatecall}, \code{send}, etc.
 % https://docs.soliditylang.org/en/v0.8.20/units-and-global-variables.html#address-related
 Programmers can specify conditions for different callee targets in the
 \code{where}-clause.
@@ -195,6 +195,13 @@ the data:
 \fi
 
 \paragraph{Second-Class Enforcement}
+Addresses, as first-class values, can of course escape from a function, e.g.
+by returning from the function or storing in external data structures.
+
+Similarly, when a guarded address is used as an argument to another address
+call, we lose the control of ...
+
+\paragraph{Second-Class Enforcement}
 \note{GW: an easy option is to discard enforcement of escaped addresses at all.
 But it seems we can guard escaped addresses within the current contract scope.
 We need to think about layered/stacked contracts of addresses (lax/picky).}
@@ -237,16 +244,18 @@ Once address \code{a} escapes, we cannot enforce the condition anymore.
 
 \paragraph{Notes on Higher-Order Functions}
 Functions in Solidity are first-class too, meaning that functions can be used
-as arguments for and returned from functions. However, at this moment
-\footnote{Solidity version 8.20} Solidity has not supported writing anonymous
-functions (lambda expressions) or nested, named functions.
-Only explicitly defined top-level functions can be used in first-class ways,
-which effectively do not have capturing from the environment.
+as arguments for and returned from functions.
+However, real closures following lexical scopes do not exist in Solidity
+at this moment \footnote{Solidity version 8.20}.
+There is no way to write anonymous functions (lambda expressions) or nested,
+named functions that capture variables from environments.
+Only explicitly defined top-level functions can be used in first-class ways.
 This restriction discourages programmers to use higher-order functions due to
 its inconvenience and verbosity.
 Moreover, it poses challenges to seamlessly implement first-class behavioral
-contract and monitor system (e.g. as in \cite{DBLP:conf/icfp/FindlerF02})
-without an expensive whole program transformation.
+contract and monitor system that guards higher-order functions (e.g. as in
+\cite{DBLP:conf/icfp/FindlerF02}) without an expensive whole program
+transformation.
 Therefore, in this paper we focus on the contract and monitoring of addresses
 values and leave monitoring for higher-order functions as future work when
 Solidity has a proper support for lambda expressions.
