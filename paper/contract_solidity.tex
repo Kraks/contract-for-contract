@@ -3,7 +3,7 @@
 We now introduce \lang informally with examples.
 \lang is a non-breaking extension that additionally provides means
 to specify behavioral contracts on top of the Solidity language.
-We often use \emph{specification} for behavioral contracts to avoid terminological ambiguity.
+We often use (executable) \emph{specification} for behavioral contracts to avoid terminological ambiguity.
 
 \paragraph{Design Rationale}
 This paper concerns about designing an extension for Solidity that enhances the
@@ -194,64 +194,51 @@ the data:
 \wac{We may need an example here since the necessity to designate the callee function may not be obvious to reviewers.}
 \fi
 
-\paragraph{Second-Class Enforcement}
+\paragraph{Second-Class Monitoring}
+%\note{GW: an easy option is to discard enforcement of escaped addresses at all.
+%But it seems we can guard escaped addresses within the current contract scope.
+%We need to think about layered/stacked contracts of addresses (lax/picky).}
 Addresses, as first-class values, can of course escape from a function, e.g.
 by returning from the function or storing in external data structures.
+However, it is not always possible to enforce the specification
+of addresses when escaped to third-parties.
+For example, consider a function that returns an address equipped with
+conditions:
+\begin{lstlisting}
+EXAMPLE TODO
+function f(address a) returns (address) { return a; }
+\end{lstlisting}
+In this case, if the returned address value crosses the boundary to other
+Ethereum programs (by external calls initiated by a third-party) that we do not
+have control, we are impotence to monitor if the conditions are violated.
+
+In spite of that, \lang does guarantee that addresses are completely monitored
+within the current Ethereum program's calling context, following a stack
+discipline.
+In other words, for an argument addresses \code{addr} of function \code{f},
+\lang is able to detect any violation of \code{addr}'s conditions before
+\code{f} returns (even if the call happens in other functions).
+We called this mechanism \emph{second-class monitoring}, borrowing Strachey's taxonomy
+of first- and second-class objects \cite{DBLP:journals/lisp/Strachey00}.
+This is already useful to prevent \note{XXX} \note{fwd ref}, especially when
+the address comes from an untrusted party.
 
 Similarly, when a guarded address is used as an argument to another address
-call, we lose the control of ...
-
-\paragraph{Second-Class Enforcement}
-\note{GW: an easy option is to discard enforcement of escaped addresses at all.
-But it seems we can guard escaped addresses within the current contract scope.
-We need to think about layered/stacked contracts of addresses (lax/picky).}
-Address contracts are \emph{not} higher-order -- if an address takes another
-address as argument, then we cannot enforce the contract of the argument
-address.
-For example, in the following case, \code{b} itself has an ``address contract''
-\code{<b-pre> -> <b-post>} but there is no general way to enforce that.
-Because we do not have the control of the actual callee function of \code{a},
-therefore no way to modify the code of \code{a} to check the precondition
-and postcondition when \code{b} is called in \code{a}.
-
-\begin{lstlisting}
-  # { a | { b | <b-pre> -> <b-post> } -> { (true, _) | true } }
-  function f(address a) {
-    address b = ...
-    (bool success, bytes memory data) = a.call(b);
-  }
-\end{lstlisting}
-
-Address contracts are \emph{second-class} -- we can only enforce the
-precondition and postcondition of addresses within the current calling
-context.  If the address escapes (e.g. by returning, or stored in a global
-variable), we cannot enforce the contract anymore.
-
-Why? Because in general we do not have the ability to insert checks around the
-computation of that address. We can indeed create a new contract (and a new address) that wraps the old address call with checks, but then calling
-the new address will not exhibit the same behavior as calling the old address
-for the caller.
-
-For example, the following identity function of addresses has a spec
-for the argument address. But the body of function does not invoke
-the address, instead, it directly returns \code{a} to the caller.
-Once address \code{a} escapes, we cannot enforce the condition anymore.
-
-\begin{lstlisting}
-  # { a | { {value, gas}(arg) | <pre-cond> } -> { (res, data) | <post-cond> } }
-  function f(address a) returns (address) { return a }
-\end{lstlisting}
+call, \note{we lose the control of ...}
 
 \paragraph{Notes on Higher-Order Functions}
-Functions in Solidity are first-class too, meaning that functions can be used
-as arguments for and returned from functions.
-However, real closures following lexical scopes do not exist in Solidity
-at this moment \footnote{Solidity version 8.20}.
-There is no way to write anonymous functions (lambda expressions) or nested,
-named functions that capture variables from environments.
-Only explicitly defined top-level functions can be used in first-class ways.
-This restriction discourages programmers to use higher-order functions due to
-its inconvenience and verbosity.
+Likewise, functions in Solidity can be used as arguments of functions and returned from
+functions.
+However, they are not really first-class objects, since at this moment
+\footnote{Solidity version 8.20} there is no way to write anonymous functions
+(lambda expressions) or nested, named functions that capture variables from
+environments.
+Only explicitly defined top-level functions can be used in ``first-class''
+ways.
+This restriction prohibits real closure values following lexical scopes,
+familiarized by functional programmers.
+%This restriction discourages programmers to use higher-order functions due to
+%its inconvenience and verbosity.
 Moreover, it poses challenges to seamlessly implement first-class behavioral
 contract and monitor system that guards higher-order functions (e.g. as in
 \cite{DBLP:conf/icfp/FindlerF02}) without an expensive whole program
