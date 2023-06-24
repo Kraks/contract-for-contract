@@ -21,6 +21,23 @@ interface IReceiver {
 
 contract Caller {
   event Response(uint);
+  
+  address payable lastAddr; // boundary
+
+  // @custom:consol { id(a) returns (b)
+  // where 
+  //   {
+  //     a.foo{value: v, gas: g}(mymsg, x) returns (y)
+  //     requires { v > 4 } 
+  //     ensures { y == x + 1 }
+  //   } 
+  //   {
+  //     b.foo{value: v, gas: g}(mymsg, x) returns (y)
+  //     requires { v > 3 } 
+  //     ensures { y == x + 1 }
+  //   }
+  // }
+  function id(address payable a) public pure returns (address payable)  { return a; }
 
   // Let's imagine that contract Caller does not have the source code for the
   // contract Receiver, but we do know the address of contract Receiver and the
@@ -37,7 +54,9 @@ contract Caller {
   // }
   function testCallFoo(address payable _addr, uint x) public payable {
     // You can send ether and specify a custom gas amount
-    uint y = IReceiver(_addr).foo{value: msg.value, gas: 5000}("call foo", x);
+    uint y = IReceiver(id(_addr)).foo{value: msg.value, gas: 5000}("call foo", x);
+
+    lastAddr = _addr;
 
     emit Response(y);
   }
@@ -61,17 +80,23 @@ contract Caller_Translate {
     uint256 _spec;
   }
 
+  address payable lastAddr;
+
   constructor() {
     _constructMapping();
   }
 
   function _constructMapping() internal {
     _IReceiverFooPres[1] = _PreSpec1;
+    _IReceiverFooPres[2] = _PreSpec2;
+    _IReceiverFooPres[4] = _PreSpec3;
 
     _IReceiverFooPosts[1] = _PostSpec1;
+    _IReceiverFooPosts[2] = _PostSpec2;
+    _IReceiverFooPosts[4] = _PostSpec3;
   }
 
-  function testCallFoo(address payable addr, uint x) public payable {
+  function testCallFoo(address payable addr, uint x) external payable {
     // Wrap up
     GuardedAddress memory _addr = GuardedAddress ({
       _addr: address(addr),
@@ -81,11 +106,38 @@ contract Caller_Translate {
     testCallFoo_Translate(_addr, x);
   }
 
+  function id(address payable a) external pure returns (address payable) {
+    // Wrap up
+    GuardedAddress memory _a = GuardedAddress ({
+      _addr: address(a),
+      _spec: 0
+    });
+
+    GuardedAddress memory _random2 = id_Translate(_a);
+    return payable(_random2._addr);
+  }
+
   function _PreSpec1(uint256 v, uint256 g, string memory mymsg, uint x) internal {
-    if (!(x > 0)) { revert PreViolationAddr(1); }
+    if (!(v > 5 && g < 10000 && x != 0)) { revert PreViolationAddr(1); }
   }
 
   function _PostSpec1(uint256 v, uint256 g, string memory mymsg, uint x, uint y) internal {
+    if (!(y == x + 1)) { revert PostViolationAddr(1); }
+  }
+
+  function _PreSpec2(uint256 v, uint256 g, string memory mymsg, uint x) internal {
+    if (!(v > 4)) { revert PreViolationAddr(1); }
+  }
+
+  function _PostSpec2(uint256 v, uint256 g, string memory mymsg, uint x, uint y) internal {
+    if (!(y == x + 1)) { revert PostViolationAddr(1); }
+  }
+
+  function _PreSpec3(uint256 v, uint256 g, string memory mymsg, uint x) internal {
+    if (!(v > 3)) { revert PreViolationAddr(1); }
+  }
+
+  function _PostSpec3(uint256 v, uint256 g, string memory mymsg, uint x, uint y) internal {
     if (!(y == x + 1)) { revert PostViolationAddr(1); }
   }
 
@@ -116,14 +168,26 @@ contract Caller_Translate {
   }
 
   function _testCallFooPre(address payable addr, uint x) internal returns (bool) {
-      return x > 0;
+    return x > 0;
   }
  
   function testCallFoo_Translate(GuardedAddress memory addr, uint x) internal {
-   addr._spec |= 1; // Note: update spec here
+    addr._spec |= 1; // Note: update spec here
 
     if (!(_testCallFooPre(payable(addr._addr), x))) { revert PreViolation(0); }
-    uint y = _IReceiverFooGuardedCall(addr, msg.value, 5000, "call foo", x);
+    uint y = _IReceiverFooGuardedCall(id_Translate(addr), msg.value, 5000, "call foo", x);
+
+    lastAddr = payable(addr._addr); // wrap down
+
     emit Response(y);
+  }
+
+  function id_Translate(GuardedAddress memory a) internal pure returns (GuardedAddress memory)  { 
+      a._spec |= 2; // spec 2
+
+      GuardedAddress memory _random1 = a;
+      _random1._spec |= 4; // spec 3
+
+      return _random1; 
   }
 }
