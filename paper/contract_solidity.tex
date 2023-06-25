@@ -226,15 +226,13 @@ the address comes from an untrusted party.
 Similarly, when a guarded address is used as an argument to another address
 call, \note{we lose the control of ...}
 
-\paragraph{Notes on Higher-Order Functions}
-Likewise, functions in Solidity can be used as arguments of functions and returned from
-functions.
-However, they are not really first-class objects, since at this moment
-\footnote{Solidity version 8.20} there is no way to write anonymous functions
-(lambda expressions) or nested, named functions that capture variables from
-environments.
-Only explicitly defined top-level functions can be used in ``first-class''
-ways.
+\paragraph{Notes on Function Pointers}
+Likewise, functions in Solidity are first-class values, i.e., they can be used
+as arguments of functions and returned from functions.
+However, at this moment \footnote{Solidity version 8.20} there is no way to
+write anonymous functions (lambda expressions) or nested, named functions that
+capture variables from environments.
+Only explicitly defined top-level functions can be used in ``first-class'' ways.
 This restriction prohibits real closure values following lexical scopes,
 familiarized by functional programmers.
 %This restriction discourages programmers to use higher-order functions due to

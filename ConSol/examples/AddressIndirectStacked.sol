@@ -54,7 +54,6 @@ contract Caller {
 
     emit Response(success, data);
   }
-
 }
 
 contract Caller_Translated {

@@ -1,6 +1,29 @@
 \begin{figure}
   \begin{alignat*}{3}
-    \Typ{Variables}  \qquad & x,&&y,z,f,g \\
+    &~ n && \in && \mathbb{Z} \qquad b \in \mathbb{B} \qquad x,y,f \in \Typ{Id}   \\
+    \Typ{Types} &~ t && :=\ && \Keywd{int} \mid \Keywd{uint} \mid \Keywd{bool} \mid \Keywd{address} \\
+                &~   && \mid\ && \Keywd{mapping} ~t~ \Keywd{=>} ~t \mid \Keywd{struct} ~x~ \{ d^* \} \\
+    \Typ{TypeDecl}    &~ d && :=\ && t ~ x \\
+    \Typ{Values}      &~ v && :=\ && n \mid b \mid x(v^*) \\
+    \Typ{Projection}  &~ p && :=\ && .x \mid [e] \\
+    \Typ{Expressions} &~ e && :=\ && x \mid v \mid e ~op~ e \mid e p^+ \\
+                      &~   && \mid\ && e.f\{(x: e)^*\}(e^*) \\
+    \Typ{Assignable}  &~ a && :=\ && d \mid x \mid e p^+ \\
+    \Typ{Statements}  &~ s && :=\ && d \mid e \mid s; s \mid a = e \mid \Keywd{return}~ e \\
+    \Typ{Spec}        &~ \sigma && :=\ && f\{(x : y)^*\}(x^*) ~\Keywd{returns}~ (y^*) \\
+                      &~        &&     && \Keywd{requires}~ e ~\Keywd{ensures}~ e ~\Keywd{where}~ \sigma^* \\
+    \Typ{Modifiers}   &~ m && :=\ && \Keywd{public} \mid \Keywd{private} \\
+    \Typ{FunDef}      &~ f && :=\ && \sigma ~\Keywd{function}~ f(d^*) ~ m ~\Keywd{returns}~ (t^*) \{ s \} \\
+    \Typ{Contract}    &~ c && :=\ && \Keywd{contract}~ x~ \{ d^*; f^* \}
+  \end{alignat*}
+  \caption{The abstract syntax of \lang.}
+  \label{fig:syntax}
+\end{figure}
+%GW: nested expression with mapping and struct
+
+\iffalse
+
+  \begin{alignat*}{3}
     \Typ{Types}      \qquad & t && ::=
       \Keywd{address} \mid
       \Keywd{uint} \mid
@@ -40,10 +63,8 @@
     \Typ{Function~Definitions} \qquad & \mathcal{F} && ::=
       \# \varsigma^* ~ \Keywd{function}~f(t ~ x, \dots)~\Keywd{returns}~t~\{ ~s~ \}
   \end{alignat*}
-  \caption{The abstract syntax of \lang.}
-  \label{fig:syntax}
-\end{figure}
 
+\fi
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "paper"

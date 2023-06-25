@@ -16,7 +16,7 @@ opt_decl := { (<id> : <id>)* }
 spec := <id>[<opt_decl>](<id>*) returns (<id>*)
         requires <expr> ensures <expr> where <spec>*
 
-decl := <type> x
+decl := <type> <id>
 
 fun_def = function f(<decl>*) returns (<type>*) { <stmt>; }
 
@@ -27,17 +27,19 @@ con := contract c { <decl>*; <fun>* }
 value := int ∪ uint
        | true
        | false
+       | <id>'('<value>*')'
 
-opt := { (<id> : <expr>)* }
+opt := '{' (<id> : <expr>)* '}'
 
 expr := <id>
       | <value>
       | <expr> op <expr>
-      | <expr>.<id>[<opt>](<expr>*)
+      | <expr>'.'<id>[<opt>]'('<expr>*')'
 
 s := <stmt>; <stmt>
    | <expr>
    | <decl> = <expr>
+   | <id> = <expr>
    | if (<expr) { <stmt> } else { <stmt> }
    | return <expr>
 
@@ -48,7 +50,6 @@ type checking semantics
 
 judgment: Γ ⊢ <fun> OK
 
-
     Γ, x: t1 ⊢ pre : boolean
     Γ, x : t, y: t2 ⊢ post : boolean
     spec are of type address
@@ -58,3 +59,5 @@ judgment: Γ ⊢ <fun> OK
     function f(𝑤: t1) returns (t2) { body }
 
 # translation semantics
+
+

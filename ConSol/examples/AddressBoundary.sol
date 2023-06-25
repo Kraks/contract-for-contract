@@ -21,19 +21,19 @@ interface IReceiver {
 
 contract Caller {
   event Response(uint);
-  
+
   address payable lastAddr; // boundary
 
   // @custom:consol { id(a) returns (b)
-  // where 
+  // where
   //   {
   //     a.foo{value: v, gas: g}(mymsg, x) returns (y)
-  //     requires { v > 4 } 
+  //     requires { v > 4 }
   //     ensures { y == x + 1 }
-  //   } 
+  //   }
   //   {
   //     b.foo{value: v, gas: g}(mymsg, x) returns (y)
-  //     requires { v > 3 } 
+  //     requires { v > 3 }
   //     ensures { y == x + 1 }
   //   }
   // }
@@ -163,14 +163,14 @@ contract Caller_Translate {
 
   function _IReceiverFooGuardedCall(GuardedAddress memory addr, uint256 v, uint256 g, string memory mymsg, uint x) internal returns (uint y) {
     _IReceiverFooPre(addr, v, g, mymsg, x);
-    y = IReceiver(payable(addr._addr)).foo{value: v, gas: g}(mymsg, x); 
+    y = IReceiver(payable(addr._addr)).foo{value: v, gas: g}(mymsg, x);
     _IReceiverFooPost(addr, v, g, mymsg, x, y);
   }
 
   function _testCallFooPre(address payable addr, uint x) internal returns (bool) {
     return x > 0;
   }
- 
+
   function testCallFoo_Translate(GuardedAddress memory addr, uint x) internal {
     addr._spec |= 1; // Note: update spec here
 
@@ -182,12 +182,12 @@ contract Caller_Translate {
     emit Response(y);
   }
 
-  function id_Translate(GuardedAddress memory a) internal pure returns (GuardedAddress memory)  { 
+  function id_Translate(GuardedAddress memory a) internal pure returns (GuardedAddress memory)  {
       a._spec |= 2; // spec 2
 
       GuardedAddress memory _random1 = a;
       _random1._spec |= 4; // spec 3
 
-      return _random1; 
+      return _random1;
   }
 }
