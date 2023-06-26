@@ -12,6 +12,7 @@
                               \mid   f\Keywd{(}e^*\Keywd{)}\\
     \Typ{Assignable}  &~ a && :=\ && d \mid x \mid e p^+ \\
     \Typ{Statements}  &~ s && :=\ && d \mid e \mid s; s \mid a ~\Keywd{=}~ e \mid \Keywd{return}~ e \mid \Keywd{revert} \\
+                      &~   && \mid\ && \Keywd{if (}e\Keywd{) \{}~ s ~\Keywd{\} else \{}~ s ~\Keywd{\}} \\
     \Typ{Spec}        &~ \sigma && :=\ && f\Keywd{\{}(x : y)^*\Keywd{\}(}x^*\Keywd{)} ~\Keywd{returns (}y^*\Keywd{)} \\
                       &~        &&     && \Keywd{requires}~ e ~\Keywd{ensures}~ e ~\Keywd{where}~ \sigma^* \\
     \Typ{Modifiers}   &~ m && :=\ && \Keywd{public} \mid \Keywd{private} \\
