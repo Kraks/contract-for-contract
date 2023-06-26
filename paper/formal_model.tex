@@ -28,15 +28,17 @@ In \corelang, a specification $\sigma$ is additionally attached to every functio
 The body of functions is simply a statement.
 Statements can be a type-and-identifier declaration (without providing an initial
 value), an expression (e.g. calling a function for its side effects), a
-composition of two statements, an assignment, or a return statement.
+composition of two statements, an assignment, a \Keywd{return} statement, or a \Keywd{revert} statement.
 The left-hand side part of assignments (i.e. assignable) can be either
 a type-and-type declaration, an identifier, or a projection of mappings or structs.
 Since \corelang permits both mappings and structs, which can recursively referring
 other types, projection allows use to directly access nested data structures,
 e.g. \code{v.field1[0].field2}.
+A \Keywd{revert} statement aborts the execution, reverting any changes made to
+the blockchain state.
 
 Expressions could be an identifier, a literal value (e.g. numbers), a binary
-operation, accessing mappings or structs, address calls and function calls.
+operation, projections of mappings or structs, address calls, and function calls.
 An address call has form $e_1.f\Keywd{\{}(x: e_2)^*\Keywd{\}(}e_3^*\Keywd{)}$,
 where $e_1$ is the target expression of type address,
 $(x: e_2)^*$ are call options (e.g. specifying the gas budget),
@@ -59,12 +61,19 @@ postcondition are simply a boolean expression \code{true}.
 \subsection{Static Semantics}
 
 The syntax permits arbitrary expressions appeared as preconditions and
-postconditions. There are additional well-typedness constraint.
+postconditions.
+However, not all possible expression are valid executable specifications.
+For example, a programmer can write \code{requires x + 1} as a precondition,
+which do have a meaning for our purpose.
 The static semantics presented here concerns about when a specification is
-well-typed.
-Since \corelang is a subset of Solidity except for specifications, we omit the
-static semantics for the rest of the language, referring to the informal
-Solidity design document.
+considered valid.
+
+In general, the precondition and postcondition need to be well-typed, which
+entails that the specified conditions are of type boolean, and only
+use well-scoped variables.
+Since \corelang is a subset of Solidity except for specifications, we focus on
+the typing for specifications and omit the typing for the rest of the language,
+referring to the informal Solidity design document.
 
 %dynamic semantics
 %\yy{do we want to model the context of contracts? (instead of reasoning one contract)}
@@ -73,5 +82,10 @@ Solidity design document.
 
 \subsection{Soundness}
 
-what does it guarantee
+In this section, we discuss when and where \corelang provides the guarantee
+that a violation will be detected (thus the execution of the smart contract
+will be reverted).
+
+Our translation semantics identifies the boundary
+
 
