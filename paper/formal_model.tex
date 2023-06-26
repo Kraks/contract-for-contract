@@ -1,4 +1,4 @@
-\section{Formal Model} \label{sec:model}
+\section{Formal Semantics} \label{sec:model}
 
 To articulate our approach and \lang's semantics, we present a core model
 smart contract language \corelang equipped with
@@ -13,16 +13,18 @@ translation semantics.
 
 \Cref{fig:syntax} shows the abstract syntax of \corelang,
 which models the most important portion of Solidity.
-\corelang's type contains integers, unsigned integers, booleans,
+\corelang's type universe contains integers, unsigned integers, booleans,
 addresses, mappings, and struct.
 A mapping type has the domain type and codomain type.
 A struct type has a name and a list of type-and-identifier declarations.
 
 At the top-level, a contract $c$ consists of a list of type-and-identifier
-declarations and a list of function definitions.  As in other languages, a
-function definition has a name, parameter declarations, return types, and the
-function body.  To model boundaries between multiple smart contracts, a
-function can be either \Keywd{public} or \Keywd{private}.
+declarations and a list of function definitions.
+Those type-and-identifier declarations specify storage states.
+As in other languages, a function definition has a name, parameter
+declarations, return types, and the function body.  To model boundaries between
+multiple smart contracts, a function can be either \Keywd{public} or
+\Keywd{private}.
 In \corelang, a specification $\sigma$ is additionally attached to every function.
 
 The body of functions is simply a statement.
@@ -39,32 +41,41 @@ A \Keywd{revert} statement aborts the execution, reverting any changes made to
 the blockchain state.
 
 Expressions could be an identifier, a literal value (e.g. numbers), a binary
-operation, projections of mappings or structs, address calls, and function calls.
-An address call has form $e_1.f\Keywd{\{}(x: e_2)^*\Keywd{\}(}e_3^*\Keywd{)}$,
-where $e_1$ is the target expression of type address,
+operation, projections of mappings or structs, address/function calls.
+Address and function calls have form $\AddrCall{e_1}{(x: e_2)^*}{e_3}$,
+where $e_1$ is the target callee expression,
 $(x: e_2)^*$ are call options (e.g. specifying the gas budget),
 and $e_3^*$ are call arguments.
-An ordinary function call or struct constructor call is simpler, consisting
-only of the function name and argument expressions.
+An ordinary function call or struct constructor call omits the call option
+part, consisting only of the function name and argument expressions.
 
-Specifications attached to functions first introduce bindings for the guarded
-function, including the function name, option arguments, ordinary arguments,
-and returned values.
+Specifications attached to function definitions first introduce bindings for
+the guarded function, including the function name, option parameters,
+ordinary parameters, and returned values.
 The precondition and postcondition are denoted in the \code{requires}-clause and
 \code{ensures}-clause, respectively.
-In the \code{where}-clause, programmers can specify the condition for addresses
-appeared as arguments or returned values for the parent call, recursively using
-the same syntax.
 In practice not all functions need to be specified with conditions.
 In such cases, a no-op specification is expressed where the precondition and
 postcondition are simply a boolean expression \code{true}.
+In the \code{where}-clause, programmers can specify the condition for addresses
+appeared as arguments or returned values for the parent call, recursively using
+the same syntax.
+When the specification is attached to an address, we allow very flexible ways
+to specify the callee. For example, if a struct argument contains an address
+value that we would like to guard:
+\begin{lstlisting}
+// x is a struct argument whose field y is an address
+... where { x.y.f requires $\mathit{precond}$ ensures $\mathit{postcond}$ }
+\end{lstlisting}
+we can use the projection syntax to specify
+the condition when address \code{x.y} is called on function \code{f}.
 
 \subsection{Static Semantics}
 
 The syntax permits arbitrary expressions appeared as preconditions and
 postconditions.
 However, not all possible expression are valid executable specifications.
-For example, a programmer can write \code{requires x + 1} as a precondition,
+For example, a programmer can write arithmetic expressions \code{requires x + 1} as a precondition,
 which do have a meaning for our purpose.
 The static semantics presented here concerns about when a specification is
 considered valid.
@@ -76,10 +87,59 @@ Since \corelang is a subset of Solidity except for specifications, we focus on
 the typing for specifications and omit the typing for the rest of the language,
 referring to the informal Solidity design document.
 
+\begin{figure}[t]
+  \judgement{Function}{$\Gamma \vdash \sigma: t$}
+  %\begin{alignat*}{2}
+    %\mathit{param}(\SpecCall{f}{(x : y)^*}{x^*}{y^*} ...) & = 1
+  %\end{alignat*}
+
+  \infrule[f-spec]{
+    \mathit{target}(\sigma) = f \\
+    \Gamma' = \Gamma \cup
+              \{ \mathit{param}(\sigma)_i : \mathit{type}(d_i) \}^{i \in 1..m} \\
+    \Gamma'' = \Gamma' \cup
+              \{ \mathit{ret}(\sigma)_j : t_j \}^{j \in 1..n} \\
+    \Gamma' \vdash \mathit{pre}(\sigma) : \Keywd{bool} \andalso
+    \Gamma'' \vdash \mathit{post}(\sigma) : \Keywd{bool} \\
+    \Gamma \vdash \mathit{addr}(\sigma)_i : \note{type-of-call}
+  }{
+    \Gamma \vdash \sigma : \FunType{f}{d_i^{i \in 1..m}}{m}{t_j^{j \in 1..n}}
+  }
+
+  \infrule[c-top]{
+    \forall i \in 1..n,\ \Gamma_0 \cup \Gamma \vdash \F_i \\
+    \Gamma = \{ \mathit{id}(d_j) : \mathit{type}(d_j) \}^{j \in 1..m} \cup
+             \{ \mathit{id}(\F_i) : \mathit{type}(\F_i) \}^{i \in 1..n}
+  }{
+    \Gamma_0 \vdash \Contract{c}{d_i^{i \in 1..m}}{{\F}_i^{i \in 1..n}}
+  }
+
+  % \Gamma_0 initial context, containing typings for built-in terms
+
+  \caption{Static semantics (excerpt) of \corelang specifications. Only checkings relevant to specifications are shown.}
+  \label{fig:static}
+\end{figure}
+
 %dynamic semantics
 %\yy{do we want to model the context of contracts? (instead of reasoning one contract)}
 
 \subsection{Translation Semantics}
+
+\note{GW: what if in the condition, user calls a guarded function?}
+
+\paragraph{Extent of Effective Checking}
+monitors all value flows within the extent
+
+\paragraph{Wrapping Addresses} \lang transform \Keywd{address} type to a struct
+type with an additional type $\mathcal{G}$ that carries the pre-/postcondition.
+At runtime when the underlying address is called,
+corresponding checks can be performed by examining this value of type $\mathcal{G}$.
+
+$$
+\Keywd{address} \leadsto \Keywd{address} \times \mathcal{G}
+$$
+
+\paragraph{Unwrapping Addresses} balabala
 
 \subsection{Soundness}
 
@@ -87,6 +147,11 @@ In this section, we discuss when and where \corelang provides the guarantee
 that a violation will be detected (thus the execution of the smart contract
 will be reverted).
 
-Our translation semantics identifies the boundary
+Our translation semantics identifies the extent of effective checking.
+Notably, if an address value is stored to the state or passed to other
+contracts, the address leaves the boundary and loses its guards by unwrapping.
+
+
+\corelang's semantics guarantee relatively complete monitoring, i.e.
 
 
