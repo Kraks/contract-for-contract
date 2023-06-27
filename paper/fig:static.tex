@@ -1,0 +1,32 @@
+\begin{figure}[t]
+  \judgement{Specification Typing}{$\Gamma \vdash \sigma: t$}
+  %\begin{alignat*}{2}
+    %\mathit{param}(\SpecCall{f}{(x : y)^*}{x^*}{y^*} ...) & = 1
+  %\end{alignat*}
+
+  \infrule[f-spec]{
+    \mathit{target}(\sigma) = f \\
+    \Gamma' = \Gamma \cup
+              \{ \mathit{param}(\sigma)_i : \mathit{type}(d_i) \}^{i \in 1..m} \\
+    \Gamma'' = \Gamma' \cup
+              \{ \mathit{ret}(\sigma)_j : t_j \}^{j \in 1..n} \\
+    \Gamma' \vdash \mathit{pre}(\sigma) : \Keywd{bool} \andalso
+    \Gamma'' \vdash \mathit{post}(\sigma) : \Keywd{bool} \\
+    \Gamma \vdash \mathit{addr}(\sigma)_i : \note{type-of-call}
+  }{
+    \Gamma \vdash \sigma : \FunType{f}{d_i^{i \in 1..m}}{m}{t_j^{j \in 1..n}}
+  }
+
+  \infrule[c-top]{
+    \forall i \in 1..n,\ \Gamma_0 \cup \Gamma \vdash \mathit{spec}(\F_i) : \mathit{type}(\F_i) \\
+    \Gamma = \{ \mathit{id}(d_j) : \mathit{type}(d_j) \}^{j \in 1..m} \cup
+             \{ \mathit{id}(\F_i) : \mathit{type}(\F_i) \}^{i \in 1..n}
+  }{
+    \Gamma_0 \vdash \Contract{c}{d_i^{i \in 1..m}}{{\F}_i^{i \in 1..n}}
+  }
+
+  % \Gamma_0 initial context, containing typings for built-in terms
+
+  \caption{Static semantics (excerpt) of \corelang specifications. Only checkings relevant to specifications are shown.}
+  \label{fig:static}
+\end{figure}

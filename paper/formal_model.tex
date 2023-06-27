@@ -27,6 +27,10 @@ multiple smart contracts, a function can be either \Keywd{public} or
 \Keywd{private}.
 In \corelang, a specification $\sigma$ is additionally attached to every function.
 
+We can also define interfaces at top-level, which only contain function
+declarations. Interfaces are useful when invoking functions on addresses,
+providing expected types of arguments and returned values of the address call.
+
 The body of functions is simply a statement.
 Statements can be a type-and-identifier declaration (without providing an initial
 value), an expression (e.g. calling a function for its side effects), a
@@ -34,7 +38,7 @@ composition of two statements, an assignment, a \Keywd{return} statement, a \Key
 or a conditional statement.
 The left-hand side part of assignments (i.e. assignable) can be either
 a type-and-type declaration, an identifier, or a projection of mappings or structs.
-Since \corelang permits both mappings and structs, which can recursively referring
+Since \corelang permits both mappings and structs, which can recursively refer to
 other types, projection allows use to directly access nested data structures,
 e.g. \code{v.field1[0].field2}.
 A \Keywd{revert} statement aborts the execution, reverting any changes made to
@@ -46,12 +50,15 @@ Address and function calls have form $\AddrCall{e_1}{(x: e_2)^*}{e_3}$,
 where $e_1$ is the target callee expression,
 $(x: e_2)^*$ are call options (e.g. specifying the gas budget),
 and $e_3^*$ are call arguments.
-An ordinary function call or struct constructor call omits the call option
-part, consisting only of the function name and argument expressions.
+An ordinary function call, struct constructor call, or casting omits the call
+option part, consisting only of the function name and argument expressions.
 
 Specifications attached to function definitions first introduce bindings for
-the guarded function, including the function name, option parameters,
-ordinary parameters, and returned values.
+the guarded function, including the names for the guarded callee, call options,
+ordinary arguments, and returned values. The following snippet shows an example
+\[
+  \overbrace{\mathit{fp^*}}^{\text{callee}}\Keywd{\{}\underbrace{(x : y)^*}_{\text{call options}}\Keywd{\}(}\overbrace{x^*}^{\text{arguments}}\Keywd{)} ~\Keywd{returns (}\underbrace{y^*}_{\text{returned values}}\Keywd{)}
+\]
 The precondition and postcondition are denoted in the \code{requires}-clause and
 \code{ensures}-clause, respectively.
 In practice not all functions need to be specified with conditions.
@@ -71,6 +78,7 @@ we can use the projection syntax to specify
 the condition when address \code{x.y} is called on function \code{f}.
 
 \subsection{Static Semantics}
+\input{fig:static}
 
 The syntax permits arbitrary expressions appeared as preconditions and
 postconditions.
@@ -86,39 +94,6 @@ use well-scoped variables.
 Since \corelang is a subset of Solidity except for specifications, we focus on
 the typing for specifications and omit the typing for the rest of the language,
 referring to the informal Solidity design document.
-
-\begin{figure}[t]
-  \judgement{Function}{$\Gamma \vdash \sigma: t$}
-  %\begin{alignat*}{2}
-    %\mathit{param}(\SpecCall{f}{(x : y)^*}{x^*}{y^*} ...) & = 1
-  %\end{alignat*}
-
-  \infrule[f-spec]{
-    \mathit{target}(\sigma) = f \\
-    \Gamma' = \Gamma \cup
-              \{ \mathit{param}(\sigma)_i : \mathit{type}(d_i) \}^{i \in 1..m} \\
-    \Gamma'' = \Gamma' \cup
-              \{ \mathit{ret}(\sigma)_j : t_j \}^{j \in 1..n} \\
-    \Gamma' \vdash \mathit{pre}(\sigma) : \Keywd{bool} \andalso
-    \Gamma'' \vdash \mathit{post}(\sigma) : \Keywd{bool} \\
-    \Gamma \vdash \mathit{addr}(\sigma)_i : \note{type-of-call}
-  }{
-    \Gamma \vdash \sigma : \FunType{f}{d_i^{i \in 1..m}}{m}{t_j^{j \in 1..n}}
-  }
-
-  \infrule[c-top]{
-    \forall i \in 1..n,\ \Gamma_0 \cup \Gamma \vdash \F_i \\
-    \Gamma = \{ \mathit{id}(d_j) : \mathit{type}(d_j) \}^{j \in 1..m} \cup
-             \{ \mathit{id}(\F_i) : \mathit{type}(\F_i) \}^{i \in 1..n}
-  }{
-    \Gamma_0 \vdash \Contract{c}{d_i^{i \in 1..m}}{{\F}_i^{i \in 1..n}}
-  }
-
-  % \Gamma_0 initial context, containing typings for built-in terms
-
-  \caption{Static semantics (excerpt) of \corelang specifications. Only checkings relevant to specifications are shown.}
-  \label{fig:static}
-\end{figure}
 
 %dynamic semantics
 %\yy{do we want to model the context of contracts? (instead of reasoning one contract)}
