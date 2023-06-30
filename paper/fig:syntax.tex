@@ -39,7 +39,7 @@
     \Typ{Assignable}  &~ a && :=\ && d \mid x \mid e p^+ \\
     \Typ{Statements}  &~ s && :=\ && d \mid e \mid s; s \mid a ~\Keywd{=}~ e \mid \Keywd{return}~ e \mid \Keywd{revert} \\
                       &~   && \mid\ && \Keywd{if (}e\Keywd{) \{}~ s ~\Keywd{\} else \{}~ s ~\Keywd{\}} \\
-    \Typ{Target}      &~ \tau && :=\ && f \mid x \Keywd{(} y p^* \Keywd{)} \\
+    \Typ{Target}      &~ \tau && :=\ && f \mid x \Keywd{(} y p^* \Keywd{).}f \\
     \Typ{Spec}        &~ \sigma && :=\ && \SpecCall{\tau}{(x : y)^*}{x^*}{y^*} \\
                       &~        &&     && \SpecCond{e}{e}{\sigma^*} \\
     \Typ{Modifiers}   &~ m && :=\ && \Keywd{public} \mid \Keywd{private} \\

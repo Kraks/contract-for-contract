@@ -1,26 +1,39 @@
+\newcommand{\fun}[1]{
+  \text{#1}
+}
+
 \begin{figure*}[t]
-  \judgement{Specification Typing}{$\Gamma \vdash \sigma: t$}
+  \judgement{Specification Typing}{$\Gamma \vdash \sigma: t$, $\Gamma \vdash e: t$}
   %\begin{alignat*}{2}
-    %\mathit{param}(\SpecCall{f}{(x : y)^*}{x^*}{y^*} ...) & = 1
+    %\fun{param}(\SpecCall{f}{(x : y)^*}{x^*}{y^*} ...) & = 1
   %\end{alignat*}
 
-  \infrule[f-spec]{
-    \mathit{target}(\sigma) = f \\
-    \Gamma' = \Gamma \cup
-              \{ \mathit{param}(\sigma)_i : \mathit{type}(d_i) \}^{i \in 1..m} \\
-    \Gamma'' = \Gamma' \cup
-              \{ \mathit{ret}(\sigma)_j : t_j \}^{j \in 1..n} \\
-    \Gamma' \vdash \mathit{pre}(\sigma) : \Keywd{bool} \andalso
-    \Gamma'' \vdash \mathit{post}(\sigma) : \Keywd{bool} \\
-    \Gamma \vdash \mathit{addr}(\sigma)_i : \note{type-of-call}
+  \infrule[a-spec]{
+    a
   }{
-    \Gamma \vdash \sigma : \FunType{f}{d_i^{i \in 1..m}}{m}{t_j^{j \in 1..n}}
+    \Gamma \vdash \sigma : \FunType{f}{t_i^{i \in 1..m}}{m}{t_j^{j \in 1..n}}
+  }
+
+  \infrule[f-spec]{
+    \Gamma' = \Gamma \cup
+              \{ \textbf{o}_i : \fun{type}(\boldsymbol{\ell}_i) \} \cup
+              \{ \textbf{x}_i : \textbf{t}^\text{arg}_i \} \qquad
+    \Gamma'' = \Gamma' \cup
+              \{ \textbf{y}_i : \textbf{t}^\text{ret}_i \} \\
+    \Gamma' \vdash e_1 : \Keywd{bool} \qquad
+    \Gamma'' \vdash e_2 : \Keywd{bool} \qquad
+    \Gamma \vdash \fun{addr}(\sigma)_i : \note{type-of-call}
+  }{
+    \Gamma \vdash
+    \SpecCall{f}{(\boldsymbol{\ell} : \textbf{o})}{\textbf{x}}{\textbf{y}} ~
+    \SpecCond{e_1}{e_2}{\boldsymbol{\sigma}^\text{addr}} :
+    \FunType{f}{\textbf{t}^{\text{arg}}}{m}{\textbf{t}^\text{ret}}
   }
 
   \infrule[c-top]{
-    \forall i \in 1..n,\ \Gamma_0 \cup \Gamma \vdash \mathit{spec}(\F_i) : \mathit{type}(\F_i) \qquad
-    \Gamma = \{ \mathit{id}(d_j) : \mathit{type}(d_j) \}^{j \in 1..m} \cup
-             \{ \mathit{id}(\F_i) : \mathit{type}(\F_i) \}^{i \in 1..n}
+    \forall i \in 1..n,\ \Gamma_0 \cup \Gamma \vdash \fun{spec}(\F_i) : \fun{type}(\F_i) \qquad
+    \Gamma = \{ \fun{id}(d_j) : \fun{type}(d_j) \}^{j \in 1..m} \cup
+             \{ \fun{id}(\F_i) : \fun{type}(\F_i) \}^{i \in 1..n}
   }{
     \Gamma_0 \vdash \Contract{c}{d_i^{i \in 1..m}}{{\F}_i^{i \in 1..n}}
   }
