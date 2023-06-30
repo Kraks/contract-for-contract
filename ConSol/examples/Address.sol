@@ -82,7 +82,7 @@ contract Caller_Translate {
   }
 
   function _PreSpec1(uint256 v, uint256 g, string memory mymsg, uint x) internal {
-    if (!(x > 0)) { revert PreViolationAddr(1); }
+    if (!(v > 5 && g < 10000 && x != 0)) { revert PreViolationAddr(1); }
   }
 
   function _PostSpec1(uint256 v, uint256 g, string memory mymsg, uint x, uint y) internal {
@@ -115,14 +115,14 @@ contract Caller_Translate {
     _IReceiverFooPost(addr, v, g, mymsg, x, y);
   }
 
-  function _testCallFooPre(address payable addr, uint x) internal returns (bool) {
-      return x > 0;
+  function _testCallFooPre(address payable addr, uint x) internal {
+      if (!(x > 0)) { revert PreViolation(0); }
   }
  
   function testCallFoo_Translate(GuardedAddress memory addr, uint x) internal {
    addr._spec |= 1; // Note: update spec here
 
-    if (!(_testCallFooPre(payable(addr._addr), x))) { revert PreViolation(0); }
+    _testCallFooPre(payable(addr._addr), x);
     uint y = _IReceiverFooGuardedCall(addr, msg.value, 5000, "call foo", x);
     emit Response(y);
   }
