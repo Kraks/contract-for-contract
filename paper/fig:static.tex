@@ -1,4 +1,4 @@
-\begin{figure}[t]
+\begin{figure*}[t]
   \judgement{Specification Typing}{$\Gamma \vdash \sigma: t$}
   %\begin{alignat*}{2}
     %\mathit{param}(\SpecCall{f}{(x : y)^*}{x^*}{y^*} ...) & = 1
@@ -18,7 +18,7 @@
   }
 
   \infrule[c-top]{
-    \forall i \in 1..n,\ \Gamma_0 \cup \Gamma \vdash \mathit{spec}(\F_i) : \mathit{type}(\F_i) \\
+    \forall i \in 1..n,\ \Gamma_0 \cup \Gamma \vdash \mathit{spec}(\F_i) : \mathit{type}(\F_i) \qquad
     \Gamma = \{ \mathit{id}(d_j) : \mathit{type}(d_j) \}^{j \in 1..m} \cup
              \{ \mathit{id}(\F_i) : \mathit{type}(\F_i) \}^{i \in 1..n}
   }{
@@ -29,4 +29,4 @@
 
   \caption{Static semantics (excerpt) of \corelang specifications. Only checkings relevant to specifications are shown.}
   \label{fig:static}
-\end{figure}
+\end{figure*}

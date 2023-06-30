@@ -29,7 +29,7 @@ In \corelang, a specification $\sigma$ is additionally attached to every functio
 
 We can also define interfaces at top-level, which only contain function
 declarations. Interfaces are useful when invoking functions on addresses,
-providing expected types of arguments and returned values of the address call.
+providing expected types of arguments and returned values for the address call.
 
 The body of functions is simply a statement.
 Statements can be a type-and-identifier declaration (without providing an initial
@@ -53,11 +53,14 @@ and $e_3^*$ are call arguments.
 An ordinary function call, struct constructor call, or casting omits the call
 option part, consisting only of the function name and argument expressions.
 
-Specifications attached to function definitions first introduce bindings for
-the guarded function, including the names for the guarded callee, call options,
+A specification is attached to a target, which is either a function name or
+an address (expressed by an access path due to the existence of nested structures).
+When specified for addresses, the programmer provides an interface name at the beginning.
+In addition, a specification introduces bindings for call options,
 ordinary arguments, and returned values. The following snippet shows an example
+of function specification
 \[
-  \overbrace{\mathit{fp^*}}^{\text{callee}}\Keywd{\{}\underbrace{(x : y)^*}_{\text{call options}}\Keywd{\}(}\overbrace{x^*}^{\text{arguments}}\Keywd{)} ~\Keywd{returns (}\underbrace{y^*}_{\text{returned values}}\Keywd{)}
+  \overbrace{\mathit{vote}}^{\text{callee}}\Keywd{\{}\underbrace{(x : y)^*}_{\text{call options}}\Keywd{\}(}\overbrace{x^*}^{\text{arguments}}\Keywd{)} ~\Keywd{returns (}\underbrace{y^*}_{\text{returned values}}\Keywd{)}
 \]
 The precondition and postcondition are denoted in the \code{requires}-clause and
 \code{ensures}-clause, respectively.
