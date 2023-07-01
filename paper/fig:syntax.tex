@@ -32,7 +32,7 @@
     &~ n && \in && \mathbb{Z} \qquad b \in \mathbb{B} \qquad x,y,f \in \Typ{Id}   \\
     \Typ{Data Types} &~ t && :=\ && \Keywd{int} \mid \Keywd{uint} \mid \Keywd{bool} \mid \Keywd{address} \\
                 &~   && \mid\ && \Keywd{mapping} ~t~ \Keywd{=>} ~t \mid \Keywd{struct} ~x~ \Keywd{\{}~ d^* ~\Keywd{\}} \\
-    \Typ{Type Decl}    &~ d && :=\ && t ~ x \\
+    \Typ{Type~Decl}    &~ d && :=\ && t ~ x \\
     \Typ{Values}      &~ v && :=\ && n \mid b \\
     \Typ{Projection}  &~ p && :=\ && \Keywd{.}x \mid \Keywd{[}e\Keywd{]} \\
     \Typ{Expressions} &~ e && :=\ && x \mid v \mid e ~op~ e \mid e p^+ \mid \AddrCall{e}{(x: e)^*}{e^*} \\
@@ -43,8 +43,8 @@
     \Typ{Spec}        &~ \sigma && :=\ && \SpecCall{\tau}{(x : y)^*}{x^*}{y^*} \\
                       &~        &&     && \SpecCond{e}{e}{\sigma^*} \\
     \Typ{Modifiers}   &~ m && :=\ && \Keywd{public} \mid \Keywd{private} \\
-    \Typ{Fun Decl}    &~ d_f && :=\ && \FunType{f}{d^*}{m}{t^*} \\
-    \Typ{Fun Def}     &~ \F&& :=\ && \sigma ~ d_f ~ \Keywd{\{} ~ s \Keywd{\}} \\
+    \Typ{Fun~Decl}    &~ d_f && :=\ && \FunType{f}{d^*}{m}{t^*} \\
+    \Typ{Fun~Def}     &~ \F&& :=\ && \sigma ~ d_f ~ \Keywd{\{} ~ s ~ \Keywd{\}} \\
     \Typ{Contract}    &~ \C&& :=\ && \Contract{x}{d^*}{\F^*} \\
     \Typ{Interface}   &~ \I&& :=\ && \Interface{x}{d_f^*}
   \end{alignat*}
