@@ -1,17 +1,10 @@
-import {
-  CompileResult,
-  compileSol,
-  EventDefinition,
-  FunctionDefinition,
-  StructuredDocumentation,
-  ASTNode,
-} from 'solc-typed-ast';
+import { CompileResult, compileSol, EventDefinition, FunctionDefinition, ASTNodeFactory } from 'solc-typed-ast';
 import fs from 'fs/promises';
 import { ASTWriter, ASTReader, DefaultASTWriterMapping, LatestCompilerVersion, PrettyFormatter } from 'solc-typed-ast';
 import * as path from 'path';
-import { CSSpecParse, CSSpecVisitor, CSSpec, isValSpec, isTempSpec } from './spec/index.js';
-import { handleValSpec } from './val-spec-transformer.js';
-import { SPEC_PREFIX, isConSolSpec } from './utils.js';
+import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
+import { ContractSpecTransformer } from './val-spec-transformer.js';
+import { SPEC_PREFIX } from './utils.js';
 
 // AST node kinds that allow ConSol spec attachments
 type ConSolCheckNodes = FunctionDefinition | EventDefinition;
@@ -41,7 +34,7 @@ async function main() {
 
   // const inputPath = args[1];
   const inputPath = './test/testCallFoo.sol';
-  //const inputPath = './test/Lock.sol';
+  // const inputPath = './test/Lock.sol';
   const filename = path.basename(inputPath);
   const dirname = path.dirname(inputPath);
 
@@ -62,24 +55,10 @@ async function main() {
   console.log('Used compiler version: ' + complieResult.compilerVersion);
   // console.log(sourceUnits[0].print());
 
-  sourceUnits[0].vContracts[0].walkChildren((astNode: ASTNode) => {
-    const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
-    if (!astNodeDoc) return;
-    const specStr = astNodeDoc.text;
-    if (!isConSolSpec(specStr)) return;
-
-    console.log('Processing spec: ' + specStr.substring(SPEC_PREFIX.length).trim());
-
-    const spec = parseConSolSpec(specStr);
-
-    if (isValSpec(spec)) {
-      handleValSpec(astNode, spec);
-    } else if (isTempSpec(spec)) {
-      // TODO
-    } else {
-      console.assert(false);
-    }
-  });
+  const contract = sourceUnits[0].vContracts[0];
+  const factory = new ASTNodeFactory(contract.context);
+  const contractTransformer = new ContractSpecTransformer(factory, contract.scope, contract);
+  contractTransformer.process();
 
   // convert ast back to source
   const formatter = new PrettyFormatter(4, 0);

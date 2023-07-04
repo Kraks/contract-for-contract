@@ -24,10 +24,14 @@ import {
   Identifier,
   Literal,
   replaceNode,
+  StructuredDocumentation,
+  ContractDefinition,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
 import { attachNames, extractFunName } from './utils.js';
+import { SPEC_PREFIX, isConSolSpec } from './utils.js';
+import { CSSpecParse, CSSpecVisitor, CSSpec, isValSpec, isTempSpec } from './spec/index.js';
 
 export function makeRequireStmt(
   ctx: ASTContext,
@@ -563,10 +567,18 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   declaredParams: VariableDeclaration[];
   declaredRetParams: VariableDeclaration[];
 
-  constructor(funDef: FunctionDefinition, spec: ValSpec<T>) {
+  constructor(funDef: FunctionDefinition, spec: ValSpec<T>, factory: ASTNodeFactory) {
     const declaredParams = (funDef as FunctionDefinition).vParameters.vParameters;
     const declaredRetParams = (funDef as FunctionDefinition).vReturnParameters.vParameters;
-    super(funDef.context as ASTContext, funDef.scope, spec, extractFunName(funDef), declaredParams, declaredRetParams);
+    super(
+      funDef.context as ASTContext,
+      funDef.scope,
+      spec,
+      extractFunName(funDef),
+      declaredParams,
+      declaredRetParams,
+      factory,
+    );
     this.declaredParams = declaredParams;
     this.declaredRetParams = declaredRetParams;
     this.funDef = funDef;
@@ -694,16 +706,55 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   }
 }
 
-export function handleValSpec<T>(node: ASTNode, spec: ValSpec<T>) {
-  console.log('Parsed spec AST:');
-  console.log(spec);
-  console.log(spec.tag);
-  if (node instanceof FunctionDefinition) {
-    const trans = new FunDefValSpecTransformer(node, spec);
-    trans.apply();
-  } else if (node instanceof EventDefinition) {
-    // TODO: optional
-  } else {
-    console.assert(false, 'wow');
+export class ContractSpecTransformer<T> extends ConSolTransformer {
+  contract: ContractDefinition;
+
+  constructor(factory: ASTNodeFactory, scope: number, contract: ContractDefinition) {
+    super(factory, scope);
+    this.contract = contract;
+  }
+
+  parseConSolSpec(doc: string): CSSpec<string> {
+    const specStr = doc.substring(SPEC_PREFIX.length).trim();
+    const visitor = new CSSpecVisitor<string>((s) => s);
+    const spec = CSSpecParse<string>(specStr, visitor);
+    return spec;
+  }
+
+  handleValSpec<T>(node: ASTNode, spec: ValSpec<T>) {
+    console.log('Parsed spec AST:');
+    console.log(spec);
+    console.log(spec.tag);
+    if (node instanceof FunctionDefinition) {
+      const trans = new FunDefValSpecTransformer(node, spec, this.factory);
+      trans.apply();
+    } else if (node instanceof EventDefinition) {
+      // TODO: optional
+    } else {
+      console.assert(false, 'wow');
+    }
+  }
+
+  process() {
+    type ConSolCheckNodes = FunctionDefinition | EventDefinition;
+
+    this.contract.walkChildren((astNode: ASTNode) => {
+      const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
+      if (!astNodeDoc) return;
+      const specStr = astNodeDoc.text;
+      if (!isConSolSpec(specStr)) return;
+      console.log('Processing spec: ' + specStr.substring(SPEC_PREFIX.length).trim());
+      const spec = this.parseConSolSpec(specStr);
+
+      if (isValSpec(spec)) {
+        // (this.spec.preCond === undefined)
+
+        this.handleValSpec(astNode, spec);
+      } else if (isTempSpec(spec)) {
+        // TODO
+      } else {
+        console.assert(false);
+      }
+    });
   }
 }
