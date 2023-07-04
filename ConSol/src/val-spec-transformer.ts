@@ -766,8 +766,6 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
   process(): void {
     type ConSolCheckNodes = FunctionDefinition | EventDefinition;
 
-    this.preAddrErrorEvent = this.makeErrorEvent('preViolation', 'funcId');
-    this.contract.appendChild(this.preAddrErrorEvent);
     this.contract.walkChildren((astNode: ASTNode) => {
       const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
       if (!astNodeDoc) return;
@@ -776,8 +774,25 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
       console.log('Processing spec: ' + specStr.substring(SPEC_PREFIX.length).trim());
       const spec = this.parseConSolSpec(specStr);
 
+      if (spec.preCond != undefined && this.preCondErrorEvent == undefined) {
+        this.preCondErrorEvent = this.makeErrorEvent('preViolation', 'funcId');
+        this.contract.appendChild(this.preCondErrorEvent);
+      }
+      if (spec.postCond != undefined && this.postCondErrorEvent == undefined) {
+        this.postCondErrorEvent = this.makeErrorEvent('postViolation', 'funcId');
+        this.contract.appendChild(this.postCondErrorEvent);
+      }
+
       if (isValSpec(spec)) {
-        // (this.spec.preCond === undefined)
+        if (spec.preFunSpec.length != 0 && this.preAddrErrorEvent == undefined) {
+          this.preAddrErrorEvent = this.makeErrorEvent('PreViolationAddr', 'specId');
+          this.contract.appendChild(this.preAddrErrorEvent);
+        }
+
+        if (spec.postFunSpec.length != 0 && this.postAddrErrorEvent == undefined) {
+          this.postAddrErrorEvent = this.makeErrorEvent('PostViolationAddr', 'specId');
+          this.contract.appendChild(this.postAddrErrorEvent);
+        }
 
         this.handleValSpec(astNode, spec);
       } else if (isTempSpec(spec)) {

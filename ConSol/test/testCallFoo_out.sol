@@ -3,6 +3,10 @@ pragma solidity ^0.8.9;
 contract Caller {
     event Response(bool success, bytes data);
 
+    event preViolation(uint256 funcId);
+
+    event PreViolationAddr(uint256 specId);
+
     /// @custom:consol { testCallFoo(addr, x) requires {x > 0} where { addr{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v > 5 && g < 10000 && x != 0 } ensures { flag == true } } { addr.send(x) returns (b) requires { x < 1024 } ensures {b == true} }}
     function testCallFoo_original(address payable _addr, uint256 x) private payable {
         (bool success, bytes memory data) = guarded_testCallFoo_addr(_addr, msg.value, 5000, "call foo", x);
