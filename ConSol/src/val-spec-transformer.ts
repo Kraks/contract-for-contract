@@ -708,6 +708,10 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
 
 export class ContractSpecTransformer<T> extends ConSolTransformer {
   contract: ContractDefinition;
+  preCondErrorEvent: EventDefinition | undefined;
+  postCondErrorEvent: EventDefinition | undefined;
+  preAddrErrorEvent: EventDefinition | undefined;
+  postAddrErrorEvent: EventDefinition | undefined;
 
   constructor(factory: ASTNodeFactory, scope: number, contract: ContractDefinition) {
     super(factory, scope);
@@ -735,9 +739,35 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
     }
   }
 
-  process() {
+  makeErrorEvent(eventName: string, paramName: string): EventDefinition {
+    const param: VariableDeclaration = this.factory.makeVariableDeclaration(
+      false,
+      false,
+      paramName,
+      // this.scope,
+      0,
+      false,
+      DataLocation.Default,
+      StateVariableVisibility.Default,
+      Mutability.Mutable,
+      'uint256',
+    );
+    param.vType = this.strToTypeName('uint256');
+
+    const event = this.factory.makeEventDefinition(
+      false, // anonymous
+      eventName,
+      this.factory.makeParameterList([param]),
+    );
+
+    return event;
+  }
+
+  process(): void {
     type ConSolCheckNodes = FunctionDefinition | EventDefinition;
 
+    this.preAddrErrorEvent = this.makeErrorEvent('preViolation', 'funcId');
+    this.contract.appendChild(this.preAddrErrorEvent);
     this.contract.walkChildren((astNode: ASTNode) => {
       const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
       if (!astNodeDoc) return;

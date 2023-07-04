@@ -2,9 +2,7 @@ import { CompileResult, compileSol, EventDefinition, FunctionDefinition, ASTNode
 import fs from 'fs/promises';
 import { ASTWriter, ASTReader, DefaultASTWriterMapping, LatestCompilerVersion, PrettyFormatter } from 'solc-typed-ast';
 import * as path from 'path';
-import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
 import { ContractSpecTransformer } from './val-spec-transformer.js';
-import { SPEC_PREFIX } from './utils.js';
 
 // AST node kinds that allow ConSol spec attachments
 type ConSolCheckNodes = FunctionDefinition | EventDefinition;
@@ -18,13 +16,6 @@ function convertResultToPlainObject(result: CompileResult): Record<string, unkno
   };
 }
 
-function parseConSolSpec(doc: string): CSSpec<string> {
-  const specStr = doc.substring(SPEC_PREFIX.length).trim();
-  const visitor = new CSSpecVisitor<string>((s) => s);
-  const spec = CSSpecParse<string>(specStr, visitor);
-  return spec;
-}
-
 async function main() {
   // const args = process.argv.slice(1);
   // if (args.length !== 2) {
@@ -33,8 +24,8 @@ async function main() {
   // }
 
   // const inputPath = args[1];
-  const inputPath = './test/testCallFoo.sol';
-  // const inputPath = './test/Lock.sol';
+  // const inputPath = './test/testCallFoo.sol';
+  const inputPath = './test/Lock.sol';
   const filename = path.basename(inputPath);
   const dirname = path.dirname(inputPath);
 
