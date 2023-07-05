@@ -26,6 +26,7 @@ import {
   replaceNode,
   StructuredDocumentation,
   ContractDefinition,
+  ErrorDefinition,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -708,10 +709,12 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
 
 export class ContractSpecTransformer<T> extends ConSolTransformer {
   contract: ContractDefinition;
-  preCondErrorEvent: EventDefinition | undefined;
-  postCondErrorEvent: EventDefinition | undefined;
-  preAddrErrorEvent: EventDefinition | undefined;
-  postAddrErrorEvent: EventDefinition | undefined;
+  preCondError: ErrorDefinition | undefined;
+  postCondError: ErrorDefinition | undefined;
+  preAddrError: ErrorDefinition | undefined;
+  postAddrError: ErrorDefinition | undefined;
+
+  //TODO: keep map from spec to id
 
   constructor(factory: ASTNodeFactory, scope: number, contract: ContractDefinition) {
     super(factory, scope);
@@ -739,7 +742,7 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
     }
   }
 
-  makeErrorEvent(eventName: string, paramName: string): EventDefinition {
+  makeError(eventName: string, paramName: string, paraTypeName: string): ErrorDefinition {
     const param: VariableDeclaration = this.factory.makeVariableDeclaration(
       false,
       false,
@@ -750,21 +753,19 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
       DataLocation.Default,
       StateVariableVisibility.Default,
       Mutability.Mutable,
-      'uint256',
+      paraTypeName,
     );
-    param.vType = this.strToTypeName('uint256');
+    param.vType = this.strToTypeName(paraTypeName);
 
-    const event = this.factory.makeEventDefinition(
-      false, // anonymous
-      eventName,
-      this.factory.makeParameterList([param]),
-    );
+    const errorDef = this.factory.makeErrorDefinition(eventName, this.factory.makeParameterList([param]));
 
-    return event;
+    return errorDef;
   }
 
   process(): void {
+    // AST node kinds that allow ConSol spec attachments
     type ConSolCheckNodes = FunctionDefinition | EventDefinition;
+    // TODO: traverse twice, spec as key
 
     this.contract.walkChildren((astNode: ASTNode) => {
       const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
@@ -774,24 +775,24 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
       console.log('Processing spec: ' + specStr.substring(SPEC_PREFIX.length).trim());
       const spec = this.parseConSolSpec(specStr);
 
-      if (spec.preCond != undefined && this.preCondErrorEvent == undefined) {
-        this.preCondErrorEvent = this.makeErrorEvent('preViolation', 'funcId');
-        this.contract.appendChild(this.preCondErrorEvent);
+      if (spec.preCond != undefined && this.preCondError == undefined) {
+        this.preCondError = this.makeError('preViolation', 'funcName', 'string');
+        this.contract.appendChild(this.preCondError);
       }
-      if (spec.postCond != undefined && this.postCondErrorEvent == undefined) {
-        this.postCondErrorEvent = this.makeErrorEvent('postViolation', 'funcId');
-        this.contract.appendChild(this.postCondErrorEvent);
+      if (spec.postCond != undefined && this.postCondError == undefined) {
+        this.postCondError = this.makeError('postViolation', 'funcName', 'string');
+        this.contract.appendChild(this.postCondError);
       }
 
       if (isValSpec(spec)) {
-        if (spec.preFunSpec.length != 0 && this.preAddrErrorEvent == undefined) {
-          this.preAddrErrorEvent = this.makeErrorEvent('PreViolationAddr', 'specId');
-          this.contract.appendChild(this.preAddrErrorEvent);
+        if (spec.preFunSpec.length != 0 && this.preAddrError == undefined) {
+          this.preAddrError = this.makeError('PreViolationAddr', 'specId', 'uint256');
+          this.contract.appendChild(this.preAddrError);
         }
 
-        if (spec.postFunSpec.length != 0 && this.postAddrErrorEvent == undefined) {
-          this.postAddrErrorEvent = this.makeErrorEvent('PostViolationAddr', 'specId');
-          this.contract.appendChild(this.postAddrErrorEvent);
+        if (spec.postFunSpec.length != 0 && this.postAddrError == undefined) {
+          this.postAddrError = this.makeError('PostViolationAddr', 'specId', 'uint256');
+          this.contract.appendChild(this.postAddrError);
         }
 
         this.handleValSpec(astNode, spec);

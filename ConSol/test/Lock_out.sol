@@ -1,12 +1,12 @@
 pragma solidity ^0.8.9;
 
 contract Lock {
+    error preViolation(string memory funcName);
+
+    error postViolation(string memory funcName);
+
     /// custom:consol {Withdrawal (amount, w) requires {amount>0} }
     event Withdrawal(uint256 amount, uint256 when);
-
-    event preViolation(uint256 funcId);
-
-    event postViolation(uint256 funcId);
 
     /// regular comment
     uint256 public unlockTime;

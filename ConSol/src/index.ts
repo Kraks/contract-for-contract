@@ -1,11 +1,8 @@
-import { CompileResult, compileSol, EventDefinition, FunctionDefinition, ASTNodeFactory } from 'solc-typed-ast';
+import { CompileResult, compileSol, ASTNodeFactory } from 'solc-typed-ast';
 import fs from 'fs/promises';
 import { ASTWriter, ASTReader, DefaultASTWriterMapping, LatestCompilerVersion, PrettyFormatter } from 'solc-typed-ast';
 import * as path from 'path';
 import { ContractSpecTransformer } from './val-spec-transformer.js';
-
-// AST node kinds that allow ConSol spec attachments
-type ConSolCheckNodes = FunctionDefinition | EventDefinition;
 
 function convertResultToPlainObject(result: CompileResult): Record<string, unknown> {
   return {
