@@ -1,5 +1,17 @@
-import { FunctionDefinition, VariableDeclaration, ASTNode, assert } from 'solc-typed-ast';
+import {
+  ASTContext,
+  ASTNodeFactory,
+  FunctionDefinition,
+  LiteralKind,
+  VariableDeclaration,
+  ASTNode,
+  FunctionCallKind,
+  ExpressionStatement,
+  Expression,
+  assert,
+} from 'solc-typed-ast';
 
+import { ValSpec } from './spec/index.js';
 import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
 
 export const SPEC_PREFIX = '@custom:consol';
@@ -31,4 +43,54 @@ export function attachNames(names: string[], decls: VariableDeclaration[]): Vari
     decls[i].name = name;
   });
   return decls;
+}
+
+export function makeRequireStmt(
+  ctx: ASTContext,
+  factory: ASTNodeFactory,
+  constraint: Expression,
+  msg: string,
+): ExpressionStatement {
+  const callArgs = [
+    constraint,
+    factory.makeLiteral('string', LiteralKind.String, Buffer.from(msg, 'utf8').toString('hex'), msg),
+  ];
+  const requireFn = factory.makeIdentifier('function (bool,string memory) pure', 'require', -1);
+  const requireCall = factory.makeFunctionCall('bool', FunctionCallKind.FunctionCall, requireFn, callArgs);
+  return factory.makeExpressionStatement(requireCall);
+}
+
+export function preCheckFunName(f: string): string {
+  return '_' + f + 'Pre';
+}
+
+export function postCheckFunName(f: string): string {
+  return '_' + f + 'Post';
+}
+
+export function uncheckedFunName(f: string): string {
+  return f + '_original';
+}
+
+export function properAddrName<T>(addr: string, member: string): string {
+  return addr + '_' + member;
+}
+
+export function extractRawAddr<T>(spec: ValSpec<T>): string {
+  // Note(GW): spec.call.addr is optional by the definition of garmmar.
+  // If it is undefined, then we are handling an address spec that only has a single callee.
+  // In this case, the funName field is actually the variable name for the address,
+  // and we synthesis the default callable member name (i.e. call);
+  // Otherwise, we are handling member access call (e.g. addr.send).
+  // FIXME(GW): parser error for the "otherwise" case
+  if (spec.call.addr === undefined) return spec.call.funName;
+  else return spec.call.addr;
+}
+
+export function extractAddrMember<T>(spec: ValSpec<T>): string {
+  if (spec.call.addr === undefined) return 'call';
+  else return spec.call.funName;
+}
+export function needAbiEncoding(member: string): boolean {
+  return member === 'call' || member === 'delegatecall' || member === 'staticcall';
 }
