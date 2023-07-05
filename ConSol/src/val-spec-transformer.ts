@@ -182,22 +182,34 @@ class ValSpecTransformer<T> extends ConSolTransformer {
     this.guardedAllParamNames = [...this.guardedParamNames, ...this.guardedRetParamNames];
   }
 
-  makeFlatCheckFun(funName: string, condExpr: T, params: ParameterList): FunctionDefinition {
-    const retNode = this.factory.makePhantomExpression('bool', condExpr as string);
-    const boolRetVar = this.factory.makeVariableDeclaration(
-      false, // constant
-      false, // indexed
-      'bool', // name // FIME(GW): this doesn't look right
-      0, // scope
-      false, // stateVariable
-      DataLocation.Default, // storageLocation
-      StateVariableVisibility.Default, // visibility
-      Mutability.Constant, // mutability
-      'bool', // typeString, "bool"
+  makeFlatCheckFun(funName: string, condExpr: T, params: ParameterList, errorDef: ErrorDefinition): FunctionDefinition {
+    const condNode = this.factory.makePhantomExpression('bool', condExpr as string);
+
+    // Make the if-condition (expression)
+    const ifCondition = this.factory.makeUnaryOperation(
+      'bool', // typeString
+      true,  // prefix
+      '!', // operator
+      condNode,
     );
-    const retVarDecs = new ParameterList(0, '', [boolRetVar]);
-    const retStmt = this.factory.makeReturn(retNode.id, retNode);
-    const funBody = this.factory.makeBlock([retStmt]);
+
+    // Define the error
+    const errorId = this.factory.makeIdentifierFor(errorDef);
+    
+
+    // Create the function call for the error
+    const errorCall = this.factory.makeFunctionCall(
+      'void',
+      FunctionCallKind.FunctionCall,
+      errorId, 
+      [this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0')] // Arguments
+    );
+
+    // Create the revert statement with the error call
+    const revertStatement = this.factory.makeRevertStatement(errorCall);
+    // Make the if-statement
+    const ifStatement = this.factory.makeIfStatement(ifCondition, revertStatement);
+    const funBody = this.factory.makeBlock([ifStatement]);
     const checkFunDef = this.factory.makeFunctionDefinition(
       this.scope,
       FunctionKind.Function,
@@ -207,7 +219,7 @@ class ValSpecTransformer<T> extends ConSolTransformer {
       FunctionStateMutability.NonPayable,
       false, // funKind == FunctionKind.Constructor,
       params,
-      retVarDecs,
+      this.factory.makeParameterList([]), // returnParameters
       [], //modifier
       undefined,
       funBody,
@@ -235,6 +247,7 @@ class ValSpecTransformer<T> extends ConSolTransformer {
   }
 
   makeRequireStmt(constraint: Expression, msg: string): ExpressionStatement {
+
     const callArgs = [
       constraint,
       this.factory.makeLiteral('string', LiteralKind.String, Buffer.from(msg, 'utf8').toString('hex'), msg),
@@ -245,32 +258,44 @@ class ValSpecTransformer<T> extends ConSolTransformer {
   }
 
   makeCheckStmt(funName: string, args: Expression[], errorMsg: string): ExpressionStatement {
+    const call = this.makeFunCall(funName, args);
+    return this.makeRequireStmt(call, errorMsg);
+  }
+
+  makeCallStmt(funName: string, args: Expression[]): ExpressionStatement {
+    const call = this.makeFunCall(funName, args);
+    return this.factory.makeExpressionStatement(call);
+  }
+
+  makeFunCall(funName: string, args: Expression[]): FunctionCall {
     const call = this.factory.makeFunctionCall(
       'bool',
       FunctionCallKind.FunctionCall,
       this.factory.makeIdentifier('function', funName, -1),
       args,
     );
-    return this.makeRequireStmt(call, errorMsg);
+    return call;
   }
 
-  preCondCheckFun(): FunctionDefinition | undefined {
+  preCondCheckFun(errorDef: ErrorDefinition|undefined): FunctionDefinition | undefined {
     if (this.spec.preCond === undefined) return undefined;
+    assert(errorDef != undefined, 'Pre Error is undefined');
     const preFunName = preCheckFunName(this.tgtName);
     // TODO(GW): should use factory.makeParameterList...
     const varDecs = this.makeVarDecs(this.guardedParamNames, this.paramVarDecs);
     const allParams = new ParameterList(0, '', [...varDecs]);
-    const preFunDef = this.makeFlatCheckFun(preFunName, this.spec.preCond, allParams);
+    const preFunDef = this.makeFlatCheckFun(preFunName, this.spec.preCond, allParams, errorDef);
     return preFunDef;
   }
 
-  postCondCheckFun(): FunctionDefinition | undefined {
+  postCondCheckFun(errorDef: ErrorDefinition|undefined): FunctionDefinition | undefined {
     if (this.spec.postCond === undefined) return undefined;
+    assert(errorDef != undefined, 'post Error is undefined');
     const postFunName = postCheckFunName(this.tgtName);
     const rets = [...this.guardedParamNames, ...this.guardedRetParamNames];
     const retVarDecs = this.makeVarDecs(rets, [...this.paramVarDecs, ...this.retVarDecs]);
     const allParams = new ParameterList(0, '', [...retVarDecs]);
-    const postCondFunc = this.makeFlatCheckFun(postFunName, this.spec.postCond, allParams);
+    const postCondFunc = this.makeFlatCheckFun(postFunName, this.spec.postCond, allParams, errorDef);
     return postCondFunc;
   }
 }
@@ -284,6 +309,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
   optTypes: TypeName[];
   argTypes: TypeName[];
   retTypes: TypeName[];
+  preAddrError: ErrorDefinition | undefined;
+  postAddrError: ErrorDefinition | undefined;
 
   constructor(
     parent: FunctionDefinition,
@@ -292,6 +319,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     ctx: ASTContext,
     scope: number,
     factory?: ASTNodeFactory,
+    preAddrError? : ErrorDefinition | undefined,
+    postAddrError? : ErrorDefinition | undefined,
   ) {
     const addr = extractRawAddr(spec);
     const member = extractAddrMember(spec);
@@ -306,6 +335,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     this.retTypes = retTypes;
     this.paramVarDecs = this.makeNamelessTypedVarDecls([...optTypes, ...argTypes]);
     this.retVarDecs = this.makeNamelessTypedVarDecls(retTypes);
+    this.preAddrError = preAddrError;
+    this.postAddrError = postAddrError; 
   }
 
   extractSigFromFuncCallOptions(call: FunctionCallOptions): string {
@@ -487,9 +518,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
 
     // Generate function call to check pre-condition (if any)
     if (preCondFun) {
-      const errorMsg = 'Violate the precondition for address ' + this.tgtName;
-      const preCondRequireStmt = this.makeCheckStmt(preCondFun.name, this.makeIdsFromVarDecs(params), errorMsg);
-      stmts.push(preCondRequireStmt);
+      const preCondStmt = this.makeCallStmt(preCondFun.name, this.makeIdsFromVarDecs(params));
+      stmts.push(preCondStmt);
     }
 
     // Generate address call to the address, replace arguments
@@ -502,9 +532,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     // Generate function call to check post-condition (if any)
     if (postCondFun) {
       const postCallArgs = this.makeIdsFromVarDecs(retVarDecs);
-      const errorMsg = 'Violate the postondition for address ' + this.tgtName;
-      const postRequireStmt = this.makeCheckStmt(postCondFun.name, postCallArgs, errorMsg);
-      stmts.push(postRequireStmt);
+      const postCondStmt = this.makeCallStmt(postCondFun.name, postCallArgs);
+      stmts.push(postCondStmt);
     }
 
     // Create the return statement (if any)
@@ -544,9 +573,9 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
   }
 
   apply(): void {
-    const preFun = this.preCondCheckFun();
+    const preFun = this.preCondCheckFun(this.preAddrError);
     if (preFun) this.parentFunDef.vScope.appendChild(preFun);
-    const postFun = this.postCondCheckFun();
+    const postFun = this.postCondCheckFun(this.postAddrError);
     if (postFun) this.parentFunDef.vScope.appendChild(postFun);
 
     // step 1: generate guarded address call function
@@ -567,8 +596,17 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   retTypes: TypeName[];
   declaredParams: VariableDeclaration[];
   declaredRetParams: VariableDeclaration[];
+  preCondError: ErrorDefinition | undefined;
+  postCondError: ErrorDefinition | undefined;
+  preAddrError: ErrorDefinition | undefined;
+  postAddrError: ErrorDefinition | undefined;
 
-  constructor(funDef: FunctionDefinition, spec: ValSpec<T>, factory: ASTNodeFactory) {
+  constructor(funDef: FunctionDefinition, spec: ValSpec<T>, factory: ASTNodeFactory,
+    preCondError? : ErrorDefinition | undefined,
+    postCondError? : ErrorDefinition | undefined,
+    preAddrError? : ErrorDefinition | undefined,
+    postAddrError? : ErrorDefinition | undefined,
+    ) {
     const declaredParams = (funDef as FunctionDefinition).vParameters.vParameters;
     const declaredRetParams = (funDef as FunctionDefinition).vReturnParameters.vParameters;
     super(
@@ -586,6 +624,10 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     this.retTypes = this.declaredRetParams
       .map((param) => param.vType)
       .filter((vType): vType is TypeName => vType !== undefined); // filter out the undefined object
+    this.preCondError = preCondError;
+    this.postCondError = postCondError;
+    this.preAddrError = preAddrError;
+    this.postAddrError = postAddrError; 
   }
 
   guardedFun(
@@ -603,13 +645,11 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
 
     // Generate function call to check pre-condition (if any)
     if (preCondFun) {
-      const errorMsg = 'Violate the precondition for function ' + this.tgtName;
-      const preCondRequireStmt = this.makeCheckStmt(
+      const preCondStmt = this.makeCallStmt(
         preCondFun.name,
         this.makeIdsFromVarDecs(this.declaredParams),
-        errorMsg,
       );
-      stmts.push(preCondRequireStmt);
+      stmts.push(preCondStmt);
     }
 
     // Generate function call to the original function
@@ -634,9 +674,8 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
       if (this.retTypes.length > 0) {
         postCallArgs = postCallArgs.concat(this.makeIdsFromVarDecs(retTypeDecls));
       }
-      const errorMsg = 'Violate the postondition for function ' + this.tgtName;
-      const postRequireStmt = this.makeCheckStmt(postCondFun.name, postCallArgs, errorMsg);
-      stmts.push(postRequireStmt);
+      const postCondStmt = this.makeCallStmt(postCondFun.name, postCallArgs);
+      stmts.push(postCondStmt);
     }
 
     // Create the return statement (if any)
@@ -676,13 +715,13 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
 
   addrTransformers(addrSpec: ValSpec<T>): AddrValSpecTransformer<T> {
     const tgtAddr = this.findTargetAddr(this.funDef, this.spec, extractRawAddr(addrSpec));
-    return new AddrValSpecTransformer(this.funDef, tgtAddr, addrSpec, this.ctx, this.scope, this.factory);
+    return new AddrValSpecTransformer(this.funDef, tgtAddr, addrSpec, this.ctx, this.scope, this.factory, this.preAddrError, this.postAddrError);
   }
 
   apply(): void {
-    const preFun = this.preCondCheckFun();
+    const preFun = this.preCondCheckFun(this.preCondError);
     if (preFun) this.funDef.vScope.appendChild(preFun);
-    const postFun = this.postCondCheckFun();
+    const postFun = this.postCondCheckFun(this.postCondError);
     if (postFun) this.funDef.vScope.appendChild(postFun);
 
     const addrTrans = this.spec.preFunSpec.map((s) => this.addrTransformers(s));
@@ -713,12 +752,13 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
   postCondError: ErrorDefinition | undefined;
   preAddrError: ErrorDefinition | undefined;
   postAddrError: ErrorDefinition | undefined;
+  specToId: Map <CSSpec<T>, number>;
 
-  //TODO: keep map from spec to id
 
   constructor(factory: ASTNodeFactory, scope: number, contract: ContractDefinition) {
     super(factory, scope);
     this.contract = contract;
+    this.specToId = new Map<CSSpec<T>, number>();
   }
 
   parseConSolSpec(doc: string): CSSpec<string> {
@@ -733,7 +773,7 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
     console.log(spec);
     console.log(spec.tag);
     if (node instanceof FunctionDefinition) {
-      const trans = new FunDefValSpecTransformer(node, spec, this.factory);
+      const trans = new FunDefValSpecTransformer(node, spec, this.factory, this.preCondError, this.postCondError, this.preAddrError, this.postAddrError);
       trans.apply();
     } else if (node instanceof EventDefinition) {
       // TODO: optional
@@ -747,7 +787,7 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
       false,
       false,
       paramName,
-      // this.scope,
+      // this.scope, // -> error, why???
       0,
       false,
       DataLocation.Default,
@@ -767,13 +807,17 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
     type ConSolCheckNodes = FunctionDefinition | EventDefinition;
     // TODO: traverse twice, spec as key
 
+    let id = 0;
     this.contract.walkChildren((astNode: ASTNode) => {
       const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
       if (!astNodeDoc) return;
       const specStr = astNodeDoc.text;
       if (!isConSolSpec(specStr)) return;
-      console.log('Processing spec: ' + specStr.substring(SPEC_PREFIX.length).trim());
+      // console.log('Processing spec: ' + specStr.substring(SPEC_PREFIX.length).trim());
       const spec = this.parseConSolSpec(specStr);
+
+      this.specToId.set(spec as CSSpec<T>, id);
+      id += 1;
 
       if (spec.preCond != undefined && this.preCondError == undefined) {
         this.preCondError = this.makeError('preViolation', 'funcName', 'string');
@@ -785,6 +829,7 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
       }
 
       if (isValSpec(spec)) {
+        // if not preFunSpec and not postFunSpec, do not need the spec2Id map
         if (spec.preFunSpec.length != 0 && this.preAddrError == undefined) {
           this.preAddrError = this.makeError('PreViolationAddr', 'specId', 'uint256');
           this.contract.appendChild(this.preAddrError);
@@ -795,6 +840,22 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
           this.contract.appendChild(this.postAddrError);
         }
 
+      }
+    });
+
+    console.log(this.specToId);
+
+    this.contract.walkChildren((astNode: ASTNode) => {
+      const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
+      if (!astNodeDoc) return;
+      const specStr = astNodeDoc.text;
+      if (!isConSolSpec(specStr)) return;
+      // console.log('Processing spec: ' + specStr.substring(SPEC_PREFIX.length).trim());
+      const spec = this.parseConSolSpec(specStr);
+      const specId = this.specToId.get(spec as CSSpec<T>);
+      console.log('Processing spec ' + specId + ':  ' +specStr.substring(SPEC_PREFIX.length).trim());
+      if (isValSpec(spec)) {
+       
         this.handleValSpec(astNode, spec);
       } else if (isTempSpec(spec)) {
         // TODO

@@ -39,55 +39,55 @@ contract Lock {
         return (a + b, a - b);
     }
 
-    function _constructorPre(uint256 _unlockTime) private returns (bool) {
-        return _unlockTime>0&&block.timestamp<_unlockTime;
+    function _constructorPre(uint256 _unlockTime) private {
+        if (!_unlockTime>0&&block.timestamp<_unlockTime) revert preViolation(0);
     }
 
     constructor(uint256 _unlockTime) payable {
-        require(_constructorPre(_unlockTime), "Violate the precondition for function constructor");
+        _constructorPre(_unlockTime);
         constructor_original(_unlockTime);
     }
 
-    function _withdrawPre() private returns (bool) {
-        return block.timestamp>=unlockTime;
+    function _withdrawPre() private {
+        if (!block.timestamp>=unlockTime) revert preViolation(0);
     }
 
     function withdraw() public {
-        require(_withdrawPre(), "Violate the precondition for function withdraw");
+        _withdrawPre();
         withdraw_original();
     }
 
-    function _getSumNoRetPre(int256 not_the_same_name, int256 metoo) private returns (bool) {
-        return not_the_same_name>0&&metoo>0;
+    function _getSumNoRetPre(int256 not_the_same_name, int256 metoo) private {
+        if (!not_the_same_name>0&&metoo>0) revert preViolation(0);
     }
 
     function getSumNoRet(int256 a, int256 b) public pure {
-        require(_getSumNoRetPre(a, b), "Violate the precondition for function getSumNoRet");
+        _getSumNoRetPre(a, b);
         getSumNoRet_original(a, b);
     }
 
-    function _getSumPre(int256 a, int256 b) private returns (bool) {
-        return a>0&&b>0;
+    function _getSumPre(int256 a, int256 b) private {
+        if (!a>0&&b>0) revert preViolation(0);
     }
 
     function getSum(int256 a, int256 b) public pure returns (int256) {
-        require(_getSumPre(a, b), "Violate the precondition for function getSum");
+        _getSumPre(a, b);
         int256 c = getSum_original(a, b);
         return (c);
     }
 
-    function _getSum2RetPre(int256 a, int256 b) private returns (bool) {
-        return a>0&&b>0;
+    function _getSum2RetPre(int256 a, int256 b) private {
+        if (!a>0&&b>0) revert preViolation(0);
     }
 
-    function _getSum2RetPost(int256 a, int256 b, int256 c, int256 d) private returns (bool) {
-        return c>0;
+    function _getSum2RetPost(int256 a, int256 b, int256 c, int256 d) private {
+        if (!c>0) revert postViolation(0);
     }
 
     function getSum2Ret(int256 a, int256 b) public pure returns (int256, int256) {
-        require(_getSum2RetPre(a, b), "Violate the precondition for function getSum2Ret");
+        _getSum2RetPre(a, b);
         (int256 c, int256 d) = getSum2Ret_original(a, b);
-        require(_getSum2RetPost(a, b, c, d), "Violate the postondition for function getSum2Ret");
+        _getSum2RetPost(a, b, c, d);
         return (c, d);
     }
 }
