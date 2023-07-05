@@ -182,7 +182,13 @@ class ValSpecTransformer<T> extends ConSolTransformer {
     this.guardedAllParamNames = [...this.guardedParamNames, ...this.guardedRetParamNames];
   }
 
-  makeFlatCheckFun(funName: string, condExpr: T, params: ParameterList, errorDef: ErrorDefinition, errorParamVal:string|number): FunctionDefinition {
+  makeFlatCheckFun(
+    funName: string,
+    condExpr: T,
+    params: ParameterList,
+    errorDef: ErrorDefinition,
+    errorParamVal: string | number,
+  ): FunctionDefinition {
     const condNode = this.factory.makePhantomExpression('bool', condExpr as string);
 
     // Make the if-condition (expression)
@@ -195,20 +201,25 @@ class ValSpecTransformer<T> extends ConSolTransformer {
 
     // Define the error
     const errorId = this.factory.makeIdentifierFor(errorDef);
-    
+
     let errorParam;
     if (typeof errorParamVal === 'number') {
-      errorParam = this.factory.makeLiteral('uint256', LiteralKind.Number, String(errorParamVal), String(errorParamVal))
-    }else{
-      errorParam = this.factory.makeLiteral('string', LiteralKind.String, errorParamVal, errorParamVal)
+      errorParam = this.factory.makeLiteral(
+        'uint256',
+        LiteralKind.Number,
+        String(errorParamVal),
+        String(errorParamVal),
+      );
+    } else {
+      errorParam = this.factory.makeLiteral('string', LiteralKind.String, errorParamVal, errorParamVal);
     }
-    
+
     // Create the function call for the error
     const errorCall = this.factory.makeFunctionCall(
       'void',
       FunctionCallKind.FunctionCall,
-      errorId, 
-      [errorParam] // Arguments
+      errorId,
+      [errorParam], // Arguments
     );
 
     // Create the revert statement with the error call
@@ -282,7 +293,10 @@ class ValSpecTransformer<T> extends ConSolTransformer {
     return call;
   }
 
-  preCondCheckFun(errorDef: ErrorDefinition | undefined, errorParamVal: string|number): FunctionDefinition | undefined {
+  preCondCheckFun(
+    errorDef: ErrorDefinition | undefined,
+    errorParamVal: string | number,
+  ): FunctionDefinition | undefined {
     if (this.spec.preCond === undefined) return undefined;
     assert(errorDef != undefined, 'Pre Error is undefined');
     const preFunName = preCheckFunName(this.tgtName);
@@ -293,7 +307,7 @@ class ValSpecTransformer<T> extends ConSolTransformer {
     return preFunDef;
   }
 
-  postCondCheckFun(errorDef: ErrorDefinition|undefined): FunctionDefinition | undefined {
+  postCondCheckFun(errorDef: ErrorDefinition | undefined): FunctionDefinition | undefined {
     if (this.spec.postCond === undefined) return undefined;
     assert(errorDef != undefined, 'post Error is undefined');
     const postFunName = postCheckFunName(this.tgtName);
@@ -836,7 +850,6 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
     this.postAddrError = this.makeError('PostViolationAddr', 'specId', 'uint256');
     this.contract.appendChild(this.postAddrError);
 
-
     let id = 0;
     this.contract.walkChildren((astNode: ASTNode) => {
       const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
@@ -848,9 +861,6 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
 
       this.specToId.set(spec as CSSpec<T>, id);
       id += 1;
-
-      
-  
     });
 
     console.log(this.specToId);
