@@ -66,12 +66,14 @@ contract Caller_Translate {
   }
 
   function _constructMapping() internal {
+    // require id to spec
     _IReceiverFooPres[1] = _PreSpec1;
 
     _IReceiverFooPosts[1] = _PostSpec1;
   }
 
   function testCallFoo(address payable addr, uint x) public payable {
+    // require spec to id
     // Wrap up
     GuardedAddress memory _addr = GuardedAddress ({
       _addr: address(addr),
@@ -120,6 +122,7 @@ contract Caller_Translate {
   }
  
   function testCallFoo_Translate(GuardedAddress memory addr, uint x) internal {
+    // require spec to id
    addr._spec |= 1; // Note: update spec here
 
     _testCallFooPre(payable(addr._addr), x);
