@@ -293,12 +293,8 @@ class ValSpecTransformer<T> extends ConSolTransformer {
     return call;
   }
 
-  preCondCheckFun(
-    errorDef: ErrorDefinition | undefined,
-    errorParamVal: string | number,
-  ): FunctionDefinition | undefined {
+  preCondCheckFun(errorDef: ErrorDefinition, errorParamVal: string | number): FunctionDefinition | undefined {
     if (this.spec.preCond === undefined) return undefined;
-    assert(errorDef != undefined, 'Pre Error is undefined');
     const preFunName = preCheckFunName(this.tgtName);
     // TODO(GW): should use factory.makeParameterList...
     const varDecs = this.makeVarDecs(this.guardedParamNames, this.paramVarDecs);
@@ -307,12 +303,8 @@ class ValSpecTransformer<T> extends ConSolTransformer {
     return preFunDef;
   }
 
-  postCondCheckFun(
-    errorDef: ErrorDefinition | undefined,
-    errorParamVal: string | number,
-  ): FunctionDefinition | undefined {
+  postCondCheckFun(errorDef: ErrorDefinition, errorParamVal: string | number): FunctionDefinition | undefined {
     if (this.spec.postCond === undefined) return undefined;
-    assert(errorDef != undefined, 'post Error is undefined');
     const postFunName = postCheckFunName(this.tgtName);
     const rets = [...this.guardedParamNames, ...this.guardedRetParamNames];
     const retVarDecs = this.makeVarDecs(rets, [...this.paramVarDecs, ...this.retVarDecs]);
@@ -331,8 +323,8 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
   optTypes: TypeName[];
   argTypes: TypeName[];
   retTypes: TypeName[];
-  preAddrError: ErrorDefinition | undefined;
-  postAddrError: ErrorDefinition | undefined;
+  preAddrError: ErrorDefinition;
+  postAddrError: ErrorDefinition;
 
   constructor(
     parent: FunctionDefinition,
@@ -340,9 +332,9 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     spec: ValSpec<T>,
     ctx: ASTContext,
     scope: number,
+    preAddrError: ErrorDefinition,
+    postAddrError: ErrorDefinition,
     factory?: ASTNodeFactory,
-    preAddrError?: ErrorDefinition | undefined,
-    postAddrError?: ErrorDefinition | undefined,
   ) {
     const addr = extractRawAddr(spec);
     const member = extractAddrMember(spec);
@@ -618,19 +610,19 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   retTypes: TypeName[];
   declaredParams: VariableDeclaration[];
   declaredRetParams: VariableDeclaration[];
-  preCondError: ErrorDefinition | undefined;
-  postCondError: ErrorDefinition | undefined;
-  preAddrError: ErrorDefinition | undefined;
-  postAddrError: ErrorDefinition | undefined;
+  preCondError: ErrorDefinition;
+  postCondError: ErrorDefinition;
+  preAddrError: ErrorDefinition;
+  postAddrError: ErrorDefinition;
 
   constructor(
     funDef: FunctionDefinition,
     spec: ValSpec<T>,
+    preCondError: ErrorDefinition,
+    postCondError: ErrorDefinition,
+    preAddrError: ErrorDefinition,
+    postAddrError: ErrorDefinition,
     factory: ASTNodeFactory,
-    preCondError?: ErrorDefinition | undefined,
-    postCondError?: ErrorDefinition | undefined,
-    preAddrError?: ErrorDefinition | undefined,
-    postAddrError?: ErrorDefinition | undefined,
   ) {
     const declaredParams = (funDef as FunctionDefinition).vParameters.vParameters;
     const declaredRetParams = (funDef as FunctionDefinition).vReturnParameters.vParameters;
@@ -743,9 +735,9 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
       addrSpec,
       this.ctx,
       this.scope,
-      this.factory,
       this.preAddrError,
       this.postAddrError,
+      this.factory,
     );
   }
 
@@ -779,16 +771,20 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
 
 export class ContractSpecTransformer<T> extends ConSolTransformer {
   contract: ContractDefinition;
-  preCondError: ErrorDefinition | undefined;
-  postCondError: ErrorDefinition | undefined;
-  preAddrError: ErrorDefinition | undefined;
-  postAddrError: ErrorDefinition | undefined;
+  preCondError: ErrorDefinition;
+  postCondError: ErrorDefinition;
+  preAddrError: ErrorDefinition;
+  postAddrError: ErrorDefinition;
   specToId: Map<CSSpec<T>, number>;
 
   constructor(factory: ASTNodeFactory, scope: number, contract: ContractDefinition) {
     super(factory, scope);
     this.contract = contract;
     this.specToId = new Map<CSSpec<T>, number>();
+    this.preCondError = this.makeError('preViolation', 'funcName', 'string');
+    this.postCondError = this.makeError('postViolation', 'funcName', 'string');
+    this.preAddrError = this.makeError('PreViolationAddr', 'specId', 'uint256');
+    this.postAddrError = this.makeError('PostViolationAddr', 'specId', 'uint256');
   }
 
   parseConSolSpec(doc: string): CSSpec<string> {
@@ -806,11 +802,11 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
       const trans = new FunDefValSpecTransformer(
         node,
         spec,
-        this.factory,
         this.preCondError,
         this.postCondError,
         this.preAddrError,
         this.postAddrError,
+        this.factory,
       );
       trans.apply();
     } else if (node instanceof EventDefinition) {
@@ -844,13 +840,9 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
     // AST node kinds that allow ConSol spec attachments
     type ConSolCheckNodes = FunctionDefinition | EventDefinition;
     // TODO: traverse twice, spec as key
-    this.preCondError = this.makeError('preViolation', 'funcName', 'string');
     this.contract.appendChild(this.preCondError);
-    this.postCondError = this.makeError('postViolation', 'funcName', 'string');
     this.contract.appendChild(this.postCondError);
-    this.preAddrError = this.makeError('PreViolationAddr', 'specId', 'uint256');
     this.contract.appendChild(this.preAddrError);
-    this.postAddrError = this.makeError('PostViolationAddr', 'specId', 'uint256');
     this.contract.appendChild(this.postAddrError);
 
     let id = 0;
