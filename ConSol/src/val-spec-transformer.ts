@@ -182,7 +182,7 @@ class ValSpecTransformer<T> extends ConSolTransformer {
     this.guardedAllParamNames = [...this.guardedParamNames, ...this.guardedRetParamNames];
   }
 
-  makeFlatCheckFun(funName: string, condExpr: T, params: ParameterList, errorDef: ErrorDefinition): FunctionDefinition {
+  makeFlatCheckFun(funName: string, condExpr: T, params: ParameterList, errorDef: ErrorDefinition, errorParamVal:string|number): FunctionDefinition {
     const condNode = this.factory.makePhantomExpression('bool', condExpr as string);
 
     // Make the if-condition (expression)
@@ -196,13 +196,19 @@ class ValSpecTransformer<T> extends ConSolTransformer {
     // Define the error
     const errorId = this.factory.makeIdentifierFor(errorDef);
     
-
+    let errorParam;
+    if (typeof errorParamVal === 'number') {
+      errorParam = this.factory.makeLiteral('uint256', LiteralKind.Number, String(errorParamVal), String(errorParamVal))
+    }else{
+      errorParam = this.factory.makeLiteral('string', LiteralKind.String, errorParamVal, errorParamVal)
+    }
+    
     // Create the function call for the error
     const errorCall = this.factory.makeFunctionCall(
       'void',
       FunctionCallKind.FunctionCall,
       errorId, 
-      [this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0')] // Arguments
+      [errorParam] // Arguments
     );
 
     // Create the revert statement with the error call
@@ -277,25 +283,25 @@ class ValSpecTransformer<T> extends ConSolTransformer {
     return call;
   }
 
-  preCondCheckFun(errorDef: ErrorDefinition|undefined): FunctionDefinition | undefined {
+  preCondCheckFun(errorDef: ErrorDefinition|undefined, errorParamVal: string|number): FunctionDefinition | undefined {
     if (this.spec.preCond === undefined) return undefined;
     assert(errorDef != undefined, 'Pre Error is undefined');
     const preFunName = preCheckFunName(this.tgtName);
     // TODO(GW): should use factory.makeParameterList...
     const varDecs = this.makeVarDecs(this.guardedParamNames, this.paramVarDecs);
     const allParams = new ParameterList(0, '', [...varDecs]);
-    const preFunDef = this.makeFlatCheckFun(preFunName, this.spec.preCond, allParams, errorDef);
+    const preFunDef = this.makeFlatCheckFun(preFunName, this.spec.preCond, allParams, errorDef, errorParamVal);
     return preFunDef;
   }
 
-  postCondCheckFun(errorDef: ErrorDefinition|undefined): FunctionDefinition | undefined {
+  postCondCheckFun(errorDef: ErrorDefinition|undefined, errorParamVal: string|number): FunctionDefinition | undefined {
     if (this.spec.postCond === undefined) return undefined;
     assert(errorDef != undefined, 'post Error is undefined');
     const postFunName = postCheckFunName(this.tgtName);
     const rets = [...this.guardedParamNames, ...this.guardedRetParamNames];
     const retVarDecs = this.makeVarDecs(rets, [...this.paramVarDecs, ...this.retVarDecs]);
     const allParams = new ParameterList(0, '', [...retVarDecs]);
-    const postCondFunc = this.makeFlatCheckFun(postFunName, this.spec.postCond, allParams, errorDef);
+    const postCondFunc = this.makeFlatCheckFun(postFunName, this.spec.postCond, allParams, errorDef, errorParamVal);
     return postCondFunc;
   }
 }
@@ -573,9 +579,9 @@ class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
   }
 
   apply(): void {
-    const preFun = this.preCondCheckFun(this.preAddrError);
+    const preFun = this.preCondCheckFun(this.preAddrError, 0);
     if (preFun) this.parentFunDef.vScope.appendChild(preFun);
-    const postFun = this.postCondCheckFun(this.postAddrError);
+    const postFun = this.postCondCheckFun(this.postAddrError, 0);
     if (postFun) this.parentFunDef.vScope.appendChild(postFun);
 
     // step 1: generate guarded address call function
@@ -719,9 +725,9 @@ class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   }
 
   apply(): void {
-    const preFun = this.preCondCheckFun(this.preCondError);
+    const preFun = this.preCondCheckFun(this.preCondError, this.tgtName);
     if (preFun) this.funDef.vScope.appendChild(preFun);
-    const postFun = this.postCondCheckFun(this.postCondError);
+    const postFun = this.postCondCheckFun(this.postCondError, this.tgtName);
     if (postFun) this.funDef.vScope.appendChild(postFun);
 
     const addrTrans = this.spec.preFunSpec.map((s) => this.addrTransformers(s));
@@ -806,6 +812,15 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
     // AST node kinds that allow ConSol spec attachments
     type ConSolCheckNodes = FunctionDefinition | EventDefinition;
     // TODO: traverse twice, spec as key
+    this.preCondError = this.makeError('preViolation', 'funcName', 'string');
+    this.contract.appendChild(this.preCondError);
+    this.postCondError = this.makeError('postViolation', 'funcName', 'string');
+    this.contract.appendChild(this.postCondError);
+    this.preAddrError = this.makeError('PreViolationAddr', 'specId', 'uint256');
+    this.contract.appendChild(this.preAddrError);
+    this.postAddrError = this.makeError('PostViolationAddr', 'specId', 'uint256');
+    this.contract.appendChild(this.postAddrError);
+
 
     let id = 0;
     this.contract.walkChildren((astNode: ASTNode) => {
@@ -819,28 +834,8 @@ export class ContractSpecTransformer<T> extends ConSolTransformer {
       this.specToId.set(spec as CSSpec<T>, id);
       id += 1;
 
-      if (spec.preCond != undefined && this.preCondError == undefined) {
-        this.preCondError = this.makeError('preViolation', 'funcName', 'string');
-        this.contract.appendChild(this.preCondError);
-      }
-      if (spec.postCond != undefined && this.postCondError == undefined) {
-        this.postCondError = this.makeError('postViolation', 'funcName', 'string');
-        this.contract.appendChild(this.postCondError);
-      }
-
-      if (isValSpec(spec)) {
-        // if not preFunSpec and not postFunSpec, do not need the spec2Id map
-        if (spec.preFunSpec.length != 0 && this.preAddrError == undefined) {
-          this.preAddrError = this.makeError('PreViolationAddr', 'specId', 'uint256');
-          this.contract.appendChild(this.preAddrError);
-        }
-
-        if (spec.postFunSpec.length != 0 && this.postAddrError == undefined) {
-          this.postAddrError = this.makeError('PostViolationAddr', 'specId', 'uint256');
-          this.contract.appendChild(this.postAddrError);
-        }
-
-      }
+      
+  
     });
 
     console.log(this.specToId);

@@ -5,6 +5,10 @@ contract Lock {
 
     error postViolation(string memory funcName);
 
+    error PreViolationAddr(uint256 specId);
+
+    error PostViolationAddr(uint256 specId);
+
     /// custom:consol {Withdrawal (amount, w) requires {amount>0} }
     event Withdrawal(uint256 amount, uint256 when);
 
@@ -40,7 +44,7 @@ contract Lock {
     }
 
     function _constructorPre(uint256 _unlockTime) private {
-        if (!_unlockTime>0&&block.timestamp<_unlockTime) revert preViolation(0);
+        if (!_unlockTime>0&&block.timestamp<_unlockTime) revert preViolation("constructor");
     }
 
     constructor(uint256 _unlockTime) payable {
@@ -49,7 +53,7 @@ contract Lock {
     }
 
     function _withdrawPre() private {
-        if (!block.timestamp>=unlockTime) revert preViolation(0);
+        if (!block.timestamp>=unlockTime) revert preViolation("withdraw");
     }
 
     function withdraw() public {
@@ -58,7 +62,7 @@ contract Lock {
     }
 
     function _getSumNoRetPre(int256 not_the_same_name, int256 metoo) private {
-        if (!not_the_same_name>0&&metoo>0) revert preViolation(0);
+        if (!not_the_same_name>0&&metoo>0) revert preViolation("getSumNoRet");
     }
 
     function getSumNoRet(int256 a, int256 b) public pure {
@@ -67,7 +71,7 @@ contract Lock {
     }
 
     function _getSumPre(int256 a, int256 b) private {
-        if (!a>0&&b>0) revert preViolation(0);
+        if (!a>0&&b>0) revert preViolation("getSum");
     }
 
     function getSum(int256 a, int256 b) public pure returns (int256) {
@@ -77,11 +81,11 @@ contract Lock {
     }
 
     function _getSum2RetPre(int256 a, int256 b) private {
-        if (!a>0&&b>0) revert preViolation(0);
+        if (!a>0&&b>0) revert preViolation("getSum2Ret");
     }
 
     function _getSum2RetPost(int256 a, int256 b, int256 c, int256 d) private {
-        if (!c>0) revert postViolation(0);
+        if (!c>0) revert postViolation("getSum2Ret");
     }
 
     function getSum2Ret(int256 a, int256 b) public pure returns (int256, int256) {
