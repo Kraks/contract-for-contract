@@ -11,7 +11,7 @@ import {
   LiteralKind,
   PrettyFormatter,
 } from 'solc-typed-ast';
-import { makeRequireStmt } from '../val-spec-transformer.js';
+import { makeRequireStmt } from '../utils.js';
 
 describe('val spec transformer', () => {
   const template = `
