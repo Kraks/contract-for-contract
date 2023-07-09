@@ -58,21 +58,26 @@ The \texttt{deposit} function, accepting two arguments, \texttt{token} and \text
 The function begins with a \texttt{require} statement at line 11, ensuring the sender is the contract's owner. 
 A higher-order function call, \texttt{transferFrom}, is subsequently invoked on the contract at the address \texttt{token} (lines 12-13).
 
-The above example demonstrates that addresses provide crucial features in Solidity, including:
+This example demonstrates how addresses facilitate key features in Solidity, including:
   
 \noindent
-\textit{\underline{Access control}.} 
-Addresses, when regarded as first-class values, play a pivotal role in enforcing access control within Solidity. 
-They facilitate the restriction of privileged function invocations and the allocation of diverse permissions to individual users. 
-Developers must carefully construct assertions based on numeric values associated with addresses to ensure the correctness of access control mechanisms.
+\textit{\underline{Access control}.}
+Addresses, when treated as first-class values, play a crucial role in the implementation of access control in Solidity.
+They enable the restriction of privileged function invocations and the assignment of diverse permissions to distinct users.
+Developers are thus obligated to carefully design assertions based on the numerical values of addresses to ensure the correctness of access control measures.
+
+
 
 \noindent
-\textit{\underline{Flexible Interaction}.} 
-Addresses can also be invoked and execute arbitrary computations. 
-This capability empowers contracts to interact flexibly with other contracts, even if those contracts are deployed by third parties with undisclosed implementations. 
-Consequently, the ecosystem of smart contracts can be incrementally developed in a decentralized manner, with various developers contributing through the deployment of their own contracts. 
-Future developers can effortlessly interact with existing contracts by invoking their functions using addresses. 
-Nonetheless, due to the possibility of adversarial actors developing and deploying their own contracts, curated security checks must be enforced when invoking higher-order functions up on addresses.
+\textit{\underline{Flexible Interaction}.}
+Addresses are also capable of being called upon and conducting arbitrary computations.
+This attribute allows contracts to interact flexibly with other contracts, even if those contracts are deployed by external parties with undisclosed implementations.
+Consequently, the ecosystem of smart contracts can evolve incrementally in a decentralized fashion, with various developers contributing via the deployment of their distinct contracts.
+Subsequent developers can effortlessly interact with pre-existing contracts by invoking their functions using addresses.
+Nevertheless, given the potential existence of adversarial actors creating and deploying their own contracts, thorough security checks must be enforce when invoking higher-order functions upon addresses.
+
+
+
 
 
 
