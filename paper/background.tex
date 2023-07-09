@@ -10,27 +10,27 @@ Thereafter, we discuss the challenges that arise when designing a specification 
 % blockchain in a nutshell (keep it short)
 \paragraph{Ethereum}
 % \textit{Ethereum}~\cite{buterin2014next} is a blockchain platform designed to be more flexible and programmable than its predecessor, \textit{Bitcoin}~\cite{nakamoto2008bitcoin}. 
-Ethereum~\cite{buterin2014next} is a blockchain platform designed to  provide better flexibility and programmability than its precursor, Bitcoin~\cite{nakamoto2008bitcoin}.
+Ethereum~\cite{buterin2014next} is a blockchain platform designed to  provide better flexibility and programmability than its predecessor, Bitcoin~\cite{nakamoto2008bitcoin}.
 There are two types of accounts in the Ethereum blockchain: \textit{Externally Owned Accounts} (EOAs) and \textit{Smart Contracts}. 
-EOAs, controlled by private keys, usually stand for individual users. Meanwhile, smart contracts are self-running programs that enforce agreements without needing a third party. 
+EOAs, controlled by private keys, usually stand for individual users. Meanwhile, smart contracts are self-running programs that enforce agreements without needing a third party.
 Actions on Ethereum are conducted through \textit{Transactions}, mostly involving interactions with smart contracts (e.g., invoking a function of a smart contract).
  
 % Solidity in a nutshell
 \paragraph{Solidity}
 Solidity, a widely used programming language for smart contracts, shares syntax similarities with Java and JavaScript. 
 In Solidity, a contract acts much like a class in Java, and it can contain data fields. 
-The language allows functions with modifiers such as \texttt{external}, implying that a function can be invoked by an EOA or another contract, and \texttt{internal}, indicating that only other functions within the contract can call this function. 
+The language allows functions with modifiers such as \texttt{public}, implying that a function can be invoked by an EOA or another contract, and \texttt{private}, indicating that only other functions within the contract can call this function. 
 Solidity compiler compiles a contract into bytecode.
 When the bytecode is sent to the blockchain, the corresponding contract gets deployed.
 
 % compilation --> deployment --> address --> high-order --> open world (boundry)
 \paragraph{Address}
-Both EOAs and Smart Contracts can be identified by a unique 160-bit address. 
-the address of an EOA comes from its private key, while the one of a smart contract is decided by how the contract is deployed. 
+Both EOAs and smart contracts can be identified by a unique 160-bit address. 
+An EOA's address is derived from its private key, while the address of a smart contract comes from its deployment process.
 
-Addresses in Solidity are not just first-class values but also callable and capable of conducting complex computations. 
-They play a crucial role in Solidity, enabling complex higher-order computations, flexible interactions, and efficient access control for smart contracts. 
-The following example will provide an insight into how addresses are used in Solidity.
+In Solidity, addresses not only exist as first-class values but are also callable entities capable of carrying out complex computations. 
+The importance of addresses is highlighted by their function in supporting sophisticated higher-order computations, enabling flexible interactions, and facilitating efficient access control for smart contracts. \zz{discuss the improtrance of addresses after explaning the example.}
+The following example provides an insight into how addresses are used in Solidity.
 
 \begin{lstlisting}
 interface IERC20 {
