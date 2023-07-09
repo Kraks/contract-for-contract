@@ -3,7 +3,8 @@
 
 % \todo{brief introduction of the Solidity language, why it is complicated}
 
-In this section, we start by briefly introducing the fundamental concepts of blockchain and the Solidity language, emphasizing their key features. 
+In this section, we start by briefly introducing the fundamental concepts of blockchain and the Solidity language.
+%, emphasizing their key features. 
 % we first briefly introduce the background of blockchain and the Solidity language, focusing on their unique features. 
 Thereafter, we discuss the challenges that arise when designing a specification and monitoring system dedicated to Solidity.
 
@@ -11,30 +12,28 @@ Thereafter, we discuss the challenges that arise when designing a specification 
 \paragraph{Ethereum}
 % \textit{Ethereum}~\cite{buterin2014next} is a blockchain platform designed to be more flexible and programmable than its predecessor, \textit{Bitcoin}~\cite{nakamoto2008bitcoin}. 
 Ethereum~\cite{buterin2014next} is a blockchain platform designed to  provide better flexibility and programmability than its predecessor, Bitcoin~\cite{nakamoto2008bitcoin}.
-There are two types of accounts in the Ethereum blockchain: \textit{Externally Owned Accounts} (EOAs) and \textit{Smart Contracts}. 
-EOAs, controlled by private keys, usually stand for individual users. Meanwhile, smart contracts are self-running programs that enforce agreements without needing a third party.
-Actions on Ethereum are conducted through \textit{Transactions}, mostly involving interactions with smart contracts (e.g., invoking a function of a smart contract).
+It accommodates two account types: \textit{Externally Owned Accounts} (EOAs) and \textit{Smart Contracts}. 
+EOAs, controlled by private keys, usually stand for individual users. 
+Meanwhile, smart contracts are self-running programs that enforce agreements without needing a third party.
+Actions on Ethereum are conducted through \textit{Transactions}, primarily involving interactions among EOAs and smart contracts, such as an EOA invoking a function of a smart contract.
  
 % Solidity in a nutshell
 \paragraph{Solidity}
-Solidity, a widely used programming language for smart contracts, shares syntax similarities with Java and JavaScript. 
-In Solidity, a contract acts much like a class in Java, and it can contain data fields. 
-The language allows functions with modifiers such as \texttt{public}, implying that a function can be invoked by an EOA or another contract, and \texttt{private}, indicating that only other functions within the contract can call this function. 
-Solidity compiler compiles a contract into bytecode.
-When the bytecode is sent to the blockchain, the corresponding contract gets deployed.
+Solidity is a widely used programming language for smart contracts.
+It possesses a syntax that shares considerable similarity with those of Java and JavaScript.
+In Solidity, a contract performs in a manner akin to a Java class, possessing the ability to contain persistent data fields and executable functions. 
+% The language enables the use of function modifiers such as \texttt{public}, which denotes that a function can be invoked by an EOA or another contract, and \texttt{private}, which suggests that the function is callable only by functions within the same contract. 
+During the compilation process, a contract transforms into bytecode, which, when transmitted to the blockchain, leads to the deployment of the corresponding contract.
 
 % compilation --> deployment --> address --> high-order --> open world (boundry)
 \paragraph{Address}
 Both EOAs and smart contracts can be identified by a unique 160-bit address. 
-An EOA's address is derived from its private key, while the address of a smart contract comes from its deployment process.
-
-In Solidity, addresses not only exist as first-class values but are also callable entities capable of carrying out complex computations. 
-The importance of addresses is highlighted by their function in supporting sophisticated higher-order computations, enabling flexible interactions, and facilitating efficient access control for smart contracts. \zz{discuss the improtrance of addresses after explaning the example.}
-The following example provides an insight into how addresses are used in Solidity.
-
-\begin{lstlisting}
+% The address of an EOA is computed from its private key, while the address of a smart contract is determined by its deployment procedure. 
+In Solidity, these addresses not only exist as first-class values but are also callable entities capable of carrying out complex computations. 
+The following example provides an insight into how addresses are used in Solidity. 
+\begin{lstlisting}[numbers=right]
 interface IERC20 {
-  function transfer(address to, uint amount) external;
+  function transferFrom(address, address, uint);
 }
 
 contract Vault {
@@ -42,27 +41,49 @@ contract Vault {
   
   constructor() { owner = msg.sender; }
 
-  function deposit(address token, uint amount) {
+  function deposit(address token, uint amount) public {
     require(msg.sender == owner);
     IERC20(token)
       .transferFrom(msg.sender, address(this), amount);
   }
 }
 \end{lstlisting}
+The example begins with the definition of an interface \texttt{IERC20}, specifying a function \texttt{transferFrom} (lines 1-3). 
+% In Solidity, cross-contract calls operate akin to remote procedure calls, where the callee function is dynamically resolved and chosen at the receiver contract's runtime, requiring only the interface rather than the implementation during compilation.
+It is noteworthy that in Solidity, cross-contract calls operate akin to remote procedure calls, where only the interface is required at compile-time.
+% Following this, a smart contract, \texttt{Vault}, is outlined, which includes a data field \texttt{owner} (line 6), a constructor (line 8), and a function \texttt{deposit} (lines 10-14). 
+Subsequently, the \texttt{Vault} smart contract is introduced, comprising an \texttt{owner} data field (line 6), a constructor (line 8), and a function dubbed \texttt{deposit} (lines 10-14). 
+The constructor, triggered during the contract's deployment, assigns the sender's address (\texttt{msg.sender}) to the \texttt{owner} field.
+The \texttt{deposit} function, accepting two arguments, \texttt{token} and \texttt{amount} (line 10), demonstrates a typical using scenario of addresses, where \texttt{token} represents an address of a smart contract deployed by another party, and its implementation is unavailable. 
+The function begins with a \texttt{require} statement at line 11, ensuring the sender is the contract's owner. 
+A higher-order function call, \texttt{transferFrom}, is subsequently invoked on the contract at the address \texttt{token} (lines 12-13).
 
-%TODO
+The above example demonstrates that addresses provide crucial features in Solidity, including:
+  
+\noindent
+\textit{\underline{Access control}.} 
+Addresses, when regarded as first-class values, play a pivotal role in enforcing access control within Solidity. 
+They facilitate the restriction of privileged function invocations and the allocation of diverse permissions to individual users. 
+Developers must carefully construct assertions based on numeric values associated with addresses to ensure the correctness of access control mechanisms.
 
-+ as data 
-+ as function parameter
-+ can call to function that is not implemented in the current contract
+\noindent
+\textit{\underline{Flexible Interaction}.} 
+Addresses can also be invoked and execute arbitrary computations. 
+This capability empowers contracts to interact flexibly with other contracts, even if those contracts are deployed by third parties with undisclosed implementations. 
+Consequently, the ecosystem of smart contracts can be incrementally developed in a decentralized manner, with various developers contributing through the deployment of their own contracts. 
+Future developers can effortlessly interact with existing contracts by invoking their functions using addresses. 
+Nonetheless, due to the possibility of adversarial actors developing and deploying their own contracts, curated security checks must be enforced when invoking higher-order functions up on addresses.
 
-XXX For example, a smart contract can call an external function of another smart contract using the address of the latter.
-As shown above, the function \texttt{f} takes an address as an argument and calls the transfer function of the contract at the given address. 
-Note that \texttt{IERC20} is an interface, which helps the compiler to generate the correct signatures for the function call.
-By doing so, a smart contract can interact with other smart contracts without knowing their implementations.
-It is also noteworthy that it is common to use an address of a smart contract that is deployed by others, which is beyond the control of the current contract. 
-As long as the subject contract implements the interface, the current contract can call its functions.
-Besides, Solidity treats addresses as first-class values, which can be passed as arguments, returned as results, stored in data fields, and so on.
+
+
+
+% XXX For example, a smart contract can call an external function of another smart contract using the address of the latter.
+% As shown above, the function \texttt{f} takes an address as an argument and calls the transfer function of the contract at the given address. 
+% Note that \texttt{IERC20} is an interface, which helps the compiler to generate the correct signatures for the function call.
+% By doing so, a smart contract can interact with other smart contracts without knowing their implementations.
+% It is also noteworthy that it is common to use an address of a smart contract that is deployed by others, which is beyond the control of the current contract. 
+% As long as the subject contract implements the interface, the current contract can call its functions.
+% Besides, Solidity treats addresses as first-class values, which can be passed as arguments, returned as results, stored in data fields, and so on.
 
 
 % + introduce solidity in a nutshell
@@ -74,8 +95,8 @@ Besides, Solidity treats addresses as first-class values, which can be passed as
 % gas --> halting problem
 
 
-address: they are callable and can perform arbitrary computation, but we cannot always
-inspect the computation other than checking the underlying numeric addressing value.
+% address: they are callable and can perform arbitrary computation, but we cannot always
+% inspect the computation other than checking the underlying numeric addressing value.
 
 
 
@@ -84,25 +105,44 @@ inspect the computation other than checking the underlying numeric addressing va
 
 
 \paragraph{Challenges}
-Here we identify some major challenges imposed by the unique features of the
-Solidity language and blockchain computation:
+% Here we identify some major challenges imposed by the unique features of blockchain computation and the Solidity language: 
+The development of a specification and runtime monitoring system for Solidity in the context of blockchain computation poses unique challenges.
+These challenges arise from the distinctive features inherent in this domain:
+
+% \zz{whether it is intuitive to see the challenges from the features?}
 
 \begin{itemize}
-  \item Rich higher-order computation:
-    e.g., address are \emph{opaque first-class values carrying higher-order
-    computation}.
-  \item Distributed execution model:
-    contracts are deployed on the blockchain and invoked remotely by an unknown
-    or adversarial party.
-  \item Open-world assumption:
-    we do not have access and control of all smart contract programs.
-  \item Efficiency requirement:
-    deployed smart contract programs consumes ``gas'' and it is desirable
-    to minimize gas consumption.
+  \item \textit{Rich Higher-order Computation}:
+    % e.g., address are \emph{opaque first-class values carrying higher-order
+    % computation}.
+    Solidity introduces the concept of addresses as \emph{opaque first-class values carrying higher-order computation}. 
+    % This feature poses a challenge when it comes to monitoring and analyzing contract behavior.
+  \item \textit{Distributed Execution Model}:
+    % contracts are deployed on the blockchain and invoked remotely by an unknown
+    % or adversarial party.
+    Contracts deployed on the blockchain are subject to remote invocation by unknown or potentially adversarial parties. 
+    % This decentralized execution model presents challenges in ensuring the security and reliability of contract interactions.
+  \item \textit{Open-world Assumption}:
+    % we do not have access and control of all smart contract programs.
+    The blockchain ecosystem operates under an open-world assumption, where access and control over all smart contract programs are limited. 
+    % This necessitates careful consideration of design choices when developing specification and runtime monitoring systems.
+  \item \textit{Efficiency Requirement}:
+    % deployed smart contract programs consumes ``gas'' and it is desirable
+    % to minimize gas consumption.
+    Deployed smart contract programs consume a finite resource known as ``gas'', making it crucial to optimize gas consumption while maintaining desired functionality. 
+    % Striking a balance between efficiency and comprehensive monitoring poses a significant challenge.
 \end{itemize}
 
-These challenges make it impossible to monitor all communication channels,
-which further demands us exploring different design choices when layering
-a specification and runtime monitoring system for Solidity.
+% These challenges make it impossible to monitor all communication channels,
+% which further demands us exploring different design choices when layering
+% a specification and runtime monitoring system for Solidity.
+Given these challenges, it is clear that attempting to monitor all communication channels within this environment is infeasible. 
+Consequently, the development of specification and runtime monitoring systems for Solidity necessitates the exploration of various design approaches.
+
+
+
+
+
+
 
 
