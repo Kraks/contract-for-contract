@@ -4,44 +4,97 @@ x, f, c ∈ <id>
 
 type := int
       | uint
-      | boolean
+      | bool
       | address
       | mapping (T => T)
-      | struct x { T x; ... }
+      | struct x { <type decl>; ... }
 
-mod := public | private // omitting external and internal
-
-opt_decl := { (<id> : <id>)* }
-
-spec := <id>[<opt_decl>](<id>*) returns (<id>*)
-        requires <expr> ensures <expr> where <spec>*
-
-decl := <type> <id>
-
-fun_def = function f(<decl>*) returns (<type>*) { <stmt>; }
-
-fun := <spec> <fun_def>
-
-con := contract c { <decl>*; <fun>* }
+type decl := <type> <id>
 
 value := int ∪ uint
        | true
        | false
        | <id>'('<value>*')'
 
-opt := '{' (<id> : <expr>)* '}'
+projection = .x | [e]
 
 expr := <id>
       | <value>
       | <expr> op <expr>
-      | <expr>'.'<id>[<opt>]'('<expr>*')'
+      | <expr><proj>+
+      | <expr>{(<id> : <expr>)*}(<expr>*)
 
-s := <stmt>; <stmt>
-   | <expr>
-   | <decl> = <expr>
-   | <id> = <expr>
-   | if (<expr) { <stmt> } else { <stmt> }
-   | return <expr>
+assignable := <type decl>
+            | <id>
+	    | <expr><proj>+
+
+stmt := <type decl>
+      | <expr>
+      | <stmt>; <stmt>
+      | <assignable> = <expr>
+      | return <expr>
+      | revert
+      | if (<expr) { <stmt> } else { <stmt> }
+
+target := <id> | <id>(<id><proj>*).<id>
+
+spec := <target>{(<id>:<id>)*}(<id>*) returns (<id>*)
+        requires <expr> ensures <expr> where <spec>*
+
+mod := public | private // omitting external and internal
+
+fun decl := function <id>(<type decl>*) returns (<type>*)
+
+fun def := <spec> <fun decl> { <stmt> }
+
+contract := contract <id> { <type decl>*; <fun def>* }
+
+interface := interface <id> { <fun decl>* }
+
+//opt_decl := { (<id> : <id>)* }
+//opt := '{' (<id> : <expr>)* '}'
+
+# translation semantics
+
+idea:
+- for a public function 𝑓,
+  1 generate another public function 𝑓_pub that has the same interface.
+    if 𝑓 has spec, then generate checks for its precondition and postcondition
+    * if 𝑓 has a spec for its address arguments,
+      wrap it.
+    * if 𝑓 has a spec for its returned address,
+      unwrap it.
+    * the main body of 𝑓_pub is to call the private version 𝑓_pri
+  2 generate a private function 𝑓_pri that has wrapped interface types
+    * if 𝑓 has a spec for its address arguments,
+      attach spec onto the wrapped argument.
+    * if 𝑓 has a spec for its returned address,
+      attach spec onto the wrapped returned value.
+
+- for a private function 𝑔,
+  only need to do step 2 as for public functions.
+
+- statement/expression
+
+  when wrap/unwrap expression???
+
+- expression wrap
+
+
+
+- type wrap
+
+  wrap : type -> type
+  wrap(int) = int
+  wrap(uint) = uint
+  wrap(bool) = bool
+  wrap(address) = struct { address _addr; uint256 _spec}
+  wrap(T1 ⇒ T2) = (T1 ⇒ wrap(T2))
+  wrap(struct x { T y; ... }) = struct x_wrapped { wrap(T) y; ... }
+
+  + Question: do we need to rename struct type?
+
+- type unwrap
 
 # static semantics
 
@@ -57,7 +110,5 @@ judgment: Γ ⊢ <fun> OK
 -----------------------------------------------------------------
 Γ ⊢ f(𝑥) returns (𝑦) requires pre ensures pos where specs
     function f(𝑤: t1) returns (t2) { body }
-
-# translation semantics
 
 
