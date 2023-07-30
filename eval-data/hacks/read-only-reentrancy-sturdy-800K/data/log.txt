@@ -1,0 +1,14 @@
+original:
+    Total Transactions: 23
+    Total Gas Usage: 39351302
+    Total Gas Usage in USD: 2036.97574735
+
+assertion-fix:
+    Total Transactions: 23
+    Total Gas Usage: 39794551
+    Total Gas Usage in USD: 2058.5980766000002
+
+spec-fix:
+    Total Transactions: 23
+    Total Gas Usage: 39795112
+    Total Gas Usage in USD: 2058.6249445

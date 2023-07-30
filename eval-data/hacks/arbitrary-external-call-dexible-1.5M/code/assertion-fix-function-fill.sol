@@ -44,7 +44,7 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
             SwapTypes.RouterRequest calldata rr = request.routes[i];
             IERC20(rr.routeAmount.token).safeApprove(rr.spender, rr.routeAmount.amount);
             
-            // XXX: patch
+            // XXX: Consol fix
             require(bytes4(rr.routerData[:4]) != bytes4(0x23b872dd));
 
             (bool s, ) = rr.router.call(rr.routerData);
