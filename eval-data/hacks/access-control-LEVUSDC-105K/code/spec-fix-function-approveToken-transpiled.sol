@@ -70,6 +70,9 @@ contract CurveSwap is CurveContractInterface{
         return _approveToken_worker(token, spender, _amount);
     }
 
+    /// @custom:consol
+    /// approveToken(token, spender, _amount) returns (ret)
+    ///     requires spender == QueryAddressProvider(2)
     function _approveToken_worker(address token, address spender, uint _amount) internal returns (bool) {
         IERC20(token).safeApprove(spender, _amount);
         return true;
