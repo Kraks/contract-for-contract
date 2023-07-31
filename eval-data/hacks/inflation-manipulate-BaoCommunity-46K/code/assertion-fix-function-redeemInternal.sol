@@ -546,7 +546,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         // redeemFresh emits redeem-specific logs on errors, so we don't need to
         error = redeemFresh(msg.sender, redeemTokens, 0);
 
-        /// XXX: consol fix
+        // XXX: consol fix
         require(totalSupply > 1000);
 
         return error;
@@ -567,7 +567,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         // redeemFresh emits redeem-specific logs on errors, so we don't need to
         error = redeemFresh(msg.sender, 0, redeemAmount);
 
-        /// XXX: consol fix
+        // XXX: consol fix
         require(totalSupply > 1000);
 
         return error;

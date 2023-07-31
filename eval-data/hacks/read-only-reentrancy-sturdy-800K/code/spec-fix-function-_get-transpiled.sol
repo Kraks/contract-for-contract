@@ -16,9 +16,9 @@ import {Math} from '../dependencies/openzeppelin/contracts/Math.sol';
 contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
   IBalancerStablePool private constant BALWSTETHWETH =
     IBalancerStablePool(0x32296969Ef14EB0c6d29669C550D4a0449130230);
-  /// @custom:consol
-  /// STETH.latestRoundData() returns (roundId, answer, startedAt, updatedAt, answeredInRound)
-  ///   ensures (updatedAt > block.timestamp - 1 days) && (answer > 0)
+  // @custom:consol
+  // STETH.latestRoundData() returns (roundId, answer, startedAt, updatedAt, answeredInRound)
+  //   ensures (updatedAt > block.timestamp - 1 days) && (answer > 0)
   uint256 private immutable STETH = _get_guarded_STETH();
   address private constant BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
 
@@ -48,10 +48,10 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
   /**
    * @dev Get LP Token Price
    */
-  /// @custom:consol
-  /// _get() returns (ret)
-  ///   ensures (ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) && 
-  ///       (ret * 105 / 100 > BALWSTETHWETH.getLatest(1))
+  // @custom:consol
+  // _get() returns (ret)
+  //   ensures (ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) && 
+  //       (ret * 105 / 100 > BALWSTETHWETH.getLatest(1))
   function _get() internal view returns (uint256) {
     (, int256 stETHPrice, , , ) = _IChainlinkAggregator_latestRoundData(STETH);
 

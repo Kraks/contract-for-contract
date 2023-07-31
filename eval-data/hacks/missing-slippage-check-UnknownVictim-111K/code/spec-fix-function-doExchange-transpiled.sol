@@ -198,9 +198,9 @@ contract ExchangeBetweenPools is Ownable{
 
   uint256 public minimum_amount;
 
-  /// @custom:consol
-  /// curve.exchange_underlying(x, y, camount, n)
-  ///   ensures _exchange_underlying_post_condition(camount)
+  // @custom:consol
+  // curve.exchange_underlying(x, y, camount, n)
+  //   ensures _exchange_underlying_post_condition(camount)
   uint256 internal _curve = _get_guarded_curve();
 
   constructor(address _from_bank, address _to_bank, uint256 _min_amount) public{
@@ -265,9 +265,9 @@ contract ExchangeBetweenPools is Ownable{
     }
   }
 
-  /// @custom:consol
-  /// doExchange(amount) public returns (success)
-  ///   requires amount >= minimum_amount && amount <= ERC20TokenBankInterface(from_bank).balance()
+  // @custom:consol
+  // doExchange(amount) public returns (success)
+  //   requires amount >= minimum_amount && amount <= ERC20TokenBankInterface(from_bank).balance()
   function _doExchange_worker(uint256 amount) internal returns(bool){
 
     ERC20TokenBankInterface(from_bank).issue(address(this), amount);

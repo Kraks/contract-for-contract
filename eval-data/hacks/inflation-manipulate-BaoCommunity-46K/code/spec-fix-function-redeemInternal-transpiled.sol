@@ -551,10 +551,10 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
      * @param redeemTokens The number of cTokens to redeem into underlying
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    /// @custom:consol
-    /// redeemInternal(redeemTokens) returns (error)
-    ///     requires accrueInterest() == uint(Error.NO_ERROR)
-    ///     ensures totalSupply > 1000
+    // @custom:consol
+    // redeemInternal(redeemTokens) returns (error)
+    //     requires accrueInterest() == uint(Error.NO_ERROR)
+    //     ensures totalSupply > 1000
     function _redeemInternal_worker(uint redeemTokens) internal returns (uint) {
         // redeemFresh emits redeem-specific logs on errors, so we don't need to
         return redeemFresh(msg.sender, redeemTokens, 0);
@@ -573,10 +573,10 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
      * @param redeemAmount The amount of underlying to receive from redeeming cTokens
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    /// @custom:consol
-    /// redeemUnderlyingInternal(redeemTokens) returns (error)
-    ///     requires accrueInterest() == uint(Error.NO_ERROR)
-    ///     ensures totalSupply > 1000
+    // @custom:consol
+    // redeemUnderlyingInternal(redeemTokens) returns (error)
+    //     requires accrueInterest() == uint(Error.NO_ERROR)
+    //     ensures totalSupply > 1000
     function _redeemUnderlyingInternal_worker(uint redeemAmount) internal nonReentrant returns (uint) {
         // redeemFresh emits redeem-specific logs on errors, so we don't need to
         return redeemFresh(msg.sender, 0, redeemAmount);
