@@ -83,6 +83,7 @@ library SafeMath {
     * @dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
     */
     // @custom:consol { sub(a, b) returns (c) requires { b <= a } }
+    // @custom:consol-diff 1/2
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         return a - b;
     }
@@ -91,6 +92,7 @@ library SafeMath {
     * @dev Adds two numbers, throws on overflow.
     */
     // @custom:consol { add(a, b) returns (c) ensures { c >= a } }
+    // @custom:consol-diff 1/3
     function add(uint256 a, uint256 b) internal pure returns (uint256 c) {
         c = a + b;
         return c;
@@ -474,6 +476,7 @@ contract ERC721 is ERC165, IERC721 {
     * @param tokenId uint256 ID of the token to be transferred
     */
     // @custom:consol { transferFrom(from, to, tokenId) requires { _isApprovedOrOwner(msg.sender, tokenId) && to != address(0) } }
+    // @custom:consol-diff 2/6
     function transferFrom(
         address from,
         address to,
@@ -579,6 +582,7 @@ contract ERC721 is ERC165, IERC721 {
     * @param tokenId uint256 ID of the token to be minted by the msg.sender
     */
     // @custom:consol { _mint(to, tokenId) requires { to != address(0) } }
+    // @custom:consol-diff 1/3
     function _mint(address to, uint256 tokenId) internal {
         _addTokenTo(to, tokenId);
         emit Transfer(address(0), to, tokenId);
@@ -602,6 +606,7 @@ contract ERC721 is ERC165, IERC721 {
     * @param tokenId uint256 ID of the token to be transferred
     */
     // @custom:consol { _clearApproval(owner, tokenId) requires { ownerOf(tokenId) == owner } }
+    // @custom:consol-diff 1/3
     function _clearApproval(address owner, uint256 tokenId) internal {
         if (_tokenApprovals[tokenId] != address(0)) {
             _tokenApprovals[tokenId] = address(0);
@@ -614,6 +619,7 @@ contract ERC721 is ERC165, IERC721 {
     * @param tokenId uint256 ID of the token to be added to the tokens list of the given address
     */
     // @custom:consol { _addTokenTo(to, tokenId) requires { _tokenOwner[tokenId] == address(0) } }
+    // @custom:consol-diff 1/3
     function _addTokenTo(address to, uint256 tokenId) internal {
         _tokenOwner[tokenId] = to;
         _ownedTokensCount[to] = _ownedTokensCount[to].add(1);
@@ -625,6 +631,7 @@ contract ERC721 is ERC165, IERC721 {
     * @param tokenId uint256 ID of the token to be removed from the tokens list of the given address
     */
     // @custom:consol { _removeTokenFrom(from, tokenId) requires { ownerOf(tokenId) == from } }
+    // @custom:consol-diff 1/3
     function _removeTokenFrom(address from, uint256 tokenId) internal {
         _ownedTokensCount[from] = _ownedTokensCount[from].sub(1);
         _tokenOwner[tokenId] = address(0);

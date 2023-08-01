@@ -18,16 +18,16 @@ contract SafeMath {
         return c;
     }
 
-    // @custom:concol { safeSub(a, b) returns (c) requires { b <= a } }
+    // @custom:consol { safeSub(a, b) returns (c) requires { b <= a } }
+    // @custom:consol-diff 1/2
     function safeSub(uint256 a, uint256 b) internal pure returns (uint256) {
-        _assert(b <= a);
         return a - b;
     }
 
-    // @custom:concol { safeAdd(a, b) returns (c) ensures { c >= a && c >= b } }
+    // @custom:consol { safeAdd(a, b) returns (c) ensures { c >= a && c >= b } }
+    // @custom:consol-diff 1/2
     function safeAdd(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
-        _assert(c >= a && c >= b);
         return c;
     }
 
@@ -58,7 +58,8 @@ contract EKT is SafeMath {
     }
 
 
-    // @custom:concol { burn(_value) returns (b) requires { _value > 0 && _value <= _balances[msg.sender] && (_to == address(0) || _balances[_to] + _value >= _balances[_to]) }
+    // @custom:consol { burn(_value) returns (b) requires { _value > 0 && _value <= _balances[msg.sender] && (_to == address(0) || _balances[_to] + _value >= _balances[_to]) }
+    // @custom:consol-diff 3/10
     function transfer(address _to, uint256 _value)  public returns (bool) {
 //        require(_to != address(0));
         if (_to == address(0)) {
@@ -71,10 +72,9 @@ contract EKT is SafeMath {
         }
     }
 
-    // @custom:concol { burn(_value) returns (b) requires { _value > 0 && _value <= _balances[msg.sender] }
+    // @custom:consol { burn(_value) returns (b) requires { _value > 0 && _value <= _balances[msg.sender] }
+    // @custom:consol-diff 2/6
     function burn(uint256 _value) public returns (bool) {
-        require(_balances[msg.sender] >= _value && _value > 0);
-        require(totalSupply >= _value);
         _balances[msg.sender] = safeSub(_balances[msg.sender], _value);
         totalSupply = safeSub(totalSupply, _value);
         emit Burn(msg.sender, _value);

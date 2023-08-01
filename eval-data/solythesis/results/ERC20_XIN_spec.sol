@@ -23,15 +23,15 @@ library SafeMath {
   }
 
   // @custom:consol { sub(a, b) returns (c) requires { b <= a } }
+  // @custom:consol-diff 1/2
   function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-    assert(b <= a);
     return a - b;
   }
 
   // @custom:consol { add(a, b) returns (c) ensures { c >= a } }
+  // @custom:consol-diff 1/3
   function add(uint256 a, uint256 b) internal pure returns (uint256) {
     uint256 c = a + b;
-    assert(c >= a);
     return c;
   }
 }
@@ -79,6 +79,7 @@ contract StandardToken is ERC20 {
    * @param _value The amount to be transferred.
    */
   // @custom:consol { transfer(_to, _value) returns (b) requires { _to != address(0) } }
+  // @custom:consol-diff 1/5
   function transfer(address _to, uint256 _value) public returns (bool) {
     // SafeMath.sub will throw if there is not enough balance.
     balances[msg.sender] = balances[msg.sender].sub(_value);

@@ -18,7 +18,7 @@ contract SafeMath {
         return c;
     }
 
-    // @custom:concol { safeSub(a, b) returns (c) requires { b <= a } }
+    // @custom:consol { safeSub(a, b) returns (c) requires { b <= a } }
     function safeSub(uint256 a, uint256 b) internal pure returns (uint256) {
 	_safeSubPre(a, b);
 	uint256 c = safeSub_original(a, b);
@@ -31,11 +31,10 @@ contract SafeMath {
     function _safeSubPost(uint256 a, uint256 b, uint256 c) private pure {
     }
     function safeSub_original(uint256 a, uint256 b) private pure returns (uint256) {
-        _assert(b <= a);
         return a - b;
     }
 
-    // @custom:concol { safeAdd(a, b) returns (c) ensures { c >= a && c >= b } }
+    // @custom:consol { safeAdd(a, b) returns (c) ensures { c >= a && c >= b } }
     function safeAdd(uint256 a, uint256 b) internal pure returns (uint256) {
 	_safeAddPre(a, b);
 	uint256 c = safeAdd_original(a, b);
@@ -49,7 +48,6 @@ contract SafeMath {
     }
     function safeAdd_original(uint256 a, uint256 b) private pure returns (uint256) {
         uint256 c = a + b;
-        _assert(c >= a && c >= b);
         return c;
     }
 
@@ -80,7 +78,7 @@ contract EKT is SafeMath {
     }
 
 
-    // @custom:concol { burn(_value) returns (b) requires { _value > 0 && _value <= _balances[msg.sender] && (_to == address(0) || _balances[_to] + _value >= _balances[_to]) }
+    // @custom:consol { burn(_value) returns (b) requires { _value > 0 && _value <= _balances[msg.sender] && (_to == address(0) || _balances[_to] + _value >= _balances[_to]) }
     function transfer(address _to, uint256 _value)  public returns (bool) {
 	_transferPre(_to, _value);
 	bool b = transfer_original(_to, _value);
@@ -107,7 +105,7 @@ contract EKT is SafeMath {
         }
     }
 
-    // @custom:concol { burn(_value) returns (b) requires { _value > 0 && _value <= _balances[msg.sender] }
+    // @custom:consol { burn(_value) returns (b) requires { _value > 0 && _value <= _balances[msg.sender] }
     function burn(uint256 _value) public returns (bool) {
 	_burnPre(_value);
 	bool b = burn_original(_value);
@@ -116,12 +114,11 @@ contract EKT is SafeMath {
     }
     function _burnPre(uint256 _value) private {
 	require(_value > 0 && _value <= _balances[msg.sender]);
+        require(totalSupply >= _value);
     }
     function _burnPost(uint256 _value, bool b) private {
     }
     function burn_original(uint256 _value) private returns (bool) {
-        require(_balances[msg.sender] >= _value && _value > 0);
-        require(totalSupply >= _value);
         _balances[msg.sender] = safeSub(_balances[msg.sender], _value);
         totalSupply = safeSub(totalSupply, _value);
         emit Burn(msg.sender, _value);

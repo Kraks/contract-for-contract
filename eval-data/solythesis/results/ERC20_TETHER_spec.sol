@@ -10,6 +10,7 @@ pragma solidity ^0.5.0;
  */
 library SafeMath {
     // @custom:consol { mul(a, b) returns (c) ensures { a == 0 && c == 0 || c / a == b }
+    // @custom:consol-diff 1/5
     function mul(uint256 a, uint256 b) internal pure returns (uint256) {
         if (a == 0) {
             return 0;
@@ -26,14 +27,15 @@ library SafeMath {
     }
 
     // @custom:consol { sub(a, b) returns (c) requires { b <= a } }
+    // @custom:consol-diff 1/2
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         return a - b;
     }
 
     // @custom:consol { add(a, b) returns (c) ensures { c >= a } }
+    // @custom:consol-diff 1/3
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
-        assert(c >= a);
         return c;
     }
 }
@@ -339,8 +341,8 @@ contract TetherToken is Pausable, StandardToken, BlackList {
 
     // Forward ERC20 methods to upgraded contract if this one is deprecated
     // @custom:consol { transfer(_to, _value) requires { !isBlackListed[msg.sender] } }
+    // @custom:consol-diff 1/5
     function transfer(address _to, uint _value) public whenNotPaused {
-        require(!isBlackListed[msg.sender]);
         if (deprecated) {
             return UpgradedStandardToken(upgradedAddress).transferByLegacy(msg.sender, _to, _value);
         } else {

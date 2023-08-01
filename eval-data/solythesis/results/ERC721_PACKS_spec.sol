@@ -193,6 +193,7 @@ contract IERC721Receiver {
 library SafeMath {
     
     // @custom:consol { add(a, b) returns (c) ensures { c >= a } }
+    // @custom:consol-diff 1/3
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
 
@@ -201,6 +202,7 @@ library SafeMath {
 
     
     // @custom:consol { sub(a, b) returns (c) requires { b <= a } }
+    // @custom:consol-diff 1/3
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a - b;
 

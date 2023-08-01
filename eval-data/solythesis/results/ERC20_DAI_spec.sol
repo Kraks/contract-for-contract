@@ -24,10 +24,12 @@ pragma solidity ^0.5.0;
 
 contract DSMath {
     // @custom:consol { add(x, y) returns (z) requires {} ensures { z >= x } }
+    // @custom:consol-diff 1/2
     function add(uint x, uint y) internal pure returns (uint z) {
 	z = x + y;
     }
     // @custom:consol { sub(x, y) returns (z) requires {} ensures { z <= x } }
+    // @custom:consol-diff 1/2
     function sub(uint x, uint y) internal pure returns (uint z) {
 	z = x - y;
     }

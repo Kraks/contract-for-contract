@@ -38,6 +38,7 @@ pragma solidity ^0.5.0;
 library SafeMath {
 
     // @custom:consol { add(a, b) returns (c) ensures { c >= a } }
+    // @custom:consol-diff 1/2
     function add(uint a, uint b) internal pure returns (uint c) {
 
         c = a + b;
@@ -45,6 +46,7 @@ library SafeMath {
     }
 
     // @custom:consol { sub(a, b) returns (c) requires { b <= a } }
+    // @custom:consol-diff 1/2
     function sub(uint a, uint b) internal pure returns (uint c) {
 
         c = a - b;

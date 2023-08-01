@@ -91,6 +91,7 @@ library SafeMath {
     * @dev Multiplies two unsigned integers, reverts on overflow.
     */
     // @custom:consol { mul(a, b) returns (c) ensures { c / a == b } }
+    // @custom:consol-diff 1/5
     function mul(uint256 a, uint256 b) internal pure returns (uint256) {
         // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
         // benefit is lost if 'b' is also tested.
@@ -108,6 +109,7 @@ library SafeMath {
     * @dev Integer division of two unsigned integers truncating the quotient, reverts on division by zero.
     */
     // @custom:consol { div(a, b) returns (c) requires { b > 0 } }
+    // @custom:consol-diff 1/3
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
         // Solidity only automatically asserts when dividing by 0
         uint256 c = a / b;
@@ -120,6 +122,7 @@ library SafeMath {
     * @dev Subtracts two unsigned integers, reverts on overflow (i.e. if subtrahend is greater than minuend).
     */
     // @custom:consol { sub(a, b) returns (c) requires { b <= a } }
+    // @custom:consol-diff 1/3
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a - b;
 
@@ -130,6 +133,7 @@ library SafeMath {
     * @dev Adds two unsigned integers, reverts on overflow.
     */
     // @custom:consol { add(a, b) returns (c) ensures { c >= a } }
+    // @custom:consol-diff 1/3
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
 
@@ -141,6 +145,7 @@ library SafeMath {
     * reverts when dividing by zero.
     */
     // @custom:consol { mod(a, b) returns (c) requires { b != 0 } }
+    // @custom:consol-diff 1/2
     function mod(uint256 a, uint256 b) internal pure returns (uint256) {
         return a % b;
     }
@@ -216,6 +221,7 @@ contract ERC165 is IERC165 {
      * @dev internal method for registering an interface
      */
     // @custom:consol { registerInterface(interfaceId) requires { interfaceId != 0xffffffff } }
+    // @custom:consol-diff 1/2
     function _registerInterface(bytes4 interfaceId) internal {
         _supportedInterfaces[interfaceId] = true;
     }
@@ -279,6 +285,7 @@ contract ERC721 is ERC165, IERC721 {
      * @return uint256 representing the amount owned by the passed address
      */
     // @custom:consol { balanceOf(owner) returns (c) requires { owner != address(0) } }
+    // @custom:consol-diff 1/2
     function balanceOf(address owner) public view returns (uint256) {
         return _ownedTokensCount[owner];
     }
@@ -289,6 +296,7 @@ contract ERC721 is ERC165, IERC721 {
      * @return owner address currently marked as the owner of the given token ID
      */
     // @custom:consol { ownerOf(tokenId) returns (owner) ensures { owner != address(0) } }
+    // @custom:consol-diff 1/3
     function ownerOf(uint256 tokenId) public view returns (address) {
         address owner = _tokenOwner[tokenId];
         return owner;
@@ -303,6 +311,7 @@ contract ERC721 is ERC165, IERC721 {
      * @param tokenId uint256 ID of the token to be approved
      */
     // @custom:consol { approve(to, tokenId) requires { ownerOf(tokenId) != to && (msg.sender == ownerOf(tokenId) || isApprovedForAll(ownerOf(tokenId), msg.sender)) } }
+    // @custom:consol-diff 2/5
     function approve(address to, uint256 tokenId) public {
         address owner = ownerOf(tokenId);
 
@@ -317,6 +326,7 @@ contract ERC721 is ERC165, IERC721 {
      * @return address currently approved for the given token ID
      */
     // @custom:consol { getApproved(tokenId) returns (approved) requires { _exists(tokenId) } }
+    // @custom:consol-diff 1/2
     function getApproved(uint256 tokenId) public view returns (address) {
         return _tokenApprovals[tokenId];
     }
@@ -328,6 +338,7 @@ contract ERC721 is ERC165, IERC721 {
      * @param approved representing the status of the approval to be set
      */
     // @custom:consol { setApprovalForAll(to, approved) requires { to != msg.sender } }
+    // @custom:consol-diff 1/3
     function setApprovalForAll(address to, bool approved) public {
         _operatorApprovals[msg.sender][to] = approved;
         emit ApprovalForAll(msg.sender, to, approved);
@@ -352,6 +363,7 @@ contract ERC721 is ERC165, IERC721 {
      * @param tokenId uint256 ID of the token to be transferred
     */
     // @custom:consol { transferFrom(from, to, tokenId) requires { _isApprovedOrOwner(msg.sender, tokenId) } }
+    // @custom:consol-diff 1/2
     function transferFrom(address from, address to, uint256 tokenId) public {
         _transferFrom(from, to, tokenId);
     }
@@ -418,6 +430,7 @@ contract ERC721 is ERC165, IERC721 {
      * @param tokenId uint256 ID of the token to be minted
      */
     // @custom:consol { _mint(to, tokenId) requires { to != address(0) && !_exists(tokenId) } }
+    // @custom:consol-diff 2/5
     function _mint(address to, uint256 tokenId) internal {
         _tokenOwner[tokenId] = to;
         _ownedTokensCount[to] = _ownedTokensCount[to].add(1);
@@ -433,6 +446,7 @@ contract ERC721 is ERC165, IERC721 {
      * @param tokenId uint256 ID of the token being burned
      */
     // @custom:consol { _burn(owner, tokenId) requires { ownerOf(tokenId) == owner } }
+    // @custom:consol-diff 1/5
     function _burn(address owner, uint256 tokenId) internal {
         _clearApproval(tokenId);
 
@@ -459,6 +473,7 @@ contract ERC721 is ERC165, IERC721 {
      * @param tokenId uint256 ID of the token to be transferred
     */
     // @custom:consol { _transferFrom(from, to, tokenId) requires { ownerOf(tokenId) == from && to != address(0) } }
+    // @custom:consol-diff 2/6
     function _transferFrom(address from, address to, uint256 tokenId) internal {
 
         _clearApproval(tokenId);
@@ -564,6 +579,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
      * @return uint256 token ID at the given index of the tokens list owned by the requested address
      */
     // @custom:consol { tokenOfOwnerByIndex(owner, index) returns (tokenId) requires { index < balanceOf(owner) } }
+    // @custom:consol-diff 1/2
     function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256) {
         return _ownedTokens[owner][index];
     }
@@ -583,6 +599,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
      * @return uint256 token ID at the given index of the tokens list
      */
     // @custom:consol { tokenByIndex(index) requires { index < totalSupply() } }
+    // @custom:consol-diff 1/2
     function tokenByIndex(uint256 index) public view returns (uint256) {
         return _allTokens[index];
     }
@@ -790,6 +807,7 @@ contract ERC721Metadata is ERC165, ERC721, IERC721Metadata {
      * @param tokenId uint256 ID of the token to query
      */
     // @custom:consol { tokenURI(tokenId) returns (uri) requires { _exists(tokenId) } }
+    // @custom:consol-diff 1/2
     function tokenURI(uint256 tokenId) external view returns (string memory) {
         return _tokenURIs[tokenId];
     }
@@ -801,6 +819,7 @@ contract ERC721Metadata is ERC165, ERC721, IERC721Metadata {
      * @param uri string URI to assign
      */
     // @custom:consol { _setTokenURI(tokenId, uri) requires { _exists(tokenId) } }
+    // @custom:consol-diff 1/2
     function _setTokenURI(uint256 tokenId, string memory uri) internal {
         _tokenURIs[tokenId] = uri;
     }
@@ -858,6 +877,7 @@ library Roles {
      * @dev give an account access to this role
      */
     // @custom:consol { add(role, account) requires { account != address(0) && !has(role, account) }
+    // @custom:consol-diff 2/3
     function add(Role storage role, address account) internal {
 
         role.bearer[account] = true;
@@ -867,6 +887,7 @@ library Roles {
      * @dev remove an account's access to this role
      */
     // @custom:consol { remove(role, account) requires { account != address(0) && has(role, account) }
+    // @custom:consol-diff 2/3
     function remove(Role storage role, address account) internal {
         role.bearer[account] = false;
     }
@@ -876,6 +897,7 @@ library Roles {
      * @return bool
      */
     // @custom:consol { has(role, account) returns (bool) requires { account != address(0) } }
+    // @custom:consol-diff 1/2
     function has(Role storage role, address account) internal view returns (bool) {
         return role.bearer[account];
     }
@@ -990,6 +1012,7 @@ contract ERC721Burnable is ERC721 {
      * @param tokenId uint256 id of the ERC721 token to be burned.
      */
     // @custom:consol { burn(tokenId) requires { _isApprovedOrOwner(msg.sender, tokenId) } }
+    // @custom:consol-diff 1/2
     function burn(uint256 tokenId) public {
         _burn(tokenId);
     }
@@ -1064,6 +1087,7 @@ contract Ownable {
      * @param newOwner The address to transfer ownership to.
      */
     // @custom:consol { transferOwnership(newOwner) requires { newOwner != address(0) } }
+    // @custom:consol-diff 1/3
     function _transferOwnership(address newOwner) internal {
         emit OwnershipTransferred(_owner, newOwner);
         _owner = newOwner;

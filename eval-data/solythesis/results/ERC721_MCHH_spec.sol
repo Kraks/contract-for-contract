@@ -195,6 +195,7 @@ library SafeMath {
   * @dev Subtracts two numbers, reverts on overflow (i.e. if subtrahend is greater than minuend).
   */
   // @custom:consol { sub(a, b) returns (c) requires { b <= a } }
+  // @custom:consol-diff 1/3
   function sub(uint256 a, uint256 b) internal pure returns (uint256) {
     uint256 c = a - b;
 
@@ -205,6 +206,7 @@ library SafeMath {
   * @dev Adds two numbers, reverts on overflow.
   */
   // @custom:consol { add(a, b) returns (c) ensures { c >= a } }
+  // @custom:consol-diff 1/3
   function add(uint256 a, uint256 b) internal pure returns (uint256) {
     uint256 c = a + b;
 
