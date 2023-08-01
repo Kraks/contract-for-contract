@@ -9,9 +9,10 @@ pragma solidity ^0.5.0;
  * @dev Math operations with safety checks that throw on error
  */
 library SafeMath {
+  // @custom:consol { mul(a, b) returns (c) ensures { a == 0 || c / a == b } }
+  // @custom:consol-diff 1/3
   function mul(uint256 a, uint256 b) internal pure returns (uint256) {
     uint256 c = a * b;
-    assert(a == 0 || c / a == b);
     return c;
   }
 
@@ -22,14 +23,16 @@ library SafeMath {
     return c;
   }
 
+  // @custom:consol { sub(a, b) returns (c) requires { b <= a } }
+  // @custom:consol-diff 1/2
   function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-    assert(b <= a);
     return a - b;
   }
 
+  // @custom:consol { add(a, b) returns (c) ensures { c >= a }
+  // @custom:consol-diff 1/3
   function add(uint256 a, uint256 b) internal pure returns (uint256) {
     uint256 c = a + b;
-    assert(c >= a);
     return c;
   }
 }
@@ -57,8 +60,9 @@ contract BasicToken is ERC20Basic {
   * @dev transfer token for a specified address
   * @param _to The address to transfer to.
   * @param _value The amount to be transferred.
-  * @custom:consol { transfer(_to, _value) returns (b) requires { _to != address(0) && _value > 0 && _value <= balances[msg.sender] } }
   */
+  // @custom:consol { transfer(_to, _value) returns (b) requires { _to != address(0) && _value > 0 && _value <= balances[msg.sender] } }
+  // @custom:consol-diff 3/7
   function transfer(address _to, uint256 _value) public returns (bool) {
     // SafeMath.sub will throw if there is not enough balance.
     balances[msg.sender] = balances[msg.sender].sub(_value);
@@ -103,8 +107,9 @@ contract StandardToken is ERC20, BasicToken {
    * @param _from address The address which you want to send tokens from
    * @param _to address The address which you want to transfer to
    * @param _value uint256 the amount of tokens to be transferred
-   * @custom:consol { transferFrom(_from, _to, _value) returns (b) requires { _to != address(0) && _value > 0 && _value <= balances[_from] && _value <= allowed[_from][msg.sender] } }
    */
+   // @custom:consol { transferFrom(_from, _to, _value) returns (b) requires { _to != address(0) && _value > 0 && _value <= balances[_from] && _value <= allowed[_from][msg.sender] } }
+    // @custom:consol-diff 4/9
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
     balances[_from] = balances[_from].sub(_value);
     balances[_to] = balances[_to].add(_value);
@@ -174,7 +179,8 @@ contract Ownable {
    * @dev Allows the current owner to transfer control of the contract to a newOwner.
    * @param newOwner The address to transfer ownership to.
    */
-  /// @custom:consol { transferOwnership(newOwner) requires { newOwner != address(0) } }
+  // @custom:consol { transferOwnership(newOwner) requires { newOwner != address(0) } }
+  // @custom:consol-diff 1/3
   function transferOwnership(address newOwner) onlyOwner public {
     emit OwnershipTransferred(owner, newOwner);
     owner = newOwner;
@@ -246,7 +252,8 @@ contract PausableToken is StandardToken, Pausable {
     return super.approve(_spender, _value);
   }
   
-  /// @custom:consol { batchTransfer(_receivers, _value) returns (b) requires { _receivers.length > 0 && _receivers.length <= 20 && _value > 0 && balances[msg.sender] >= uint256(cnt) * _value } }
+  // @custom:consol { batchTransfer(_receivers, _value) returns (b) requires { _receivers.length > 0 && _receivers.length <= 20 && _value > 0 && balances[msg.sender] >= uint256(cnt) * _value } }
+  // @custom:consol-diff 4/11
   function batchTransfer(address[] memory _receivers, uint256 _value) public whenNotPaused returns (bool) {
     uint cnt = _receivers.length;
     uint256 amount = uint256(cnt) * _value;

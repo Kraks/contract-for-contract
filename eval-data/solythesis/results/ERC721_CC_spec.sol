@@ -40,6 +40,7 @@ library SafeMath {
   * @dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
   */
   // @custom:consol { sub(a, b) returns (c) requires { b <= a } }
+  // @custom:consol-diff 1/2
   function sub(uint256 a, uint256 b) internal pure returns (uint256) {
     return a - b;
   }
@@ -48,6 +49,7 @@ library SafeMath {
   * @dev Adds two numbers, throws on overflow.
   */
   // @custom:consol { add(a, b) returns (c) ensures { c >= a } }
+  // @custom:consol-diff 1/3
   function add(uint256 a, uint256 b) internal pure returns (uint256 c) {
     c = a + b;
     return c;
@@ -400,6 +402,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
    * @param _tokenId uint256 ID of the token to be transferred
   */
   // @custom:consol { transferFrom(_from, _to, _tokenId) requires { _from != address(0) && _to != address(0) } }
+  // @custom:consol-diff 2/6
   function transferFrom(
     address _from,
     address _to,
@@ -499,6 +502,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
    * @param _tokenId uint256 ID of the token to be minted by the msg.sender
    */
   // @custom:consol { _mitn(_to, _tokenId) requires { _to != address(0) } }
+  // @custom:consol-diff 1/3
   function _mint(address _to, uint256 _tokenId) internal {
     addTokenTo(_to, _tokenId);
     emit Transfer(address(0), _to, _tokenId);
@@ -522,6 +526,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
    * @param _tokenId uint256 ID of the token to be transferred
    */
   // @custom:consol { _clearApproval(_owner, _tokenId) requires { ownerOf(_tokenId) == _owner } }
+  // @custom:consol-diff 1/3
   function clearApproval(address _owner, uint256 _tokenId) internal {
     if (tokenApprovals[_tokenId] != address(0)) {
       tokenApprovals[_tokenId] = address(0);
@@ -534,6 +539,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
    * @param _tokenId uint256 ID of the token to be added to the tokens list of the given address
    */
   // @custom:consol { _addTokenTo(_to, _tokenId) requires { tokenOwner[_tokenId] == address(0) } }
+  // @custom:consol-diff 1/3
   function addTokenTo(address _to, uint256 _tokenId) internal {
     tokenOwner[_tokenId] = _to;
     ownedTokensCount[_to] = ownedTokensCount[_to].add(1);
@@ -545,6 +551,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
    * @param _tokenId uint256 ID of the token to be removed from the tokens list of the given address
    */
   // @custom:consol { _removTokenFrom(_from, _tokenId) requires { ownerOf(_tokenId) == _from } }
+  // @custom:consol-diff 1/3
   function removeTokenFrom(address _from, uint256 _tokenId) internal {
     ownedTokensCount[_from] = ownedTokensCount[_from].sub(1);
     tokenOwner[_tokenId] = address(0);

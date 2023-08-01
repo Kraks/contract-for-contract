@@ -20,11 +20,13 @@ library SafeMath256 {
     }
 
     // @custom:consol { sub(a, b) returns (c) requires { b <= a } }
+    // @custom:consol-diff 1/2
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         return a - b;
     }
 
     // @custom:consol { add(a, b) returns (c) ensures { c >= a }
+    // @custom:consol-diff 1/3
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
         return c;
@@ -249,6 +251,7 @@ contract ERC721BasicToken is ERC721Basic, Upgradable {
     }
 
     // @custom:consol { transferFrom(_from, _to, _tokenId) requires { isApprovedOrOwner(msg.sender, _tokenId) && _from != address(0) && _to != address(0) } }
+    // @custom:consol 3/7
     function transferFrom(address _from, address _to, uint256 _tokenId) public {
         clearApproval(_from, _tokenId);
         removeTokenFrom(_from, _tokenId);
@@ -281,6 +284,7 @@ contract ERC721BasicToken is ERC721Basic, Upgradable {
     }
 
     // @custom:consol { _mint(_to, _tokenId) requires { _to != address(0) } }
+    // @custom:consol-diff 1/3
     function _mint(address _to, uint256 _tokenId) internal {
         addTokenTo(_to, _tokenId);
         emit Transfer(address(0), _to, _tokenId);
@@ -293,6 +297,7 @@ contract ERC721BasicToken is ERC721Basic, Upgradable {
     }
 
     // @custom:consol { _checkAndCallSafeTransfer(_from, _to, _tokenId, _data) requires { ownerOf[_tokenId] == _owner } }
+    // @custom:consol-diff 1/4
     function clearApproval(address _owner, uint256 _tokenId) internal {
         if (tokenApprovals[_tokenId] != address(0)) {
             tokenApprovals[_tokenId] = address(0);
@@ -301,12 +306,14 @@ contract ERC721BasicToken is ERC721Basic, Upgradable {
     }
 
     // @custom:consol { addTokenTo(_to, _tokenId) requires { tokenOwner[_tokenId] == address(0) } }
+    // @custom:consol-diff 1/3
     function addTokenTo(address _to, uint256 _tokenId) internal {
         tokenOwner[_tokenId] = _to;
         ownedTokensCount[_to] = ownedTokensCount[_to].add(1);
     }
 
     // @custom:consol { removeTokenFrom(_from, _tokenId) requires { ownerOf(_tokenId) == _from && ownedTokensCount[_from] > 0 } }
+    // @custom:consol-diff 2/4
     function removeTokenFrom(address _from, uint256 _tokenId) internal {
         ownedTokensCount[_from] = ownedTokensCount[_from].sub(1);
         tokenOwner[_tokenId] = address(0);

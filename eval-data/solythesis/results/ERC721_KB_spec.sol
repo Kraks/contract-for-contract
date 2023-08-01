@@ -122,6 +122,7 @@ library SafeMath {
     * @dev Subtracts two unsigned integers, reverts on overflow (i.e. if subtrahend is greater than minuend).
     */
     // @custom:consol { sub(a, b) returns (c) requires { b <= a } }
+    // @custom:consol-diff 1/3
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a - b;
 
@@ -132,6 +133,7 @@ library SafeMath {
     * @dev Adds two unsigned integers, reverts on overflow.
     */
     // @custom:consol { add(a, b) returns (c) ensures { c >= a }
+    // @custom:consol-diff 1/3
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
 
@@ -355,6 +357,7 @@ contract ERC721 is ERC165, IERC721 {
      * @param tokenId uint256 ID of the token to be transferred
     */
     // @custom:consol { transferFrom(from, to, tokenId) requires { _isApprovedOrOwner(msg.sender, tokenId) } }
+    // @custom:consol-diff 1/2
     function transferFrom(address from, address to, uint256 tokenId) public {
         _transferFrom(from, to, tokenId);
     }
@@ -421,6 +424,7 @@ contract ERC721 is ERC165, IERC721 {
      * @param tokenId uint256 ID of the token to be minted
      */
     // @custom:consol { _mint(to, tokenId) requires { to != address(0) && !_exists(tokenId) } }
+    // @custom:consol-diff 2/5
     function _mint(address to, uint256 tokenId) internal {
 
         _tokenOwner[tokenId] = to;
@@ -464,6 +468,7 @@ contract ERC721 is ERC165, IERC721 {
      * @param tokenId uint256 ID of the token to be transferred
     */
     // @custom:consol { _transferFrom(from, to, tokenId) requires { ownerOf(tokenId) == from && to != address(0) } }
+    // @custom:consol-diff 2/7
     function _transferFrom(address from, address to, uint256 tokenId) internal {
         _clearApproval(tokenId);
 

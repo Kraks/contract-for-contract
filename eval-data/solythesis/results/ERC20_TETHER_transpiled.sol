@@ -66,7 +66,6 @@ library SafeMath {
     }
     function add_original(uint256 a, uint256 b) private pure returns (uint256) {
         uint256 c = a + b;
-        assert(c >= a);
         return c;
     }
 }

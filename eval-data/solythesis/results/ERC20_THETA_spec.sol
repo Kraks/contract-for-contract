@@ -27,11 +27,13 @@ library SafeMath {
   }
 
   // @custom:consol { sub(a, b) returns (c) requires { b <= a } }
+  // @custom:consol-diff 1/2
   function sub(uint a, uint b) internal pure returns (uint) {
     return a - b;
   }
 
   // @custom:consol { add(a, b) returns (c) ensures { c >= a } }
+  // @custom:consol-diff 1/3
   function add(uint a, uint b) internal pure returns (uint) {
     uint c = a + b;
     return c;
@@ -158,6 +160,7 @@ contract ThetaToken is StandardToken, Controlled {
     }
 
     // @custom:consol { transfer(_to, _value) returns (b) requires {balances[msg.sender] >= _value && _value > 0 } }
+    // @custom:consol-diff 2/6
     function transfer(address _to, uint _value) public returns (bool success) {
         balances[msg.sender] = balances[msg.sender].sub(_value);
         balances[_to] = balances[_to].add(_value);

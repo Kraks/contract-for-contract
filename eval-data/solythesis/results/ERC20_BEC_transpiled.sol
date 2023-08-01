@@ -9,9 +9,20 @@ pragma solidity ^0.5.0;
  * @dev Math operations with safety checks that throw on error
  */
 library SafeMath {
+  // @custom:consol { mul(a, b) returns (c) ensures { a == 0 || c / a == b } }
   function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+    _mulPre(a, b);
+    uint256 c = mul_original(a, b);
+    _mulPost(a, b, c);
+    return c;
+  }
+  function _mulPre(uint256 a, uint256 b) private pure {
+  }
+  function _mulPost(uint256 a, uint256 b, uint256 c) private pure {
+    require(a == 0 || c / a == b);
+  }
+  function mul_original(uint256 a, uint256 b) private pure returns (uint256) {
     uint256 c = a * b;
-    assert(a == 0 || c / a == b);
     return c;
   }
 
@@ -22,14 +33,36 @@ library SafeMath {
     return c;
   }
 
+  // @custom:consol { sub(a, b) returns (c) requires { b <= a } }
   function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-    assert(b <= a);
+    _subPre(a, b);
+    uint256 c = sub_original(a, b);
+    _subPost(a, b, c);
+    return c;
+  }
+  function _subPre(uint256 a, uint256 b) private pure {
+    require(b <= a);
+  }
+  function _subPost(uint256 a, uint256 b, uint256 c) private pure {
+  }
+  function sub_original(uint256 a, uint256 b) private pure returns (uint256) {
     return a - b;
   }
 
+  // @custom:consol { add(a, b) returns (c) ensures { c >= a }
   function add(uint256 a, uint256 b) internal pure returns (uint256) {
+    _addPre(a, b);
+    uint256 c = add_original(a, b);
+    _addPost(a, b, c);
+    return c;
+  }
+  function _addPre(uint256 a, uint256 b) private pure {
+  }
+  function _addPost(uint256 a, uint256 b, uint256 c) private pure {
+    require(c >= a);
+  }
+  function add_original(uint256 a, uint256 b) private pure returns (uint256) {
     uint256 c = a + b;
-    assert(c >= a);
     return c;
   }
 }
