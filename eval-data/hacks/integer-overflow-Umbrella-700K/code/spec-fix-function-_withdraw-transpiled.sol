@@ -255,23 +255,23 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
 	/// @param amount tokens to withdraw
     /// @param user address
     /// @param recipient address, where to send tokens, if we migrating token address can be zero
-    function _withdraw(uint256 amount, address user, address recipient) internal nonReentrant updateReward(user) {
+    function _withdraw(uint256 amount, address user, address recipient) internal {
         __withdraw_guard(amount, user, recipient);
     }
 
     function __withdraw_guard(uint256 amount, address user, address recipient) private {
-        require(__withdraw_pre_condition(amount, user, recipient));
-        _withdraw_worker(amount, user, recipient);
+        __withdraw_pre(amount, user, recipient);
+        __withdraw_worker(amount, user, recipient);
     }
 
-    function __withdraw_pre_condition(uint256 amount, address user, address recipient) private returns (bool) {
-        return _balances[user] >= amount && amount != 0;
+    function __withdraw_pre(uint256 amount, address user, address recipient) private {
+        if (!(_balances[user] >= amount && amount != 0)) revert();
     }
 
-    // @custom:consol
-    // _withdraw(amount, user, recipient) returns ()
-    //      requires _balances[user] >= amount && amount != 0
-    function _withdraw_worker(uint256 amount, address user, address recipient) private {
+    /// @custom:consol
+    /// _withdraw(amount, user, recipient) 
+    ///      requires _balances[user] >= amount && amount != 0
+    function __withdraw_worker(uint256 amount, address user, address recipient) private nonReentrant updateReward(user) {
         // not using safe math, because there is no way to overflow if stake tokens not overflow
         _totalSupply = _totalSupply - amount;
         _balances[user] = _balances[user] - amount;

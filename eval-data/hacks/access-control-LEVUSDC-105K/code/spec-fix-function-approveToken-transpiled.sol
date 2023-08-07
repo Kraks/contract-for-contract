@@ -58,22 +58,22 @@ contract CurveSwap is CurveContractInterface{
     }
 
     function approveToken(address token, address spender, uint _amount) external returns (bool) {
-        return _approveToken_worker(token, spender, _amount);
+        return _approveToken_guard(token, spender, _amount);
     }
 
-    function _approveToken_pre_condition(address token, address spender, uint _amount) internal view returns (bool) {
-        return spender == QueryAddressProvider(2);
-    }
-
-    function _approveToken_guard(address token, address spender, uint _amount) internal returns (bool) {
-        require(_approveToken_pre_condition(token, spender, _amount));
-        return _approveToken_worker(token, spender, _amount);
+    function _approveToken_pre(address token, address spender, uint _amount) private view {
+        if (spender == QueryAddressProvider(2)) revert();
     }
 
     /// @custom:consol
     /// approveToken(token, spender, _amount) returns (ret)
     ///     requires spender == QueryAddressProvider(2)
-    function _approveToken_worker(address token, address spender, uint _amount) internal returns (bool) {
+    function _approveToken_guard(address token, address spender, uint _amount) private returns (bool) {
+        _approveToken_pre(token, spender, _amount);
+        return _approveToken_worker(token, spender, _amount);
+    }
+
+    function _approveToken_worker(address token, address spender, uint _amount) private returns (bool) {
         IERC20(token).safeApprove(spender, _amount);
         return true;
     }

@@ -348,23 +348,6 @@ contract RouteProcessor2 {
     return true;
   }
 
-  function uniswapV3SwapCallback(
-    int256 amount0Delta,
-    int256 amount1Delta,
-    bytes calldata data
-  ) external {
-      _uniswapV3SwapCallback_guard(amount0Delta, amount1Delta, data);
-  }
-
-  function _uniswapV3SwapCallback_guard(
-    int256 amount0Delta,
-    int256 amount1Delta,
-    bytes calldata data
-  ) internal {
-      require(_uniswapV3SwapCallback_pre_condition(amount0Delta, amount1Delta, data));
-      _uniswapV3SwapCallback_worker(amount0Delta, amount1Delta, data);
-  }
-
   /// @notice Called to `msg.sender` after executing a swap via IUniswapV3Pool#swap.
   /// @dev In the implementation you must pay the pool tokens owed for the swap.
   /// The caller of this method must be checked to be a UniswapV3Pool deployed by the canonical UniswapV3Factory.
@@ -374,14 +357,35 @@ contract RouteProcessor2 {
   /// @param amount1Delta The amount of token1 that was sent (negative) or must be received (positive) by the pool by
   /// the end of the swap. If positive, the callback must send that amount of token1 to the pool.
   /// @param data Any data passed through by the caller via the IUniswapV3PoolActions#swap call
-  // @custom:consol
-  // uniswapV3SwapCallback(amount0Delta, amount1Delta, data) returns ()
-  //    requires _uniswapV3SwapCallback_pre_condition(amount0Delta, amount1Delta, data)
+  /// @custom:consol
+  function uniswapV3SwapCallback(
+    int256 amount0Delta,
+    int256 amount1Delta,
+    bytes calldata data
+  ) external {
+      _uniswapV3SwapCallback_guard(amount0Delta, amount1Delta, data);
+  }
+
+  /// uniswapV3SwapCallback(amount0Delta, amount1Delta, data) returns ()
+  ///    requires _uniswapV3SwapCallback_pre_condition(amount0Delta, amount1Delta, data)
+  function _uniswapV3SwapCallback_guard(
+    int256 amount0Delta,
+    int256 amount1Delta,
+    bytes calldata data
+  ) private {
+      _uniswapV3SwapCallback_pre(amount0Delta, amount1Delta, data);
+      _uniswapV3SwapCallback_worker(amount0Delta, amount1Delta, data);
+  }
+
+  function _uniswapV3SwapCallback_pre(int256 amount0Delta, int256 amount1Delta, bytes calldata data) private {
+      if (!_uniswapV3SwapCallback_pre_condition(amount0Delta, amount1Delta, data)) revert();
+  }
+
   function _uniswapV3SwapCallback_worker(
     int256 amount0Delta,
     int256 amount1Delta,
     bytes calldata data
-  ) internal {
+  ) private {
     lastCalledPool = IMPOSSIBLE_POOL_ADDRESS;
     (address tokenIn, address from) = abi.decode(data, (address, address));
     int256 amount = amount0Delta > 0 ? amount0Delta : amount1Delta;

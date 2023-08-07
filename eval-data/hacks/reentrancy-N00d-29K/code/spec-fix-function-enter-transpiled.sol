@@ -6,20 +6,24 @@ contract SushiBar is ERC20("n00d with X", "Xn00d"){
         sushi = _sushi;
     }
 
-    function _enter_post_condition(uint256 _amount) internal returns (bool) {
-        return totalSupply() <= sushi.balanceOf(address(this));
-    }
-
-    function _enter_guard(uint256 _amount) internal {
-        _enter_worker(_amount);
-        require(_enter_post_condition(_amount));
-    }
-
     // Enter the bar. Pay some SUSHIs. Earn some shares.
-    // @custom:consol
-    // function enter(_amount) returns ()
-    //   ensures totalSupply() <= sushi.balanceOf(address(this))
-    function _enter_worker(uint256 _amount) internal {
+    function enter(uint256 _amount) external {
+        _enter_guard(_amount);
+    }
+
+    /// @custom:consol
+    /// function enter(_amount) 
+    ///   ensures totalSupply() <= sushi.balanceOf(address(this))
+    function _enter_guard(uint256 _amount) private {
+        _enter_worker(_amount);
+        _enter_post(_amount);
+    }
+
+    function _enter_post(uint256 _amount) private {
+        if (!(totalSupply() <= sushi.balanceOf(address(this)))) revert();
+    }
+
+    function _enter_worker(uint256 _amount) private {
         uint256 totalSushi = sushi.balanceOf(address(this));
         uint256 totalShares = totalSupply();
         if (totalShares == 0 || totalSushi == 0) {
@@ -31,28 +35,27 @@ contract SushiBar is ERC20("n00d with X", "Xn00d"){
         sushi.transferFrom(msg.sender, address(this), _amount);
     }
 
-    function enter(uint256 _amount) external {
-        _enter_guard(_amount);
-    }
-
-    function _leave_guard(uint256 _amount) internal {
-        _leave_worker(_amount);
-        require(_enter_post_condition(_amount));
-    }
-
     // Leave the bar. Claim back your SUSHIs.
-    // function leave(_share) returns ()
-    //   ensures totalSupply() <= sushi.balanceOf(address(this))
-    function _leave_worker(uint256 _share) internal {
+    function leave(uint256 _amount) external {
+        _leave_guard(_amount);
+    }
+
+    /// @custom:consol
+    /// function leave(_share) 
+    ///   ensures totalSupply() <= sushi.balanceOf(address(this))
+    function _leave_guard(uint256 _amount) private {
+        _leave_worker(_amount);
+        _leave_post(_amount);
+    }
+
+    function _leave_post(uint256 _amount) private {
+        if (!(totalSupply() <= sushi.balanceOf(address(this)))) revert();
+    }
+
+    function _leave_worker(uint256 _share) private {
         uint256 totalShares = totalSupply();
         uint256 what = _share.mul(sushi.balanceOf(address(this))).div(totalShares);
         _burn(msg.sender, _share);
         sushi.transfer(msg.sender, what);
-
-        require(totalSupply() <= sushi.balanceOf(address(this)));
-    }
-
-    function leave(uint256 _amount) external {
-        _leave_guard(_amount);
     }
 }

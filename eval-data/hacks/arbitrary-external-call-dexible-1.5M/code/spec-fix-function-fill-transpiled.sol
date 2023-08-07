@@ -46,14 +46,31 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
 
         return true;
     }
+
+    function fill(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) external returns (SwapMeta memory)  {
+	return _fill_guard(request, meta);
+    }
  
     /// @custom:consol
-    /// fill(request, meta) returns (meta)
+    /// fill(request, meta) returns (ret_meta)
     ///     requires _checkRequest(request)
-    ///     ensures meta.out >= request.tokenOut.amount
-    function fill(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) external onlySelf returns (SwapMeta memory)  {
-        require(_checkRequest(request));
+    ///     ensures ret_meta.outAmount >= request.tokenOut.amount
+    function _fill_guard(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) private returns (SwapMeta memory) {
+	_fill_pre(request, meta);
+	SwapMeta memory ret_meta = _fill_workder(request, meta);
+	_fill_post(request, meta, ret_meta);
+	return ret_meta;
+    }
 
+    function _fill_pre(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) private {
+	if (!_checkRequest(request)) revert();
+    }
+
+    function _fill_post(SwapTypes.SwapRequest calldata request, SwapMeta memory meta, SwapMeta memory ret_meta) private {
+	if (!(meta.out >= request.tokenOut.amount)) revert();
+    }
+
+    function _fill_workder(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) external onlySelf returns (SwapMeta memory)  {
         preCheck(request, meta);
         meta.outAmount = request.tokenOut.token.balanceOf(address(this));
         
@@ -76,7 +93,6 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
         
         console.log("Expected", request.tokenOut.amount, "Received", meta.outAmount);
 
-        require(meta.outAmount >= request.tokenOut.amount);
         return meta;
     }
 

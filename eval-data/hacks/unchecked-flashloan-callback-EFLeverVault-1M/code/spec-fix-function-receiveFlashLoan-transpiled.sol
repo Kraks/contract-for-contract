@@ -307,15 +307,6 @@ contract EFLeverVault is Ownable, ReentrancyGuard{
     last_earn_block = block.number;
   }
 
-  function _receiveFlashLoan_pre_condition(
-        IERC20[] memory tokens,
-        uint256[] memory amounts,
-        uint256[] memory feeAmounts,
-        bytes memory userData
-  ) internal returns (bool) {
-      return _entered == 1 && msg.sender == balancer;
-  }
-
   function receiveFlashLoan(
         IERC20[] calldata tokens,
         uint256[] calldata amounts,
@@ -325,25 +316,34 @@ contract EFLeverVault is Ownable, ReentrancyGuard{
       _receiveFlashLoan_guard(tokens, amounts, feeAmounts, userData);
   }
 
+  /// @custom:consol
+  /// receiveFlashLoan(tokens, amounts, feeAmounts, userData) 
+  ///    requires _entered == 1 && msg.sender == balancer
   function _receiveFlashLoan_guard(
         IERC20[] memory tokens,
         uint256[] memory amounts,
         uint256[] memory feeAmounts,
         bytes memory userData
-  ) internal {
-      require(_receiveFlashLoan_pre_condition(tokens, amounts, feeAmounts, userData));
+  ) private {
+      _receiveFlashLoan_pre(tokens, amounts, feeAmounts, userData);
       _receiveFlashLoan_worker(tokens, amounts, feeAmounts, userData);
   }
 
-  // @custom:consol
-  // receiveFlashLoan(tokens, amounts, feeAmounts, userData) returns ()
-  //    requires _entered == 1 && msg.sender == balancer
+  function _receiveFlashLoan_pre(
+        IERC20[] memory tokens,
+        uint256[] memory amounts,
+        uint256[] memory feeAmounts,
+        bytes memory userData
+  ) private {
+      if (!(_entered == 1 && msg.sender == balancer)) revert();
+  }
+
   function _receiveFlashLoan_worker(
         IERC20[] memory tokens,
         uint256[] memory amounts,
         uint256[] memory feeAmounts,
         bytes memory userData
-    ) internal {
+    ) private {
         uint256 loan_amount = amounts[0];
         uint256 fee_amount = feeAmounts[0];
 

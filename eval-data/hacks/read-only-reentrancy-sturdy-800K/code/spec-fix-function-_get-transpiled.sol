@@ -19,14 +19,14 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
   // @custom:consol
   // STETH.latestRoundData() returns (roundId, answer, startedAt, updatedAt, answeredInRound)
   //   ensures (updatedAt > block.timestamp - 1 days) && (answer > 0)
-  uint256 private immutable STETH = _get_guarded_STETH();
+  uint256 private immutable STETH = _wrap_STETH();
   address private constant BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
 
-  function _get_guarded_STETH() pure internel returns (uint256) {
-    return (1 << 160) | uint256(uint160(0x86392dC19c0b719886221c78AB11eb8Cf5c52812));
+  function _wrap_STETH() pure private returns (uint256) {
+    return (uint256(1) << 160 + 0) | uint256(uint160(0x86392dC19c0b719886221c78AB11eb8Cf5c52812));
   }
 
-  function _IChainlinkAggregator_latestRoundData(uint256 addr) internal view returns (
+  function _dispatch_IChainlinkAggregator_latestRoundData(uint256 addr) private view returns (
     uint80 roundId,
     int256 answer,
     uint256 startedAt,
@@ -40,25 +40,38 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
 
     (roundId, answer, startedAt, updatedAt, answeredInRound) = target.latestRoundData();
 
-    if (spec & 1 != 0) {
-        require((updatedAt > block.timestamp - 1 days) && (answer > 0));
+    if (spec & 1 << 0 != 0) {
+        if(!((updatedAt > block.timestamp - 1 days) && (answer > 0))) revert();
     }
   }  
 
   /**
    * @dev Get LP Token Price
    */
-  // @custom:consol
-  // _get() returns (ret)
-  //   ensures (ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) && 
-  //       (ret * 105 / 100 > BALWSTETHWETH.getLatest(1))
   function _get() internal view returns (uint256) {
-    (, int256 stETHPrice, , , ) = _IChainlinkAggregator_latestRoundData(STETH);
+    return __get_guard();
+  }
+
+  /// @custom:consol
+  /// _get() returns (ret)
+  ///   ensures (ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) && 
+  ///       (ret * 105 / 100 > BALWSTETHWETH.getLatest(1))
+  function __get_guard() private view returns (uint256) {
+    uint256 ret = __get_worker();
+    __get_post(ret);
+    return ret;
+  }
+
+  function __get_post(uint256 ret) private view {
+    if (!((ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) && (ret * 105 / 100 > BALWSTETHWETH.getLatest(1)))) revert();
+  }
+
+  function __get_worker() private view returns (uint256) {
+    (, int256 stETHPrice, , , ) = _dispatch_IChainlinkAggregator_latestRoundData(STETH);
 
     uint256 minValue = Math.min(uint256(stETHPrice), 1e18);
 
     uint256 ret = (BALWSTETHWETH.getRate() * minValue) / 1e18;
-    require((ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) && (ret * 105 / 100 > BALWSTETHWETH.getLatest(1)));
 
     return ret;
   }
@@ -66,19 +79,19 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
   // Get the latest exchange rate, if no valid (recent) rate is available, return false
   /// @inheritdoc IOracle
   function get() external view override returns (bool, uint256) {
-    return (true, _get());
+    return (true, __get_guard());
   }
 
   // Check the last exchange rate without any state changes
   /// @inheritdoc IOracle
   function peek() external view override returns (bool, int256) {
-    return (true, int256(_get()));
+    return (true, int256(__get_guard()));
   }
 
   // Check the current spot exchange rate without any state changes
   /// @inheritdoc IOracle
   function latestAnswer() external view override returns (int256 rate) {
-    return int256(_get());
+    return int256(__get_guard());
   }
 
   // Check the oracle

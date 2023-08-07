@@ -198,10 +198,10 @@ contract ExchangeBetweenPools is Ownable{
 
   uint256 public minimum_amount;
 
-  // @custom:consol
-  // curve.exchange_underlying(x, y, camount, n)
-  //   ensures _exchange_underlying_post_condition(camount)
-  uint256 internal _curve = _get_guarded_curve();
+  /// @custom:consol
+  /// curve.exchange_underlying(x, y, camount, n)
+  ///   ensures _exchange_underlying_post_condition(camount)
+  uint256 internal _curve = _wrap_curve();
 
   constructor(address _from_bank, address _to_bank, uint256 _min_amount) public{
     note = "Only for USDC to USDT";
@@ -218,12 +218,12 @@ contract ExchangeBetweenPools is Ownable{
     minimum_amount = _min_amount;
   }
 
-  function curve() view external returns (address) {
+  function curve() view public returns (address) {
       return address(uint160(_curve));
   }
 
-  function _get_guarded_curve() view internal returns (uint256) {
-      return uint256(uint160(CurveInterface(0xbBC81d23Ea2c3ec7e56D39296F0cbB648873a5d3).curve())) | (uint256(1) << 160);
+  function _wrap_curve() view private returns (uint256) {
+      return (uint256(1) << 160 + 0) | uint256(uint160(CurveInterface(0xbBC81d23Ea2c3ec7e56D39296F0cbB648873a5d3).curve()));
   }
 
   event MinimumAmountChanged(uint256 old, uint256 _new);
@@ -240,34 +240,35 @@ contract ExchangeBetweenPools is Ownable{
     emit MinimumAmountChanged(old, minimum_amount);
   }
 
-  function doExchange(uint256 amount) external returns (bool) {
-      return _doExchange_guard(amount);
-  }
 
-  function _doExchange_guard(uint256 amount) internal returns (bool) {
-      require(_doExchange_pre_condition(amount));
-      bool _doExchange_ret = _doExchange_worker(amount);
-      return _doExchange_ret;
-  }
-
-  function _doExchange_pre_condition(uint256 amount) internal returns (bool) {
-      return amount >= minimum_amount && amount <= ERC20TokenBankInterface(from_bank).balance();
-  }
-
-  function _dispatch_PriceInterface_exchange_underlying(uint256 addr, int128 x, int128 y, uint256 camount, uint256 n) internal {
+  function _dispatch_PriceInterface_exchange_underlying(uint256 addr, int128 x, int128 y, uint256 camount, uint256 n) private {
     PriceInterface target = PriceInterface(address(uint160(addr)));
     uint256 spec = addr >> 160;
 
     target.exchange_underlying(x, y, camount, n);
 
-    if (spec & 1 != 0) {
-        require(_exchange_underlying_post_condition(camount));
+    if (spec & 1 << 0 != 0) {
+        if(!_exchange_underlying_post_condition(camount)) revert();
     }
   }
 
-  // @custom:consol
-  // doExchange(amount) public returns (success)
-  //   requires amount >= minimum_amount && amount <= ERC20TokenBankInterface(from_bank).balance()
+  function doExchange(uint256 amount) external returns (bool) {
+      return _doExchange_guard(amount);
+  }
+
+  function _doExchange_guard(uint256 amount) private returns (bool) {
+      require(_doExchange_pre_condition(amount));
+      bool _doExchange_ret = _doExchange_worker(amount);
+      return _doExchange_ret;
+  }
+
+  function _doExchange_pre(uint256 amount) private {
+      if (!(amount >= minimum_amount && amount <= ERC20TokenBankInterface(from_bank).balance())) revert();
+  }
+
+  /// @custom:consol
+  /// doExchange(amount) public returns (success)
+  ///   requires amount >= minimum_amount && amount <= ERC20TokenBankInterface(from_bank).balance()
   function _doExchange_worker(uint256 amount) internal returns(bool){
 
     ERC20TokenBankInterface(from_bank).issue(address(this), amount);

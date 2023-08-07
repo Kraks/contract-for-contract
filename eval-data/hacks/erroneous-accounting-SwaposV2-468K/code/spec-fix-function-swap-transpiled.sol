@@ -83,16 +83,19 @@ contract SwaposV2Pair is ISwaposV2Pair, SwaposV2ERC20 {
         return true;
     }
 
+    /// update reserves and, on the first call per block, price accumulators
+    /// @custom:consol
+    /// _update(balance0, balance1, _reserve0, _reserve1) returns () 
+    ///   requires __update_pre_condition(balance0, balance1, _reserve0, _reserve1)
     function __update_guard(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) private {
-        require(__update_pre_condition(balance0, balance1, _reserve0, _reserve1));
+        __update_pre(balance0, balance1, _reserve0, _reserve1);
         __update_worker(balance0, balance1, _reserve0, _reserve1);
     }
 
+    function __update_pre(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) private {
+	if (!__update_pre_condition(balance0, balance1, _reserve0, _reserve1)) revert();
+    }
 
-    // update reserves and, on the first call per block, price accumulators
-    // @custom:consol
-    // _update(balance0, balance1, _reserve0, _reserve1) returns () 
-    //   requires __update_pre_condition(balance0, balance1, _reserve0, _reserve1)
     function __update_worker(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) private {
         uint32 blockTimestamp = uint32(block.timestamp % 2**32);
         uint32 timeElapsed = blockTimestamp - blockTimestampLast; // overflow is desired

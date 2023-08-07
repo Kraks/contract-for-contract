@@ -307,9 +307,9 @@ contract EFLeverVault is Ownable, ReentrancyGuard{
     last_earn_block = block.number;
   }
 
-  // @custom:consol
-  // receiveFlashLoan(tokens, amounts, feeAmounts, userData) returns ()
-  //    requires _entered == 1 && msg.sender == balancer
+  /// @custom:consol
+  /// receiveFlashLoan(tokens, amounts, feeAmounts, userData) returns ()
+  ///    requires _entered == 1 && msg.sender == balancer
   function receiveFlashLoan(
         IERC20[] memory tokens,
         uint256[] memory amounts,

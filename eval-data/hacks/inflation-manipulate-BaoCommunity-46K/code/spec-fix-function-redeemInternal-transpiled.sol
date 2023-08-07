@@ -530,19 +530,23 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return (uint(Error.NO_ERROR), vars.actualMintAmount);
     }
 
-    function _redeemInternal_pre_condition(uint redeemTokens) internal returns (bool) {
-        return accrueInterest() == uint(Error.NO_ERROR);
-    }
-
-    function _redeemInternal_post_condition(uint redeemTokens) internal returns (bool) {
-        return totalSupply > 1000;
-    }
-
-    function _redeemInternal_guard(uint redeemTokens) internal returns (uint) {
-        require(_redeemInternal_pre_condition(redeemTokens));
+    /// @custom:consol
+    /// redeemInternal(redeemTokens) returns (error)
+    ///     requires accrueInterest() == uint(Error.NO_ERROR)
+    ///     ensures totalSupply > 1000
+    function _redeemInternal_guard(uint redeemTokens) private returns (uint) {
+        _redeemInternal_pre(redeemTokens);
         uint _redeemInternal_ret = _redeemInternal_worker(redeemTokens);
-        require(_redeemInternal_post_condition(redeemTokens));
+        _redeemInternal_post(redeemTokens, _redeemInternal_ret);
         return _redeemInternal_ret;
+    }
+
+    function _redeemInternal_pre(uint redeemTokens) private {
+        if (!(accrueInterest() == uint(Error.NO_ERROR)) revert();
+    }
+
+    function _redeemInternal_post(uint redeemTokens, uint error) private {
+        if (!(totalSupply > 1000) revert();
     }
 
     /**
@@ -551,20 +555,28 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
      * @param redeemTokens The number of cTokens to redeem into underlying
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    // @custom:consol
-    // redeemInternal(redeemTokens) returns (error)
-    //     requires accrueInterest() == uint(Error.NO_ERROR)
-    //     ensures totalSupply > 1000
-    function _redeemInternal_worker(uint redeemTokens) internal returns (uint) {
+    function _redeemInternal_worker(uint redeemTokens) private returns (uint) {
         // redeemFresh emits redeem-specific logs on errors, so we don't need to
         return redeemFresh(msg.sender, redeemTokens, 0);
     }
 
-    function _redeemUnderlyingInternal_guard(uint redeemTokens) internal returns (uint) {
-        require(_redeemInternal_pre_condition(redeemTokens));
+    /// @custom:consol
+    /// redeemUnderlyingInternal(redeemTokens) returns (error)
+    ///     requires accrueInterest() == uint(Error.NO_ERROR)
+    ///     ensures totalSupply > 1000
+    function _redeemUnderlyingInternal_guard(uint redeemTokens) private returns (uint) {
+        _redeemUnderlyingInternal_pre(redeemTokens);
         uint _redeemUnderlyingInternal_ret = _redeemUnderlyingInternal_worker(redeemTokens);
-        require(_redeemInternal_post_condition(redeemTokens));
+        _redeemUnderlyingInternal_post(redeemTokens, _redeemUnderlyingInternal_ret);
         return _redeemUnderlyingInternal_ret;
+    }
+
+    function _redeemUnderlyingInternal_pre(uint redeemTokens) private {
+	if (!(accrueInterest() == uint(Error.NO_ERROR)) revert();
+    }
+
+    function _redeemUnderlyingInternal_post(uint redeemTokens, uint error) private {
+	if (!(totalSupply > 1000) revert();
     }
 
     /**
@@ -573,10 +585,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
      * @param redeemAmount The amount of underlying to receive from redeeming cTokens
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    // @custom:consol
-    // redeemUnderlyingInternal(redeemTokens) returns (error)
-    //     requires accrueInterest() == uint(Error.NO_ERROR)
-    //     ensures totalSupply > 1000
     function _redeemUnderlyingInternal_worker(uint redeemAmount) internal nonReentrant returns (uint) {
         // redeemFresh emits redeem-specific logs on errors, so we don't need to
         return redeemFresh(msg.sender, 0, redeemAmount);
