@@ -1,0 +1,56 @@
+% IChainlinkAggregator private constant STETH  = IChainlinkAggregator(0x86392d...);
+
+% ${\color{csspec} \mathit{STETH.latestRoundData()} }$
+% ${\color{csspec} \mathit{returns (roundId, answer, startedAt, updatedAt, answeredInRound)} }$
+% ${\color{csspec} \mathit{ensures (updatedAt > block.timestamp - 1 days) \&\& (answer > 0)} }$
+% IChainlinkAggregator private constant STETH 
+%   = IChainlinkAggregator(0x86392d...);
+\begin{figure*}[t]
+\begin{subfigure}[t]{0.49\textwidth}
+\begin{lstlisting}[numbers=left,stepnumber=1,xleftmargin=1em,numberstyle=\ttfamily\color{gray},numbersep=3pt]
+function getPrice(address chainklink) returns (uint256) {
+  (_, uint256 ethPrice, _, uint256 updatedAt, _) = 
+    IChainlinkAggregator(chainlink).latestRoundData();
+  require(updatedAt > block.timestamp - 1 days);
+  require(basePrice > 0);
+  
+  uint256 price = ORACLE.getRate() * ethPrice;
+  
+  $\HLBox{\texttt{\textbf{require}(price * 95 / 100 < ORACLE.getLatestPrice()}}$
+  $\HLBox{\texttt{\ \  \&\& price * 105 / 100 > ORACLE.getLatestPrice());}}$
+  
+  return price;
+}
+\end{lstlisting}
+\caption{Source code of readonly reentrancy vulnerability, and its fix (lines 10-11) 
+with \code{require}, ensuring the price fluctuation within 5\%.}
+\label{fig:sturby_buggy}
+\end{subfigure}%
+\hfill
+\begin{subfigure}[t]{0.49\textwidth}
+
+\begin{lstlisting}[language=Consol,numbers=left,stepnumber=1,xleftmargin=0.8em,numberstyle=\ttfamily\color{gray},numbersep=3pt,firstnumber=1]
+getPrice(chainlink) returns (price)
+ensures price * 95 / 100 < ORACLE.getLatestPrice() &&
+       price * 105 / 100 > ORACLE.getLatestPrice()
+where {
+  IChainlinkAggregator(chainlink).latestRoundData()
+  returns (_, answer, _, updatedAt, _)
+  ensures updatedAt > block.timestamp - 1 days && answer > 0
+}
+\end{lstlisting}
+\vspace{-0.25em}
+\begin{lstlisting}[numbers=left,stepnumber=1,xleftmargin=1em,numberstyle=\ttfamily\color{gray},numbersep=3pt,firstnumber=9]
+function getPrice(address chainlink) returns (uint256) {
+  (, uint256 ethPrice, , , ) = 
+    IChainlinkAggregator(chainlink).latestRoundData();
+  return ORACLE.getRate() * ethPrice;
+}
+\end{lstlisting}
+\caption{The fix with \lang specifications (lines 1--8), decoupling the specification and business logic.}
+\label{fig:sturby_fix}
+\end{subfigure}
+\caption{Comparison of fixes for Sturdy (simplified) source code with assertions 
+and \lang specification with enhanced readability and maintainability (see \Cref{sec:case} for detailed analysis).}
+\label{fig:sturbyIntro}
+\end{figure*}

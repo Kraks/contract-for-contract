@@ -1,0 +1,64 @@
+\newcommand{\fun}[1]{
+  \text{#1}
+}
+
+\begin{figure*}[t]
+  \judgement{Specification Typing}{$\Gamma \vdash \sigma: d_f$, $\Gamma \vdash e: t$}
+  %\begin{alignat*}{2}
+    %\fun{param}(\SpecCall{f}{(x : y)^*}{x^*}{y^*} ...) & = 1
+  %\end{alignat*}
+
+  \infrule[a-spec]{
+    \Gamma' = \Gamma \cup
+              \{ o_q : \fun{type}(\ell_q) \}^q \cup
+              \{ x_i : t^\text{\tiny arg}_i \}^i \qquad
+    \Gamma'' = \Gamma' \cup
+              \{ y_j : t^\text{\tiny ret}_j \}^j \qquad
+    \Gamma' \vdash e_1 : \Keywd{bool} \qquad
+    \Gamma'' \vdash e_2 : \Keywd{bool}
+  }{
+    \Gamma \vdash 
+    \SpecCall{\K(x^\text{\tiny addr}).f}{\overline{\ell_q : o_q}^q}{\overline{x_i}^i}{\overline{y_j}^j}~
+    \Keywd{requires}~ e_1 ~\Keywd{ensures}~ e_2 :
+    \FunType{f}{\overline{t^{\text{\tiny arg}}_i ~ x'_i}^i}{m}{\overline{t^\text{\tiny ret}_j}^{j}}
+  }
+
+  \infrule[f-spec]{
+    \Gamma' = \Gamma \cup
+              \{ z_p : \fun{type}(\ell_p) \}^p \cup
+              \{ x_i : t^\text{\tiny arg}_i \}^i \qquad
+    \Gamma'' = \Gamma' \cup
+              \{ y_j : t^\text{\tiny ret}_j \}^j \qquad
+    \Gamma' \vdash e_1 : \Keywd{bool} \qquad
+    \Gamma'' \vdash e_2 : \Keywd{bool} \\
+    \forall q, \quad
+    \fun{target}(\sigma_q^\text{\tiny addr}) = \K_q(x^\text{\tiny addr}_q\cdots).f_q \qquad
+    d_{f_q} \in \K_q \qquad
+    \Gamma \vdash \sigma_q^\text{\tiny addr} : d_{f_q} % \fun{decl}(\fun{target}(\sigma_q^\text{\tiny addr}))
+    % \Gamma \vdash \fun{addr}(\sigma) : \note{type-of-call}
+  }{
+    \Gamma \vdash
+    \SpecCall{f}{\overline{\ell_p : z_p}^p}{\overline{x_i}^i}{\overline{y_j}^j} ~
+    \SpecCond{e_1}{e_2}{\overline{\sigma_q^\text{\tiny addr}}^q} :
+    \FunType{f}{\overline{t^{\text{\tiny arg}}_i ~ x'_i}^i}{m}{\overline{t^\text{\tiny ret}_j}^{j}}
+  }
+
+  \infrule[c-top]{
+    \Gamma' = \Gamma \cup \{~\fun{id}(d_j) : \fun{type}(d_j) ~\}^{j} \cup
+             \{~ \fun{id}(\F_i) : \fun{type}(\F_i) ~\}^{i}
+             \qquad
+    \forall i, \quad \Gamma' \vdash \fun{spec}(\F_i) : \fun{decl}(\F_i)
+  }{
+    \Gamma \vdash \Contract{\K}{\overline{d}_j^{j}}{\overline{\F}_i^{i}}
+  }
+
+  % \Gamma_0 initial context, containing typings for built-in terms
+
+  \caption{Static semantics (excerpt) of \corelang specifications. Only checkings relevant to specifications are shown.}
+  \label{fig:static}
+\end{figure*}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "paper"
+%%% End:

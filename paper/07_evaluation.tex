@@ -1,0 +1,83 @@
+% \newpage
+\section{Gas Efficiency} \label{sec:perf}
+\label{sec:eval}
+
+
+% \wac{Do we organize evaluation using RQs?}
+
+% \subsection{Performance Overhead}
+% \begin{itemize}
+% 	\item Gas cost
+% 	\item DeFi projects with source code and test cases.
+% 	\item Migrate ``Securing smart contract with runtime validation'' data (with ERCxxx invariant).
+% \end{itemize}
+
+\input{tab_solythesis}
+
+\lang offers developers a powerful tool to decouple the specifications from the business logic.
+However, the adoption of \lang may induce runtime overhead in terms of gas consumption.
+% In this section, 
+% With the optimizations (Section~\ref{sec:impl}), 
+In this section,
+we show that the overhead induced in using \lang to declare function specifications is minimal.
+
+% \noindent\textbf{Dataset}: 
+\bfpara{Dataset.}
+We use two datasets to evaluate the gas efficiency of \lang.
+First, we leverage the dataset collected by Li et al.~\cite{DBLP:conf/pldi/LiCL20}, which consists of 23 contracts in ERC20, ERC721, and ERC1202 standards ($\mathcal{D}_1$).
+Second, we leverage the contracts of the 10 real-world attacks collected in Section~\ref{sec:case} ($\mathcal{D}_2$).
+We collect the historical transactions on Ethereum invoking the corresponding vulnerable 
+contracts to evaluate the gas consumption of \lang.
+
+% \noindent\textbf{Baseline and comparison}:
+\bfpara{Baseline and Methodology.}
+The baseline we compare with \lang is the contracts where low-level assertions are directly implemented as pre-/post-conditions in the function body or around address calls.
+Specifically, for dataset $\mathcal{D}_1$, the baseline is the original contracts collected by Li et al.~\cite{DBLP:conf/pldi/LiCL20}.
+Specifications are already implemented in the original contracts using \texttt{require} or \texttt{assert} statements.
+To evaluate the gas efficiency of \lang, for each contract, we manually re-implement it by extracting the assertion-based pre-/post-conditions and expressing them in \lang specifications, while preserving the original contract logic.
+% The dataset is equipped with transactions calling each contract, which allows us to evaluate the gas efficiency of \lang by executing these transactions on the original contracts and the reimplemented version of them using \lang.
+We leverage the test cases (transactions) provided by Li et al.~\cite{DBLP:conf/pldi/LiCL20} to execute and evaluate the gas consumption of the baseline and \lang.
+For dataset $\mathcal{D}_2$, we manually patch the vulnerable contracts using assertions and \lang, respectively.
+We replay all historical transactions on Ethereum that cover the patched functions and measure the gas consumption of the baseline and \lang-patched version.
+
+% \noindent\textbf{Results}:
+\bfpara{Results.}
+Table~\ref{tab:solythesis_evaluation} shows the comparison of gas consumption on dataset $\mathcal{D}_1$.
+Row \textit{Original} and \textit{\lang} show the average transaction gas consumption on the original contract and \lang-implemented contract, respectively.
+The gas increase ratio of \lang-implemented version compared to the original contract is given in the third row \textit{GIR}.
+The results show that such overhead of \lang specifications is minimal, only 0.43\% more gas on average for each contract. 
+
+Table~\ref{tab:case_gas} shows the comparison of gas consumption on dataset $\mathcal{D}_2$.
+Column \textit{GFI} and \textit{GIR} give the average increased gas fee (in US dollar) and gas consumption increase ratio of transactions on the patched contract compared to the original vulnerable contract.
+Column \textit{by Assertions} and \textit{by \lang} shows the GFI and GIR on the baseline (assertion-patched contracts) and \lang-patched contracts.
+Column \textit{\#Tx} gives the total number of historical transactions executed on the patched functions.
+Similar to experiments on dataset $\mathcal{D}_1$, patching vulnerable contracts using \lang specifications only has minimal gas overhead (avg. \$0.239), corresponding to at most \$1.2 more transaction fees.
+Compared to baseline, \lang specifications also induce a small increase in gas, thanks to the optimizations to avoid additional storage overhead in the generated code (\Cref{sec:impl}).
+% , but the overhead is small.
+% given that \lang provides a powerful linguistic means to attach specifications decoupled from contract logic implementations. 
+% Note that, we adopt optimizations to avoid additional storage overhead in the generated code (\Cref{sec:impl}).
+The overhead is induced by the additional private function call generated in the translation of functions with \lang specifications.
+Such overhead is minimal since the private function calls are compiled into cheap JUMP instructions.
+\looseness=-1
+
+On dataset $\mathcal{D}_1$ we also report the percentage of lines in original functions that are expressed as \lang specifications (Column \textit{LR} in Table~\ref{tab:solythesis_evaluation}).
+Similar to the results in Table~\ref{tab:case}, a large portion of code in functions can be extracted as \lang specifications.
+This indicates the \lang is effective in separating specifications from business logic in functions.
+
+% \wac{Below are deprecated}
+% Row \textit{Gas Increase} gives the increase ratio of average gas consumption for transactions on each contract.
+
+% To measure how many behavioral contracts can be extracted from each function, we also measure the average lines of code (LOC) reduced for each function by decoupling pre-conditions and post-conditions from the function business logic.
+% For instance, 20\% means 20\% lines of code in a function can be specified as function behavioral contracts using \lang.
+% The row \textit{LOC Reduced} shows the average percentage of each function that can be extracted as behavioral contracts using \lang.
+% On average for each function, 36.51\% lines of code are specifications of pre- and post-conditions, which can be specified using \lang.
+% The result indicates that a large portion of code in functions is not related to business logic. 
+% If the function behaviors can be specified and enforced using \lang, developers can focus more on the main business logic with clean and maintainable code, reducing programming errors in the implementation.
+% \zz{need to revist, given the newly-introduced case study section. e.g., we already explain what Reduced LoC is in that section.}
+
+% \subsection{Readability}
+% \begin{itemize}
+% 	\item Number hunk of code to measure the efforts to fix a bug.
+% 	\item Number of tokens required to fix.
+% \end{itemize}
+

@@ -1,0 +1,17 @@
+\begin{figure}[t]
+\begin{lstlisting}[numbers=left,stepnumber=1,xleftmargin=1em,numberstyle=\ttfamily\color{gray},numbersep=3pt]
+function getRate() public view returns (uint256) {
+  uint256 _poolTokenBalance = _getPoolTokenBalance(); // not uptated
+  return _calculateRate(_poolTokenBalance);
+}
+
+function exitPool(address sender, address recipient, 
+  uint256 amount) nonReentrant external {
+  (bool success, ) = recipient.call{value: amount}(""); // reentrancy
+  _updatePoolTokenBalance(amount);
+}
+\end{lstlisting}
+
+\caption{A Simplified Demonstration of an Readonly Reentrancy: Balancer Contracts}
+\label{fig:sturbyHack}
+\end{figure}

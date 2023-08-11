@@ -1,0 +1,71 @@
+\begin{figure}[t]
+\begin{lstlisting}[numbers=left,stepnumber=1,xleftmargin=1em,numberstyle=\ttfamily\color{gray},numbersep=3pt]
+function fill(SwapTypes.SwapRequest calldata request, 
+SwapMeta memory meta) external onlySelf returns (SwapMeta memory)  {
+  //some checks
+  for(uint i=0;i<request.routes.length;++i) {
+    SwapTypes.RouterRequest calldata rr = request.routes[i];
+    IERC20(rr.routeAmount.token).safeApprove
+        (rr.spender, rr.routeAmount.amount);
+    (bool s, ) = rr.router.call(rr.routerData);  // vulnerable
+    ...
+    }
+  ...
+  require(meta.outAmount >= request.tokenOut.amount,
+  "Insufficient output generated");
+}
+\end{lstlisting}
+
+\caption{A Simplified Demonstration of an Arbitrary External Call Bug: Dexible Contracts}
+\label{fig:dexibleHack}
+\end{figure}
+
+
+
+\begin{comment}
+\begin{figure}[t]
+\begin{lstlisting}[numbers=left,stepnumber=1,xleftmargin=1em,numberstyle=\ttfamily\color{gray},numbersep=3pt]
+struct SwapData {
+  address callTo;
+  bytes callData;
+  ...
+}
+function swap(bytes32 transactionId, SwapData calldata _swap) 
+  internal {
+  ... // some balance check
+  meta.outAmount = request.tokenOut.token.balanceOf(address(this));
+  (bool success, bytes memory res) = _swap.callTo.call{
+    value: nativeValue
+  }(_swap.callData);
+  if (!success) {
+    string memory reason = LibUtil.getRevertMsg(res);
+    revert(reason);
+  }
+  ...
+}
+
+\end{lstlisting}
+
+\caption{A Simplified Demonstration of an Arbitrary External Call Bug: LiFi Contracts}
+\label{fig:lifi_example}
+\end{figure}
+
+\begin{figure}[t]
+\label{fig:lifi_solution}
+\begin{lstlisting}[language=Consol]
+swap (transactionId, _swap) 
+requires {(_swap.callTo == XXX && _swap.callData[:4] == YYY) || ...}
+\end{lstlisting}
+
+\begin{lstlisting}[language=Consol]
+swap (transactionId, _swap) 
+where { _swap.callTo.call(data) returns (success, res)
+    requires {_swap.callTo == XXX && data[:4] == YYY) || ...}
+    ensure {success}
+}
+\end{lstlisting}
+\caption{\lang Specifications for LiFi attack.}
+\label{fig:lifi_solution}
+\end{figure}
+
+\end{comment}

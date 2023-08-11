@@ -1,0 +1,38 @@
+\renewcommand{\arraystretch}{0.8}
+\begin{table}[t]
+\centering
+\caption{Gas consumption on vulnerable contracts in 
+% dataset 
+$\mathcal{D}_2$, patched with assertions and \lang.
+GFI: gas fee increase (\$).
+GIR: gas increase ratio after patching 
+% on \lang-implemented contracts 
+% compared 
+to the original.
+}
+\vspace{-1mm}
+\label{tab:case_gas}
+\setlength{\tabcolsep}{4pt}
+\small
+\begin{tabular}{lccccc}
+\toprule
+\multicolumn{1}{c}{\multirow{2.2}{*}{\textbf{Project}}} & \multirow{2.2}{*}{\textbf{\#Tx}} & \multicolumn{2}{c}{\textbf{by Assertions}} & \multicolumn{2}{c}{\textbf{by \lang}} \\ 
+\cmidrule(lr){3-4} \cmidrule(lr){5-6}
+\multicolumn{1}{c}{}                         &                       & \textbf{GFI (\$)}               & \textbf{GIR (\%)}               & \textbf{GFI (\$)}                    & \textbf{GIR (\%)}                    \\
+\midrule
+Umbrella~\cite{unbrellaHack}                                    & 3                     & 0.012             & 0.151             & 0.021                  & 0.249                  \\
+EFLeverVault~\cite{eflevervaultHack}                                 & 13                    & 0.043             & 0.094             & 0.050                  & 0.109                  \\
+N00d~\cite{n00dHack}                                         & 46                    & 0.022             & 1.656             & 0.027                  & 2.099                  \\
+Dexible~\cite{dexibleHack}                                      & 54                    & 0.048             & 0.088             & 0.126                  & 0.230                  \\
+SushiSwap~\cite{sushiSwapHack}                                    & 3                     & 0.479             & 4.820             & 0.511                  & 5.147                  \\
+SwaposV2~\cite{swaposv2Hack}                                     & 1                     & 0.019             & 0.188             & 0.025                  & 0.244                  \\
+Unknown~\cite{unknownHack}                                      & 10                    & 0.018             & 0.010             & 0.434                  & 0.269                  \\
+Sturdy~\cite{sturbyHack}                                       & 19                    & 1.138             & 1.221             & 1.139                  & 1.223                  \\
+LEVUSDC~\cite{levusdcHack}                                      & 7                     & 0.051             & 0.143             & 0.054                  & 0.152                  \\
+Bao~\cite{baoHack}                                          & 15                    & 0.004             & 0.036             & 0.007                  & 0.069                   \\
+\midrule
+\textbf{Avg.} & 17.1 &	0.183 &	0.841 &	0.239 &	0.979\\
+\bottomrule
+\end{tabular}
+\end{table}
+% \vspace{-2mm}

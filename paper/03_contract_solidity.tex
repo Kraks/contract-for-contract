@@ -1,0 +1,568 @@
+\section{\lang by Examples} \label{sec:examples}
+
+%We now introduce \lang informally with examples.
+\lang is a non-breaking extension for Solidity that additionally provides means
+to specify and enforce behavioral contracts (we will often use \emph{specification} 
+for behavioral contracts to avoid ambiguity).
+%\subsubsection*{Design Rationale}
+% With the mind of offering \xx{To offer ..} 
+%To offer a better tool for Solidity programmers, 
+%we have the following goals when designing \lang:
+Now, we introduce the core features of \lang with examples.
+
+\subsection{Contracts for First-Order Values}
+
+We begin with specifying pre-conditions and post-conditions for functions
+involving first-order arguments. 
+Hereafter, we write \lang specifications in {\color{csspec}{\emph{italic serif style}}}, 
+and ordinary Solidity program in \code{sans-serif}.
+Consider the following \code{swap} example that swaps the amount \code{in} of one token to another token according to the current exchange rate. 
+Callers can specify the minimal amount \code{min_out} of the output token that they expect in case the exchange rate fluctuates.
+
+\begin{lstlisting}[language=Consol]
+swap(in, min_out) returns (out)
+requires in > 0
+ensures out >= min_out
+\end{lstlisting}
+\vspace{-0.25em}
+\begin{lstlisting}[language=Solidity]
+function swap(uint in, uint min_out) returns (uint out) { ... }
+\end{lstlisting}
+
+The first three lines are \lang specifications.
+The first line of the specification introduces bindings for function \code{swap}'s 
+argument \spec{in}, \spec{min_out} and return value \spec{out}.
+The \spec{requires}-clause specifies the pre-condition to call \code{swap},
+and the \spec{ensures}-clause specifies the post-condition.
+Any occurrences of \spec{in} in the conditions refer to the actual
+argument value from call-sites, and similarly, occurrences of \spec{out}
+refer to the actual return value.
+
+Note that in the specification, binding names do not have to match 
+those in the function definition (although in this case, they do). 
+Similarly, types of arguments and returned values can often be inferred from
+the definition, thus are omitted.
+%\yy{types are specified in the function signature, right?}
+
+% \subsubsection*{\textbf{Syntactic Sugars}}
+\bfpara{Syntactic Sugars.}
+We can liberally omit any part of the argument or return value specification,
+e.g., the following specification omits the \spec{requires}-clause for \code{toWei}: %\yy{swap requires and ensures?
+\begin{lstlisting}[language=Consol]
+toWei(x) returns (_) ensures x < type(uint).max / 1e18
+\end{lstlisting}
+\vspace{-0.25em}
+\begin{lstlisting}
+function toWei(uint x) returns (uint) { ... }
+\end{lstlisting}
+The above specification is equivalent to the core form where the omitted 
+part is simply the Boolean \code{true} expression:
+\begin{lstlisting}[language=Consol]
+toWei(x) returns (_) requires true ensures x < type(uint).max / 1e18
+\end{lstlisting}
+
+% \subsubsection*{\textbf{Dependent Contract}}
+\bfpara{Dependent Contract.}
+It is possible to write specifications where the post-condition depends on 
+the arguments. 
+In other words, the scope of argument bindings spans both the precondition 
+and postcondition.
+For example, we can write the following condition to specify monotonicity for a numeric function:
+\begin{lstlisting}[language=Consol]
+f(x) returns (y) ensures y > x
+\end{lstlisting}
+\vspace{-0.25em}
+\begin{lstlisting}[language=Solidity]
+function f(int x) returns (int) { ... }
+\end{lstlisting}
+
+%Another way is to use the `any` flat contract, which is defined as
+%\code{any = { _ | true }}:
+%\begin{lstlisting}
+%  # {x | x < type(uint).max / 1e18} -> any
+%\end{lstlisting}
+
+% \subsubsection*{\textbf{Any Expression is Allowed}}
+\bfpara{Any Expression is Allowed.}
+When specifying the pre- or post-conditions, programmers are free to use
+any valid Solidity expression, including but not limited
+to function calls, memory operations, and built-in special variables carrying
+important transaction data (e.g. \code{msg.value}) or metadata (e.g.
+\code{block.timestamp}) whose values are only available at run-time.
+%The programmers are free to check desired properties against with these
+%transactional information.
+
+For example, the following snippet examines the amount of Wei that is carried within \code{msg.value}
+% carried 
+of the transaction as the pre-condition of \code{buyTickets}:
+% \yy{is the typo intended?} \yy{ensures -> requires?}\xx{revised.}
+\begin{lstlisting}[language=Consol]
+buyTickets(n) requires msg.value >= 1e15 * n
+\end{lstlisting}
+\vspace{-0.25em}
+\begin{lstlisting}
+function buyTickets(int n) payable { ... }
+\end{lstlisting}
+This liberty empowers programmers to check any computable properties, 
+which may be beyond the capability of static verification.
+
+%\wac{Why cannot static verification check such properties? Are we assuming that static verification only checks the violation of inline assertions?} \yy{pre-condition has different meaning in static verificaiton. I think it will not add much value to explain it. Static verification would check the post-condition assuming the pre-condition holds; in our context, pre-condition and post-condition are both enforced at runtime. Intuitively, their difference is like implication and conjunction}
+%\zz{How about other special variables, such as `block.chainid` and `tx.origin`?. Perhaps we could redesign a universal syntax for these variables in Section 2.5, where we discuss where to add the message sender}
+%\url{https://docs.soliditylang.org/en/develop/units-and-global-variables.html#block-and-transaction-properties}
+
+So far, these ``flat'' contracts for first-order values are straightforward.
+They provide a systematic and more readable way to write assertions wrapping around functions.
+
+\subsection{Contracts for Higher-Order Values}\label{sec:examples-higher-order}
+
+Now we introduce \lang's distinct feature, i.e., specifying and enforcing
+rich conditions for addresses.
+
+% \subsubsection*{\textbf{Addresses as Numeric Values}}
+\bfpara{Addresses as Numeric Values.}
+Resembling pointers in C/C++, addresses in Solidity are numerical values
+that can be compared or computed.
+Therefore, at the first approximation, specifications of addresses are 
+no different from other integer values.
+For instance, we can assert that the address argument value must be non-zero:
+\begin{lstlisting}[language=Consol]
+f(addr) requires addr != 0
+\end{lstlisting}
+\vspace{-0.25em}
+\begin{lstlisting}
+function f(address payable addr) { ... }
+\end{lstlisting}
+
+% \subsubsection*{\textbf{Addresses as Latent Computation}}
+\bfpara{Addresses as Latent Computation.}
+However, addresses in Solidity have rich higher-order behaviors: they
+represent deployed external Ethereum contracts that can be invoked.
+% \note{GW: need an example with return values}
+Suppose we have a \code{deposit} function,
+which takes an address argument and transfers money from that address. %and invokes it in the function.
+With \lang, programmers can specify the condition of such latent address
+calls using a \spec{where}-clause without the need of touching the function body:
+\begin{lstlisting}[language=Consol]
+deposit(token, amount) requires msg.sender == owner
+where {
+  IERC20(token).transferFrom(sender, addr, amount) returns (success)
+  requires amount > 0   ensures success
+}
+\end{lstlisting}
+\vspace{-0.25em}
+\begin{lstlisting}
+function deposit(address token, uint amount) public {
+  IERC20(token).transferFrom(...); // the call is now guarded
+}
+\end{lstlisting}
+%msg.sender, address(this), amount);
+When \code{token} is considered an instance implementing the ERC20 token standard~\cite{vogelstellerEIP20TokenStandard2023},
+we assert the transfer must succeed and the transferred \spec{amount} (the third argument) must be greater than zero.
+We use the same \spec{requires}- and \spec{ensures}-clause syntax to specify pre-/post-conditions,
+as in top-level functional specifications.
+A \spec{where}-clause may contain multiple address specifications, corresponding
+to multiple address arguments of a function.
+
+Using \lang we  have decoupled specifying and enforcing of the conditions
+--- there is no need to change the function body or manually insert checks
+around the call, resulting in more readable and maintainable code. 
+% As we will see later 
+%As we will demonstrate later, in more complicated code, this separation leads to  
+% more
+%enhanced
+%maintainability of the code and allows programmers to confidently refactor code as needed. \xx{revised}
+% maintainable code and allows programmers to fearlessly refactor the code.
+%\wac{Perhaps we can also mention that address spec can be declared for a storage variable?}\zz{it is a syntax sugar}GW: mentioned in sec 5
+
+% \subsubsection*{\textbf{Single Address, Multiple Callees}}
+\bfpara{Single Address, Multiple Callees.}
+% \lang is expressive enough\xx{sufficiently} to specify conditions of multiple target functions
+% Since the address is an instance of a contract (or a user \xx{to a user account}) containing multiple functions, programmer can call these functions at free will.
+%An address is an instance of a contract (or a user account) and contains multiple functions that can be invoked by others.
+% programmers \xx{by other contract? users?}.
+%\xx{revised}
+% can call these functions at free will.
+%\note{GW: if the address is a user, do we need the interface cast?}
+%\wac{We don't need since if it is an EOA, then there is no function to invoke.}
+\lang is expressive to specify conditions for multiple target functions associated with a single address value.
+This can be done by  specifying conditions for different callable targets
+in the \spec{where}-clause. 
+Consider function \code{f}'s address argument \code{addr}, the programmer can specify
+conditions for \code{addr}'s functions \code{transfer} and \code{vote}:
+%Other than the \code{call} method, there are other forms of low-level calls with
+%different signatures, e.g., \code{delegatecall}, \code{send}, etc.
+% https://docs.soliditylang.org/en/v0.8.20/units-and-global-variables.html#address-related
+\begin{lstlisting}[language=Consol]
+f(addr) where
+{ addr.transfer(x) returns (success) requires x<=addr.balance }
+{ addr.trade(msg, x) returns (success, rate) requires x>0 ensures success}
+\end{lstlisting}
+% \xx{filled in with different and concrete conditions}
+% \xx{vote is not a good case as it requires value}
+% { addr.vote(msg, y) returns (success, data) requires y!=0 ensures success}
+
+This flexibility allows programmers to effectively 
+control and enforce distinct behaviors for different targets at a finer granularity.
+
+
+%\zz{I guess we should educate the audience about the difference between low-level and high-level calls at the beginning of Section 2.4. I'll take care of this later.}
+%\note{GW: it seems we need to discern \code{call}s with different signatures}
+
+% \subsubsection*{\textbf{Call Option Arguments}}
+\bfpara{Call Option Arguments.}
+Address calls in Solidity can 
+% additionally 
+take additional special arguments
+such as \code{value} and \code{gas}:
+\begin{lstlisting}
+addr.call{value: 100, gas: 5000}(...);
+\end{lstlisting}
+Programmers can use \lang to specify conditions of these call option arguments 
+by introducing additional bindings using the familiar syntax that is used in Solidity:
+\begin{lstlisting}[language=Consol]
+addr.vote{value: v, gas: g}(msg, amount) requires v>=0 && v<=addr.balance
+\end{lstlisting}
+% \xx{updated example with concrete conditions}
+where \code{v} and \code{g} represent the actual Ether transfer value and gas value, 
+whose names can be referenced in \spec{requires}/\spec{ensures}-clauses.
+%Such representations simplify the specification process, enabling more 
+%accurate and expressive conditions and allow more intricate specifications.
+
+% \subsubsection*{\textbf{Low-Level Calls}}
+\bfpara{Low-Level Calls.}
+We have presented how \lang can be used to specify and enforce
+conditions of high-level address calls, where signatures
+of the callees are available.
+Another form of calls in Solidity is \emph{low-level calls},
+where the callee signature and arguments are encoded as raw bytes data:
+\begin{lstlisting}[language=Solidity]
+  bytes memory data = ...
+  (bool success, bytes memory result) = addr.call(data)
+\end{lstlisting}
+
+With \lang and Solidity's \code{decode} functionality, 
+% the programmer can specify conditions of low-level calls by inspecting the raw data. 
+programmers can enforce the behaviors of low-level calls by attaching specifications to the raw data.%\xx{revised}
+For example, by writing preconditions as a standalone function
+(recall that conditions can be any expression),
+we can examine the encoded signatures and arguments in a separate function 
+and check it in the \spec{requires}-clause:
+\begin{lstlisting}[language=Consol]
+function checkPreCond(bytes memory data) returns (bool) {
+  if (bytes4(data[:4]) != bytes4(ERC20SignatureData)) 
+    return false; // check if data encodes ERC20 protocol
+  (uint256 n, address a) = abi.decode(data[4:], (uint256, address));
+  ... // check the actual arguments n and a
+}
+addr.call(data) requires checkPreCond(data) // precondition of addr.call
+\end{lstlisting}
+
+% \subsubsection*{\textbf{Higher-Order Functions}}
+\bfpara{Higher-Order Functions.}
+Likewise, functions in Solidity are first-class values, i.e., they can be used
+as arguments of, or returned from, other functions.
+However, 
+as of Solidity 0.8.20,
+% at this moment~\footnote{Solidity version 0.8.20}, 
+% Solidity's 
+support for first-class functions is limited to explicitly defined top-level functions.
+% there is no way to write anonymous functions (lambda expressions) or nested, 
+% named functions that capture variables from environments.
+Writing anonymous functions (lambda expressions), nested functions, or named functions that capture variables from environments are currently not supported.
+% Only explicitly defined top-level functions can be used in ``first-class'' ways.
+This restriction prohibits real closure values with lexical scopes, familiarized by functional programmers.
+%This limitation restricts the use of real closure values with lexical scopes, a feature that is commonly used by functional programmers.
+%This restriction discourages programmers to use higher-order functions due to
+%its inconvenience and verbosity.
+% In principle, our treatment to addresses can be applied to functions as well.
+% However, 
+While our approach to addresses could be extended to functions,
+due to the restriction of Solidity, higher-order functions
+are rarely used in Solidity programs.
+Therefore, in this paper, we focus on the contracts and monitoring of address
+values, and leave the monitoring for higher-order functions as future work once
+Solidity has proper support for lambda expressions~\cite{soliditydoctypes}. % \zz{cite the document mentioning Solidity is planing to support anonymous functions}\xx{cited}
+%\xx{revised}
+%Moreover, the restriction from the language poses challenges to seamlessly 
+%implement first-class behavioral contract and monitor system that guards 
+%higher-order functions (e.g. as in \cite{DBLP:conf/icfp/FindlerF02}) 
+%without an expensive whole program transformation.
+
+% \vspace{-9mm}
+\subsection{\textbf{Persistent Monitoring}}
+\label{sec:examples-monitoring}
+\lang features persistent monitoring of address specifications,
+i.e., guarded addresses are first-class citizens too -- passing
+to other functions, returning from functions, or storing into mutable states, 
+all preserve the attached pre-/post-conditions.
+These conditions will be checked whenever the address is called, even remotely 
+from where the conditions were attached.
+
+%For instance,
+%these conditions will be enforced when the address has been passed to other functions, returned from the current function, or stored in memory. \xx{revised}
+% the address has been passed to other functions, returned from the current function, or stored in storage.
+
+%\lang tracks the use of guarded address arguments
+%even if they are passed down to other functions which potentially call the address.
+% For instance, 
+% \subsubsection*{\textbf{Passing Guarded Addresses}}
+\bfpara{Passing Guarded Addresses.}
+In the following example, the programmer has attached specifications
+to the public function \code{deposit} but not to the \code{actualDeposit}.
+The private function \code{actualDeposit} consumes the address passed
+from \code{deposit} and invokes functions on the address.
+\begin{lstlisting}[language=Consol]
+deposit(token, amount) 
+where { IERC20(token).transferTo(addr, amt) requires amt > 10 }
+\end{lstlisting}
+\vspace{-0.25em}
+\begin{lstlisting}[language=Solidity]
+function deposit(address token, uint amount) public {
+  address token2 = token;
+  actualDeposit(token2, amount - 10);
+}
+function actualDeposit(address token2, uint amount) private {
+  IERC20(token2).transferTo(.., amount); // call happens here
+}
+\end{lstlisting}
+% \xx{naming: foo, and two tokens are confusing}
+% \xx{added a concrete condition. move comments to the text? ->}
+%\yy{I was expection something like \spec{amount>=0}} 
+Although the condition for address \code{token} is specified for \code{deposit},
+the call of \code{transferTo} happens remotely in \code{actualDeposit},
+via indirect value flows.
+\lang ensures the precondition of the address call (\spec{amt >= 0}) 
+attached from  \code{deposit} is preserved and checked in \code{actualDeposit}.
+%\lang guarantees this by dynamically tracking the value flow.
+
+It is possible that \code{actualDeposit} is invoked by other functions. In such cases,
+different conditions may be checked, depending on the actual address argument \code{token2}.
+
+% \subsubsection*{\textbf{Returning Guarded Addresses}}
+\bfpara{Returning Guarded Addresses.}
+%Addresses can be returned functions as well. 
+There are two ways to return a guarded address value. First,
+returning a guarded address whose specification was attached at a previous point,
+e.g., by other functions or at the time when the address is used as an argument.
+Consider this identity function of addresses, which requires its address argument
+to be monotonic when called: %\xx{revised}
+\begin{lstlisting}[language=Solidity]
+interface IMono { function f(int) returns (int); }
+\end{lstlisting}
+\vspace{-0.25em}
+\begin{lstlisting}[language=Consol]
+id(addr1) returns (addr2) 
+where { IMono(addr1).f(x) returns (y) requires y >= x }
+\end{lstlisting}
+\vspace{-0.25em}
+\begin{lstlisting}[language=Solidity]
+function id(address addr1) returns (address) { return addr1; }
+\end{lstlisting}
+Then, when \code{addr1} is returned to the caller of \code{id}, the same condition is still attached.
+At a later point, when the received address is invoked, the monotonic check
+will be enforced.
+% accompanied\xx{attached?}.
+%For example, when the \code{addr1} (identical to \code{addr1}) is returned 
+%from the function \code{id}, the specifications initially attached to \code{addr1}
+%persist with \code{addr2}. 
+% \xx{return from where, still attached when invoked by xxx }
+
+The second way is to directly attach conditions to the returned address.
+Using the same identify function as an example, we can specify monotonicity 
+of the returned address \spec{addr2} (instead of \spec{addr1}):
+\begin{lstlisting}[language=Consol]
+id(addr1) returns (addr2) where { I(addr2).f(x) returns (y) requires y>=x }
+\end{lstlisting}
+Similarly, at a later point, when the received address is invoked, the monotonic check
+will be enforced:
+\begin{lstlisting}[language=Solidity]
+address c = id(...)
+int y = IMono(c).f(x) // checks condition y >= x
+\end{lstlisting}
+Moreover, it is possible to attach different precondition and postcondition
+to the same address value.
+%\yy{changed low-level call to high-level call}
+
+%\note{GW: what is the first time we talk about storage?}
+
+Allowing attaching persistent specifications to return addresses is a powerful notion.
+%\todo{why it is useful?}\wac{Added}
+Addresses may flow through the business logic of contracts. 
+\lang liberates developers from meticulously tracking
+address flows and verbosely checking the
+critical conditions at every address call site. 
+Consequently, developers can focus on the overall business logic,
+delivering code with decent readability and maintainability (see case studies \Cref{sec:case}).
+%\wac{Refer to a case study maybe.}\note{GW: yes}
+
+Additionally, a guarded address can be stored in storage,
+retrieved, and called later. When the call happens, \lang preserves the checks 
+as they are remotely specified.
+
+% \subsubsection*{\textbf{Extent of Effective Monitoring}}
+\bfpara{Extent of Effective Monitoring.}
+In \Cref{sec:translation}, we discuss how \lang implements persistent address
+specification monitoring using a whole-program transformation.
+Nevertheless, there are cases where tracking specifications attached to addresses
+becomes impossible in a distributed setting, e.g., when a guarded address value 
+is passed to another external contract program that is unknown to \lang.
+In such cases, \lang cannot  monitor how the external contract program uses the address.
+%\xx{revised}
+However, programmers can still trust \lang within the scope of the annotated
+contract program. \lang ensures effective and persistent monitoring of address specifications
+as long as the address calls happen within the current contract.
+In \Cref{sec:correctness}, we depict the boundary of effective monitoring after 
+explaining the translation semantics.
+%\yy{Can we justify it is often sufficient to focus on the contract program under development? Refer back to the "open-world" assumption?}
+%\lang's implementation maintains the same interface of the contract to observers.
+
+\iffalse
+Nevertheless, such checks against \code{addr} cannot be performed when \code{f}
+is called, even though \code{addr} is a proper argument of \code{f}.
+Because \code{addr} in this use case is effectively a function, and
+it is undecidable to statically examine its properties in general.
+Additionally, we may not have access to the source code of the contract
+represented by \code{addr}.
+\begin{lstlisting}[language=Consol]
+f(addr) where
+{ addr.call(msg, amount) returns (flag, data)
+  requires amount > 100
+  ensures flag == true }
+\end{lstlisting}
+\vspace{-0.25em}
+\begin{lstlisting}
+function f(address payable addr) {
+  ... // omitting statements before the call
+  (bool success, bytes memory data) =
+    addr.call(abi.encodeWithSignature(
+        "foo(string, uint256)", "call foo", 128
+      )
+    );
+  ... // omitting statements after the call
+}
+\end{lstlisting}
+\lang addresses this issue by adopting lazy checks
+\cite{DBLP:conf/icfp/FindlerF02} that only take place
+when the address is actually invoked \note{GW: fwd ref to impl}.
+The above snippet specifies the condition of \code{addr}
+in the \code{where}-clause, which requires that
+the \code{amount} argument must be greater than 100 and
+the address call must succeed.
+\fi
+
+\iffalse
+It would be convenient to directly enforces the success of the call and omit
+the data:
+\begin{lstlisting}
+  # { a | { {value, gas}(arg) | <pre-cond> } -> { (true, _) | true } }
+  function f(address a) { ... }
+\end{lstlisting}
+
+\zz{just FYI, `a.f` can also specify `value`, `gas`, etc.}
+
+\begin{lstlisting}
+  # { a.f | pre-cond -> post-cond }
+  # { a.g | pre-cond -> post-cond }
+  function f(address a) { ... }
+\end{lstlisting}
+
+\wac{We may need an example here since the necessity to designate the callee function may not be obvious to reviewers.}
+\fi
+
+\iffalse
+\paragraph{Second-Class Monitoring}
+%\note{GW: an easy option is to discard enforcement of escaped addresses at all.
+%But it seems we can guard escaped addresses within the current contract scope.
+%We need to think about layered/stacked contracts of addresses (lax/picky).}
+Addresses, as first-class values, can of course escape from a function, e.g.
+by returning from the function or storing in external data structures.
+However, it is not always possible to enforce the specification
+of addresses when escaped to third-parties.
+For example, consider a function that returns an address equipped with
+conditions:
+\begin{lstlisting}
+EXAMPLE TODO
+function f(address a) returns (address) { return a; }
+\end{lstlisting}
+In this case, if the return address value crosses the boundary to other
+Ethereum programs (by external calls initiated by a third-party) that we do not
+have control, we are impotence to monitor if the conditions are violated.
+
+In spite of that, \lang does guarantee that addresses are completely monitored
+within the current Ethereum program's calling context, following a stack
+discipline.
+In other words, for an argument addresses \code{addr} of function \code{f},
+\lang is able to detect any violation of \code{addr}'s conditions before
+\code{f} returns (even if the call happens in other functions).
+We called this mechanism \emph{second-class monitoring}, borrowing Strachey's taxonomy
+of first- and second-class objects \cite{DBLP:journals/lisp/Strachey00}.
+This is already useful to prevent \note{XXX} \note{fwd ref}, especially when
+the address comes from an untrusted party.
+
+Similarly, when a guarded address is used as an argument to another address
+call, \note{we lose the control of ...}
+\fi
+
+\iffalse
+	\begin{lstlisting}
+function map(uint[] memory data, function (uint) pure returns (uint) f)
+  internal pure returns (uint[] memory r)
+{
+  r = new uint[](data.length);
+  for (uint i = 0; i < data.length; i++) {
+    r[i] = f(data[i]);
+  }
+}
+\end{lstlisting}
+
+We can specify the contract for function arguments too:
+\begin{lstlisting}
+  # { f | {x | x < 0} -> {y | y > 0} }
+  function map(int[] memory data, function (int) pure returns (int) f) { ... }
+\end{lstlisting}
+It might be too verbose -- so we can define those predicates separately for better readability/maintainability:
+\begin{lstlisting}
+  function greaterThanZero(int x) pure returns (bool) {
+    return x > 0;
+  }
+  function smallerThanZero(int x) pure returns (bool) {
+    return x < 0;
+  }
+  # { f | smallerThanZero -> greaterThanZero }
+  function map(int[] memory data, function (int) pure returns (int) f) { ... }
+\end{lstlisting}
+
+Functions contracts can be higher-order --
+it can take other function contracts
+as part of the spec. For example
+\zz{coooool!}
+\begin{lstlisting}
+  # TODO
+  function f(function (function (int) returns (int) g) h) { ... }
+\end{lstlisting}
+
+Function contracts are first-class -- so if this guarded function is escaped
+(e.g. by returning), the contract is still enforced:
+\begin{lstlisting}
+NEED AN EXAMPLE
+\end{lstlisting}
+\fi
+
+\iffalse
+\subsection{Comparison with \texttt{modifier}}
+
+\lang is a significant extension of Solidity which has different use scenarios from \texttt{modifier}s.
+Solidity \texttt{modifier}s are designed to change the behaviors of functions in a declarative way~\cite{soliditymod}, while \lang is introduced to declare specifications (pre/postconditions) to function invocations and its higher order arguments and return values.
+\lang differs from \texttt{modifier}s in the following aspects:
+First, \lang allows developers to specify postconditions for an invocation of a function.
+Second, \lang can support declaring specifications on higher-order values.
+Third, \lang features persistent monitoring of higher-order value specifications.
+The specifications are attached to higher-order values instead of only being checked at the declared location.
+This enables consistent specification enforcement throughout the entire contract.
+Such features are not supported by \texttt{modifier}s and are unique to \lang, offering developers more powerful means to declare high-level behavior specifications.
+\fi
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "paper"
+%%% End:

@@ -1,0 +1,68 @@
+\newcommand{\AddrCall}[3]{
+  \K \texttt{(} {#1} \texttt{).}{#2} \texttt{(} {#3} \texttt{)}
+}
+\newcommand{\Call}[2]{
+  {#1}\left({#2}\right)
+}
+\newcommand{\SpecCall}[3]{
+  {#1}\texttt{(} {#2} \texttt{)}: \texttt{(}{#3}\texttt{)}
+}
+\newcommand{\SpecCond}[3]{
+  \Keywd{requires}~ {#1} ~\Keywd{ensures}~ {#2} ~\Keywd{where}~ {#3}
+}
+\newcommand{\FunDef}[6]{
+  {#1} ~\Keywd{fun}~ {#2}\left({#3}\right): ~ \left({#5}\right) ~ {#4}  ~\left\{~ {#6} ~\right\}
+}
+\newcommand{\FunType}[4]{
+  \Keywd{fun}~ {#1}\texttt{(} {#2} \texttt{)}: \texttt{(} {#4} \texttt{)} ~ {#3} 
+}
+\newcommand{\FunTypeNR}[4]{
+  \Keywd{fun}~ {#1}\texttt{(} {#2} \texttt{)} ~ {#3} 
+}
+\newcommand{\Contract}[3]{
+  \Keywd{contract}~ {#1}~ \texttt{\{}~ {#2} \texttt{;}~ {#3} ~\texttt{\}}
+}
+\newcommand{\Interface}[2]{
+  \Keywd{interface}~ {#1}~ \texttt{\{} ~ {#2} ~\texttt{\}}
+}
+
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\I}{\mathcal{I}}
+\newcommand{\K}{\kappa}
+
+\begin{figure}
+\small
+  \begin{alignat*}{3}
+    &~ &n & \in && \mathbb{Z} \qquad b \in \mathbb{B} \qquad x,y,f,\K \in \Typ{Id}   \\
+    \Typ{Data Types}  &~ t, r && :=\ && \Keywd{unit} \mid \Keywd{int} \mid \Keywd{uint} \mid \Keywd{bool} \mid \Keywd{address} \mid \dots \\
+                      %&~   && \mid\ && \Keywd{mapping} ~t~ \Keywd{=>} ~t \mid \Keywd{struct} ~x~ \Keywd{\{}~ d^* ~\Keywd{\}} \\
+                      % &~   && \mid\ && \FunType{f}{t^*}{m}{t^*} \\
+    \Typ{Type~Decl}   &~ d && :=\ && t ~ x \hspace{3.6em}
+    \Typ{Values}       ~ v :=\ n \mid b \\
+    \Typ{Assignable}  &~ a && :=\ && d \mid x \hspace{3em}
+    \Typ{Target}       ~ \tau :=\    f \mid \K \Keywd{(} x \Keywd{).}f \\
+    %\Typ{Projection}  &~ p && :=\ && \Keywd{.}x \mid \Keywd{[}e\Keywd{]} \\
+    %\Typ{Call~Opts}   &~ \ell&& :=\ && \Keywd{value} \mid \Keywd{gas} \mid \dots \\
+    \Typ{Expressions} &~ e && :=\ && x \mid v \mid e ~op~ e % \mid e p^+ 
+                                \mid f \texttt{(} e^* \texttt{)}
+                                \mid \AddrCall{e}{f}{e^*} \\
+    % \mid x \mid e p^+ \\
+    \Typ{Statements}  &~ s && :=\ && d \mid e \mid s; s \mid a ~\Keywd{=}~ e \mid \Keywd{return}~ e \\ %\mid \Keywd{revert} \\
+                      &~   && \mid\ && \Keywd{if (}e\Keywd{) \{}~ s ~\Keywd{\} else \{}~ s ~\Keywd{\}} \\
+    \Typ{Spec}        &~ \sigma && :=\ && \SpecCall{\tau}{x^*}{y^*} \SpecCond{e}{e}{\sigma^*} \\
+    \Typ{Modifiers}   &~ m && :=\ && \Keywd{public} \mid \Keywd{private} \\
+    \Typ{Fun~Decl}    &~ d_f && :=\ && \FunType{f}{d^*}{m}{r^*} \\
+    \Typ{Fun~Def}     &~ \F&& :=\ && \sigma ~ d_f ~ \Keywd{\{} ~ s ~ \Keywd{\}} \\
+    \Typ{Contract}    &~ \C&& :=\ && \Contract{\K}{d^*}{\F^*} \\
+    \Typ{Interface}   &~ \I&& :=\ && \Interface{\K}{d_f^*}
+  \end{alignat*}
+  % \vspace{-2em}
+  \vspace{-1.5em}
+  \caption{The abstract syntax of $\lambda_\lang$.}
+  \label{fig:syntax}
+\end{figure}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "paper"
+%%% End:

@@ -1,0 +1,512 @@
+\vspace{-5pt}
+\section{Case Studies} \label{sec:case}
+
+% + 10 cases, sourced from XXX, per type, and its corresponding defenses.
+% + we shows that those defenses can be expressed with  a few lines of non-intrusive of \lang, decoupled from the main busness, making developers focus on the logic.
+% + we start with xxx, and discussion more on two representive cases.
+
+% In this section, we demonstrate
+This section showcases \lang's the expressiveness and effectiveness
+using 10 real-world smart contract attacks (\$8 million loss in total) and defenses. 
+We first provide a comprehensive overview of our case study, then 
+delve into two representative cases, illustrating
+how \lang specifications concisely and non-intrusively express security defenses, 
+% can be concisely expressed using a few non-intrusive \lang annotations and thereby 
+decoupling from their primary business logic. % showcasing that \lang can facilitate development by alleviating interference between low-level checks and business logic.
+
+
+\begin{figure}[t]
+% \begin{subfigure}[t]{0.49\textwidth}
+\centering
+\begin{lstlisting}[language=Consol,numbers=left,stepnumber=1,xleftmargin=0.8em,numberstyle=\ttfamily\color{gray},numbersep=3pt,firstnumber=1]
+$\HLBoxGreen{\mathit{IERC20(token).transferFrom(\_, \_, \_)\ returns\ (ret)\ requires\ ret}}$
+\end{lstlisting}
+\vspace{-0.45em}
+\begin{lstlisting}[numbers=left,stepnumber=1,xleftmargin=1em,numberstyle=\ttfamily\color{gray},numbersep=3pt,firstnumber=2]
+IERC20 public immutable token;
+\end{lstlisting}
+\vspace{-0.4em}
+\begin{lstlisting}[language=Consol,numbers=left,stepnumber=1,xleftmargin=0.8em,numberstyle=\ttfamily\color{gray},numbersep=3pt,firstnumber=3]
+$\HLBoxGreen{\mathit{withdraw(n,\ user)}}$
+$\HLBoxGreen{\mathit{requires\ \_canOperate(msg.sender,\ user)}} \HLBoxRedUnderlined{\mathit{\&\&\ \_balances[user]\ >=\ n}}$
+\end{lstlisting}
+\vspace{-0.45em}
+\begin{lstlisting}[numbers=left,stepnumber=1,xleftmargin=1em,numberstyle=\ttfamily\color{gray},numbersep=3pt,firstnumber=5]
+function withdraw(uint256 n, address user) {
+  $\HLBoxRed{\textcolor{gray}{\texttt{require(\_canOperate(msg.sender, user));}}}$
+  _balances[user] = _balances[user] - n;
+  $\HLBoxRed{\textcolor{gray}{\texttt{bool\ success =}}}$ token.transferFrom(address(this), user, n);
+  $\HLBoxRed{\textcolor{gray}{\texttt{require(success)}}}$  
+}
+function deposit(uint256 n, address user) {
+  $\HLBoxRed{\textcolor{gray}{\texttt{bool\ success =}}}$ token.transferFrom(user, address(this), n);
+  $\HLBoxRed{\textcolor{gray}{\texttt{require(success);}}}$  
+}
+\end{lstlisting}
+% \caption{The vulnerability in Umbrella project}
+% \label{fig:integer_hack}
+% \end{subfigure}
+% \hfill
+% \begin{subfigure}[t]{0.49\textwidth}
+% \centering
+% \begin{lstlisting}[language=Consol,numbers=left,stepnumber=1,xleftmargin=0.8em,numberstyle=\ttfamily\color{gray},numbersep=3pt,firstnumber=1]
+% IERC20(token).transferFrom(_, _, _) returns (ret) requires ret
+% \end{lstlisting}
+% \vspace{-0.45em}
+% \begin{lstlisting}[numbers=left,stepnumber=1,xleftmargin=1em,numberstyle=\ttfamily\color{gray},numbersep=3pt,firstnumber=2]
+% IERC20 public immutable token;
+% \end{lstlisting}
+% \vspace{-0.45em}
+% \begin{lstlisting}[language=Consol,numbers=left,stepnumber=1,xleftmargin=0.8em,numberstyle=\ttfamily\color{gray},numbersep=3pt,firstnumber=3]
+
+% withdraw(n, user) 
+% requires _canOperate(msg.sender, user) $\HLBox{\&\&\ \_balances[user] >= n}$
+% \end{lstlisting}
+% \vspace{-0.45em}
+% \begin{lstlisting}[numbers=left,stepnumber=1,xleftmargin=1em,numberstyle=\ttfamily\color{gray},numbersep=3pt, firstnumber=6]
+% function withdraw(uint256 n, address user) {
+%   _balances[user] = _balances[user] - n;
+%   token.transferFrom(address(this), user, n);
+% }
+
+% function deposit(uint256 n, address user) {
+%   ...
+%   token.transferFrom(user, address(this), n);
+% }
+% \end{lstlisting}
+% \caption{\lang-fixed}
+% \label{fig:integer_hack_fix}
+% \end{subfigure}
+\caption{Simplified code for Umbrella: The added \lang spec is highlighted in blue, 
+eliminating the assertions (in red). The additional condition for the fix is underlined.}
+\label{fig:integer}
+\end{figure}
+
+
+
+
+
+
+% To demonstrate the expressiveness and effectiveness of \lang, in this section, we investigate 10 real-world smart contracts attacks, and their corresponding defenses.
+% We shows that those defenses can be expressed with  a few lines of non-intrusive \lang annotation and decoupled from the main business logic, easing the development by eliminating the interfers amongs security checks and core business.
+% We first present the overall result of our case studies, and then discuss two representative cases.
+
+
+% In this section, we examine several real-world attacks, to demonstrate how \lang can be used to consolidate smart contracts. 
+% We now turn our attention to real-world cases and examine how \lang
+% can be used to consolidate smart contract programs.
+% These case studies are empirical evidence showing \lang is effective
+% in preventing attacks.
+
+% \vspace{-3mm}
+
+\bfpara{Data and Methodology.}
+%We study
+% Our case studies comprise the examination of 
+%10 real-world smart contract attacks 
+% that resulted
+%resulting in over
+% a total loss exceeding 
+%\$8 million loss.
+The 10 attacks are sourced from a reputable blockchain incident database~\cite{defihacklabs},
+which is widely used in the literature~\cite{DBLP:conf/icse/ZhangZXL23,DBLP:conf/icis/KeN22,DBLP:journals/iacr/ZhouXECWWQWSG22}.
+\Cref{tab:case} summarizes these attacks,
+where the first three columns present the projects' names, attack dates, and corresponding financial losses.
+% the names of the projects, the dates, and the financial loss associated with each attack, respectively. 
+Our collection covers 10 most frequent types of attacks (the 4th column) 
+listed in the database.
+
+We analyze each attack,
+% For each attack, we investigate the attack process, 
+identify the root cause, and pinpoint the vulnerable function. 
+%Following this, 
+We implement the most appropriate patch, 
+% comprised of 
+using low-level assertions (as suggested by postmortem incident reports from third-party auditors 
+\cite{consensys,trailofbits}), and then migrate the patch using \lang. 
+%highly-regarded security auditing 
+% To verify the validity of
+To validate the patches, we employ an Ethereum Archive Node~\cite{reth} to replay all 
+historical transactions on both
+patched contracts (assertion-based and \lang-based), 
+ensuing legitimate transactions succeed 
+while blocking the malicious ones.
+% the malicious ones are blocked.
+
+% Our case study consists of investigation of 10 real-world smart contract attacks sourced from a well-known blockchain incident database, which is widely used in literature.
+% For each attack, we investigate the attack process and identify the root cause as well as the vulnerable function.
+% After that, we apply the most proper patch written by low-level assertions (suggested by incident postmortems from well-reputated security auditing companies), and then rewrite the patched functions by \lang.
+% To demonstrate the correctness of patches, we leverage an Ethereum archive node to replay all the historical transactions upon the two versions of patched contracts (by assertions and \lang).
+% We ensure all the benign transactions can be successfully processed while the attacking one will be prevented. 
+% 
+
+% Table~\ref{tab:case} presents the summary of our case study. 
+% The first three columns presents the names of projects, the dates, and the fund loss of each attack, respectively.
+% The forth column denotes the types of attack.
+% It is worthnoting that, to demonstrate that \lang can assist in developing defend against various types of attacks, the attacks under investigation belong to the most common 10 attack types suggested by the database.
+
+\bfpara{Result Overview.}
+% the type of attack. 
+% It is noteworthy that, to 
+% the development of 
+All \lang-annotated programs successfully defend against these attacks. 
+% The last column
+Column ``LR'' in \Cref{tab:case} denotes the percentage of LoC reduced
+from the assertion-patched functions after adopting \lang.
+%translated into \lang specifications.
+% , in comparison to their original total lines. 
+%\xx{the definition ``in comparison... '' is confusing, removed. add back if it is wrong.}
+% For instance, 20\% means 20\% LoC in a function can be expressed as specifications using \lang.
+On average 36.5\% LoC in the assertion-patched functions can 
+be expressed as specifications with \lang.
+Since a substantial portion of these functions is dedicated to validation,
+\lang appears to be an ideal tool to decouple validations from business logic,
+hence improving readability and maintainability. \looseness=-1
+% an average of approximately \xx{why approximate?} 36.5\% LoC can be converted into \lang specification, 
+% This suggests that 
+% , separate from the core logic. 
+% Recall that, a
+%A high LR indicates \lang's modular design effectively enhances readability and 
+%maintainability and decouples the validation checks from core business logic. 
+% As illustrated by \Cref{fig:sturbyIntro}, the extensive interference of validation checks and core business flow makes the development of secure code a challenging task. The more the validation logic can be separated from the core logic, the easier it becomes to develop secure code. 
+%\zz{too verbose, revisit it later}\xx{revised}
+% \zz{todo: a better way to justify why we choose this criterion.}
+% Decoupling this validation logic contributes to a cleaner, more readable, and potentially more maintainable code structure.
+% On the other hand, it is noteworthy that
+\iffalse
+% \xx{consider removing following content, or significantly simplify this}
+Notably, 
+N00d and Dexible projects have a relatively smaller proportion of validation code. 
+% Upon further investigation, we find that 
+This is because they 
+% these two projects 
+already adopt a style that maintains pre- and post-conditions, as demonstrated in the subsequent code.
+\begin{lstlisting}
+function fill(SwapRequest request) returns (SwapMeta) {
+  preCheck(request, meta); // hand-crafted pre-conditons
+  SwapMeta meta = ... // code related to the business flow
+  require(meta.outAmount >= request.tokenOut.amount); }
+\end{lstlisting}
+This implies a deliberate intention on the part of the developers to have an effective and user-friendly mechanism to dictate and enforce contract behaviors.
+However, due to the limited expressiveness of the vanilla Solidity, some security defenses still reside in the core function bodies, leading developers to overlook certain subtle cases.
+It thereby underscores the motivation behind the development of \lang. 
+\fi
+
+% As shown in \Cref{tab:case}, on average, around 36.5\% lines of code can be converted into \lang annotations, indicating a large portion of code in functions are validation logic and not related to the core flow.
+% Decoupling these validation helps lead to cleaner, more readable, and potentially more maintainable code. 
+% Observe that N00d and Dexible have relatively small portion of validation code. 
+% Further investigation indicates that these two projects are already written in a style of maintaining pre-/post-coditions, as indicated by the following code. 
+% 
+% It indicates the developer's intention of having an effective and convenient means to specify and enforce contract behaviors.
+% However, due to the limited expressiveness of vanilla Solidity, a few security defenses still remain in the core function bodies, rendering the developers overlook some subtle cases.
+
+
+
+
+\bfpara{Case 1: Integer Underflow.}
+We use integer underflow, a notorious vulnerability type, as an example to demonstrate
+\lang's effectiveness in expressing the defense. %preventing attacks.
+% how \lang can facilitate development by minimizing the complexity of the code logic.
+\Cref{fig:integer} depicts a simplified code snippet from the Umbrella project.
+Specifically, the Umbrella project offers a staking service where users can stake and unstake their \texttt{token}s through the \texttt{deposit} (lines 11-14) and \texttt{withdraw} (lines 5-10) functions, respectively. 
+%Profits are allocated to users who stake an ample amount of tokens for a sufficient duration, whose implementation is excluded from the code snippet for simplicity.
+The \texttt{withdraw} function 
+% initially verifies if \texttt{msg.sender} has the right to operate the fund of \texttt{user} (line 4), 
+updates the \texttt{\_balances} of the user (line 7), transfers the staked tokens (line 8), and finally checks if the transfer is successful (line 9). 
+We skip the detail of the \texttt{deposit} function, except for its operation involving the transfer of tokens (lines 12-13), as well as several other functions operating on token transfers for the sake of simplicity.
+
+\input{tab_case_gas}
+
+\smallskip
+\noindent
+\underline{\textit{Attack.}}
+The vulnerability resides at line 5, where the attacker attempts to withdraw a large quantity of their staked tokens. 
+This action induces an integer underflow 
+% \footnote{This project is written in Solidity 0.7.5, which does not check overflow and underflow.} 
+in \texttt{\_balance[user]-n}, leading to an anomalously large \texttt{\_balance[user]} for the attacker. 
+Consequently, the attacker is able to transfer as many tokens as they wish. \looseness=-1
+
+\smallskip
+\noindent
+\underline{\textit{\lang-Patch.}}
+One effective patch to fix this vulnerability is to guard \texttt{withdraw} with
+a pre-condition \texttt{\_balance[user] > n}.
+However, considering the extensive security validations that must be placed 
+around every invocation of \texttt{token.transferFrom},
+there is a heightened risk that developers overlook these subtle 
+checks for integer underflow.
+As depicted in \Cref{fig:integer}, \lang's solution to this challenge is 
+to attach specifications to both function \texttt{withdraw} and calls of 
+address \texttt{token} (line 1).
+As the result, there is no need to repeatedly write validation code
+checking the same condition in multiple locations, since the storage address is persistently guarded, thanks to our whole-program translation.  
+
+This strategy reduces the number of duplicated assertions 
+currently interspersed across various invocation sites.
+Moreover, by moving all validation logic from \texttt{withdraw} function 
+to modularly defined specifications, it enhances the readability of both the business and validation logic.
+% become more readable.
+
+%developers can readily assess the 
+%validity of the logic without the risk of oversight.
+
+%enables developers to attach 
+%a specification directly to \texttt{token} (line 1) thereby expel the 
+
+
+
+% \Cref{fig:integer_hack} presents the code snippet of the Umbrella project, which is significantly simplified for illustrative purpose.
+% Specifically, Umbrella project provides a staking service where users can stake and unstake their \texttt{token}s via \texttt{\textbf{function} deposit} (lines 10-14) and \texttt{\textbf{function} withdraw} (lines 3-8), respectively.
+% Profit will be provided if users stake a sufficient amount of tokens for enough time, whose corresponding implementation is not related to the vulnerability and hence omitted.
+% With the \texttt{withdraw} function, the code first checks the \texttt{msg.sender} can operate the fund of \texttt{user} (line 4), update the \texttt{\_balances} of the user (line 5), transfers out the staked tokens (line 6), and check whether the transfer succeeds (line 7).
+% For function \texttt{deposit}, we ignore its detailed implementation except its operation upon transferring tokens (line 12).
+% Note that there are many other functions operating on token transfers but being omitted for simplicity. 
+% 
+% The vulnerabilty lies at line 5, where the attacker try to withdraw a large amount of staked tokens of him, which causes an integer overflow (or underflow) of \texttt{\_balance[user] - n} and result in a significantly large \texttt{\_balance[user]} for the attacker. 
+% The attacker can then transfer as many tokens as he wants.
+
+
+
+\bfpara{Case 2: Readonly Reentrancy.} 
+Readonly reentrancy represents another notorious class of vulnerabilities.
+%that has led to significant financial losses in the blockchain ecosystem. 
+% Conventional reentrancy can typically be mitigated by employing a Reentrancy Guard~\cite{XXX}\zz{cite} (typically implemented as a modifier). 
+% However, a newly discovered variant of this vulnerability, referred to as \textit{readonly reentrancy}, continues to pose considerable threats. 
+We use the Sturdy~\cite{sturdy} project 
+to illustrate how \lang can enhance readability and potentially help prevent such vulnerabilities. %\zz{readability?}
+
+\smallskip \noindent \underline{\textit{Attack.}}
+\Cref{fig:sturby_buggy} shows the simplified \texttt{getPrice} function from the Sturdy contract, 
+which determines the price of the Sturdy token. 
+The returned price of \texttt{getPrice} function is proportional to Ether price,
+which ratio is informed by \texttt{ORACLE.getRate} (line 7).
+However, the return value of \texttt{ORACLE.getRate} (shown in \Cref{fig:oracal}) can be manipulated by attackers,
+exploiting the fact that \texttt{getRate} (line 1, \Cref{fig:oracal}) returns a ratio of \texttt{this.balance / totalSupply}. 
+%The \texttt{withdraw} function (lines 2-7) enables users to withdraw their deposited Ether from the contract. 
+The ratio is manipulated by providing a malicious callback to a \texttt{withdraw} function (line 2-6),
+which first employs a low-level call to transfer the requested Ether amount back to \texttt{msg.sender}.
+Nevertheless, this low-level call allows \texttt{msg.sender} to callback \texttt{getPrice} 
+before \texttt{withdraw} finishes its update to \texttt{totalSupply}.
+At this moment, the nominator of the ratio \texttt{this.balance} has been lowered by the Ether transfer,
+causing \texttt{getRate} yields an abnormally low value.
+This, in turn, leads to \texttt{getPrice} returning an inflated value.
+Given that smart contracts rely on precise token prices, such miscalculations 
+due to this vulnerability can result in significant financial losses. 
+
+\smallskip
+\noindent \underline{\textit{\lang-Patch.}}
+The fix to this issue is to cross-validate 
+\texttt{getPrice} with the latest Sturdy price, which can be accessed 
+from \texttt{ORACLE.get}-\texttt{LatestPrice}. 
+In \lang, this check can be concisely expressed by a post-condition (lines 2-3 in \Cref{fig:sturby_fix}).
+
+%The reentrancy vulnerability in this scenario arises due to the callback 
+%to \texttt{msg.sender} invoked at line 4 in \Cref{fig:oracal}. 
+%In the callback, \texttt{msg.sender} can maliciously call \texttt{getPrice} 
+%function in \Cref{fig:sturby_buggy}, which subsequently calls \texttt{getRate} (\Cref{fig:oracal}). 
+% This function allows  before the callback returns. 
+% The attacker manipulates this by calling the \texttt{getPrice} function in \Cref{fig:sturby_buggy}, which subsequently calls \texttt{getRate} in \Cref{fig:oracal}.
+%Note that at this point, the state of \texttt{ORACLE} is only partially updated since 
+%\texttt{this.balance} already decreases at line 4 while \texttt{totalSupply} is not yet 
+%updated (to be updated at line 6).
+
+% As \texttt{this.balance} reduces automatically at the start of the \texttt{msg.sender.call}, and \texttt{totalSupply} decreases only after the callback, \texttt{getRate} returns an abnormally high value when it's called. 
+%For example, an attacker could sell a token worth \$1 for \$1 million.
+
+% This function first retrieves the price of Ether (i.e., the native cryptocurrency of the Ethereum network) (lines 2-3) from ChainLink~\cite{XXX}\zz{cite}, checks if the returned value is up-to-date (lines 4-5), and then calculates the exchange rate from Ether to its own token, thereby determining the token's price (line 7). 
+% Note that lines 9-10, which were introduced to patch the vulnerability, are not part of the original code.
+
+
+
+\begin{figure}[t]
+\centering
+\begin{lstlisting}[numbers=left,stepnumber=1,xleftmargin=1em,numberstyle=\ttfamily\color{gray},numbersep=3pt]
+function getRate() { return this.balance / totalSupply; }
+function withdraw() nonReentrancy {
+  uint balance = this.balance
+  msg.sender.call{value: balanceOf[msg.sender]}();
+  balanceOf[msg.sender] = 0;
+  totalSupply -= amount * totalSupply / balance;  }
+\end{lstlisting}
+\caption{The code snippet of \texttt{ORACLE} used by Sturdy.}
+\label{fig:oracal}
+\end{figure}
+
+
+
+
+\iffalse
+\subsection{Readonly Reentrancy}
+\todo{XX: background section TODO: explain callback function in background and what is tokens, how nonreentranct modifier works}
+\wac{I think it's better to introduce reentrancy here.}
+% Market.xyz readonly reentrancy attack.
+% Transfer return value not checked.
+% Li.fi attack: Arbitrary call to untrusted code (low-level call).
+
+% \paragraph{Severity} talk about severity for each case
+
+
+The first type of attack that \lang can prevent is \textit{readonly reentracy}.
+A reentrancy attack refers to an attacker hijacking the control flow of a vulnerable function and re-entering the same function or same contract before the vulnerable function's execution finishes.
+Such control flow hijacking breaks the atomicity of a function execution and can lead to catastrophic consequences.
+Modern contracts prevent reentrancy attacks by attaching \code{nonReentrant} guard \todo{cite} to functions so that a global lock is acquired and released before and after the function execution.
+However, a \code{readonly} (or \code{view}) function can only read from but not modify the contract's storage. 
+Due to its nature, it can't carry a \code{nonReentrant} modifier, which is implemented via a lock shared by all functions within the same contract, stored in the contract's storage \todo{(refer to the background section)}. 
+Readonly reentrancy attacks occur when a \code{readonly} (or \code{view}) function is invoked during the execution of another function that is modifying the contract's state, which can potentially lead to a situation where stale data is read.
+ % In DeFi transactions, while they are atomic off-chain, multi-legged transactions may exist in an ``in-between state", which is vulnerable to reentrancy.
+% Consequently, functions or contracts depending on the returned value may be exploited, resulting in undesirable or malicious behavior such as overpayment of protocol fees, rate manipulation, or incorrect pricing.
+
+\subsubsection{Attack} We use the Sturdy attack~\cite{sturbyHack} to illustrate this type of attack and how \lang can prevent it. The hack takes three entities, balancer, lending contract (victim), and the attacker.
+\paragraph{Balancer} is an automated portfolio manager and liquidity provider. It manages token pools, offering APIs for creating pools, trading tokens, and depositing or withdrawing tokens from the pool while imposing trading fees. Additionally, Balancer offers APIs that enable users to access exchange rates among tokens. 
+\paragraph{Lending Contract (victim)} is a type of smart contract that provides lending services, allowing users to lend their digital assets in return for interest. To borrow assets from the lending contract, users must provide collateral with a value exceeding the borrowing amount. The borrowed assets and the collateral can be different tokens (for instance, using USDC as collateral to borrow ETH).
+\paragraph{Attacker} The Attacker (A) exploits the Victim contract (V) by borrowing tokens from it. Let's assume that A has collateral in the form of token1, which is worth the value of $v_1$ at V, and intends to borrow a certain amount of token2, worth $v_2$ from V. Here, $v_2$ is typically strictly less than $v_1$ at the current exchange rate accessed from Balancer (B). By manipulating the exchange rate in B between token1 and token2, A is able to borrow token2 worth an excessive value $v_2'$ from V, where $v_2'$ significantly exceeds $v_1$, and worth \$\todo{xx} in the hack to Sturdy Finance. 
+
+
+We'll break down the exploit within a single transaction, conducted by A, in a step-by-step manner.  Prior to the attack transaction, A initially deposits a small amount of token1 into V as collateral to enable him/herself to borrow token2 from V later in the attack. 
+
+At the beginning of the hack transaction, A leverages a flash loan, enabling the borrowing of a vast amount of assets as long as these borrowed assets are paid back within the same transaction.
+A then deposits this large quantity of assets in the form of token2 \xx{correct? or doesn't matter} into B and immediately withdraws them via the \code{exitPool} function (line 6 \Cref{fig:sturbyHack}), which carries a \code{nonReentrant} modifier to prevent reentrant access.
+At line 8, the \code{exitPool} function calls the callback function of the recipient (i.e., A) before updating the pool token balance (line 9). Within this callback function, A proceeds to borrow a substantial amount of token2 from V. Given that some amount of token1 has been deposited by A at V, V needs to verify the exchange rate between token1 and token2 to ensure the borrowed value is less than the collateral's value. This is done via the \code{\_get} function in  \Cref{fig:sturby_buggy} which retrieves the exchange rate by calling B's \code{getRate} API (\Cref{fig:sturbyHack}), where the contract B is reentered.  However, 
+\code{getRate} 
+% is a \code{view} function, and thus 
+fails to fetch the latest exchange rate, because the rate is affected by the balance, which isn't updated until line 9 executes after returning from the callback function. As a result, \code{getRate} provides an incorrect exchange rate, significantly lower\todo{lower or higher?} than its true value. Consequently, A manages to borrow from V an amount of token2 that is far more valuable than the collateral, with a portion of it paid back to the flash loan.
+
+
+\subsubsection{Solution} 
+While it might seem straightforward to address this for Balancer by stopping using the \code{getRate} function as \code{readonly}, it's more crucial and urgent for the victim, the lending contract, to find a solution. One approach is to specify a post-condition for the \code{get} function, as shown in \Cref{fig:sturby_fix}. This post-condition prevents the attack by checking the Automated Market Maker (AMM) invariant\todo{cite}, which is violated during the reentrancy calls.
+
+
+
+\input{fig_sturby}
+\fi
+
+\iffalse
+\subsection{Arbitrary External Call}
+
+
+\input{fig_dexible}
+
+
+The second type of attack that \lang can prevent is unsafe arbitrary external calls, 
+which allows an attacker to make a contract call to any arbitrary function. 
+We illustrate this type of attack with the Dexible attack\todo{cite}.
+
+\subsubsection{Attack} 
+% ~\cite{lifiHack}. 
+\Cref{fig:dexibleHack} shows a simplified version of the vulnerable function within the Dexible contract, 
+the \texttt{fill} function,
+% function,  an internal function that facilitates
+which facilitates asset swapping within a smart contract. 
+% \xx{why is the library called libswap not contract lifi}
+
+To call the \code{fill} function, users need to provide \code{request} and \code{meta}. The  \code{request} is an object of \code{SwapTypes.SwapRequest}, 
+which contains an entry \code{routes}, a tuple of \code{SwapTypes.RouterRequest}, each of which describes a step in the swap operation including \todo{xxx} \todo{meta ...}
+% , which contains entries \texttt{callTo} and \texttt{callData}. 
+% A user can make a 
+Transactions are made by invoking \texttt{rr.router.call} with the provided \code{rr.routerData}. Since there is no check on the \code{rr}, this enables users to make the Dexible contract (the victim contract) call other arbitrary functions, with the victim contract being the message sender instead of the users (e.g., attackers) themselves. 
+
+Dexible incorporates an \textit{approve} mechanism \xx{correct?}, where users can give control of their funds to it so that Dexible has permission to transfer their funds. Specifically, consider Bob (the victim user) grants Dexible approval to manage his funds in ERC20. Alice (the attacker), exploits this approval by calling the \code{fill} function with a \code{request}, where \code{request.routes} consists a \code{SwapTypes.RouterRequest} object, say \code{rr}, with \code{rr.router} set to USDC, and \code{rr.routerData} is \code{transferFrom(Bob, Alice, 100)}. Consequently, Alice executes a transaction that transfers funds (i.e., 100 USDC tokens) from Bob's account to hers. \xx{correct?}
+
+
+\subsubsection{Solution} A straightforward approach to fix the vulnerability in the contract is to incorporate guards for the \code{rr.router} and \code{rr.routerData} (line xx and xx). This could be done with a series \code{require} statements, e.g., enforce the value of \code{bytes4(rr.routerData[:4])}, therefore prevent arbitrary calls by maintaining a "whitelist".  With \lang, this can be efficiently accomplished using the following spec:
+
+\begin{lstlisting}[language=Consol]
+fill(request, meta) returns (meta)
+requires _checkRequest(request)
+ensures meta.out >= request.tokenOut.amount
+\end{lstlisting}
+
+In this case, \lang enables the decoupling of decalring (\spec{\_checkRequest}) and usage (within the \code{fill} function) of the specifications. Furthermore, our specification can replace the \code{require} statement in line 10 (\Cref{fig:dexibleHack}) with an \spec{ensures}-clause to enforce this post-condition.
+\fi
+
+
+
+\begin{comment}
+    \paragraph{Solution} After the attack, LiFi implemented a whitelist mechanism, which allows calls only to pre-approved contracts and functions. Such a blocking mechanism requires xxxx \todo{shortcomings}. \lang can effectively prevent such attack with a single-place specification. We provide two solutions with \lang in Fig.~\ref{fig:lifi_solution}.
+
+The first solution is by adding a pre-condition to the first-order argument (Section~\todo{3.1}), i.e., \spec{\_swap}. With this spec, \lang conducts a check on its entries, \spec{callTo} and \spec{callData}, via a \spec{require}-clause that ensures the contracts and functions being called are indeed on the whitelist. 
+The second solution treats \spec{\_swap.callTo} as a higher-order argument (Section~\todo{3.2}) and enforces its properties via a \spec{where}-clause. 
+
+Functionally, both solutions perform checks on the enforced conditions on the contract being called. The only distinction is the time the checks are performed. With the first spec, the check is conducted immediately upon entering the \texttt{swap} function, as the spec is on the argument of the function. With the second spec, the check is performed when \texttt{\_swap.callto.call} is actually invoked. 
+Both the specs are effective in preventing the attack. We offer these as two alternative solutions to underscore the flexibility and adaptability of \lang.
+
+\end{comment}
+
+
+
+
+\iffalse
+\subsection{Return Value Not Check}
+\fi
+
+\iffalse
+\begin{table}[t]
+\centering
+\caption{Summary of case studies. \textit{Loss} denotes the monetary loss measured in US Dollars, and \textit{LR} denotes the percentage of lines from vulnerable functions that are converted into behavioral contracts, relative to the original total lines in these functions.}
+\small
+\setlength{\tabcolsep}{3.5pt}
+\label{tab:case}
+\begin{tabular}{lcrlc}
+\toprule
+\multicolumn{1}{c}{\textbf{Project}} & \textbf{Date}     & \multicolumn{1}{c}{\textbf{Loss}} & \multicolumn{1}{c}{\textbf{Attack Type}} & \multicolumn{1}{c}{\textbf{LR (\%)}} \\
+\midrule
+Umbrella~\cite{unbrellaHack}                    & 03-20-22 & 700K                     & Integer Overflow                & 33.33                           \\
+EFLeverVault~\cite{eflevervaultHack}                & 10-14-22 & 1M                       & Business Logic Flaw    & 25.00                           \\
+N00d~\cite{n00dHack}                        & 10-26-22 & 29K                      & Reentrancy                      & 11.11                           \\
+Dexible~\cite{dexibleHack}                     & 02-17-23 & 1.5M                     & Arbitrary External Call         & 11.76                           \\
+SushiSwap~\cite{sushiSwapHack}                   & 04-09-23 & 3.3M                     & Unchecked User Input            & 54.55                           \\
+SwaposV2~\cite{swaposv2Hack}                    & 04-16-23 & 468K                     & Erroneous Accounting            & 25.00                           \\
+Unknown~\cite{unknownHack}               & 05-31-23 & 111K                     & Missing Slippage Check          & 30.00                           \\
+Sturdy~\cite{sturbyHack}                      & 06-12-23 & 800K                     & Read Only Reentrancy            & 57.14                           \\
+LEVUSDC~\cite{levusdcHack}                     & 06-15-23 & 105K                     & Access Control                  & 33.33                           \\
+Bao~\cite{baoHack}                & 07-04-23 & 46K                      & Inflation Manipulate            & 83.33    \\
+\bottomrule
+\end{tabular}
+\end{table}
+\fi
+
+\iffalse
+\begin{table}
+	\centering
+	\caption{Summary of case studies.
+ % \wac{The dForce link is broken. I changed it.}\xx{we should use reference (not hyperlink)?}\wac{Not sure. Maybe you are right.} 
+ }
+	\label{tab:case}
+	\begin{tabular}{cccc}
+		\toprule
+		\textbf{Type} & \textbf{Case} & \textbf{Date} & \textbf{Loss} \\
+		\midrule
+		\multirow{4}{*}{\rotatebox[origin=c]{90}{\begin{tabular}{@{}c@{}}Readonly \\Reentrancy\end{tabular}}}
+		& Sentiment~\cite{sentimentHack} & 04/05/23 & \$1M \\
+		& dForce~\cite{dforceHack} & 02/10/23 & \$3.65M \\
+		& MidasCapital~\cite{midascapitalHack} & 01/16/23 & \$650K \\
+		& Market.xyz~\cite{marketxyzHack} & 10/24/22 & \$220K \\
+
+		\midrule
+
+		\multirow{10}{*}{\rotatebox[origin=c]{90}{Arbitrary External Call}}
+		& MIMSpell~\cite{mimspellHack} & 06/20/23 & \$17K \\
+		& Phoenix~\cite{phoenixHack} & 03/07/23 & \$100K \\
+		& RevertFinance~\cite{revertFinanceHack} & 02/18/23 & \$30K \\
+		& Dexible~\cite{dexibleHack} & 02/12/23 & \$1.5M \\
+		& CowSwap~\cite{cowswapHack} & 02/07/23 & \$120K \\
+		& Rubic~\cite{rubicHack} & 12/25/22 & \$1.5M \\
+		& BrahTOPG~\cite{brahtopgHack} & 11/09/22 & \$89K \\
+		& MEV\_0ad8~\cite{mev0ad8Hack} & 11/08/22 & \$282K \\
+		& Rabby~\cite{rabbyHack} & 10/11/22 & \$200K \\
+		& Li.Fi~\cite{lifiHack} & 03/20/22 & \$570K \\
+
+		% \midrule
+
+		% \multirow{5}{*}{\rotatebox[origin=c]{90}{\begin{tabular}{@{}c@{}}Return Value\\Not Check\end{tabular}}}
+		% & & & \\
+		% & & & \\
+		% & \href{https://medium.com/@QubitFin/protocol-exploit-report-305c34540fa3}{Qubit} & 01/28/22 & \$80M \\
+		% & & & \\
+		% & & & \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+\fi
+
+% reentrancy: Checks, Effects, Interactions naturally?

@@ -6,7 +6,14 @@
 \definecolor{ccomment}{HTML}{3F7F5F}
 \definecolor{cstring}{HTML}{2A0099}
 
+%\definecolor{csspec}{HTML}{135579}
+\definecolor{csspec}{HTML}{021d66}
+
 \colorlet{shadecolor}{light-gray!40}
+
+\newcommand{\commentstyle}[1]{\color{ccomment}\itshape{#1}}
+\newcommand{\keywordstyle}[1]{\color{ckeyword}\bfseries{#1}}
+\newcommand{\stringstyle}[1]{\color{cstring}\text{#1}}
 
 \lstdefinelanguage{Solidity}%
 {morekeywords = {
@@ -20,7 +27,7 @@
   public, private, virtual, override,
   true, false, bool,
   bytes, bytes32,
-  uint, uint8, uint16, uint32, uint64, uint128, uint256,
+  uint, uint8, uint16, uint32, uint64, uint128, uint160, uint256,
   int, int8, int16, int32, int64, int128, int256,
   address, string,
   require, assert, revert, try, catch,
@@ -32,13 +39,48 @@
   morecomment = [l]//,%
   morecomment = [s]{/*}{*/},%
   morestring = [b]",%
+  columns=flexible,
+  %morestring=[b]',%
+  showstringspaces = false%
+}[keywords,comments,strings]%
+
+\newcommand{\speckeywordstyle}[1]{\color{csspec}{\bfseries{#1}}}
+
+\lstdefinelanguage{Consol}%
+{morekeywords = {
+  abstract, contract, interface, is,
+  ether, szabo, finney, wei,
+  seconds, minutes, hours, days, weeks, years,
+  function, constructor, memory, calldata,
+  for, if, new
+  mapping,
+  internal, external, pure, view, payable, return, returns,
+  public, private, virtual, override,
+  %true, false, bool,
+  %bytes, bytes32,
+  %uint, uint8, uint16, uint32, uint64, uint128, uint256,
+  %int, int8, int16, int32, int64, int128, int256,
+  %address, string,
+  require, assert, revert, try, catch,
+  requires, ensures, where
+  },%
+  sensitive,%
+  %identifierstyle = \color{blue},
+  basicstyle=\itshape\small\color{csspec},
+  columns=fullflexible,
+  commentstyle=\commentstyle,
+  keywordstyle=\speckeywordstyle,
+  moredelim = *[l][\itshape]{\#},
+  morecomment = [l]//,%
+  morecomment = [s]{/*}{*/},%
+  morestring = [b]",%
   %morestring=[b]',%
   showstringspaces = false%
 }[keywords,comments,strings]%
 
 \lstset{
   language=Solidity,%
-  backgroundcolor=\color{shadecolor},%
+  %backgroundcolor=\color{shadecolor},%
   mathescape=true,%
 %  columns=[c]fixed,%
   aboveskip=2pt,%\smallskipamount,
@@ -85,17 +127,18 @@
 }
 
 \definecolor{listingbg}{RGB}{240, 240, 240}
-
-\newcommand{\commentstyle}[1]{\color{ccomment}\itshape{#1}}
-\newcommand{\keywordstyle}[1]{\color{ckeyword}\bfseries{#1}}
-\newcommand{\stringstyle}[1]{\color{cstring}\text{#1}}
-
 \lstnewenvironment{listing}{\lstset{language=Solidity}}{}
 \lstnewenvironment{listingtiny}{\lstset{language=Solidity,basicstyle=\scriptsize\ttfamily}}{}
 
 \newcommand{\code}[1]{\lstinline[language=Solidity,columns=fixed,basicstyle=\ttfamily]|#1|}
+\newcommand{\spec}[1]{\lstinline[language=Consol,columns=fullflexible]|#1|}
 
-\renewcommand{\paragraph}[1]{\vspace{0.15em}\noindent\textit{\textbf{#1.}}}
+%\renewcommand{\paragraph}[1]{\vspace{0.15em}\noindent\textit{\textbf{#1.}}}
+
+
+\newcommand{\bfpara}[1]{\vspace{0.03in}\noindent\textbf{#1}}
+\newcommand{\itpara}[1]{\vspace{0.03in}\noindent\textit{\textbf{#1 }}}
+
 
 % ----- formal
 
@@ -108,11 +151,13 @@
 \newcommand{\todo}[1]{\note{TODO: #1}}
 \newcommand{\wac}[1]{{\color{orange}[WAC: #1]}} % Wuqi's comment
 \newcommand{\zz}[1]{{\color{blue}[ZZ: #1]}} % ZZ's comment
-\newcommand{\yy}[1]{{\color{Plum}[YY: #1]}} % YY's comment
+\newcommand{\yy}[1]{{\color{violet}[YY: #1]}} % YY's comment
 \newcommand{\xx}[1]{{\color{purple}[XX: #1]}} % YY's comment
 \newcommand{\rev}[1]{\note{Revision: #1}}
 \newcommand{\silent}[1]{}
 \newcommand{\hl}[1]{\setlength{\fboxsep}{0pt}\colorbox{light-gray}{#1}}
+
+
 
 \newcommand{\lang}{\textsc{ConSol}\xspace}
 \newcommand{\corelang}{$\lambda_\lang$\xspace}
@@ -129,8 +174,8 @@
 
 % ----- syntax
 \newcommand{\optional}[1]{{\color{gray}\left[{\color{black}#1}\right]}}
-\newcommand{\state}{\sigma} % global state of all contracts
-\newcommand{\store}[1]{\delta_{#1}} % state of a individual contract
+%\newcommand{\state}{\sigma} % global state of all contracts
+%\newcommand{\store}[1]{\delta_{#1}} % state of a individual contract
 
 \newcommand{\addr}{\mathcal{A}}
 \newcommand{\bddr}{\mathcal{B}}
@@ -141,4 +186,50 @@
 \newcommand{\sender}{\mathtt{sender}}
 
 % ------ semantics
-\newcommand{\denot}[1]{\llbracket#1\rrbracke}
+\newcommand{\denot}[1]{\llbracket{#1}\rrbracket}
+
+% smart colored highlight box
+\newcommand{\HLBox}[2][teal!12]{\ensuremath{\mathchoice%
+  {\setlength{\fboxsep}{.5ex}\colorbox{#1}{$\displaystyle#2$}}%
+  {\setlength{\fboxsep}{.5ex}\colorbox{#1}{$\textstyle#2$}}%
+  {\setlength{\fboxsep}{.5ex}\colorbox{#1}{$\scriptstyle#2$}}%
+  {\setlength{\fboxsep}{.5ex}\colorbox{#1}{$\scriptscriptstyle#2$}}}}%
+\newcommand{\HLBoxGreen}[2][teal!12]{\ensuremath{\mathchoice%
+  {\setlength{\fboxsep}{.5ex}\colorbox{#1}{$\displaystyle#2$}}%
+  {\setlength{\fboxsep}{.5ex}\colorbox{#1}{$\textstyle#2$}}%
+  {\setlength{\fboxsep}{.5ex}\colorbox{#1}{$\scriptstyle#2$}}%
+  {\setlength{\fboxsep}{.5ex}\colorbox{#1}{$\scriptscriptstyle#2$}}}}%
+\newcommand{\HLBoxRed}[2][red!12]{\ensuremath{\mathchoice%
+  {\setlength{\fboxsep}{.5ex}\colorbox{#1}{$\displaystyle#2$}}%
+  {\setlength{\fboxsep}{.5ex}\colorbox{#1}{$\textstyle#2$}}%
+  {\setlength{\fboxsep}{.5ex}\colorbox{#1}{$\scriptstyle#2$}}%
+  {\setlength{\fboxsep}{.5ex}\colorbox{#1}{$\scriptscriptstyle#2$}}}}%
+
+  \newcommand{\HLBoxRedUnderlined}[2][teal!12]{\ensuremath{\mathchoice%
+  {\setlength{\fboxsep}{.5ex}\colorbox{#1}{\underline{$\displaystyle#2$}}}%
+  {\setlength{\fboxsep}{.5ex}\colorbox{#1}{\underline{$\textstyle#2$}}}%
+  {\setlength{\fboxsep}{.5ex}\colorbox{#1}{\underline{$\scriptstyle#2$}}}%
+  {\setlength{\fboxsep}{.5ex}\colorbox{#1}{\underline{$\scriptscriptstyle#2$}}}}}%
+
+
+
+\definecolor{myyellow}{HTML}{DFE674}
+\definecolor{myblue}{HTML}{F49EA0}
+
+
+% ------ results
+\newcommand{\numCaseStudied}{10~}
+\newcommand{\gasoverhead}{{\color{red}{[X]\%~}}}
+
+
+
+%------------ special notations ----------------
+% minimize the white space between tables and figures.
+\captionsetup[figure]{font=bf,skip=6pt}%set figure caption
+\captionsetup[table]{font=bf,skip=6pt}%set table caption
+\newcommand{\distance}{8pt}
+\setlength{\textfloatsep}{6pt}%set distance between figure/tables on the top/bottom with text
+\setlength{\floatsep}{\distance}%set distance between figures or tables
+\setlength{\intextsep}{\distance}%set distance between figures/tables in text with text
+\setlength{\dbltextfloatsep}{\distance} %distance between a figure/table spanning both columns and the text;
+\setlength{\dblfloatsep}{\distance} %distance between two figures/tables spanning both columns.

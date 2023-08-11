@@ -1,52 +1,55 @@
 \newcommand{\AddrCall}[3]{
-  {#1}\Keywd{\{}{#2}\Keywd{\}(}{#3}\Keywd{)}
+  {#1} \texttt{\{} {#2}\texttt{\}}\texttt{(} {#3} \texttt{)}
 }
 \newcommand{\Call}[2]{
-  {#1}\Keywd{(}{#2}\Keywd{)}
+  {#1}\left({#2}\right)
 }
 \newcommand{\SpecCall}[4]{
-  {#1}\Keywd{\{}{#2}\Keywd{\}(}{#3}\Keywd{)} ~\Keywd{returns (}{#4}\Keywd{)}
+  {#1}\texttt{\{} {#2} \texttt{\}}\texttt{(} {#3} \texttt{)} ~\Keywd{returns}~ \texttt{(}{#4}\texttt{)}
 }
 \newcommand{\SpecCond}[3]{
   \Keywd{requires}~ {#1} ~\Keywd{ensures}~ {#2} ~\Keywd{where}~ {#3}
 }
 \newcommand{\FunDef}[6]{
-  {#1} ~\Keywd{function}~ {#2}\Keywd{(}{#3}\Keywd{)} ~ {#4} ~\Keywd{returns (}{#5}\Keywd{)} ~\Keywd{\{}~ {#6} ~\Keywd{\}}
+  {#1} ~\Keywd{function}~ {#2}\left({#3}\right) ~ {#4} ~\Keywd{returns}~ \left({#5}\right) ~\left\{~ {#6} ~\right\}
 }
 \newcommand{\FunType}[4]{
-  \Keywd{function}~ {#1}\Keywd{(}{#2}\Keywd{)} ~ {#3} ~\Keywd{returns (}{#4}\Keywd{)}
+  \Keywd{function}~ {#1}\texttt{(} {#2} \texttt{)} ~ {#3} ~\Keywd{returns}~ \texttt{(} {#4} \texttt{)}
 }
 \newcommand{\Contract}[3]{
-  \Keywd{contract}~ {#1}~ \Keywd{\{}~ {#2}; {#3} ~\Keywd{\}}
+  \Keywd{contract}~ {#1}~ \texttt{\{}~ {#2} \texttt{;}~ {#3} ~\texttt{\}}
 }
 \newcommand{\Interface}[2]{
-  \Keywd{interface}~ {#1}~ \Keywd{\{}~ {#2} ~\Keywd{\}}
+  \Keywd{interface}~ {#1}~ \texttt{\{} ~ {#2} ~\texttt{\}}
 }
 
 \newcommand{\F}{\mathcal{F}}
 \newcommand{\C}{\mathcal{C}}
 \newcommand{\I}{\mathcal{I}}
+\newcommand{\K}{\mathcal{K}}
 
 \begin{figure}
   \begin{alignat*}{3}
-    &~ n && \in && \mathbb{Z} \qquad b \in \mathbb{B} \qquad x,y,f \in \Typ{Id}   \\
-    \Typ{Data Types} &~ t && :=\ && \Keywd{int} \mid \Keywd{uint} \mid \Keywd{bool} \mid \Keywd{address} \\
-                &~   && \mid\ && \Keywd{mapping} ~t~ \Keywd{=>} ~t \mid \Keywd{struct} ~x~ \Keywd{\{}~ d^* ~\Keywd{\}} \\
-    \Typ{Type~Decl}    &~ d && :=\ && t ~ x \\
+    &~ n && \in && \mathbb{Z} \qquad b \in \mathbb{B} \qquad x,y,z,f,\K \in \Typ{Id}   \\
+    \Typ{Data Types}  &~ t && :=\ && \Keywd{int} \mid \Keywd{uint} \mid \Keywd{bool} \mid \Keywd{address} \\
+                      &~   && \mid\ && \Keywd{mapping} ~t~ \Keywd{=>} ~t \mid \Keywd{struct} ~x~ \Keywd{\{}~ d^* ~\Keywd{\}} \\
+                      % &~   && \mid\ && \FunType{f}{t^*}{m}{t^*} \\
+    \Typ{Type~Decl}   &~ d && :=\ && t ~ x \\
     \Typ{Values}      &~ v && :=\ && n \mid b \\
     \Typ{Projection}  &~ p && :=\ && \Keywd{.}x \mid \Keywd{[}e\Keywd{]} \\
-    \Typ{Expressions} &~ e && :=\ && x \mid v \mid e ~op~ e \mid e p^+ \mid \AddrCall{e}{(x: e)^*}{e^*} \\
-    \Typ{Assignable}  &~ a && :=\ && d \mid x \mid e p^+ \\
+    \Typ{Call~Opts}   &~ \ell&& :=\ && \Keywd{value} \mid \Keywd{gas} \mid \dots \\
+    \Typ{Expressions} &~ e && :=\ && x \mid v \mid e ~op~ e \mid e p^+ \mid \AddrCall{e}{(\ell: e)^*}{e^*} \\
+    \Typ{Assignable}  &~ a && :=\ && d \mid x p^* \\ % \mid x \mid e p^+ \\
     \Typ{Statements}  &~ s && :=\ && d \mid e \mid s; s \mid a ~\Keywd{=}~ e \mid \Keywd{return}~ e \mid \Keywd{revert} \\
                       &~   && \mid\ && \Keywd{if (}e\Keywd{) \{}~ s ~\Keywd{\} else \{}~ s ~\Keywd{\}} \\
-    \Typ{Target}      &~ \tau && :=\ && f \mid x \Keywd{(} y p^* \Keywd{).}f \\
-    \Typ{Spec}        &~ \sigma && :=\ && \SpecCall{\tau}{(x : y)^*}{x^*}{y^*} \\
+    \Typ{Target}      &~ \tau && :=\ && f \mid \K \Keywd{(} x p^* \Keywd{).}f \\
+    \Typ{Spec}        &~ \sigma && :=\ && \SpecCall{\tau}{(\ell : z)^*}{x^*}{y^*} \\
                       &~        &&     && \SpecCond{e}{e}{\sigma^*} \\
     \Typ{Modifiers}   &~ m && :=\ && \Keywd{public} \mid \Keywd{private} \\
     \Typ{Fun~Decl}    &~ d_f && :=\ && \FunType{f}{d^*}{m}{t^*} \\
     \Typ{Fun~Def}     &~ \F&& :=\ && \sigma ~ d_f ~ \Keywd{\{} ~ s ~ \Keywd{\}} \\
-    \Typ{Contract}    &~ \C&& :=\ && \Contract{x}{d^*}{\F^*} \\
-    \Typ{Interface}   &~ \I&& :=\ && \Interface{x}{d_f^*}
+    \Typ{Contract}    &~ \C&& :=\ && \Contract{\K}{d^*}{\F^*} \\
+    \Typ{Interface}   &~ \I&& :=\ && \Interface{\K}{d_f^*}
   \end{alignat*}
   % TODO(GW): spec callee with interface
   \caption{The abstract syntax of $\lambda_\lang$.}

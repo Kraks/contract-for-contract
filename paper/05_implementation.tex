@@ -1,0 +1,64 @@
+\section{Implementation and Optimizations}\label{sec:impl}
+
+We implement \lang as a preprocessor of Solidity programs annotated with
+\lang's specifications. Given an input program, \lang generates a Solidity
+program following the translation outlined in \Cref{sec:model}.
+The output programs can be compiled and deployed using off-the-shelf Solidity
+toolchains without any further modification.
+\lang is implemented with \code{solc-typed-ast}~\cite{solctypedast},
+% the help of \note{X} parser, 
+which can also reify a modified AST back to a Solidity program.
+%\xx{the \lang spec is parsed with~\cite{antlr4}}
+
+Our implementation handles Solidity features that are not covered by
+the formalization, e.g., mappings, structs, and low-level calls.
+Additionally, programmers can attach specifications to storage fields,
+which can be desugared to core forms. This is useful to produce guarded
+addresses at contract initialization time.
+
+%\todo{syntax sugar: top-level initialization spec --> translate constant to immutable --> add function}
+
+%\todo{what we didn't model in \Cref{sec:model}: mapping, structs, arrays, low-level calls, HO functions}
+%Our current implementation does not handle inlined assembly. \todo{why}
+
+%Contracts for higher-order functions are another future work when Solidity has 
+%proper support for lambda expressions. Without such proper support from the base language,
+%\todo{...}
+
+% \subsubsection*{\textbf{Optimizations}} 
+% \smallskip \noindent \textbf{Optimizations.}
+\bfpara{Optimizations.}
+The translation presented in \Cref{fig:translation} works with a set of runtime functions.
+These functions cooperate with the runtime representation of guarded addresses.
+We now discuss an optimized implementation that \emph{does not incur additional storage overhead}
+in the generated code.
+
+The optimization exploits the fact that the smallest unit for storage is 256 bits 
+in the Ethereum Virtual Machine. Storing or loading for data smaller than 256 bits
+incurs the same gas overhead as data of 256 bits.
+However, the size of an address is 160 bits, which spares additional 96 bits that
+can be used to encode specifications up to 96 predicates.
+Therefore, we use \code{uint256} to represent guarded addresses, where the 96 MSB
+encodes attached specifications and 160 LSB is preserved for addresses.
+
+With this representation, our translation assigns numbers to conditions of addresses.
+The correspondence between the assigned number and their runtime functions is emitted 
+in the generated code.
+Those runtime functions then can be easily implemented: The $\mathit{wrap}$ function coerces a 
+\code{uint160} to \code{uint256}, and $\mathit{unwrap}$ function discards the 96 MSB of an \code{uint256} value.
+The $\mathit{attachSpec}$ function only modifies the 96 MSB of a guarded address representation.
+The $\mathit{dispatch}$ function can check which bits in the 96 MSB of the guarded addresses
+are set, therefore knows which predicates to check.
+
+The total number of conditions attached to addresses cannot exceed 96.
+However, so far, we have not encountered real cases that need to use more than 96 address conditions. 
+If with more conditions, our translation could fall back to the naive encoding discussed in \Cref{sec:translation}.
+
+\iffalse
++ representing guarded address
++ eliminate redundant calls - the compiler should do so ... (e.g., from guarded to worker)
++ combining pre-/post-conditions in different functions (many functions share the same precondition), 
+  to reduce the number of specs 
++ Syntax sugar?
+\fi
+%Question: where to place modifier?
