@@ -434,7 +434,7 @@ contract ERC721 is ERC165, IERC721 {
   )
     public
   {
-      _transferFrom_guare(from, to, tokenId);
+      _transferFrom_guard(from, to, tokenId);
   }
 
   // @custom:consol

@@ -70,7 +70,7 @@ library SafeMath {
   // @custom:consol
   //    add(a, b) returns (c)
   //    ensures c >= a
-  function add(uint256 a, uint256 b) private pure returns (uint256 c) {
+  function _add_guard(uint256 a, uint256 b) private pure returns (uint256 c) {
     c = _add_worker(a, b);
     _add_post(a, b, c);
     return c;
@@ -443,7 +443,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   // @custom:consol
   //    transferFrom(_from, _to, _tokenId)
   //    requires _from != address(0) && _to != address(0)
-  function transferFrom(
+  function _transferFrom_guard(
     address _from,
     address _to,
     uint256 _tokenId
@@ -655,7 +655,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
    * @param _tokenId uint256 ID of the token to be removed from the tokens list of the given address
    */
   function removeTokenFrom(address _from, uint256 _tokenId) internal {
-      _removTokenFrom_guard(_from, _tokenId);
+      _removeTokenFrom_guard(_from, _tokenId);
   }
 
   // @custom:consol

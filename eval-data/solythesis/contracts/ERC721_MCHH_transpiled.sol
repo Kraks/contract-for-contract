@@ -703,7 +703,7 @@ contract ERC721 is ERC165, IERC721 {
    * @param tokenId uint256 ID of the token to be added to the tokens list of the given address
    */
   function _addTokenTo(address to, uint256 tokenId) internal {
-      __addTokenTo(to, tokenId);
+      __addTokenTo_guard(to, tokenId);
   }
 
   // @costom:consol

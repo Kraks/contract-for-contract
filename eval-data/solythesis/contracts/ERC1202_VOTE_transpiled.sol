@@ -24,12 +24,12 @@ contract AdvancedTokenVote1202 {
     _createIssue_guard(issueId, _tokenAddr, options_, qualifiedVoters_, issueDesc_);
   }
 
-  // @custom:consol 
-  // createIssue(issueId, _tokenAddr, options_, qualifiedVoters_, issueDesc_) 
+  // @custom:consol
+  // createIssue(issueId, _tokenAddr, options_, qualifiedVoters_, issueDesc_)
   // 	requires options.length >= 2 && options[issudId].length == 0
   function _createIssue_guard(uint issueId, address _tokenAddr, uint[] memory options_, address[] memory qualifiedVoters_, string memory issueDesc_) private {
     _createIssue_pre(issueId, _tokenAddr, options_, qualifiedVoters_, issueDesc_);
-    _createIssue_workder(issueId, _tokenAddr, options_, qualifiedVoters_, issueDesc_);
+    _createIssue_worker(issueId, _tokenAddr, options_, qualifiedVoters_, issueDesc_);
   }
 
   function _createIssue_pre(uint issueId, address _tokenAddr, uint[] memory options_, address[] memory qualifiedVoters_, string memory issueDesc_) private {
@@ -54,8 +54,8 @@ contract AdvancedTokenVote1202 {
     return _vote_guard(issueId, option);
   }
 
-  // @custom:consol 
-  // 	vote(issueId, option) returns (b) 
+  // @custom:consol
+  // 	vote(issueId, option) returns (b)
   // 	requires isOpen[issueId]
   function _vote_guard(uint issueId, uint option) public returns (bool success) {
     _vote_pre(issueId, option);

@@ -356,7 +356,7 @@ contract ERC721 is ERC165, IERC721 {
 
 
     function transferFrom(address from, address to, uint256 tokenId) public {
-        _tranferFrom_guard(from, to, tokenId);
+        _transferFrom_guard(from, to, tokenId);
     }
 
     // @costom:consol
@@ -462,7 +462,7 @@ contract ERC721 is ERC165, IERC721 {
     // @costom:consol
     //  _clearApproval(tokenId)
     //  requires ownerOf(tokenId) == from && to != address(0)
-    function _transferFrom(address from, address to, uint256 tokenId) private {
+    function __transferFrom_guard(address from, address to, uint256 tokenId) private {
 	__transferFrom_pre(from, to, tokenId);
 	__transferFrom_worker(from, to, tokenId);
     }

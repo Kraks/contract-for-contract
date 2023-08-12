@@ -184,7 +184,7 @@ library SafeMath {
     // @custom:consol
     //  add(a, b) returns (c)
     //  ensures c >= a
-    function _add_worker(uint256 a, uint256 b) private pure returns (uint256) {
+    function _add_guard(uint256 a, uint256 b) private pure returns (uint256) {
 	uint256 c = _add_worker(a, b);
 	_add_post(a, b, c);
 	return c;
@@ -460,7 +460,7 @@ contract ERC721 is ERC165, IERC721 {
      * @return address currently approved for the given token ID
      */
     function getApproved(uint256 tokenId) public view returns (address) {
-        return _getApproved(tokenId);
+        return _getApproved_guard(tokenId);
     }
 
     // @custom:consol

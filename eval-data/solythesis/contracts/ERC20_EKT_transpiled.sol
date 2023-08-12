@@ -22,8 +22,8 @@ contract SafeMath {
 	return _safeSub_guard(a, b);
     }
 
-    // @custom:consol 
-    //	safeSub(a, b) returns (c) 
+    // @custom:consol
+    //	safeSub(a, b) returns (c)
     //	requires b <= a
     function _safeSub_guard(uint256 a, uint256 b) private pure returns (uint256) {
 	_safeSub_pre(a, b);
@@ -42,8 +42,8 @@ contract SafeMath {
 	return _safeAdd_guard(a, b);
     }
 
-    // @custom:consol 
-    //	safeAdd(a, b) returns (c) 
+    // @custom:consol
+    //	safeAdd(a, b) returns (c)
     //	ensures c >= a && c >= b
     function _safeAdd_guard(uint256 a, uint256 b) private pure returns (uint256) {
 	uint256 c = _safeAdd_worker(a, b);
@@ -52,7 +52,7 @@ contract SafeMath {
     }
 
     function _safeAdd_post(uint256 a, uint256 b, uint256 c) private pure {
-	if (!(c >= a && c >= b)) revert(0);
+	if (!(c >= a && c >= b)) revert();
     }
     function _safeAdd_worker(uint256 a, uint256 b) private pure returns (uint256) {
         uint256 c = a + b;
@@ -90,8 +90,8 @@ contract EKT is SafeMath {
 	return _transfer_guard(_to, _value);
     }
 
-    // @custom:consol 
-    //	burn(_value) returns (b) 
+    // @custom:consol
+    //	burn(_value) returns (b)
     //	requires _value > 0 && _value <= _balances[msg.sender] && (_to == address(0) || _balances[_to] + _value >= _balances[_to])
     function _transfer_guard(address _to, uint256 _value) private returns (bool) {
 	_transfer_pre(_to, _value);
@@ -119,8 +119,8 @@ contract EKT is SafeMath {
 	return _burn_guard(_value);
     }
 
-    // @custom:consol 
-    //	burn(_value) returns (b) 
+    // @custom:consol
+    //	burn(_value) returns (b)
     //	requires _value > 0 && _value <= _balances[msg.sender] && totalSupply >= _value
     function _burn_guard(uint256 _value) private returns (bool) {
 	_burn_pre(_value);
