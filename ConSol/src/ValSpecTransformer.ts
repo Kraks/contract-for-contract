@@ -21,10 +21,10 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
-import { ConSolTransformer } from './ConSolTransformer.js';
+import { ConSolFactory } from './ConSolFactory.js';
 import { preCheckFunName, postCheckFunName } from './utils.js';
 
-export class ValSpecTransformer<T> extends ConSolTransformer {
+export class ValSpecTransformer<T> extends ConSolFactory {
   ctx: ASTContext;
   spec: ValSpec<T>;
   tgtName: string;
@@ -71,8 +71,8 @@ export class ValSpecTransformer<T> extends ConSolTransformer {
     // Make the if-condition (expression)
     const ifCondition = this.factory.makeUnaryOperation(
       'bool', // typeString
-      true, // prefix
-      '!', // operator
+      true,   // prefix
+      '!',    // operator
       condNode,
     );
 
@@ -138,16 +138,6 @@ export class ValSpecTransformer<T> extends ConSolTransformer {
       retTypeDecl.vType = ty;
       return retTypeDecl;
     });
-  }
-
-  makeRequireStmt(constraint: Expression, msg: string): ExpressionStatement {
-    const callArgs = [
-      constraint,
-      this.factory.makeLiteral('string', LiteralKind.String, Buffer.from(msg, 'utf8').toString('hex'), msg),
-    ];
-    const requireFn = this.factory.makeIdentifier('function (bool,string memory) pure', 'require', -1);
-    const requireCall = this.factory.makeFunctionCall('bool', FunctionCallKind.FunctionCall, requireFn, callArgs);
-    return this.factory.makeExpressionStatement(requireCall);
   }
 
   makeCheckStmt(funName: string, args: Expression[], errorMsg: string): ExpressionStatement {

@@ -45,21 +45,6 @@ export function attachNames(names: string[], decls: VariableDeclaration[]): Vari
   return decls;
 }
 
-export function makeRequireStmt(
-  ctx: ASTContext,
-  factory: ASTNodeFactory,
-  constraint: Expression,
-  msg: string,
-): ExpressionStatement {
-  const callArgs = [
-    constraint,
-    factory.makeLiteral('string', LiteralKind.String, Buffer.from(msg, 'utf8').toString('hex'), msg),
-  ];
-  const requireFn = factory.makeIdentifier('function (bool,string memory) pure', 'require', -1);
-  const requireCall = factory.makeFunctionCall('bool', FunctionCallKind.FunctionCall, requireFn, callArgs);
-  return factory.makeExpressionStatement(requireCall);
-}
-
 export function preCheckFunName(f: string): string {
   return '_' + f + 'Pre';
 }

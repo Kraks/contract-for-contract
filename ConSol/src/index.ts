@@ -2,7 +2,7 @@ import { CompileResult, compileSol, ASTNodeFactory } from 'solc-typed-ast';
 import fs from 'fs/promises';
 import { ASTWriter, ASTReader, DefaultASTWriterMapping, LatestCompilerVersion, PrettyFormatter } from 'solc-typed-ast';
 import * as path from 'path';
-import { ContractSpecTransformer } from './ContractSpecTransformer.js';
+import { ConSolTransformer } from './ConSolTransformer.js';
 
 function convertResultToPlainObject(result: CompileResult): Record<string, unknown> {
   return {
@@ -43,7 +43,7 @@ async function main() {
 
   const contract = sourceUnits[0].vContracts[0];
   const factory = new ASTNodeFactory(contract.context);
-  const contractTransformer = new ContractSpecTransformer(factory, contract.scope, contract);
+  const contractTransformer = new ConSolTransformer(factory, contract.scope, contract);
   contractTransformer.process();
 
   // reify the ast back to source code
