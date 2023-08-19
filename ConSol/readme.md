@@ -41,8 +41,7 @@ npm run test
 
 ```
 $ npm link          # required only for the initial run.
-
-$ consol <inputfile>
+$ consol <input-file>
 ```
 
 For example,
@@ -65,9 +64,10 @@ $ ls
     > console.log(result.data.sources[ \` ${filename}.sol \` ].ast.nodes[1].nodes)
 - `Lock_out.sol`: Solidity code after transformation.
 
-
 ## Annotation
-Follow [Solidity Annotation](https://docs.soliditylang.org/en/v0.8.11/natspec-format.html).
+
+ConSol's annotation starts with `@custom:consol`, following
+[Solidity's annotation convention](https://docs.soliditylang.org/en/v0.8.11/natspec-format.html).
 
 ```
 /// @custom:consol ...
@@ -77,7 +77,7 @@ Or
 
 ```
 /**
-@custom:consol  firstline
+@custom:consol firstline
 secondline
 */
 ```

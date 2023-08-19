@@ -2,7 +2,7 @@ import { CompileResult, compileSol, ASTNodeFactory } from 'solc-typed-ast';
 import fs from 'fs/promises';
 import { ASTWriter, ASTReader, DefaultASTWriterMapping, LatestCompilerVersion, PrettyFormatter } from 'solc-typed-ast';
 import * as path from 'path';
-import { ContractSpecTransformer } from './val-spec-transformer.js';
+import { ContractSpecTransformer } from './ContractSpecTransformer.js';
 
 function convertResultToPlainObject(result: CompileResult): Record<string, unknown> {
   return {
