@@ -71,8 +71,8 @@ export class ValSpecTransformer<T> extends ConSolFactory {
     // Make the if-condition (expression)
     const ifCondition = this.factory.makeUnaryOperation(
       'bool', // typeString
-      true,   // prefix
-      '!',    // operator
+      true, // prefix
+      '!', // operator
       condNode,
     );
 

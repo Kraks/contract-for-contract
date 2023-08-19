@@ -8,7 +8,6 @@ import {
   TypeName,
   Identifier,
   ErrorDefinition,
-  ASTContext,
   Expression,
   ExpressionStatement,
   LiteralKind,

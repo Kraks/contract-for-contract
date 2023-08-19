@@ -1,15 +1,4 @@
-import {
-  ASTContext,
-  ASTNodeFactory,
-  FunctionDefinition,
-  LiteralKind,
-  VariableDeclaration,
-  ASTNode,
-  FunctionCallKind,
-  ExpressionStatement,
-  Expression,
-  assert,
-} from 'solc-typed-ast';
+import { FunctionDefinition, VariableDeclaration, ASTNode, assert } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
 import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
