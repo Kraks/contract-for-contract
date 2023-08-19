@@ -14,55 +14,53 @@ function convertResultToPlainObject(result: CompileResult): Record<string, unkno
 }
 
 async function main() {
-  // const args = process.argv.slice(1);
-  // if (args.length !== 2) {
-  //   console.error(`Usage: ${process.argv[0]} <filepath>`);
-  //   process.exit(1);
-  // }
+  const args = process.argv.slice(1);
+  if (args.length !== 2) {
+    console.error(`Usage: ${process.argv[0]} <filepath>`);
+    process.exit(1);
+  }
 
-  // const inputPath = args[1];
+  const inputPath = args[1];
   // const inputPath = './test/testCallFoo.sol';
-  const inputPath = './test/Lock.sol';
+  // const inputPath = './test/Lock.sol';
   const filename = path.basename(inputPath);
   const dirname = path.dirname(inputPath);
 
-  const outputJson = path.join(dirname, filename.split('.')[0] + '.json');
+  const outputJson = path.join(dirname, filename.split('.')[0] + '_ast.json');
   const outputSol = path.join(dirname, filename.split('.')[0] + '_out.sol');
 
-  const complieResult = await compileSol(inputPath, 'auto');
-  // console.log(complieResult);
-  // console.log(complieResult.data.sources[`${filename}.sol`].ast.nodes[1].nodes);
+  const compileResult = await compileSol(inputPath, 'auto');
+  // console.log(compileResult);
+  // console.log(compileResult.data.sources[`${filename}.sol`].ast.nodes[1].nodes);
+  console.log('Used compiler version: ' + compileResult.compilerVersion);
 
-  // dump to json file
-  await fs.writeFile(outputJson, JSON.stringify(convertResultToPlainObject(complieResult), null, 2));
+  // dump ast to json file
+  await fs.writeFile(outputJson, JSON.stringify(convertResultToPlainObject(compileResult), null, 2));
 
-  // read the typed ast
+  // convert to typed ast
   const reader = new ASTReader();
-  const sourceUnits = reader.read(complieResult.data);
-
-  console.log('Used compiler version: ' + complieResult.compilerVersion);
-  // console.log(sourceUnits[0].print());
+  const sourceUnits = reader.read(compileResult.data);
 
   const contract = sourceUnits[0].vContracts[0];
   const factory = new ASTNodeFactory(contract.context);
   const contractTransformer = new ContractSpecTransformer(factory, contract.scope, contract);
   contractTransformer.process();
 
-  // convert ast back to source
+  // reify the ast back to source code
   const formatter = new PrettyFormatter(4, 0);
   const writer = new ASTWriter(
     DefaultASTWriterMapping,
     formatter,
-    complieResult.compilerVersion ? complieResult.compilerVersion : LatestCompilerVersion,
+    compileResult.compilerVersion ? compileResult.compilerVersion : LatestCompilerVersion,
   );
 
   for (const sourceUnit of sourceUnits) {
-    console.log('// ' + sourceUnit.absolutePath);
+    console.log('Processed ' + sourceUnit.absolutePath);
     const outFileContent = writer.write(sourceUnit);
     try {
       // Use the writeFile method to save the content to a file
       await fs.writeFile(outputSol, outFileContent);
-      console.log(`File ${outputSol} saved successfully`);
+      console.log(`Compiled to ${outputSol} successfully`);
     } catch (error) {
       console.error(`Error saving file ${outputSol}: ${error}`);
     }
