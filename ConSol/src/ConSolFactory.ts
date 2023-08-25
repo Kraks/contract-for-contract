@@ -48,9 +48,7 @@ export class ConSolFactory {
       paraTypeName,
     );
     param.vType = this.strToTypeName(paraTypeName);
-
     const errorDef = this.factory.makeErrorDefinition(eventName, this.factory.makeParameterList([param]));
-
     return errorDef;
   }
 

@@ -16,7 +16,7 @@ function convertResultToPlainObject(result: CompileResult): Record<string, unkno
 async function main() {
   const args = process.argv.slice(1);
   if (args.length !== 2) {
-    console.error(`Usage: ${process.argv[0]} <filepath>`);
+    console.error(`Usage: ${process.argv[1]} <filepath>`);
     process.exit(1);
   }
 

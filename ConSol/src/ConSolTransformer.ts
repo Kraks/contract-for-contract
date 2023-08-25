@@ -15,6 +15,9 @@ import { CSSpecParse, CSSpecVisitor, CSSpec, isValSpec, isTempSpec } from './spe
 import { ConSolFactory } from './ConSolFactory.js';
 import { FunDefValSpecTransformer } from './FunDefValSpecTransformer.js';
 
+// AST node kinds that allow ConSol spec attachments
+type ConSolCheckNodes = FunctionDefinition | EventDefinition;
+
 export class ConSolTransformer<T> {
   factory: ASTNodeFactory;
   contract: ContractDefinition;
@@ -38,6 +41,7 @@ export class ConSolTransformer<T> {
 
   parseConSolSpec(doc: string): CSSpec<string> {
     const specStr = doc.substring(SPEC_PREFIX.length).trim();
+    // console.log('Processing spec: ' + specStr);
     const visitor = new CSSpecVisitor<string>((s) => s);
     const spec = CSSpecParse<string>(specStr, visitor);
     return spec;
@@ -59,28 +63,29 @@ export class ConSolTransformer<T> {
       );
       trans.apply();
     } else if (node instanceof EventDefinition) {
-      // TODO: optional
+      // Note(GW): allowing to attach pre-cond to events, the pre-cond is
+      // checked before the event is emitted. Optional.
     } else {
-      console.assert(false, 'wow');
+      console.assert(false, 'unexpected node type: ' + node.constructor.name);
     }
   }
 
   process(): void {
-    // AST node kinds that allow ConSol spec attachments
-    type ConSolCheckNodes = FunctionDefinition | EventDefinition;
+    let contract = this.contract;
+
     // TODO: traverse twice, spec as key
-    this.contract.appendChild(this.preCondError);
-    this.contract.appendChild(this.postCondError);
-    this.contract.appendChild(this.preAddrError);
-    this.contract.appendChild(this.postAddrError);
+    contract.appendChild(this.preCondError);
+    contract.appendChild(this.postCondError);
+    contract.appendChild(this.preAddrError);
+    contract.appendChild(this.postAddrError);
 
     let id = 0;
-    this.contract.walkChildren((astNode: ASTNode) => {
+    contract.walkChildren((astNode: ASTNode) => {
       const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
       if (!astNodeDoc) return;
+
       const specStr = astNodeDoc.text;
       if (!isConSolSpec(specStr)) return;
-      // console.log('Processing spec: ' + specStr.substring(SPEC_PREFIX.length).trim());
       const spec = this.parseConSolSpec(specStr);
 
       this.specToId.set(spec as CSSpec<T>, id);
@@ -89,15 +94,18 @@ export class ConSolTransformer<T> {
 
     console.log(this.specToId);
 
-    this.contract.walkChildren((astNode: ASTNode) => {
+    contract.walkChildren((astNode: ASTNode) => {
       const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
       if (!astNodeDoc) return;
+
       const specStr = astNodeDoc.text;
       if (!isConSolSpec(specStr)) return;
-      // console.log('Processing spec: ' + specStr.substring(SPEC_PREFIX.length).trim());
+
       const spec = this.parseConSolSpec(specStr);
       const specId = this.specToId.get(spec as CSSpec<T>);
+      // FIXME: specId is undefined
       console.log('Processing spec ' + specId + ':  ' + specStr.substring(SPEC_PREFIX.length).trim());
+
       if (isValSpec(spec)) {
         this.handleValSpec(astNode, spec);
       } else if (isTempSpec(spec)) {
