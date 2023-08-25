@@ -71,7 +71,7 @@ export class ConSolTransformer<T> {
   }
 
   process(): void {
-    let contract = this.contract;
+    const contract = this.contract;
 
     // TODO: traverse twice, spec as key
     contract.appendChild(this.preCondError);
