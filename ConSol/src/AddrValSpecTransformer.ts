@@ -281,7 +281,7 @@ export class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
     const funDef = this.factory.makeFunctionDefinition(
       this.parentFunDef.scope,
       FunctionKind.Function,
-      'guarded_' + this.parentFunDef.name + '_' + this.tgtName,
+      'guarded_' + this.parentFunDef.name + '_' + this.tgtName + '_' + uncheckedCall.vFunctionName,  
       this.parentFunDef.virtual,
       this.parentFunDef.visibility,
       this.parentFunDef.stateMutability,
