@@ -57,7 +57,9 @@ export class ValSpecTransformer<T> extends ConSolFactory {
       super(factory, scope);
     }
     if (spec.call.funName !== tgtName) {
-      console.error(`Error: Mismatch names between the attached function (${tgtName}) the spec (${spec.call.funName}). Abort.`);
+      console.error(
+        `Error: Mismatch names between the attached function (${tgtName}) the spec (${spec.call.funName}). Abort.`,
+      );
       process.exit(-1);
     }
     this.ctx = ctx;
