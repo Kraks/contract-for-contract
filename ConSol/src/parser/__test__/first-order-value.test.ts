@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 import { createParser } from './util.js';
-import { TestErrorListener } from '../../../__test__/util.js';
+import { TestErrorListener } from '../../__test__/util.js';
 
 describe('first-order value spec', () => {
   describe('Parser', () => {

@@ -1,9 +1,79 @@
-import { FunctionDefinition, VariableDeclaration, ASTNode, assert } from 'solc-typed-ast';
-
+import { FunctionDefinition, VariableDeclaration, ASTNode, assert, compileSol, CompileResult, ASTReader, ASTNodeFactory, PrettyFormatter, ASTWriter, DefaultASTWriterMapping, LatestCompilerVersion } from 'solc-typed-ast';
 import { ValSpec } from './spec/index.js';
 import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
 
+import * as fs from 'fs';
+import { ConSolTransformer } from './ConSolTransformer.js';
+
 export const SPEC_PREFIX = '@custom:consol';
+
+export function compareFiles(file1Path: string, file2Path: string): boolean {
+  try {
+    const content1 = fs.readFileSync(file1Path, 'utf-8');
+    const content2 = fs.readFileSync(file2Path, 'utf-8');
+    return content1 === content2;
+  } catch (error) {
+    console.error("Error reading files:", error);
+    return false;
+  }
+}
+
+export async function checkConSolOutput(file: string): Promise<boolean> {
+  const expected = file.replace('.sol', '_expected.sol');
+  const output = file.replace('.sol', '_out.sol');
+  await ConSolCompile(file, output);
+  return compareFiles(expected, output);
+}
+
+function convertResultToPlainObject(result: CompileResult): Record<string, unknown> {
+  return {
+    ...result,
+    files: Object.fromEntries(result.files),
+    resolvedFileNames: Object.fromEntries(result.resolvedFileNames),
+    inferredRemappings: Object.fromEntries(result.inferredRemappings),
+  };
+}
+
+export async function ConSolCompile(inputFile: string, outputFile: string, outputJson?: string): Promise<void> {
+  console.log(`inputFile: ${inputFile}`);
+  const compileResult = await compileSol(inputFile, 'auto');
+  // console.log(compileResult);
+  // console.log(compileResult.data.sources[`${filename}.sol`].ast.nodes[1].nodes);
+  console.log('Used compiler version: ' + compileResult.compilerVersion);
+
+  // dump ast to json file
+  if (outputJson) {
+    fs.writeFileSync(outputJson, JSON.stringify(convertResultToPlainObject(compileResult), null, 2));
+  }
+
+  // convert to typed ast
+  const reader = new ASTReader();
+  const sourceUnits = reader.read(compileResult.data);
+
+  const sourceUnit = sourceUnits[0];
+  const contract = sourceUnit.vContracts[0];
+  const factory = new ASTNodeFactory(contract.context);
+  const contractTransformer = new ConSolTransformer(factory, contract.scope, contract);
+  contractTransformer.process();
+
+  // reify the ast back to source code
+  const formatter = new PrettyFormatter(4, 0);
+  const writer = new ASTWriter(
+    DefaultASTWriterMapping,
+    formatter,
+    compileResult.compilerVersion ? compileResult.compilerVersion : LatestCompilerVersion,
+  );
+
+  console.log('Processed ' + sourceUnit.absolutePath);
+  const outFileContent = writer.write(sourceUnit);
+  try {
+    // Use the writeFile method to save the content to a file
+    fs.writeFileSync(outputFile, outFileContent);
+    console.log(`Compiled to ${outputFile} successfully`);
+  } catch (error) {
+    console.error(`Error saving file ${outputFile}: ${error}`);
+  }
+}
 
 export function isConSolSpec(doc: string): boolean {
   return doc.startsWith(SPEC_PREFIX);
@@ -23,23 +93,6 @@ export function isConstructor(node: ASTNode): node is FunctionDefinition {
 export function extractFunName(node: ASTNode): string {
   if (isConstructor(node)) return 'constructor';
   return node.raw.name;
-}
-
-// Note(GW): this function changes `decls` in-place
-export function attachNames(names: string[], decls: VariableDeclaration[]): VariableDeclaration[] {
-  assert(names.length === decls.length, 'Return Variable length wrong');
-  names.forEach((name, i) => {
-    decls[i].name = name;
-  });
-  return decls;
-}
-
-export function preCheckFunName(f: string): string {
-  return '_' + f + 'Pre';
-}
-
-export function postCheckFunName(f: string): string {
-  return '_' + f + 'Post';
 }
 
 export function uncheckedFunName(f: string): string {

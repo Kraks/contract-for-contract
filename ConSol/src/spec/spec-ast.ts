@@ -2,9 +2,9 @@ import assert from 'assert';
 import { ParseTree, TerminalNode } from 'antlr4';
 import { CharStream, CommonTokenStream } from 'antlr4';
 
-import SpecVisitor from './parser/SpecVisitor.js';
-import SpecLexer from './parser/SpecLexer.js';
-import SpecParser from './parser/SpecParser.js';
+import SpecVisitor from '../parser/SpecVisitor.js';
+import SpecLexer from '../parser/SpecLexer.js';
+import SpecParser from '../parser/SpecParser.js';
 import {
   SpecContext,
   FnameContext,
@@ -16,7 +16,7 @@ import {
   SexprContext,
   PairContext,
   IdentsContext,
-} from './parser/SpecParser.js';
+} from '../parser/SpecParser.js';
 
 type Tagged<Tag> = {
   readonly tag: Tag;

@@ -1,3 +1,4 @@
+import assert from 'assert';
 import {
   ASTNodeFactory,
   VariableDeclaration,
@@ -13,7 +14,15 @@ import {
   LiteralKind,
   FunctionCallKind,
 } from 'solc-typed-ast';
-import { attachNames } from './utils.js';
+
+// Note(GW): this function changes `decls` in-place
+function attachNames(names: string[], decls: VariableDeclaration[]): VariableDeclaration[] {
+  assert(names.length === decls.length, 'Return Variable length wrong');
+  names.forEach((name, i) => {
+    decls[i].name = name;
+  });
+  return decls;
+}
 
 export class ConSolFactory {
   factory: ASTNodeFactory;

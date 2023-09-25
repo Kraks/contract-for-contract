@@ -1,17 +1,27 @@
 import {
   ASTContext,
-  ASTNode,
   ASTNodeFactory,
   ASTReader,
-  ASTWriter,
   Block,
   compileSourceString,
-  DefaultASTWriterMapping,
-  LatestCompilerVersion,
   LiteralKind,
-  PrettyFormatter,
 } from 'solc-typed-ast';
+import { genSource } from './util';
 import { ConSolFactory } from '../ConSolFactory';
+import { ConSolCompile, compareFiles } from '../utils';
+
+describe("end to end tests", () => {
+  beforeEach(async () => {
+    await ConSolCompile('test/Lock.sol', 'test/Lock_out.sol');
+  });
+
+  describe('end-to-end', () => {
+    it('Lock.sol', async () => {
+      const result = compareFiles('test/Lock_expected.sol', 'test/Lock_out.sol');
+      expect(result).toBe(true);
+    });
+  });
+});
 
 describe('val spec transformer', () => {
   const template = `
@@ -21,19 +31,20 @@ describe('val spec transformer', () => {
       }
     }
   `;
-  let ctx: ASTContext;
-  let body: Block;
+
   let nodeFactory: ASTNodeFactory;
   let scope: number;
+
   beforeEach(async () => {
     const result = await compileSourceString('template.sol', template, 'auto');
     const reader = new ASTReader();
     const sourceUnits = reader.read(result.data);
-    body = sourceUnits[0].vContracts[0].vFunctions[0].vBody as Block;
-    ctx = body.context as ASTContext;
+    const body = sourceUnits[0].vContracts[0].vFunctions[0].vBody as Block;
+    const ctx = body.context as ASTContext;
     nodeFactory = new ASTNodeFactory(body.context);
     scope = sourceUnits[0].vContracts[0].scope;
   });
+
   describe('makeRequireStmt', () => {
     it('should build an always true require statement', async () => {
       const cond = nodeFactory.makeLiteral('boolean', LiteralKind.Bool, '0x1', 'true');
@@ -44,9 +55,3 @@ describe('val spec transformer', () => {
     });
   });
 });
-
-function genSource(...nodes: ASTNode[]): string[] {
-  const formatter = new PrettyFormatter(4, 0);
-  const writer = new ASTWriter(DefaultASTWriterMapping, formatter, LatestCompilerVersion);
-  return nodes.map((node) => writer.write(node));
-}

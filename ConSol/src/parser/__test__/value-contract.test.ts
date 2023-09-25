@@ -1,6 +1,6 @@
-import { CSSpecVisitor, CSSpecParse, ValSpec, makeValSpec } from '../index.js';
+import { CSSpecVisitor, CSSpecParse, ValSpec, makeValSpec } from '../../spec/index.js';
 
-describe('value (fun) contract', () => {
+describe('value (fun) contract - parser', () => {
   const visitor = new CSSpecVisitor((s: string) => {
     return s;
   });

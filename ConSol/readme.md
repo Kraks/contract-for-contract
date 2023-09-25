@@ -9,7 +9,7 @@
 ### Build
 
 ```
-git clone --recurse-submodules https://github.com/Kraks/contract-for-contract
+git clone --recurse-submodules git@github.com:Kraks/contract-for-contract.git
 cd contract-for-contract/solc-typed-ast
 npm install
 cd ../ConSol

@@ -22,7 +22,14 @@ import {
 
 import { ValSpec } from './spec/index.js';
 import { ConSolFactory } from './ConSolFactory.js';
-import { preCheckFunName, postCheckFunName } from './utils.js';
+
+function preCheckFunName(f: string): string {
+  return '_' + f + 'Pre';
+}
+
+function postCheckFunName(f: string): string {
+  return '_' + f + 'Post';
+}
 
 export class ValSpecTransformer<T> extends ConSolFactory {
   ctx: ASTContext;

@@ -1,6 +1,6 @@
-import { CSSpecVisitor, CSSpecParse, TempSpec, makeTempSpec } from '../index.js';
+import { CSSpecVisitor, CSSpecParse, TempSpec, makeTempSpec } from '../../spec/index.js';
 
-describe('temporal contract', () => {
+describe('temporal contract - parser', () => {
   const visitor = new CSSpecVisitor((s: string) => {
     return s;
   });
@@ -31,7 +31,7 @@ describe('temporal contract', () => {
 
   it('single argument with pre-condition', () => {
     const s = `
-    { 
+    {
         f(x) returns (y) ~> g() returns z
         when {
             x + y == z
@@ -51,7 +51,7 @@ describe('temporal contract', () => {
 
   it('single argument with post-condition', () => {
     const s = `
-    { 
+    {
         f(x) returns (y) ~> g() returns z
         ensures {
             x + y == z
@@ -188,7 +188,7 @@ describe('temporal contract', () => {
     const s = `
     {
         f(x, y, z) returns (f1)
-            => g{value: v1, gas: g1, gas_: g2}() 
+            => g{value: v1, gas: g1, gas_: g2}()
         when {
             x == v1 && (g1 + g2 == z)
         }
