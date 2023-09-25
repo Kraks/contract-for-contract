@@ -20,8 +20,8 @@ export const SPEC_PREFIX = '@custom:consol';
 
 export function compareFiles(file1Path: string, file2Path: string): boolean {
   try {
-    const content1 = fs.readFileSync(file1Path, 'utf-8');
-    const content2 = fs.readFileSync(file2Path, 'utf-8');
+    const content1 = fs.readFileSync(file1Path, 'utf-8').replace(/[\s\r\n]+$/, '');
+    const content2 = fs.readFileSync(file2Path, 'utf-8').replace(/[\s\r\n]+$/, '');
     return content1 === content2;
   } catch (error) {
     console.error('Error reading files:', error);

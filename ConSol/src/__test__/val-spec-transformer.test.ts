@@ -4,10 +4,16 @@ import { ConSolFactory } from '../ConSolFactory';
 import { checkConSolOutput } from '../utils';
 
 describe('end to end tests', () => {
+  test('PreCond.sol', async () => {
+    const result = await checkConSolOutput('test/PreCond.sol');
+    expect(result).toBe(true);
+  });
+
   test('Lock.sol', async () => {
     const result = await checkConSolOutput('test/Lock.sol');
     expect(result).toBe(true);
   });
+
   // TODO: mechanize more tests...
 });
 
