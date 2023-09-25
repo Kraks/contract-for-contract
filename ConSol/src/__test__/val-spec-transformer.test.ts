@@ -1,8 +1,7 @@
 import { ASTContext, ASTNodeFactory, ASTReader, Block, compileSourceString, LiteralKind } from 'solc-typed-ast';
 import { genSource } from './util';
 import { ConSolFactory } from '../ConSolFactory';
-import { ConSolCompile, checkConSolOutput, compareFiles } from '../utils';
-import exp from 'constants';
+import { checkConSolOutput } from '../utils';
 
 describe('end to end tests', () => {
   test('Lock.sol', async () => {
