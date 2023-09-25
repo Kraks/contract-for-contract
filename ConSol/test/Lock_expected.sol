@@ -38,7 +38,7 @@ contract Lock {
         return a + b;
     }
 
-    /// @custom:consol  {getSum2Ret (a, b) returns (c,d ) requires {a>0 && b>0} ensures{c>0} }
+    /// @custom:consol  {getSum2Ret (a, b) returns (c,d) requires {a>0 && b>0} ensures{c>0} }
     function getSum2Ret_original(int256 a, int256 b) private pure returns (int256, int256) {
         return (a + b, a - b);
     }
