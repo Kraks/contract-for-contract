@@ -177,6 +177,6 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
       }
     }
     // TODO(DX): stateMutability: pure/payable/nonpayable ...
-    // TODO(DX): data localtion
+    // TODO(DX): data location
   }
 }
