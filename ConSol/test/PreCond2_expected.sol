@@ -22,7 +22,7 @@ contract C {
     }
 
     function _withdrawPre(uint256 amt) private {
-        if (!amt>=min) revert preViolation("withdraw");
+        if (!(amt>=min)) revert preViolation("withdraw");
     }
 
     function withdraw(uint256 amount) public {

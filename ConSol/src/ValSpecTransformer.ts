@@ -73,7 +73,7 @@ export class ValSpecTransformer<T> extends ConSolFactory {
     errorDef: ErrorDefinition,
     errorParamVal: string | number,
   ): FunctionDefinition {
-    const condNode = this.factory.makePhantomExpression('bool', condExpr as string);
+    const condNode = this.factory.makePhantomExpression('bool', '(' + condExpr as string + ')');
 
     // Make the if-condition (expression)
     const ifCondition = this.factory.makeUnaryOperation(
