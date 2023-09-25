@@ -22,4 +22,3 @@ export class TestErrorListener extends ErrorListener<Token> {
     this.handler(msg);
   }
 }
-

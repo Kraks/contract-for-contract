@@ -1,16 +1,9 @@
-import {
-  ASTContext,
-  ASTNodeFactory,
-  ASTReader,
-  Block,
-  compileSourceString,
-  LiteralKind,
-} from 'solc-typed-ast';
+import { ASTContext, ASTNodeFactory, ASTReader, Block, compileSourceString, LiteralKind } from 'solc-typed-ast';
 import { genSource } from './util';
 import { ConSolFactory } from '../ConSolFactory';
 import { ConSolCompile, compareFiles } from '../utils';
 
-describe("end to end tests", () => {
+describe('end to end tests', () => {
   beforeEach(async () => {
     await ConSolCompile('test/Lock.sol', 'test/Lock_out.sol');
   });

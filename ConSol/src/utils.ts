@@ -1,4 +1,15 @@
-import { FunctionDefinition, VariableDeclaration, ASTNode, assert, compileSol, CompileResult, ASTReader, ASTNodeFactory, PrettyFormatter, ASTWriter, DefaultASTWriterMapping, LatestCompilerVersion } from 'solc-typed-ast';
+import {
+  FunctionDefinition,
+  ASTNode,
+  compileSol,
+  CompileResult,
+  ASTReader,
+  ASTNodeFactory,
+  PrettyFormatter,
+  ASTWriter,
+  DefaultASTWriterMapping,
+  LatestCompilerVersion,
+} from 'solc-typed-ast';
 import { ValSpec } from './spec/index.js';
 import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
 
@@ -13,7 +24,7 @@ export function compareFiles(file1Path: string, file2Path: string): boolean {
     const content2 = fs.readFileSync(file2Path, 'utf-8');
     return content1 === content2;
   } catch (error) {
-    console.error("Error reading files:", error);
+    console.error('Error reading files:', error);
     return false;
   }
 }
