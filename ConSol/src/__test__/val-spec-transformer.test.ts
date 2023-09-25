@@ -4,17 +4,15 @@ import { ConSolFactory } from '../ConSolFactory';
 import { checkConSolOutput } from '../utils';
 
 describe('end to end tests', () => {
-  test('PreCond.sol', async () => {
-    const result = await checkConSolOutput('test/PreCond.sol');
-    expect(result).toBe(true);
-  });
-
-  test('Lock.sol', async () => {
-    const result = await checkConSolOutput('test/Lock.sol');
-    expect(result).toBe(true);
-  });
-
   // TODO: mechanize more tests...
+  const programs = ['PreCond.sol', 'PreCond2.sol', 'Lock.sol'];
+
+  programs.forEach((program) => {
+    test(program, async () => {
+      const result = await checkConSolOutput(`test/${program}`);
+      expect(result).toBe(true);
+    });
+  });
 });
 
 describe('val spec transformer', () => {
