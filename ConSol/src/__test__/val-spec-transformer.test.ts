@@ -1,19 +1,15 @@
 import { ASTContext, ASTNodeFactory, ASTReader, Block, compileSourceString, LiteralKind } from 'solc-typed-ast';
 import { genSource } from './util';
 import { ConSolFactory } from '../ConSolFactory';
-import { ConSolCompile, compareFiles } from '../utils';
+import { ConSolCompile, checkConSolOutput, compareFiles } from '../utils';
+import exp from 'constants';
 
 describe('end to end tests', () => {
-  beforeEach(async () => {
-    await ConSolCompile('test/Lock.sol', 'test/Lock_out.sol');
+  test('Lock.sol', async () => {
+    const result = await checkConSolOutput('test/Lock.sol');
+    expect(result).toBe(true);
   });
-
-  describe('end-to-end', () => {
-    it('Lock.sol', async () => {
-      const result = compareFiles('test/Lock_expected.sol', 'test/Lock_out.sol');
-      expect(result).toBe(true);
-    });
-  });
+  // TODO: mechanize more tests...
 });
 
 describe('val spec transformer', () => {
@@ -38,13 +34,11 @@ describe('val spec transformer', () => {
     scope = sourceUnits[0].vContracts[0].scope;
   });
 
-  describe('makeRequireStmt', () => {
-    it('should build an always true require statement', async () => {
-      const cond = nodeFactory.makeLiteral('boolean', LiteralKind.Bool, '0x1', 'true');
-      const csFactory = new ConSolFactory(nodeFactory, scope);
-      const stmt = csFactory.makeRequireStmt(cond, 'error message');
-      const source = genSource(stmt)[0];
-      expect(source).toEqual(`require(true, "error message");`);
-    });
+  it('should build an always true require statement', async () => {
+    const cond = nodeFactory.makeLiteral('boolean', LiteralKind.Bool, '0x1', 'true');
+    const csFactory = new ConSolFactory(nodeFactory, scope);
+    const stmt = csFactory.makeRequireStmt(cond, 'error message');
+    const source = genSource(stmt)[0];
+    expect(source).toEqual(`require(true, "error message");`);
   });
 });
