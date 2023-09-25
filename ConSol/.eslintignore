@@ -1,5 +1,5 @@
 /grammar
-/src/spec/parser/*.ts
+/src/parser/*.ts
 /scripts/**/*-test.ts
 /node_modules
 /dist
