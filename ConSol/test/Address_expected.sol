@@ -18,7 +18,7 @@ contract Caller {
     /// @custom:consol { callFoo(addr, x)
     ///    requires {x > 0}
     ///    where {
-    ///      addr.foo{value: v, gas: g}(mymsg, x) returns (y)
+    ///      IReceiver(addr).foo{value: v, gas: g}(mymsg, x) returns (y)
     ///      requires { v > 5 && g < 10000 && x != 0 }
     ///      ensures { y == x + 1 }
     ///    }
