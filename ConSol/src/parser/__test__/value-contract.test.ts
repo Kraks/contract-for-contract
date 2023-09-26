@@ -7,7 +7,7 @@ describe('value (fun) contract - parser', () => {
   it('minimum case', () => {
     const s = `{foo()}`;
     const spec: ValSpec<string> = makeValSpec({
-      call: { funName: 'foo', kwargs: [], args: [], rets: [] },
+      call: { tgt: { func : 'foo' }, kwargs: [], args: [], rets: [] },
     });
 
     const spec_ = CSSpecParse(s, visitor) as ValSpec<string>;
@@ -25,11 +25,11 @@ describe('value (fun) contract - parser', () => {
           }
         }`;
     const spec: ValSpec<string> = makeValSpec({
-      call: { funName: 'testCallFoo', kwargs: [], args: ['addr'], rets: [] },
+      call: { tgt: { func : 'testCallFoo'}, kwargs: [], args: ['addr'], rets: [] },
       preFunSpec: [
         makeValSpec({
           call: {
-            funName: 'addr',
+            tgt: { func : 'addr' },
             kwargs: [
               { fst: 'value', snd: 'v' },
               { fst: 'gas', snd: 'g' },
@@ -54,7 +54,7 @@ describe('value (fun) contract - parser', () => {
         ensures {yyy}
         }`;
     const spec: ValSpec<string> = makeValSpec({
-      call: { funName: 'foo', kwargs: [], args: ['y'], rets: ['x'] },
+      call: { tgt: { func : 'foo' }, kwargs: [], args: ['y'], rets: ['x'] },
       preCond: 'xxx',
       postCond: 'yyy',
     });
@@ -72,19 +72,19 @@ describe('value (fun) contract - parser', () => {
         }`;
     const spec: ValSpec<string> = makeValSpec({
       call: {
-        funName: 'foo',
+        tgt: { func : 'foo'},
         kwargs: [],
         args: ['argfun', 'argfun2'],
         rets: [],
       },
       preFunSpec: [
         makeValSpec({
-          call: { funName: 'argfun', kwargs: [], args: [], rets: [] },
+          call: { tgt: { func : 'argfun'}, kwargs: [], args: [], rets: [] },
           postCond: 'aaa',
         }),
         makeValSpec({
           call: {
-            funName: 'argfun2',
+            tgt: { func : 'argfun2'},
             kwargs: [],
             args: ['xxx'],
             rets: ['hhh'],
@@ -107,7 +107,7 @@ describe('value (fun) contract - parser', () => {
         }`;
     const spec: ValSpec<string> = makeValSpec({
       call: {
-        funName: 'foo',
+        tgt: { func : 'foo'},
         kwargs: [
           { fst: 'value', snd: 'v' },
           { fst: 'gas', snd: 'g' },
@@ -117,12 +117,12 @@ describe('value (fun) contract - parser', () => {
       },
       preFunSpec: [
         makeValSpec({
-          call: { funName: 'argfun', kwargs: [], args: [], rets: [] },
+          call: { tgt: { func: 'argfun'}, kwargs: [], args: [], rets: [] },
           postCond: 'aaa',
         }),
         makeValSpec({
           call: {
-            funName: 'argfun2',
+            tgt: { func: 'argfun2'},
             kwargs: [],
             args: ['xxx'],
             rets: ['hhh'],
@@ -132,7 +132,7 @@ describe('value (fun) contract - parser', () => {
       ],
       postFunSpec: [
         makeValSpec({
-          call: { funName: 'retFun', kwargs: [], args: [], rets: [] },
+          call: { tgt: {func: 'retFun'}, kwargs: [], args: [], rets: [] },
           postCond: 'bbb',
         }),
       ],
@@ -153,7 +153,7 @@ describe('value (fun) contract - parser', () => {
         }`;
     const spec: ValSpec<string> = makeValSpec({
       call: {
-        funName: 'foo',
+        tgt: {func: 'foo'},
         kwargs: [
           { fst: 'value', snd: 'v' },
           { fst: 'gas', snd: 'g' },
@@ -164,12 +164,12 @@ describe('value (fun) contract - parser', () => {
       postCond: 'yyy',
       preFunSpec: [
         makeValSpec({
-          call: { funName: 'argfun', kwargs: [], args: [], rets: [] },
+          call: { tgt: {func: 'argfun'}, kwargs: [], args: [], rets: [] },
           postCond: 'aaa',
         }),
         makeValSpec({
           call: {
-            funName: 'argfun2',
+            tgt: {func: 'argfun2'},
             kwargs: [],
             args: ['xxx'],
             rets: ['hhh'],
@@ -179,7 +179,7 @@ describe('value (fun) contract - parser', () => {
       ],
       postFunSpec: [
         makeValSpec({
-          call: { funName: 'retFun', kwargs: [], args: [], rets: [] },
+          call: { tgt: {func : 'retFun'}, kwargs: [], args: [], rets: [] },
           postCond: 'bbb',
         }),
       ],
@@ -201,7 +201,7 @@ describe('value (fun) contract - parser', () => {
         }`;
     const spec: ValSpec<string> = makeValSpec({
       call: {
-        funName: 'foo',
+        tgt: {func: 'foo'},
         kwargs: [
           { fst: 'value', snd: 'v' },
           { fst: 'gas', snd: 'g' },
@@ -213,12 +213,12 @@ describe('value (fun) contract - parser', () => {
       postCond: 'yyy',
       preFunSpec: [
         makeValSpec({
-          call: { funName: 'argfun', kwargs: [], args: [], rets: [] },
+          call: { tgt: {func: 'argfun'}, kwargs: [], args: [], rets: [] },
           postCond: 'aaa',
         }),
         makeValSpec({
           call: {
-            funName: 'argfun2',
+            tgt: {func: 'argfun2'},
             kwargs: [],
             args: ['xxx'],
             rets: ['hhh'],
@@ -228,7 +228,7 @@ describe('value (fun) contract - parser', () => {
       ],
       postFunSpec: [
         makeValSpec({
-          call: { funName: 'retFun', kwargs: [], args: [], rets: [] },
+          call: { tgt: {func: 'retFun'}, kwargs: [], args: [], rets: [] },
           postCond: 'bbb',
         }),
       ],
@@ -250,7 +250,7 @@ describe('value (fun) contract - parser', () => {
         }`;
     const spec: ValSpec<string> = makeValSpec({
       call: {
-        funName: 'foo',
+        tgt: {func: 'foo'},
         kwargs: [
           { fst: 'value', snd: 'v' },
           { fst: 'gas', snd: 'g' },
@@ -262,13 +262,13 @@ describe('value (fun) contract - parser', () => {
       postCond: 'yyy',
       preFunSpec: [
         makeValSpec({
-          call: { funName: 'argfun', kwargs: [], args: [], rets: [] },
+          call: { tgt: {func: 'argfun'}, kwargs: [], args: [], rets: [] },
           postCond: 'aaa',
           tag: 'ValSpec',
         }),
         makeValSpec({
           call: {
-            funName: 'argfun2',
+            tgt: {func: 'argfun2'},
             kwargs: [],
             args: ['xxx'],
             rets: ['hhh'],
@@ -279,7 +279,7 @@ describe('value (fun) contract - parser', () => {
       ],
       postFunSpec: [
         makeValSpec({
-          call: { funName: 'retFun', kwargs: [], args: [], rets: [] },
+          call: { tgt: {func: 'retFun'}, kwargs: [], args: [], rets: [] },
           postCond: 'bbb',
           tag: 'ValSpec',
         }),
@@ -304,7 +304,7 @@ describe('value (fun) contract - parser', () => {
         }`;
     const spec: ValSpec<string> = makeValSpec({
       call: {
-        funName: 'foo',
+        tgt: {func: 'foo'},
         kwargs: [
           { fst: 'value', snd: 'v' },
           { fst: 'gas', snd: 'g' },
@@ -316,12 +316,12 @@ describe('value (fun) contract - parser', () => {
       postCond: 'yyy',
       preFunSpec: [
         makeValSpec({
-          call: { funName: 'argfun', kwargs: [], args: [], rets: [] },
+          call: { tgt: {func: 'argfun'}, kwargs: [], args: [], rets: [] },
           postCond: 'aaa',
         }),
         makeValSpec({
           call: {
-            funName: 'argfun2',
+            tgt: {func: 'argfun2'},
             kwargs: [],
             args: ['xxx'],
             rets: ['hhh'],
@@ -331,7 +331,7 @@ describe('value (fun) contract - parser', () => {
       ],
       postFunSpec: [
         makeValSpec({
-          call: { funName: 'retFun', kwargs: [], args: [], rets: [] },
+          call: { tgt: {func: 'retFun'}, kwargs: [], args: [], rets: [] },
           postCond: 'bbb',
         }),
       ],

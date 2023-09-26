@@ -129,13 +129,13 @@ export function extractRawAddr<T>(spec: ValSpec<T>): string {
   // and we synthesis the default callable member name (i.e. call);
   // Otherwise, we are handling member access call (e.g. addr.send).
   // FIXME(GW): parser error for the "otherwise" case
-  if (spec.call.addr === undefined) return spec.call.funName;
-  else return spec.call.addr;
+  if (spec.call.tgt.addr === undefined) return spec.call.tgt.func;
+  else return spec.call.tgt.addr;
 }
 
 export function extractAddrMember<T>(spec: ValSpec<T>): string {
-  if (spec.call.addr === undefined) return 'call';
-  else return spec.call.funName;
+  if (spec.call.tgt.addr === undefined) return 'call';
+  else return spec.call.tgt.func;
 }
 export function needAbiEncoding(member: string): boolean {
   return member === 'call' || member === 'delegatecall' || member === 'staticcall';

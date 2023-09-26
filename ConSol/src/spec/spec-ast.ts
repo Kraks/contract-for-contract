@@ -45,8 +45,7 @@ export interface Pair<T1, T2> {
 }
 
 export interface Call {
-  addr?: string;
-  funName: string;
+  tgt: Target;
   args: Array<string>;
   kwargs: Array<Pair<string, string>>;
   rets: Array<string>;
@@ -55,6 +54,7 @@ export interface Call {
 export interface Target {
   func: string;
   addr?: string;
+  interface?: string;
 }
 
 export interface $TempSpec<T> {
@@ -163,8 +163,8 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
             assert(false, 'Undefined fs or fs.call:' + funspec);
             // continue;
           }
-          const rawAddr = funspec.call.addr;
-          const tgt = rawAddr === undefined ? funspec.call.funName : rawAddr;
+          const rawAddr = funspec.call.tgt.addr;
+          const tgt = rawAddr === undefined ? funspec.call.tgt.func : rawAddr;
           if (call.args.includes(tgt)) {
             vspec.preFunSpec.push(funspec);
           } else if (call.rets.includes(tgt)) {
@@ -243,7 +243,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     assert(ctx.children != null);
     assert(ctx.children.length >= 4 && ctx.children.length <= 7);
 
-    const funName = this.visit(ctx.children[0]) as Target;
+    const target = this.visit(ctx.children[0]) as Target;
 
     // kwargs
     let identsIdx: number, kwargs: Array<Pair<string, string>>;
@@ -270,15 +270,11 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     }
 
     const call: Call = {
-      funName: funName.func,
+      tgt: target,
       kwargs: kwargs,
       args: args,
       rets: rets,
     };
-
-    if (funName.addr) {
-      call.addr = funName.addr;
-    }
 
     return call;
   };
@@ -299,8 +295,8 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
       return {
         func: this.extractTermText(idents[2]),
         addr: this.extractTermText(idents[1]),
-        // TODO: interface name
-      };
+        interface: this.extractTermText(idents[0]),
+      }
     }
   };
 
