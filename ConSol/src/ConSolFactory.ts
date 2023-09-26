@@ -36,8 +36,8 @@ export class ConSolFactory {
   makeNeg(e: Expression): Expression {
     return this.factory.makeUnaryOperation(
       'bool', // typeString
-      true,   // prefix
-      '!',    // operator
+      true, // prefix
+      '!', // operator
       e,
     );
   }

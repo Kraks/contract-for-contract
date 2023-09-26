@@ -66,7 +66,7 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
   sourceUnit.vContracts.forEach((contract) => {
     console.log(`Discover ${contract.kind} ${contract.name}.`);
     if (contract.kind === 'interface') {
-      console.log(`Skip ${contract.kind} ${contract.name}.`)
+      console.log(`Skip ${contract.kind} ${contract.name}.`);
       return;
     }
     console.log(`Processing ${contract.kind} ${contract.name}.`);
