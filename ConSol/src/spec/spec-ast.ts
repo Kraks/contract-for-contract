@@ -7,7 +7,7 @@ import SpecLexer from '../parser/SpecLexer.js';
 import SpecParser from '../parser/SpecParser.js';
 import {
   SpecContext,
-  FnameContext,
+  TargetContext,
   TupleContext,
   DictContext,
   VspecContext,
@@ -52,7 +52,7 @@ export interface Call {
   rets: Array<string>;
 }
 
-export interface FunName {
+export interface Target {
   func: string;
   addr?: string;
 }
@@ -103,7 +103,7 @@ export type SpecParseResult<T> =
   | T
   | CSSpec<T>
   | Call
-  | FunName
+  | Target
   | TempConn
   | string
   | Array<Pair<string, string>>
@@ -243,7 +243,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     assert(ctx.children != null);
     assert(ctx.children.length >= 4 && ctx.children.length <= 7);
 
-    const funName = this.visit(ctx.children[0]) as FunName;
+    const funName = this.visit(ctx.children[0]) as Target;
 
     // kwargs
     let identsIdx: number, kwargs: Array<Pair<string, string>>;
@@ -284,18 +284,23 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
   };
 
   // fname :   IDENT ( '.' IDENT )?
-  visitFname: (ctx: FnameContext) => FunName = (ctx) => {
+  //       |   IDENT '(' IDENT ')' '.' IDENT
+  visitTarget: (ctx: TargetContext) => Target = (ctx) => {
     assert(ctx.children != null);
-    assert(ctx.children.length == 1 || ctx.children.length == 3);
-
-    if (ctx.children.length == 1) {
-      return { func: this.extractTermText(ctx.children[0]) };
-    } else {
-      assert(this.extractTermText(ctx.children[1]) == '.');
+    const idents = ctx.IDENT_list();
+    if (idents.length == 1) {
+      return { func: this.extractTermText(idents[0]) };
+    } else if (idents.length == 2) {
       return {
-        func: this.extractTermText(ctx.children[2]),
-        addr: this.extractTermText(ctx.children[0]),
+        func: this.extractTermText(idents[1]),
+        addr: this.extractTermText(idents[0]),
       };
+    } else {
+      return {
+        func: this.extractTermText(idents[2]),
+        addr: this.extractTermText(idents[1]),
+        // TODO: interface name
+      }
     }
   };
 

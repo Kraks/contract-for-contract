@@ -18,9 +18,12 @@ tspec : '{' call TCONN call
 ;
 sexpr : ~('{' | '}')+ ;
 
-call  : fname ( dict )? '(' idents ')' ('returns' tuple)? ;
+call  : target dict? '(' idents ')' ('returns' tuple)? ;
 
-fname : IDENT ( '.' IDENT)?;
+target : IDENT                          // function
+       | IDENT '.' IDENT                // low-level addr call
+       | IDENT '(' IDENT ')' '.' IDENT  // high-level addr call with signature
+;
 
 // dict is non-empty
 dict  : '{' pair (',' pair)* '}' ;

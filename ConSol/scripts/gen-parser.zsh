@@ -2,7 +2,7 @@
 
 DIR=${0:a:h}
 GRAMMAR_DIR="$DIR"/../grammar
-OUT_DIR="$DIR"/../src/spec/parser
+OUT_DIR="$DIR"/../src/parser
 
 if [ ! "$(command -v java)" ]; then
     echo "java command cannot be found. Please install java."
