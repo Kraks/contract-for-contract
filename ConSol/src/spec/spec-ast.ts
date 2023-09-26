@@ -300,7 +300,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
         func: this.extractTermText(idents[2]),
         addr: this.extractTermText(idents[1]),
         // TODO: interface name
-      }
+      };
     }
   };
 
