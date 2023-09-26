@@ -33,6 +33,15 @@ export class ConSolFactory {
     this.scope = scope;
   }
 
+  makeNeg(e: Expression): Expression {
+    return this.factory.makeUnaryOperation(
+      'bool', // typeString
+      true,   // prefix
+      '!',    // operator
+      e,
+    );
+  }
+
   makeRequireStmt(constraint: Expression, msg: string): ExpressionStatement {
     const callArgs = [
       constraint,

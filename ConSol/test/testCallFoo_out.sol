@@ -11,7 +11,17 @@ contract Caller {
 
     event Response(bool success, bytes data);
 
-    /// @custom:consol { testCallFoo(addr, x) requires {x > 0} where { addr{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v > 5 && g < 10000 && x != 0 } ensures { flag == true } } { addr.send(x) returns (b) requires { x < 1024 } ensures {b == true} }}
+    /// @custom:consol {
+    ///   testCallFoo(addr, x) requires {x > 0} where {
+    ///     addr{value: v, gas: g}(mymsg, x) returns (flag, data)
+    ///     requires { v > 5 && g < 10000 && x != 0 }
+    ///     ensures { flag == true }
+    ///   } {
+    ///     addr.send(x) returns (b)
+    ///     requires { x < 1024 }
+    ///     ensures { b == true }
+    ///   }
+    /// }
     function testCallFoo_original(address payable _addr, uint256 x) private payable {
         (bool success, bytes memory data) = guarded_testCallFoo_addr_call(_addr, msg.value, 5000, "call foo", x);
         bool res = guarded_testCallFoo_addr_send(_addr, x);

@@ -80,15 +80,8 @@ export class ValSpecTransformer<T> extends ConSolFactory {
     errorParamVal: string | number,
   ): FunctionDefinition {
     const condNode = this.factory.makePhantomExpression('bool', (('(' + condExpr) as string) + ')');
-
     // Make the if-condition (expression)
-    const ifCondition = this.factory.makeUnaryOperation(
-      'bool', // typeString
-      true, // prefix
-      '!', // operator
-      condNode,
-    );
-
+    const cnd = this.makeNeg(condNode);
     // Define the error
     const errorId = this.factory.makeIdentifierFor(errorDef);
 
@@ -113,10 +106,10 @@ export class ValSpecTransformer<T> extends ConSolFactory {
     );
 
     // Create the revert statement with the error call
-    const revertStatement = this.factory.makeRevertStatement(errorCall);
+    const revertStmt = this.factory.makeRevertStatement(errorCall);
     // Make the if-statement
-    const ifStatement = this.factory.makeIfStatement(ifCondition, revertStatement);
-    const funBody = this.factory.makeBlock([ifStatement]);
+    const ifStmt = this.factory.makeIfStatement(cnd, revertStmt);
+    const funBody = this.factory.makeBlock([ifStmt]);
     const checkFunDef = this.factory.makeFunctionDefinition(
       this.scope,
       FunctionKind.Function,

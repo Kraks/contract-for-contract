@@ -61,11 +61,19 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
   const reader = new ASTReader();
   const sourceUnits = reader.read(compileResult.data);
 
+  // Note: assume there is only one source unit/file
   const sourceUnit = sourceUnits[0];
-  const contract = sourceUnit.vContracts[0];
-  const factory = new ASTNodeFactory(contract.context);
-  const contractTransformer = new ConSolTransformer(factory, contract.scope, contract);
-  contractTransformer.process();
+  sourceUnit.vContracts.forEach((contract) => {
+    console.log(`Discover ${contract.kind} ${contract.name}.`);
+    if (contract.kind === 'interface') {
+      console.log(`Skip ${contract.kind} ${contract.name}.`)
+      return;
+    }
+    console.log(`Processing ${contract.kind} ${contract.name}.`);
+    const factory = new ASTNodeFactory(contract.context);
+    const contractTransformer = new ConSolTransformer(factory, contract.scope, contract);
+    contractTransformer.process();
+  });
 
   // reify the ast back to source code
   const formatter = new PrettyFormatter(4, 0);

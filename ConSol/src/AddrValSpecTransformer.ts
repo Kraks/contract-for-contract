@@ -24,7 +24,7 @@ import { properAddrName, extractRawAddr, extractAddrMember, needAbiEncoding } fr
 
 import { ValSpecTransformer } from './ValSpecTransformer.js';
 
-export class AddrValSpecTransformer<T> extends ValSpecTransformer<T> {
+export class LowLevelAddrSpecTransformer<T> extends ValSpecTransformer<T> {
   parentFunDef: FunctionDefinition;
   addr: string;
   member: string;

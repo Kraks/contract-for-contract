@@ -15,7 +15,7 @@ import { ValSpec } from './spec/index.js';
 import { extractFunName, uncheckedFunName, extractRawAddr } from './utils.js';
 
 import { ValSpecTransformer } from './ValSpecTransformer.js';
-import { AddrValSpecTransformer } from './AddrValSpecTransformer.js';
+import { LowLevelAddrSpecTransformer } from './AddrValSpecTransformer.js';
 
 export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   funDef: FunctionDefinition;
@@ -139,9 +139,9 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     return def.vParameters.vParameters[parentSpec.call.args.findIndex((a) => a === addr)];
   }
 
-  addrTransformers(addrSpec: ValSpec<T>): AddrValSpecTransformer<T> {
+  addrTransformers(addrSpec: ValSpec<T>): LowLevelAddrSpecTransformer<T> {
     const tgtAddr = this.findTargetAddr(this.funDef, this.spec, extractRawAddr(addrSpec));
-    return new AddrValSpecTransformer(
+    return new LowLevelAddrSpecTransformer(
       this.funDef,
       tgtAddr,
       addrSpec,
@@ -159,10 +159,11 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     const postFun = this.postCondCheckFun(this.postCondError, this.tgtName);
     if (postFun) this.funDef.vScope.appendChild(postFun);
 
+    // TODO (GW): now should also handle postFunSpec
+    /*
     const addrTrans = this.spec.preFunSpec.map((s) => this.addrTransformers(s));
-    addrTrans.forEach((tr) => {
-      tr.apply();
-    });
+    addrTrans.forEach((tr) => tr.apply());
+    */
 
     const wrapper = this.guardedFun(preFun, postFun);
     if (wrapper) {
@@ -170,8 +171,8 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
       this.funDef.name = uncheckedFunName(this.tgtName);
       this.funDef.visibility = FunctionVisibility.Private;
       if (this.funDef.isConstructor) {
-        // If the spec is attached on a constructor, we generate a new constructo,
-        // and the original constructor becoems an ordinary function.
+        // If the spec is attached on a constructor, we generate a new constructor,
+        // and the original constructor becomes an ordinary function.
         this.funDef.isConstructor = false;
         this.funDef.kind = FunctionKind.Function;
       }

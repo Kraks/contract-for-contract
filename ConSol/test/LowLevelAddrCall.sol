@@ -5,7 +5,17 @@ contract Caller {
   // Let's imagine that contract Caller does not have the source code for the
   // contract Receiver, but we do know the address of contract Receiver and the function to call.
 
-  /// @custom:consol { testCallFoo(addr, x) requires {x > 0} where { addr{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v > 5 && g < 10000 && x != 0 } ensures { flag == true } } { addr.send(x) returns (b) requires { x < 1024 } ensures {b == true} }}
+  /// @custom:consol {
+  ///   testCallFoo(addr, x) requires {x > 0} where {
+  ///     addr{value: v, gas: g}(mymsg, x) returns (flag, data)
+  ///     requires { v > 5 && g < 10000 && x != 0 }
+  ///     ensures { flag == true }
+  ///   } {
+  ///     addr.send(x) returns (b)
+  ///     requires { x < 1024 }
+  ///     ensures { b == true }
+  ///   }
+  /// }
   function testCallFoo(address payable _addr, uint256 x) public payable {
     // You can send ether and specify a custom gas amount
 
@@ -20,7 +30,13 @@ contract Caller {
 
   // This one doesn't have value and gas
 
-  /// @custom:consol { testCallFoo(addr, x) requires {x > 0} where { addr(mymsg, x) returns (flag, data) requires { v > 5 && g < 10000 && x != 0 } ensures { flag == true } }}
+  /// @custom:consol {
+  ///   anotherTest(addr, x) requires {x > 0} where {
+  ///     addr(mymsg, x) returns (flag, data)
+  ///     requires { v > 5 && g < 10000 && x != 0 }
+  ///     ensures { flag == true }
+  ///   }
+  /// }
   function anotherTest(address payable _addr, int256 x) public payable {
     (bool success, bytes memory data) = _addr.call(
       abi.encodeWithSignature("foo(string, uint256)", "call foo", 456)
