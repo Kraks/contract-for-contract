@@ -114,7 +114,6 @@ contract Caller_Translated {
     // GW: so here we set up the monitoring/checking following
     // a stack discipline.
   }
-
 }
 
 

@@ -1,9 +1,9 @@
 pragma solidity ^0.8.9;
 
 contract C {
-    error preViolation(string memory funcName);
+    error preViolation(string funcName);
 
-    error postViolation(string memory funcName);
+    error postViolation(string funcName);
 
     error PreViolationAddr(uint256 specId);
 

@@ -5,7 +5,7 @@ import { checkConSolOutput } from '../utils';
 
 describe('end to end tests', () => {
   // TODO: mechanize more tests...
-  const programs = ['PreCond.sol', 'PreCond2.sol', 'Lock.sol'];
+  const programs = ['PreCond.sol', 'PreCond2.sol', 'Lock.sol', 'PostCond.sol'];
 
   programs.forEach((program) => {
     test(program, async () => {
