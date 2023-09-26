@@ -8,8 +8,8 @@ describe('temporal contract - parser', () => {
   it('no argument and dict', () => {
     const s = '{ f() =/> g() }';
     const spec: TempSpec<string> = makeTempSpec({
-      call1: { tgt: {func: 'f'}, kwargs: [], args: [], rets: [] },
-      call2: { tgt: {func: 'g'}, kwargs: [], args: [], rets: [] },
+      call1: { tgt: { func: 'f' }, kwargs: [], args: [], rets: [] },
+      call2: { tgt: { func: 'g' }, kwargs: [], args: [], rets: [] },
       conn: 1,
     });
 
@@ -20,8 +20,8 @@ describe('temporal contract - parser', () => {
   it('single argument without conditions', () => {
     const s = '{ f(x) returns (y) ~> g() returns z }';
     const spec: TempSpec<string> = makeTempSpec({
-      call1: { tgt: {func: 'f'}, kwargs: [], args: ['x'], rets: ['y'] },
-      call2: { tgt: {func: 'g'}, kwargs: [], args: [], rets: ['z'] },
+      call1: { tgt: { func: 'f' }, kwargs: [], args: ['x'], rets: ['y'] },
+      call2: { tgt: { func: 'g' }, kwargs: [], args: [], rets: ['z'] },
       conn: 2,
     });
 
@@ -39,8 +39,8 @@ describe('temporal contract - parser', () => {
     }
     `;
     const spec: TempSpec<string> = makeTempSpec({
-      call1: { tgt: {func: 'f'}, kwargs: [], args: ['x'], rets: ['y'] },
-      call2: { tgt: {func: 'g'}, kwargs: [], args: [], rets: ['z'] },
+      call1: { tgt: { func: 'f' }, kwargs: [], args: ['x'], rets: ['y'] },
+      call2: { tgt: { func: 'g' }, kwargs: [], args: [], rets: ['z'] },
       conn: 2,
       preCond: 'x+y==z',
     });
@@ -59,8 +59,8 @@ describe('temporal contract - parser', () => {
     }
     `;
     const spec: TempSpec<string> = makeTempSpec({
-      call1: { tgt: {func: 'f'}, kwargs: [], args: ['x'], rets: ['y'] },
-      call2: { tgt: {func: 'g'}, kwargs: [], args: [], rets: ['z'] },
+      call1: { tgt: { func: 'f' }, kwargs: [], args: ['x'], rets: ['y'] },
+      call2: { tgt: { func: 'g' }, kwargs: [], args: [], rets: ['z'] },
       conn: 2,
       postCond: 'x+y==z',
     });
@@ -73,13 +73,13 @@ describe('temporal contract - parser', () => {
     const s = '{ f{gas: g1}(x) ~/> g{gas: g2}() }';
     const spec: TempSpec<string> = makeTempSpec({
       call1: {
-        tgt: {func: 'f'},
+        tgt: { func: 'f' },
         kwargs: [{ fst: 'gas', snd: 'g1' }],
         args: ['x'],
         rets: [],
       },
       call2: {
-        tgt: {func: 'g'},
+        tgt: { func: 'g' },
         kwargs: [{ fst: 'gas', snd: 'g2' }],
         args: [],
         rets: [],
@@ -102,13 +102,13 @@ describe('temporal contract - parser', () => {
     `;
     const spec: TempSpec<string> = makeTempSpec({
       call1: {
-        tgt: {func: 'f'},
+        tgt: { func: 'f' },
         kwargs: [{ fst: 'gas', snd: 'g1' }],
         args: ['x'],
         rets: [],
       },
       call2: {
-        tgt: {func: 'g'},
+        tgt: { func: 'g' },
         kwargs: [{ fst: 'gas', snd: 'g2' }],
         args: [],
         rets: [],
@@ -132,13 +132,13 @@ describe('temporal contract - parser', () => {
     `;
     const spec: TempSpec<string> = makeTempSpec({
       call1: {
-        tgt: {func: 'f'},
+        tgt: { func: 'f' },
         kwargs: [{ fst: 'gas', snd: 'g1' }],
         args: ['x'],
         rets: [],
       },
       call2: {
-        tgt: {func: 'g'},
+        tgt: { func: 'g' },
         kwargs: [{ fst: 'gas', snd: 'g2' }],
         args: [],
         rets: [],
@@ -166,7 +166,7 @@ describe('temporal contract - parser', () => {
     `;
     const spec: TempSpec<string> = makeTempSpec({
       call1: {
-        tgt: {func: 'f'},
+        tgt: { func: 'f' },
         kwargs: [
           { fst: 'gas', snd: 'g1' },
           { fst: 'value', snd: 'v1' },
@@ -175,8 +175,11 @@ describe('temporal contract - parser', () => {
         rets: ['w'],
       },
       call2: {
-        tgt: {func: 'g'},
-        kwargs: [], args: ['a'], rets: ['b', 'c', 'd'] },
+        tgt: { func: 'g' },
+        kwargs: [],
+        args: ['a'],
+        rets: ['b', 'c', 'd'],
+      },
       conn: 3,
       preCond: 'v1+x>g1-w',
       postCond: 'x+y+z==b+c+d',
@@ -201,10 +204,13 @@ describe('temporal contract - parser', () => {
     `;
     const spec: TempSpec<string> = makeTempSpec({
       call1: {
-        tgt: {func: 'f'},
-        kwargs: [], args: ['x', 'y', 'z'], rets: ['f1'] },
+        tgt: { func: 'f' },
+        kwargs: [],
+        args: ['x', 'y', 'z'],
+        rets: ['f1'],
+      },
       call2: {
-        tgt: {func: 'g'},
+        tgt: { func: 'g' },
         kwargs: [
           { fst: 'value', snd: 'v1' },
           { fst: 'gas', snd: 'g1' },
