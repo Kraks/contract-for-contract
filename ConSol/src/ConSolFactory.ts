@@ -70,9 +70,10 @@ export class ConSolFactory {
     return errorDef;
   }
 
-  strToTypeName(str: string): TypeName {
-    if (str === 'bytes') return this.factory.makeElementaryTypeName('', 'bytes memory');
-    if (str === 'string') return this.factory.makeElementaryTypeName('', 'string memory');
+  strToTypeName(str: string, storage?: string): TypeName {
+    if (storage) {
+      return this.factory.makeElementaryTypeName('', `${str} ${storage}`);
+    }
     // TODO(GW): other types with storage modifier
     return this.factory.makeElementaryTypeName('', str);
   }
