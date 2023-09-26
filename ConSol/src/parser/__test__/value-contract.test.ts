@@ -342,4 +342,43 @@ describe('value (fun) contract - parser', () => {
 
     expect(parseSpec).toThrow();
   });
+
+  it('', () => {
+    const s = `{
+        foo(addr, x, y)
+        where {
+          Iface(addr).f(data) ensures { good(data) }
+        } }`;
+
+    const spec: ValSpec<string> = makeValSpec({
+      preFunSpec: [
+        {
+          preFunSpec: [],
+          postFunSpec: [],
+          call: {
+            tgt: {
+              func: "f",
+              addr: "addr",
+              interface: "Iface"
+            },
+            kwargs: [],
+            args: [ "data" ],
+            rets: []
+          },
+          tag: 'ValSpec',
+          postCond: 'good(data)'
+        }
+      ],
+      postFunSpec: [],
+      call: {
+        tgt: { func: 'foo' },
+        kwargs: [],
+        args: [ 'addr', 'x', 'y' ],
+        rets: []
+      },
+      tag: 'ValSpec'
+    });
+    const parseSpec = CSSpecParse(s, visitor) as ValSpec<string>;
+    expect(parseSpec).toEqual(spec);
+  });
 });

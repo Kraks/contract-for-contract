@@ -279,7 +279,8 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     return call;
   };
 
-  // fname :   IDENT ( '.' IDENT )?
+  // fname :   IDENT
+  //       |   IDENT '.' IDENT
   //       |   IDENT '(' IDENT ')' '.' IDENT
   visitTarget: (ctx: TargetContext) => Target = (ctx) => {
     assert(ctx.children != null);
