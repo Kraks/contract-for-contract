@@ -22,9 +22,9 @@ import {
 import { ValSpec } from './spec/index.js';
 import { properAddrName, extractRawAddr, extractAddrMember, needAbiEncoding } from './ConSolUtils.js';
 
-import { ValSpecTransformer } from './ValSpecTransformer.js';
+import { CheckFunFactory } from './CheckFunFactory.js';
 
-export class LowLevelAddrSpecTransformer<T> extends ValSpecTransformer<T> {
+export class LowLevelAddrSpecTransformer<T> extends CheckFunFactory<T> {
   parentFunDef: FunctionDefinition;
   addr: string;
   member: string;
@@ -48,7 +48,7 @@ export class LowLevelAddrSpecTransformer<T> extends ValSpecTransformer<T> {
   ) {
     const addr = extractRawAddr(spec);
     const member = extractAddrMember(spec);
-    super(ctx, scope, spec, addr, [], [], factory);
+    super(ctx, scope, spec, [], [], factory);
     this.addr = addr;
     this.member = member;
     this.tgtAddr = tgtAddr;

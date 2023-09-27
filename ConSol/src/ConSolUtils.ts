@@ -19,6 +19,11 @@ import { ConSolTransformer } from './ConSolTransformer.js';
 
 export const SPEC_PREFIX = '@custom:consol';
 
+export function toBeImplemented(): never {
+  console.error("To be implemented");
+  process.exit(-1);
+}
+
 export function parseConSolSpec(doc: string): CSSpec<string> {
   const specStr = doc.substring(SPEC_PREFIX.length).trim();
   const visitor = new CSSpecVisitor<string>((s) => s);

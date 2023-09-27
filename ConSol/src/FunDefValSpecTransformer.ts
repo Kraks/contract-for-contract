@@ -14,10 +14,10 @@ import {
 import { ValSpec } from './spec/index.js';
 import { extractFunName, uncheckedFunName, extractRawAddr } from './ConSolUtils.js';
 
-import { ValSpecTransformer } from './ValSpecTransformer.js';
+import { CheckFunFactory } from './CheckFunFactory.js';
 import { LowLevelAddrSpecTransformer } from './LowLevelAddrSpec.js';
 
-export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
+export class FunDefValSpecTransformer<T> extends CheckFunFactory<T> {
   funDef: FunctionDefinition;
   retTypes: TypeName[];
   declaredParams: VariableDeclaration[];
@@ -38,11 +38,17 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   ) {
     const declaredParams = (funDef as FunctionDefinition).vParameters.vParameters;
     const declaredRetParams = (funDef as FunctionDefinition).vReturnParameters.vParameters;
+    const tgtName = extractFunName(funDef);
+    if (spec.call.tgt.func !== tgtName) {
+      console.error(
+        `Error: Mismatch names between the attached function (${tgtName}) the spec (${spec.call.tgt.func}). Abort.`,
+      );
+      process.exit(-1);
+    }
     super(
       funDef.context as ASTContext,
       funDef.scope,
       spec,
-      extractFunName(funDef),
       declaredParams,
       declaredRetParams,
       factory,

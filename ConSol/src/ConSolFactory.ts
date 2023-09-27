@@ -13,6 +13,7 @@ import {
   ExpressionStatement,
   LiteralKind,
   FunctionCallKind,
+  FunctionCall,
 } from 'solc-typed-ast';
 
 // Note(GW): this function changes `decls` in-place
@@ -31,6 +32,41 @@ export class ConSolFactory {
   constructor(factory: ASTNodeFactory, scope: number) {
     this.factory = factory;
     this.scope = scope;
+  }
+
+  makeCallStmt(funName: string, args: Expression[], retType: string = 'void'): ExpressionStatement {
+    const f = this.factory.makeIdentifier('function', funName, -1);
+    const call = this.makeFunCall(f, args, retType);
+    return this.factory.makeExpressionStatement(call);
+  }
+
+  makeFunCall(id: Identifier, args: Expression[], retType: string): FunctionCall {
+    const call = this.factory.makeFunctionCall(
+      retType,
+      FunctionCallKind.FunctionCall,
+      id,
+      args,
+    );
+    return call;
+  }
+
+  makeTypedVarDecls(types: TypeName[], names: string[]): VariableDeclaration[] {
+    assert(types.length == names.length, 'The number of types should equal to the number of names');
+    return types.map((ty, i) => {
+      const retTypeDecl = this.factory.makeVariableDeclaration(
+        false,
+        false,
+        names[i],
+        this.scope,
+        false,
+        DataLocation.Default,
+        StateVariableVisibility.Default,
+        Mutability.Mutable,
+        types[i].typeString,
+      );
+      retTypeDecl.vType = ty;
+      return retTypeDecl;
+    });
   }
 
   makeNeg(e: Expression): Expression {

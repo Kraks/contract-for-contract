@@ -22,9 +22,9 @@ import {
 
 import { ValSpec } from './spec/index.js';
 import { ConSolFactory } from './ConSolFactory.js';
-import { postCheckFunName, preCheckFunName } from './ConSolUtils.js';
+import { postCheckFunName, preCheckFunName, toBeImplemented } from './ConSolUtils.js';
 
-export class ValSpecTransformer<T> extends ConSolFactory {
+export class CheckFunFactory<T> extends ConSolFactory {
   ctx: ASTContext;
   spec: ValSpec<T>;
   tgtName: string;
@@ -39,7 +39,6 @@ export class ValSpecTransformer<T> extends ConSolFactory {
     ctx: ASTContext,
     scope: number,
     spec: ValSpec<T>,
-    tgtName: string,
     params: VariableDeclaration[],
     retVarDecs: VariableDeclaration[],
     factory?: ASTNodeFactory,
@@ -49,15 +48,19 @@ export class ValSpecTransformer<T> extends ConSolFactory {
     } else {
       super(factory, scope);
     }
-    if (spec.call.tgt.func !== tgtName) {
-      console.error(
-        `Error: Mismatch names between the attached function (${tgtName}) the spec (${spec.call.tgt.func}). Abort.`,
-      );
-      process.exit(-1);
-    }
     this.ctx = ctx;
     this.spec = spec;
-    this.tgtName = tgtName;
+    const target = spec.call.tgt;
+    if (target.addr !== undefined && target.interface !== undefined) {
+      // High-level address call
+      this.tgtName = target.interface + '_' + target.func + '_' + spec.id;
+    } else if (target.interface !== undefined) {
+      // Low-level address call
+      toBeImplemented();
+    } else {
+      // Ordinary function call
+      this.tgtName = target.func;
+    }
     this.paramVarDecs = params;
     this.retVarDecs = retVarDecs;
     this.guardedParamNames = [...this.spec.call.kwargs.map((p) => p.snd), ...this.spec.call.args];
@@ -65,7 +68,7 @@ export class ValSpecTransformer<T> extends ConSolFactory {
     this.guardedAllParamNames = [...this.guardedParamNames, ...this.guardedRetParamNames];
   }
 
-  makeFlatCheckFun(
+  private makeCheckFun(
     funName: string,
     condExpr: T,
     params: ParameterList,
@@ -75,8 +78,6 @@ export class ValSpecTransformer<T> extends ConSolFactory {
     const condNode = this.factory.makePhantomExpression('bool', (('(' + condExpr) as string) + ')');
     // Make the if-condition (expression)
     const cnd = this.makeNeg(condNode);
-    // Define the error
-    const errorId = this.factory.makeIdentifierFor(errorDef);
 
     let errorParam;
     if (typeof errorParamVal === 'number') {
@@ -91,12 +92,7 @@ export class ValSpecTransformer<T> extends ConSolFactory {
     }
 
     // Create the function call for the error
-    const errorCall = this.factory.makeFunctionCall(
-      'void',
-      FunctionCallKind.FunctionCall,
-      errorId,
-      [errorParam], // Arguments
-    );
+    const errorCall = this.makeFunCall(this.factory.makeIdentifierFor(errorDef), [errorParam], 'void');
 
     // Create the revert statement with the error call
     const revertStmt = this.factory.makeRevertStatement(errorCall);
@@ -120,52 +116,18 @@ export class ValSpecTransformer<T> extends ConSolFactory {
     return checkFunDef;
   }
 
-  makeTypedVarDecls(types: TypeName[], names: string[]): VariableDeclaration[] {
-    assert(types.length == names.length, 'The number of types should equal to the number of names');
-    return types.map((ty, i) => {
-      const retTypeDecl = this.factory.makeVariableDeclaration(
-        false,
-        false,
-        names[i],
-        this.scope,
-        false,
-        DataLocation.Default,
-        StateVariableVisibility.Default,
-        Mutability.Mutable,
-        types[i].typeString,
-      );
-      retTypeDecl.vType = ty;
-      return retTypeDecl;
-    });
-  }
-
-  makeCheckStmt(funName: string, args: Expression[], errorMsg: string): ExpressionStatement {
-    const call = this.makeFunCall(funName, args, 'bool');
+  private makeCheckStmt(funName: string, args: Expression[], errorMsg: string): ExpressionStatement {
+    const f = this.factory.makeIdentifier('function', funName, -1);
+    const call = this.makeFunCall(f, args, 'bool');
     return this.makeRequireStmt(call, errorMsg);
-  }
-
-  makeCallStmt(funName: string, args: Expression[], retType = 'void'): ExpressionStatement {
-    const call = this.makeFunCall(funName, args, retType);
-    return this.factory.makeExpressionStatement(call);
-  }
-
-  makeFunCall(funName: string, args: Expression[], retType: string): FunctionCall {
-    const call = this.factory.makeFunctionCall(
-      retType,
-      FunctionCallKind.FunctionCall,
-      this.factory.makeIdentifier('function', funName, -1),
-      args,
-    );
-    return call;
   }
 
   preCondCheckFun(errorDef: ErrorDefinition, errorParamVal: string | number): FunctionDefinition | undefined {
     if (this.spec.preCond === undefined) return undefined;
     const preFunName = preCheckFunName(this.tgtName);
-    // TODO(GW): should use factory.makeParameterList...
     const varDecs = this.makeVarDecs(this.guardedParamNames, this.paramVarDecs);
-    const allParams = new ParameterList(0, '', [...varDecs]);
-    const preFunDef = this.makeFlatCheckFun(preFunName, this.spec.preCond, allParams, errorDef, errorParamVal);
+    const allParams = this.factory.makeParameterList([...varDecs]);
+    const preFunDef = this.makeCheckFun(preFunName, this.spec.preCond, allParams, errorDef, errorParamVal);
     return preFunDef;
   }
 
@@ -174,8 +136,8 @@ export class ValSpecTransformer<T> extends ConSolFactory {
     const postFunName = postCheckFunName(this.tgtName);
     const rets = [...this.guardedParamNames, ...this.guardedRetParamNames];
     const retVarDecs = this.makeVarDecs(rets, [...this.paramVarDecs, ...this.retVarDecs]);
-    const allParams = new ParameterList(0, '', [...retVarDecs]);
-    const postCondFunc = this.makeFlatCheckFun(postFunName, this.spec.postCond, allParams, errorDef, errorParamVal);
+    const allParams = this.factory.makeParameterList([...retVarDecs]);
+    const postCondFunc = this.makeCheckFun(postFunName, this.spec.postCond, allParams, errorDef, errorParamVal);
     return postCondFunc;
   }
 }
