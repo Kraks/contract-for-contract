@@ -235,37 +235,21 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     return tspec;
   };
 
-  // call  :   fname ( dict )? '(' idents ')' ('returns' tuple)? ;
+  // call  :   target ( dict )? '(' idents ')' ('returns' tuple)? ;
   visitCall: (ctx: CallContext) => Call = (ctx) => {
-    assert(ctx.children != null);
-    assert(ctx.children.length >= 4 && ctx.children.length <= 7);
-
-    const target = this.visit(ctx.children[0]) as Target;
-
+    const target = this.visitTarget(ctx.target());
     // kwargs
-    let identsIdx: number, kwargs: Array<Pair<string, string>>;
-    if (ctx.children[1] instanceof DictContext) {
-      identsIdx = 3;
-      kwargs = this.visit(ctx.children[1]) as Array<Pair<string, string>>;
-    } else {
-      identsIdx = 2;
-      kwargs = [];
+    let kwargs: Array<Pair<string, string>> = [];
+    if (ctx.dict() != undefined) {
+      kwargs = this.visitDict(ctx.dict());
     }
-
     // args
-    assert(this.extractTermText(ctx.children[identsIdx - 1]) == '(');
-    assert(this.extractTermText(ctx.children[identsIdx + 1]) == ')');
-    const args = this.visit(ctx.children[identsIdx]) as Array<string>;
-
+    const args = this.visitIdents(ctx.idents());
     // returns
-    let rets: Array<string>;
-    if (ctx.children[ctx.children.length - 1] instanceof TupleContext) {
-      assert(this.extractTermText(ctx.children[ctx.children.length - 2]) == 'returns');
-      rets = this.visit(ctx.children[ctx.children.length - 1]) as Array<string>;
-    } else {
-      rets = [];
+    let rets: Array<string> = [];
+    if (ctx.RETURNS() != undefined) {
+      rets = this.visitTuple(ctx.tuple());
     }
-
     const call: Call = {
       tgt: target,
       kwargs: kwargs,
