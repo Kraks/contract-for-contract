@@ -17,6 +17,7 @@ import {
   PairContext,
   IdentsContext,
 } from '../parser/SpecParser.js';
+import { nextAddrSpecId, resetAddrSpecId } from '../Global.js';
 
 type Tagged<Tag> = {
   readonly tag: Tag;
@@ -30,7 +31,7 @@ export interface $ValSpec<T> {
   preFunSpec: Array<Opaque<$ValSpec<T>, 'ValSpec'>>;
   postCond?: T;
   postFunSpec: Array<Opaque<$ValSpec<T>, 'ValSpec'>>;
-  //id?: number;
+  id?: number;
 }
 
 export enum TempConn {
@@ -161,6 +162,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
           .vspec_list()
           .map((vspec) => this.visitVspec(vspec))
           .forEach((addrSpec) => {
+            addrSpec.id = nextAddrSpecId();
             const rawAddr = addrSpec.call.tgt.addr;
             const tgt = rawAddr === undefined ? addrSpec.call.tgt.func : rawAddr;
             if (call.args.includes(tgt)) {
@@ -348,6 +350,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
 // TODO: add error handling
 // XXX: for now, just for testing
 export function CSSpecParse<T>(s: string, visitor: CSSpecVisitor<T>): CSSpec<T> {
+  resetAddrSpecId();
   const chars = new CharStream(s); // replace this with a FileStream as required
   const lexer = new SpecLexer(chars);
   const tokens = new CommonTokenStream(lexer);

@@ -21,7 +21,6 @@ import { resetAddrSpecId } from './Global.js';
 export const SPEC_PREFIX = '@custom:consol';
 
 export function parseConSolSpec(doc: string): CSSpec<string> {
-  resetAddrSpecId();
   const specStr = doc.substring(SPEC_PREFIX.length).trim();
   const visitor = new CSSpecVisitor<string>((s) => s);
   const spec = CSSpecParse<string>(specStr, visitor);
