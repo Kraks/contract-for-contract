@@ -30,6 +30,7 @@ export interface $ValSpec<T> {
   preFunSpec: Array<Opaque<$ValSpec<T>, 'ValSpec'>>;
   postCond?: T;
   postFunSpec: Array<Opaque<$ValSpec<T>, 'ValSpec'>>;
+  //id?: number;
 }
 
 export enum TempConn {
