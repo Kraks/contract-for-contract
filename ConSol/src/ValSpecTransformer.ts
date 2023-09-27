@@ -140,18 +140,18 @@ export class ValSpecTransformer<T> extends ConSolFactory {
   }
 
   makeCheckStmt(funName: string, args: Expression[], errorMsg: string): ExpressionStatement {
-    const call = this.makeFunCall(funName, args);
+    const call = this.makeFunCall(funName, args, 'bool');
     return this.makeRequireStmt(call, errorMsg);
   }
 
-  makeCallStmt(funName: string, args: Expression[]): ExpressionStatement {
-    const call = this.makeFunCall(funName, args);
+  makeCallStmt(funName: string, args: Expression[], retType: string = 'void'): ExpressionStatement {
+    const call = this.makeFunCall(funName, args, retType);
     return this.factory.makeExpressionStatement(call);
   }
 
-  makeFunCall(funName: string, args: Expression[]): FunctionCall {
+  makeFunCall(funName: string, args: Expression[], retType: string): FunctionCall {
     const call = this.factory.makeFunctionCall(
-      'bool',
+      retType,
       FunctionCallKind.FunctionCall,
       this.factory.makeIdentifier('function', funName, -1),
       args,
