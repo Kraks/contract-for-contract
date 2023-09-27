@@ -16,7 +16,6 @@ import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
 
 import * as fs from 'fs';
 import { ConSolTransformer } from './ConSolTransformer.js';
-import { resetAddrSpecId } from './Global.js';
 
 export const SPEC_PREFIX = '@custom:consol';
 

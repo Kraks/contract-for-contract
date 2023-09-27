@@ -38,7 +38,7 @@ describe('value (fun) contract - parser', () => {
             args: ['msg', 'x'],
             rets: ['flag', 'data'],
           },
-          id : 0,
+          id: 0,
           preCond: 'v>5&&g<10000&&x!=0',
           postCond: 'flag==true',
         }),
@@ -82,7 +82,7 @@ describe('value (fun) contract - parser', () => {
       preFunSpec: [
         makeValSpec({
           call: { tgt: { func: 'argfun' }, kwargs: [], args: [], rets: [] },
-          id : 0,
+          id: 0,
           postCond: 'aaa',
         }),
         makeValSpec({
@@ -92,7 +92,7 @@ describe('value (fun) contract - parser', () => {
             args: ['xxx'],
             rets: ['hhh'],
           },
-          id : 1,
+          id: 1,
           preCond: 'ddd',
         }),
       ],
@@ -123,7 +123,7 @@ describe('value (fun) contract - parser', () => {
         makeValSpec({
           call: { tgt: { func: 'argfun' }, kwargs: [], args: [], rets: [] },
           postCond: 'aaa',
-          id : 0,
+          id: 0,
         }),
         makeValSpec({
           call: {
@@ -133,14 +133,14 @@ describe('value (fun) contract - parser', () => {
             rets: ['hhh'],
           },
           preCond: 'ddd',
-          id : 2,
+          id: 2,
         }),
       ],
       postFunSpec: [
         makeValSpec({
           call: { tgt: { func: 'retFun' }, kwargs: [], args: [], rets: [] },
           postCond: 'bbb',
-          id : 1,
+          id: 1,
         }),
       ],
     });
@@ -173,7 +173,7 @@ describe('value (fun) contract - parser', () => {
         makeValSpec({
           call: { tgt: { func: 'argfun' }, kwargs: [], args: [], rets: [] },
           postCond: 'aaa',
-          id : 0,
+          id: 0,
         }),
         makeValSpec({
           call: {
@@ -183,14 +183,14 @@ describe('value (fun) contract - parser', () => {
             rets: ['hhh'],
           },
           preCond: 'ddd',
-          id : 2,
+          id: 2,
         }),
       ],
       postFunSpec: [
         makeValSpec({
           call: { tgt: { func: 'retFun' }, kwargs: [], args: [], rets: [] },
           postCond: 'bbb',
-          id : 1,
+          id: 1,
         }),
       ],
     });
@@ -225,7 +225,7 @@ describe('value (fun) contract - parser', () => {
         makeValSpec({
           call: { tgt: { func: 'argfun' }, kwargs: [], args: [], rets: [] },
           postCond: 'aaa',
-          id : 0,
+          id: 0,
         }),
         makeValSpec({
           call: {
@@ -235,14 +235,14 @@ describe('value (fun) contract - parser', () => {
             rets: ['hhh'],
           },
           preCond: 'ddd',
-          id : 2,
+          id: 2,
         }),
       ],
       postFunSpec: [
         makeValSpec({
           call: { tgt: { func: 'retFun' }, kwargs: [], args: [], rets: [] },
           postCond: 'bbb',
-          id : 1,
+          id: 1,
         }),
       ],
     });
@@ -278,7 +278,7 @@ describe('value (fun) contract - parser', () => {
           call: { tgt: { func: 'argfun' }, kwargs: [], args: [], rets: [] },
           postCond: 'aaa',
           tag: 'ValSpec',
-          id : 0,
+          id: 0,
         }),
         makeValSpec({
           call: {
@@ -289,7 +289,7 @@ describe('value (fun) contract - parser', () => {
           },
           preCond: 'ddd',
           tag: 'ValSpec',
-          id : 1,
+          id: 1,
         }),
       ],
       postFunSpec: [
@@ -297,7 +297,7 @@ describe('value (fun) contract - parser', () => {
           call: { tgt: { func: 'retFun' }, kwargs: [], args: [], rets: [] },
           postCond: 'bbb',
           tag: 'ValSpec',
-          id : 2,
+          id: 2,
         }),
       ],
     });
@@ -334,7 +334,7 @@ describe('value (fun) contract - parser', () => {
         makeValSpec({
           call: { tgt: { func: 'argfun' }, kwargs: [], args: [], rets: [] },
           postCond: 'aaa',
-          id : 0,
+          id: 0,
         }),
         makeValSpec({
           call: {
@@ -344,14 +344,14 @@ describe('value (fun) contract - parser', () => {
             rets: ['hhh'],
           },
           preCond: 'ddd',
-          id : 1,
+          id: 1,
         }),
       ],
       postFunSpec: [
         makeValSpec({
           call: { tgt: { func: 'retFun' }, kwargs: [], args: [], rets: [] },
           postCond: 'bbb',
-          id : 2,
+          id: 2,
         }),
       ],
     });
@@ -386,7 +386,7 @@ describe('value (fun) contract - parser', () => {
           },
           tag: 'ValSpec',
           postCond: 'good(data)',
-          id : 0,
+          id: 0,
         },
       ],
       postFunSpec: [],
