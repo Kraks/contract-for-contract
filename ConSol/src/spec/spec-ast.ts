@@ -132,8 +132,6 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
   // spec  :   vspec EOF | tspec EOF;
   visitSpec: (ctx: SpecContext) => CSSpec<T> = (ctx) => {
     assert(ctx.children != null);
-    assert(ctx.children.length == 2);
-
     return this.visit(ctx.children[0]) as CSSpec<T>;
   };
 
@@ -284,50 +282,26 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
 
   // tuple :   IDENT | '(' idents ')' ;
   visitTuple: (ctx: TupleContext) => Array<string> = (ctx) => {
-    assert(ctx.children != null);
-    assert(ctx.children.length == 1 || ctx.children.length == 3);
-
-    if (ctx.children.length == 1) {
-      const child = ctx.children[0] as TerminalNode;
-      assert(child.symbol.type == SpecLexer.IDENT);
-      return [child.symbol.text];
+    if (ctx.IDENT() != undefined) {
+      return [ctx.IDENT().getText()];
     } else {
-      assert(this.extractTermText(ctx.children[0]) == '(');
-      assert(this.extractTermText(ctx.children[2]) == ')');
-      return this.visit(ctx.children[1]) as Array<string>;
+      return this.visitIdents(ctx.idents());
     }
   };
 
   // pair : IDENT ':' IDENT ;
   visitPair: (ctx: PairContext) => Pair<string, string> = (ctx) => {
-    assert(ctx.children != null);
-    return { fst: ctx.children[0].getText(), snd: ctx.children[2].getText() };
+    return { fst: ctx.IDENT(0).getText(), snd: ctx.IDENT(1).getText() };
   };
 
   // dict  : '{' pair (',' pair)* '}' ;
   visitDict: (ctx: DictContext) => Array<Pair<string, string>> = (ctx) => {
-    assert(ctx.children != null);
-    assert(ctx.children.length >= 3);
-
-    assert(this.extractTermText(ctx.children[0]) == '{');
-    assert(this.extractTermText(ctx.children[ctx.children.length - 1]) == '}');
-
-    const kvs = ctx.children
-      .filter((child) => child instanceof PairContext)
-      .map((child) => this.visit(child as PairContext) as Pair<string, string>);
-
-    return kvs;
+    return ctx.pair_list().map((child) => this.visitPair(child));
   };
 
   // idents:    (IDENT (',' IDENT)*)? ;
   visitIdents: (ctx: IdentsContext) => Array<string> = (ctx) => {
-    if (ctx.children == null) {
-      return [];
-    } else {
-      return ctx.children
-        .filter((child) => (child as TerminalNode).symbol.type == SpecLexer.IDENT)
-        .map((child) => child.getText());
-    }
+    return ctx.IDENT_list().map((child) => child.getText());
   };
 }
 
