@@ -144,7 +144,7 @@ export class ValSpecTransformer<T> extends ConSolFactory {
     return this.makeRequireStmt(call, errorMsg);
   }
 
-  makeCallStmt(funName: string, args: Expression[], retType: string = 'void'): ExpressionStatement {
+  makeCallStmt(funName: string, args: Expression[], retType = 'void'): ExpressionStatement {
     const call = this.makeFunCall(funName, args, retType);
     return this.factory.makeExpressionStatement(call);
   }
