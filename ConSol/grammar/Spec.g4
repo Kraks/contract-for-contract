@@ -16,7 +16,7 @@ tspec : '{' call TCONN call
           ('ensures' '{' sexpr '}')?
         '}'
 ;
-sexpr : ~('{' | '}')+ ;
+sexpr : ~('{' | '}' | KEYWORDS)+ ;
 
 call  : target dict? '(' idents ')' ('returns' tuple)? ;
 
@@ -36,6 +36,16 @@ tuple : IDENT
       ;
 
 idents: (IDENT (',' IDENT)*)? ;
+
+RETURNS : 'returns';
+REQUIRES : 'requires';
+ENSURES : 'ensures';
+WHERE : 'where';
+
+LCURPAR : '{';
+RCURPAR : '}';
+
+KEYWORDS : RETURNS | REQUIRES | ENSURES | WHERE ;
 
 IDENT : [a-zA-Z_] [a-zA-Z_0-9]* ;
 TCONN : '=>'

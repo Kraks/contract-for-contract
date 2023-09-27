@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { ConSolCompile } from './utils.js';
+import { ConSolCompile } from './ConSolUtils.js';
 
 async function main() {
   const args = process.argv.slice(1);

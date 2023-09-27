@@ -144,9 +144,9 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
   */
   visitVspec: (ctx: VspecContext) => ValSpec<T> = (ctx) => {
     assert(ctx.children != null);
-
-    const call = this.visit(ctx.children[1]) as Call;
+    const call = this.visitCall(ctx.call());
     const vspec: ValSpec<T> = makeValSpec({ call: call });
+
     for (let i = 2; i < ctx.children.length - 1; i += 4) {
       const prompt = this.extractTermText(ctx.children[i]);
       if (prompt == 'requires') {
@@ -156,26 +156,17 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
         assert(ctx.children[i + 2] instanceof SexprContext);
         vspec.postCond = this.parseSexpr(ctx.children[i + 2].getText());
       } else if (prompt == 'where') {
-        i = i + 1;
-        while (i < ctx.children.length - 1) {
-          const funspec = this.visit(ctx.children[i]) as ValSpec<T>;
-          if (!funspec || !funspec.call) {
-            assert(false, 'Undefined fs or fs.call:' + funspec);
-            // continue;
-          }
-          const rawAddr = funspec.call.tgt.addr;
-          const tgt = rawAddr === undefined ? funspec.call.tgt.func : rawAddr;
+        ctx.vspec_list().map((vspec) => this.visitVspec(vspec)).forEach((addrSpec) => {
+          const rawAddr = addrSpec.call.tgt.addr;
+          const tgt = rawAddr === undefined ? addrSpec.call.tgt.func : rawAddr;
           if (call.args.includes(tgt)) {
-            vspec.preFunSpec.push(funspec);
+            vspec.preFunSpec.push(addrSpec);
           } else if (call.rets.includes(tgt)) {
-            vspec.postFunSpec.push(funspec);
-          } else {
-            assert(false, 'Unknown address ' + tgt);
-          }
-          i = i + 1;
-        }
+            vspec.postFunSpec.push(addrSpec);
+          } else assert(false, 'Unknown address: ' + tgt);
+        });
       } else {
-        assert(false, 'invalid keyword ' + prompt);
+        assert(false, 'invalid keyword: ' + prompt);
       }
     }
     return vspec;

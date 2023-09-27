@@ -1,7 +1,7 @@
 import { ASTContext, ASTNodeFactory, ASTReader, Block, compileSourceString, LiteralKind } from 'solc-typed-ast';
 import { genSource } from './util';
 import { ConSolFactory } from '../ConSolFactory';
-import { checkConSolOutput } from '../utils';
+import { checkConSolOutput } from '../ConSolUtils';
 
 describe('end to end tests', () => {
   // TODO: mechanize more tests...

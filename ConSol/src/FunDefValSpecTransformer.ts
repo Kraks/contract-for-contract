@@ -12,10 +12,10 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
-import { extractFunName, uncheckedFunName, extractRawAddr } from './utils.js';
+import { extractFunName, uncheckedFunName, extractRawAddr } from './ConSolUtils.js';
 
 import { ValSpecTransformer } from './ValSpecTransformer.js';
-import { LowLevelAddrSpecTransformer } from './AddrValSpecTransformer.js';
+import { LowLevelAddrSpecTransformer } from './LowLevelAddrSpec.js';
 
 export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   funDef: FunctionDefinition;
