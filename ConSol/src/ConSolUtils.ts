@@ -117,11 +117,19 @@ export function extractFunName(node: ASTNode): string {
   return node.raw.name;
 }
 
+export function preCheckFunName(f: string): string {
+  return '_' + f + '_pre';
+}
+
+export function postCheckFunName(f: string): string {
+  return '_' + f + '_post';
+}
+
 export function uncheckedFunName(f: string): string {
   return f + '_original';
 }
 
-export function properAddrName<T>(addr: string, member: string): string {
+export function properAddrName(addr: string, member: string): string {
   return addr + '_' + member;
 }
 

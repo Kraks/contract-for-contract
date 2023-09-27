@@ -5,9 +5,9 @@ contract C {
 
     error postViolation(string funcName);
 
-    error PreViolationAddr(uint256 specId);
+    error preViolationAddr(uint256 specId);
 
-    error PostViolationAddr(uint256 specId);
+    error postViolationAddr(uint256 specId);
 
     /// @custom:consol {
     ///    f(a, b) returns c ensures { c > a + b }
@@ -37,43 +37,43 @@ contract C {
         return (a * b, a + b, 1);
     }
 
-    function _fPost(uint256 a, uint256 b, uint256 c) private {
+    function _f_post(uint256 a, uint256 b, uint256 c) private {
         if (!(c>a+b)) revert postViolation("f");
     }
 
     function f(uint256 a, uint256 b) public returns (uint256) {
         uint256 c = f_original(a, b);
-        _fPost(a, b, c);
+        _f_post(a, b, c);
         return (c);
     }
 
-    function _gPost(uint256 a, uint256 b, uint256 c) private {
+    function _g_post(uint256 a, uint256 b, uint256 c) private {
         if (!(c>a*b)) revert postViolation("g");
     }
 
     function g(uint256 a, uint256 b) public returns (uint256) {
         uint256 c = g_original(a, b);
-        _gPost(a, b, c);
+        _g_post(a, b, c);
         return (c);
     }
 
-    function _hPost(uint256 a, uint256 b, uint256 c, uint256 d) private {
+    function _h_post(uint256 a, uint256 b, uint256 c, uint256 d) private {
         if (!(c+d==(a*b)+(a+b))) revert postViolation("h");
     }
 
     function h(uint256 a, uint256 b) public returns (uint256, uint256) {
         (uint256 c, uint256 d) = h_original(a, b);
-        _hPost(a, b, c, d);
+        _h_post(a, b, c, d);
         return (c, d);
     }
 
-    function _pPost(uint256 a, uint256 b, uint256 c, uint256 d, uint256 e) private {
+    function _p_post(uint256 a, uint256 b, uint256 c, uint256 d, uint256 e) private {
         if (!((c+d)*e==(a*b)+(a+b))) revert postViolation("p");
     }
 
     function p(uint256 a, uint256 b) public returns (uint256, uint256, uint256) {
         (uint256 c, uint256 d, uint256 e) = p_original(a, b);
-        _pPost(a, b, c, d, e);
+        _p_post(a, b, c, d, e);
         return (c, d, e);
     }
 }

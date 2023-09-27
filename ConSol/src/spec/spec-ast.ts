@@ -265,17 +265,17 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     assert(ctx.children != null);
     const idents = ctx.IDENT_list();
     if (idents.length == 1) {
-      return { func: this.extractTermText(idents[0]) };
+      return { func: idents[0].getText() };
     } else if (idents.length == 2) {
       return {
-        func: this.extractTermText(idents[1]),
-        addr: this.extractTermText(idents[0]),
+        func: idents[1].getText(),
+        addr: idents[0].getText(),
       };
     } else {
       return {
-        func: this.extractTermText(idents[2]),
-        addr: this.extractTermText(idents[1]),
-        interface: this.extractTermText(idents[0]),
+        func: idents[2].getText(),
+        addr: idents[1].getText(),
+        interface: idents[0].getText(),
       };
     }
   };

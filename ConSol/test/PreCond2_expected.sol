@@ -5,9 +5,9 @@ contract C {
 
     error postViolation(string funcName);
 
-    error PreViolationAddr(uint256 specId);
+    error preViolationAddr(uint256 specId);
 
-    error PostViolationAddr(uint256 specId);
+    error postViolationAddr(uint256 specId);
 
     uint256 public balance;
     uint256 private min;
@@ -21,12 +21,12 @@ contract C {
         balance = balance - amount;
     }
 
-    function _withdrawPre(uint256 amt) private {
+    function _withdraw_pre(uint256 amt) private {
         if (!(amt>=min)) revert preViolation("withdraw");
     }
 
     function withdraw(uint256 amount) public {
-        _withdrawPre(amount);
+        _withdraw_pre(amount);
         withdraw_original(amount);
     }
 }

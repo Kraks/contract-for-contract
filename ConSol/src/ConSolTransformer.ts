@@ -35,8 +35,8 @@ export class ConSolTransformer<T> {
     const csFactory = new ConSolFactory(factory, scope);
     this.preCondError = csFactory.makeError('preViolation', 'funcName', 'string');
     this.postCondError = csFactory.makeError('postViolation', 'funcName', 'string');
-    this.preAddrError = csFactory.makeError('PreViolationAddr', 'specId', 'uint256');
-    this.postAddrError = csFactory.makeError('PostViolationAddr', 'specId', 'uint256');
+    this.preAddrError = csFactory.makeError('preViolationAddr', 'specId', 'uint256');
+    this.postAddrError = csFactory.makeError('postViolationAddr', 'specId', 'uint256');
   }
 
   handleValSpec<T>(node: ASTNode, spec: ValSpec<T>) {
