@@ -45,14 +45,7 @@ export class FunDefValSpecTransformer<T> extends CheckFunFactory<T> {
       );
       process.exit(-1);
     }
-    super(
-      funDef.context as ASTContext,
-      funDef.scope,
-      spec,
-      declaredParams,
-      declaredRetParams,
-      factory,
-    );
+    super(funDef.context as ASTContext, funDef.scope, spec, declaredParams, declaredRetParams, factory);
     this.declaredParams = declaredParams;
     this.declaredRetParams = declaredRetParams;
     this.funDef = funDef;

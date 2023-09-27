@@ -34,19 +34,14 @@ export class ConSolFactory {
     this.scope = scope;
   }
 
-  makeCallStmt(funName: string, args: Expression[], retType: string = 'void'): ExpressionStatement {
+  makeCallStmt(funName: string, args: Expression[], retType = 'void'): ExpressionStatement {
     const f = this.factory.makeIdentifier('function', funName, -1);
     const call = this.makeFunCall(f, args, retType);
     return this.factory.makeExpressionStatement(call);
   }
 
   makeFunCall(id: Identifier, args: Expression[], retType: string): FunctionCall {
-    const call = this.factory.makeFunctionCall(
-      retType,
-      FunctionCallKind.FunctionCall,
-      id,
-      args,
-    );
+    const call = this.factory.makeFunctionCall(retType, FunctionCallKind.FunctionCall, id, args);
     return call;
   }
 

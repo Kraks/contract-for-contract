@@ -8,15 +8,8 @@ import {
   FunctionKind,
   ParameterList,
   VariableDeclaration,
-  DataLocation,
-  StateVariableVisibility,
-  Mutability,
-  FunctionCallKind,
   ExpressionStatement,
   Expression,
-  assert,
-  TypeName,
-  FunctionCall,
   ErrorDefinition,
 } from 'solc-typed-ast';
 

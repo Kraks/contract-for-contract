@@ -20,7 +20,7 @@ import { ConSolTransformer } from './ConSolTransformer.js';
 export const SPEC_PREFIX = '@custom:consol';
 
 export function toBeImplemented(): never {
-  console.error("To be implemented");
+  console.error('To be implemented');
   process.exit(-1);
 }
 
