@@ -10,7 +10,7 @@ import {
 
 import { ValSpec } from './spec/index.js';
 import { SPEC_PREFIX, isConSolSpec, parseConSolSpec } from './ConSolUtils.js';
-import { CSSpecParse, CSSpecVisitor, CSSpec, isValSpec, isTempSpec } from './spec/index.js';
+import { isValSpec, isTempSpec } from './spec/index.js';
 
 import { ConSolFactory } from './ConSolFactory.js';
 import { FunDefValSpecTransformer } from './FunDefValSpecTransformer.js';
@@ -69,7 +69,7 @@ export class ConSolTransformer<T> {
     contract.appendChild(this.preAddrError);
     contract.appendChild(this.postAddrError);
 
-    let id = 0;
+    const id = 0;
 
     contract.walkChildren((astNode: ASTNode) => {
       const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;

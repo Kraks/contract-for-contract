@@ -156,15 +156,18 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
         assert(ctx.children[i + 2] instanceof SexprContext);
         vspec.postCond = this.parseSexpr(ctx.children[i + 2].getText());
       } else if (prompt == 'where') {
-        ctx.vspec_list().map((vspec) => this.visitVspec(vspec)).forEach((addrSpec) => {
-          const rawAddr = addrSpec.call.tgt.addr;
-          const tgt = rawAddr === undefined ? addrSpec.call.tgt.func : rawAddr;
-          if (call.args.includes(tgt)) {
-            vspec.preFunSpec.push(addrSpec);
-          } else if (call.rets.includes(tgt)) {
-            vspec.postFunSpec.push(addrSpec);
-          } else assert(false, 'Unknown address: ' + tgt);
-        });
+        ctx
+          .vspec_list()
+          .map((vspec) => this.visitVspec(vspec))
+          .forEach((addrSpec) => {
+            const rawAddr = addrSpec.call.tgt.addr;
+            const tgt = rawAddr === undefined ? addrSpec.call.tgt.func : rawAddr;
+            if (call.args.includes(tgt)) {
+              vspec.preFunSpec.push(addrSpec);
+            } else if (call.rets.includes(tgt)) {
+              vspec.postFunSpec.push(addrSpec);
+            } else assert(false, 'Unknown address: ' + tgt);
+          });
       } else {
         assert(false, 'invalid keyword: ' + prompt);
       }
