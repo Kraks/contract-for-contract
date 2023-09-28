@@ -221,7 +221,12 @@ export class FunDefValSpecTransformer<T> {
     const paramUseAddr = this.funDef.vParameters.vParameters.map((p) => this.factory.normalize(p.typeString)).some((t) => this.usesAddr(t));
     const retUseAddr = this.funDef.vReturnParameters.vParameters.map((p) => this.factory.normalize(p.typeString)).some((t) => this.usesAddr(t));
     if (paramUseAddr || retUseAddr) {
-      // WIP(GW)
+      const newFun = this.factory.copy(this.funDef);
+      newFun.documentation = undefined;
+      const callee = this.factory.makeIdentifier('function', this.tgtName + '_guard', -1);
+      const callsite = this.factory.makeFunCall(callee, [], 'void'); //TODO(GW): arg, retType
+      newFun.vBody = this.factory.makeBlock([callsite]); // TODO: may return
+      this.funDef.vScope.appendChild(newFun);
     }
 
     const wrapper = this.guardedFun(preFun, postFun);
