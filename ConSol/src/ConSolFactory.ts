@@ -108,6 +108,12 @@ export class ConSolFactory extends ASTNodeFactory {
     return this.makeElementaryTypeName('', str);
   }
 
+  normalize(type: string): string {
+    if (type.startsWith('struct')) return type.slice('struct '.length);
+    // TODO(GW): also removes storage modifier?
+    return type;
+  }
+
   copyNodes<T extends ASTNode>(nodes: Array<T>): Array<T> {
     const newNodes: Array<T> = [];
     nodes.forEach((node, i) => {

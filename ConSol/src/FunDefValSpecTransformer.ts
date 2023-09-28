@@ -10,7 +10,7 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
-import { extractFunName, uncheckedFunName } from './ConSolUtils.js';
+import { GUARD_ADDR_TYPE, extractFunName, uncheckedFunName } from './ConSolUtils.js';
 
 import { CheckFunFactory } from './CheckFunFactory.js';
 import { ConSolFactory } from './ConSolFactory.js';
@@ -161,16 +161,38 @@ export class FunDefValSpecTransformer<T> {
   }
   */
 
+  // Note: argument takes no prefix such as `struct`
   usesAddr(type: string): boolean {
     if (type === 'address') return true;
     if (type === 'address payable') return true;
     if (globalThis.structMap.has(type)) {
-      const members = globalThis.structMap.get(type)?.vMembers || [];
+      const b = globalThis.structMap.get(type)?.vMembers.some((m) => this.usesAddr(m.typeString));
+      if (b) return true;
+    }
+    // TODO: handle mapping
+    return false;
+  }
+
+  // Note: argument takes no prefix such as `struct`
+  wrap(type: string): string {
+    if (type === 'address') return GUARD_ADDR_TYPE;
+    if (type === 'address payable') return GUARD_ADDR_TYPE;
+    // XXX (GW): we have directly changed the struct definition, would also need
+    // to provide accessors the unwrap?
+    if (globalThis.structMap.has(type)) {
+      const struct = globalThis.structMap.get(type);
+      const members = struct?.vMembers || [];
       for (const m of members) {
-        if (this.usesAddr(m.typeString)) return true;
+        const newType = this.wrap(m.typeString);
+        if (newType !== m.typeString) {
+          // Note(GW): not sure if this enough, because there is some
+          // inconsistency between typeString and vType
+          m.typeString = newType;
+        }
       }
     }
-    return false;
+    // TODO: handle mapping
+    return type;
   }
 
   process(): void {
@@ -195,6 +217,12 @@ export class FunDefValSpecTransformer<T> {
      * - The `f`_original function is the original function body, whose body might have been
      *   rewritten with dispatched address calls.
      */
+
+    const paramUseAddr = this.funDef.vParameters.vParameters.map((p) => this.factory.normalize(p.typeString)).some((t) => this.usesAddr(t));
+    const retUseAddr = this.funDef.vReturnParameters.vParameters.map((p) => this.factory.normalize(p.typeString)).some((t) => this.usesAddr(t));
+    if (paramUseAddr || retUseAddr) {
+      // WIP(GW)
+    }
 
     const wrapper = this.guardedFun(preFun, postFun);
     if (wrapper) {

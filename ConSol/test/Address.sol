@@ -27,7 +27,7 @@ contract Caller {
   ///     ensures { y == x + 1 }
   ///   }
   /// }
-  function callFoo(Vault memory v, address payable _addr, uint x) public payable {
+  function callFoo(address payable _addr, uint x) public payable {
     // You can send ether and specify a custom gas amount
     uint y = IReceiver(_addr).foo{value: msg.value, gas: 5000}("call foo", x);
 

@@ -70,7 +70,7 @@ export class ConSolTransformer<T> {
 
     resetStructMap();
     contract.walkChildren((astNode) => {
-      // TODO: may also need to handle mapping types
+      // TODO: handle mapping types
       if (astNode instanceof StructDefinition) {
         console.log(`Found struct ${astNode.canonicalName} with ${astNode.vMembers.length} members`);
         globalThis.structMap.set(astNode.canonicalName, astNode);
