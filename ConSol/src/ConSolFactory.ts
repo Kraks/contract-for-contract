@@ -14,49 +14,49 @@ import {
   LiteralKind,
   FunctionCallKind,
   FunctionCall,
+  ASTContext,
 } from 'solc-typed-ast';
+import { Context } from 'vm';
 
 // Note(GW): this function changes `decls` in-place
-function attachNames(names: string[], decls: VariableDeclaration[]): VariableDeclaration[] {
+function attachNames(names: string[], decls: VariableDeclaration[]) {
   assert(names.length === decls.length, 'Return Variable length wrong');
   names.forEach((name, i) => {
     decls[i].name = name;
   });
-  return decls;
 }
 
-export class ConSolFactory {
-  factory: ASTNodeFactory;
+export class ConSolFactory extends ASTNodeFactory {
   scope: number;
 
-  constructor(factory: ASTNodeFactory, scope: number) {
-    this.factory = factory;
+  constructor(context: ASTContext, scope: number) {
+    super(context);
     this.scope = scope;
   }
 
   makeCallStmt(funName: string, args: Expression[], retType = 'void'): ExpressionStatement {
-    const f = this.factory.makeIdentifier('function', funName, -1);
+    const f = this.makeIdentifier('function', funName, -1);
     const call = this.makeFunCall(f, args, retType);
-    return this.factory.makeExpressionStatement(call);
+    return this.makeExpressionStatement(call);
   }
 
   makeFunCall(id: Identifier, args: Expression[], retType: string): FunctionCall {
-    const call = this.factory.makeFunctionCall(retType, FunctionCallKind.FunctionCall, id, args);
+    const call = this.makeFunctionCall(retType, FunctionCallKind.FunctionCall, id, args);
     return call;
   }
 
-  makeTypedVarDecls(types: TypeName[], names: string[]): VariableDeclaration[] {
+  makeTypedVarDecls(types: TypeName[], names: string[], scope: number = this.scope): VariableDeclaration[] {
     assert(types.length == names.length, 'The number of types should equal to the number of names');
     return types.map((ty, i) => {
-      const retTypeDecl = this.factory.makeVariableDeclaration(
+      const retTypeDecl = this.makeVariableDeclaration(
         false,
         false,
         names[i],
-        this.scope,
+        scope,
         false,
         DataLocation.Default,
         StateVariableVisibility.Default,
-        Mutability.Mutable,
+        Mutability.Constant,
         types[i].typeString,
       );
       retTypeDecl.vType = ty;
@@ -65,7 +65,7 @@ export class ConSolFactory {
   }
 
   makeNeg(e: Expression): Expression {
-    return this.factory.makeUnaryOperation(
+    return this.makeUnaryOperation(
       'bool', // typeString
       true, // prefix
       '!', // operator
@@ -76,15 +76,15 @@ export class ConSolFactory {
   makeRequireStmt(constraint: Expression, msg: string): ExpressionStatement {
     const callArgs = [
       constraint,
-      this.factory.makeLiteral('string', LiteralKind.String, Buffer.from(msg, 'utf8').toString('hex'), msg),
+      this.makeLiteral('string', LiteralKind.String, Buffer.from(msg, 'utf8').toString('hex'), msg),
     ];
-    const requireFn = this.factory.makeIdentifier('function (bool, string memory) pure', 'require', -1);
-    const requireCall = this.factory.makeFunctionCall('bool', FunctionCallKind.FunctionCall, requireFn, callArgs);
-    return this.factory.makeExpressionStatement(requireCall);
+    const requireFn = this.makeIdentifier('function (bool, string memory) pure', 'require', -1);
+    const requireCall = this.makeFunctionCall('bool', FunctionCallKind.FunctionCall, requireFn, callArgs);
+    return this.makeExpressionStatement(requireCall);
   }
 
   makeError(eventName: string, paramName: string, paraTypeName: string): ErrorDefinition {
-    const param: VariableDeclaration = this.factory.makeVariableDeclaration(
+    const param: VariableDeclaration = this.makeVariableDeclaration(
       false,
       false,
       paramName,
@@ -97,22 +97,22 @@ export class ConSolFactory {
       paraTypeName,
     );
     param.vType = this.strToTypeName(paraTypeName);
-    const errorDef = this.factory.makeErrorDefinition(eventName, this.factory.makeParameterList([param]));
+    const errorDef = this.makeErrorDefinition(eventName, this.makeParameterList([param]));
     return errorDef;
   }
 
   strToTypeName(str: string, storage?: string): TypeName {
     if (storage) {
-      return this.factory.makeElementaryTypeName('', `${str} ${storage}`);
+      return this.makeElementaryTypeName('', `${str} ${storage}`);
     }
     // TODO(GW): other types with storage modifier
-    return this.factory.makeElementaryTypeName('', str);
+    return this.makeElementaryTypeName('', str);
   }
 
   copyNodes<T extends ASTNode>(nodes: Array<T>): Array<T> {
     const newNodes: Array<T> = [];
     nodes.forEach((node, i) => {
-      newNodes.push(this.factory.copy(node));
+      newNodes.push(this.copy(node));
     });
     return newNodes;
   }
@@ -124,7 +124,7 @@ export class ConSolFactory {
   }
 
   makeIdFromVarDec(vd: VariableDeclaration): Identifier {
-    return this.factory.makeIdentifierFor(vd);
+    return this.makeIdentifierFor(vd);
   }
 
   makeIdsFromVarDecs(vds: VariableDeclaration[]): Identifier[] {
@@ -133,7 +133,7 @@ export class ConSolFactory {
 
   makeNamelessTypedVarDecls(types: TypeName[]): VariableDeclaration[] {
     return types.map((ty, i) => {
-      const retTypeDecl = this.factory.makeVariableDeclaration(
+      const retTypeDecl = this.makeVariableDeclaration(
         false,
         false,
         '',

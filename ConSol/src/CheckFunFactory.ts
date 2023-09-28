@@ -17,8 +17,7 @@ import { ValSpec } from './spec/index.js';
 import { ConSolFactory } from './ConSolFactory.js';
 import { postCheckFunName, preCheckFunName, toBeImplemented } from './ConSolUtils.js';
 
-export class CheckFunFactory<T> extends ConSolFactory {
-  ctx: ASTContext;
+export class CheckFunFactory<T> {
   spec: ValSpec<T>;
   tgtName: string;
   // Note(GW): these are parameters used for generating check functions, but they may not have correct binding names
@@ -27,21 +26,15 @@ export class CheckFunFactory<T> extends ConSolFactory {
   guardedParamNames: string[];
   guardedRetParamNames: string[];
   guardedAllParamNames: string[];
+  factory: ConSolFactory;
 
   constructor(
-    ctx: ASTContext,
-    scope: number,
     spec: ValSpec<T>,
     params: VariableDeclaration[],
     retVarDecs: VariableDeclaration[],
-    factory?: ASTNodeFactory,
+    factory: ConSolFactory,
   ) {
-    if (factory === undefined) {
-      super(new ASTNodeFactory(ctx), scope);
-    } else {
-      super(factory, scope);
-    }
-    this.ctx = ctx;
+    this.factory = factory;
     this.spec = spec;
     const target = spec.call.tgt;
     if (target.addr !== undefined && target.interface !== undefined) {
@@ -70,7 +63,7 @@ export class CheckFunFactory<T> extends ConSolFactory {
   ): FunctionDefinition {
     const condNode = this.factory.makePhantomExpression('bool', (('(' + condExpr) as string) + ')');
     // Make the if-condition (expression)
-    const cnd = this.makeNeg(condNode);
+    const cnd = this.factory.makeNeg(condNode);
 
     let errorParam;
     if (typeof errorParamVal === 'number') {
@@ -85,7 +78,7 @@ export class CheckFunFactory<T> extends ConSolFactory {
     }
 
     // Create the function call for the error
-    const errorCall = this.makeFunCall(this.factory.makeIdentifierFor(errorDef), [errorParam], 'void');
+    const errorCall = this.factory.makeFunCall(this.factory.makeIdentifierFor(errorDef), [errorParam], 'void');
 
     // Create the revert statement with the error call
     const revertStmt = this.factory.makeRevertStatement(errorCall);
@@ -93,7 +86,7 @@ export class CheckFunFactory<T> extends ConSolFactory {
     const ifStmt = this.factory.makeIfStatement(cnd, revertStmt);
     const funBody = this.factory.makeBlock([ifStmt]);
     const checkFunDef = this.factory.makeFunctionDefinition(
-      this.scope,
+      this.factory.scope,
       FunctionKind.Function,
       funName,
       false, // virtual
@@ -109,16 +102,18 @@ export class CheckFunFactory<T> extends ConSolFactory {
     return checkFunDef;
   }
 
+  /*
   private makeCheckStmt(funName: string, args: Expression[], errorMsg: string): ExpressionStatement {
-    const f = this.factory.makeIdentifier('function', funName, -1);
+    const f = this.makeIdentifier('function', funName, -1);
     const call = this.makeFunCall(f, args, 'bool');
     return this.makeRequireStmt(call, errorMsg);
   }
+  */
 
   preCondCheckFun(errorDef: ErrorDefinition, errorParamVal: string | number): FunctionDefinition | undefined {
     if (this.spec.preCond === undefined) return undefined;
     const preFunName = preCheckFunName(this.tgtName);
-    const varDecs = this.makeVarDecs(this.guardedParamNames, this.paramVarDecs);
+    const varDecs = this.factory.makeVarDecs(this.guardedParamNames, this.paramVarDecs);
     const allParams = this.factory.makeParameterList([...varDecs]);
     const preFunDef = this.makeCheckFun(preFunName, this.spec.preCond, allParams, errorDef, errorParamVal);
     return preFunDef;
@@ -128,7 +123,7 @@ export class CheckFunFactory<T> extends ConSolFactory {
     if (this.spec.postCond === undefined) return undefined;
     const postFunName = postCheckFunName(this.tgtName);
     const rets = [...this.guardedParamNames, ...this.guardedRetParamNames];
-    const retVarDecs = this.makeVarDecs(rets, [...this.paramVarDecs, ...this.retVarDecs]);
+    const retVarDecs = this.factory.makeVarDecs(rets, [...this.paramVarDecs, ...this.retVarDecs]);
     const allParams = this.factory.makeParameterList([...retVarDecs]);
     const postCondFunc = this.makeCheckFun(postFunName, this.spec.postCond, allParams, errorDef, errorParamVal);
     return postCondFunc;

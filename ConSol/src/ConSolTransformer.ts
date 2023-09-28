@@ -22,7 +22,7 @@ import { resetStructMap } from './Global.js';
 type ConSolCheckNodes = FunctionDefinition | EventDefinition;
 
 export class ConSolTransformer<T> {
-  factory: ASTNodeFactory;
+  factory: ConSolFactory;
   contract: ContractDefinition;
   interfaces: Array<ContractDefinition>;
   preCondError: ErrorDefinition;
@@ -30,16 +30,15 @@ export class ConSolTransformer<T> {
   preAddrError: ErrorDefinition;
   postAddrError: ErrorDefinition;
 
-  constructor(factory: ASTNodeFactory, scope: number, contract: ContractDefinition, ifs: Array<ContractDefinition>) {
+  constructor(factory: ConSolFactory, contract: ContractDefinition, ifs: Array<ContractDefinition>) {
     this.factory = factory;
     this.contract = contract;
     this.interfaces = ifs;
 
-    const csFactory = new ConSolFactory(factory, scope);
-    this.preCondError = csFactory.makeError('preViolation', 'funcName', 'string');
-    this.postCondError = csFactory.makeError('postViolation', 'funcName', 'string');
-    this.preAddrError = csFactory.makeError('preViolationAddr', 'specId', 'uint256');
-    this.postAddrError = csFactory.makeError('postViolationAddr', 'specId', 'uint256');
+    this.preCondError = factory.makeError('preViolation', 'funcName', 'string');
+    this.postCondError = factory.makeError('postViolation', 'funcName', 'string');
+    this.preAddrError = factory.makeError('preViolationAddr', 'specId', 'uint256');
+    this.postAddrError = factory.makeError('postViolationAddr', 'specId', 'uint256');
   }
 
   handleValSpec<T>(node: ASTNode, spec: ValSpec<T>) {

@@ -24,23 +24,22 @@ describe('val spec transformer', () => {
     }
   `;
 
-  let nodeFactory: ASTNodeFactory;
+  let factory: ConSolFactory;
   let scope: number;
 
   beforeEach(async () => {
     const result = await compileSourceString('template.sol', template, 'auto');
     const reader = new ASTReader();
     const sourceUnits = reader.read(result.data);
-    const body = sourceUnits[0].vContracts[0].vFunctions[0].vBody as Block;
-    const ctx = body.context as ASTContext;
-    nodeFactory = new ASTNodeFactory(body.context);
+    const contract = sourceUnits[0].vContracts[0];
+    const ctx = (contract.context as ASTContext || new ASTContext());
+    factory = new ConSolFactory(ctx, contract.scope);
     scope = sourceUnits[0].vContracts[0].scope;
   });
 
   it('should build an always true require statement', async () => {
-    const cond = nodeFactory.makeLiteral('boolean', LiteralKind.Bool, '0x1', 'true');
-    const csFactory = new ConSolFactory(nodeFactory, scope);
-    const stmt = csFactory.makeRequireStmt(cond, 'error message');
+    const cond = factory.makeLiteral('boolean', LiteralKind.Bool, '0x1', 'true');
+    const stmt = factory.makeRequireStmt(cond, 'error message');
     const source = genSource(stmt)[0];
     expect(source).toEqual(`require(true, "error message");`);
   });

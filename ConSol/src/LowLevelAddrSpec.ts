@@ -67,7 +67,9 @@ export class HighLevelAddrSpecTransformer<T> extends CheckFunFactory<T> {
 }
 */
 
-export class LowLevelAddrSpecTransformer<T> extends CheckFunFactory<T> {
+
+/*
+export class LowLevelAddrSpecTransformer<T> {
   parentFunDef: FunctionDefinition;
   addr: string;
   member: string;
@@ -78,6 +80,7 @@ export class LowLevelAddrSpecTransformer<T> extends CheckFunFactory<T> {
   retTypes: TypeName[];
   preAddrError: ErrorDefinition;
   postAddrError: ErrorDefinition;
+  factory: CheckFunFactory<T>;
 
   constructor(
     parent: FunctionDefinition,
@@ -87,11 +90,11 @@ export class LowLevelAddrSpecTransformer<T> extends CheckFunFactory<T> {
     scope: number,
     preAddrError: ErrorDefinition,
     postAddrError: ErrorDefinition,
-    factory?: ASTNodeFactory,
+    factory: CheckFunFactory<T>,
   ) {
     const addr = extractRawAddr(spec);
     const member = extractAddrMember(spec);
-    super(ctx, scope, spec, [], [], factory);
+    this.factory = factory;
     this.addr = addr;
     this.member = member;
     this.tgtAddr = tgtAddr;
@@ -100,8 +103,8 @@ export class LowLevelAddrSpecTransformer<T> extends CheckFunFactory<T> {
     this.optTypes = optTypes;
     this.argTypes = argTypes;
     this.retTypes = retTypes;
-    this.paramVarDecs = this.makeNamelessTypedVarDecls([...optTypes, ...argTypes]);
-    this.retVarDecs = this.makeNamelessTypedVarDecls(retTypes);
+    this.paramVarDecs = this.factory.makeNamelessTypedVarDecls([...optTypes, ...argTypes]);
+    this.retVarDecs = this.factory.makeNamelessTypedVarDecls(retTypes);
     this.preAddrError = preAddrError;
     this.postAddrError = postAddrError;
   }
@@ -357,3 +360,4 @@ export class LowLevelAddrSpecTransformer<T> extends CheckFunFactory<T> {
     }
   }
 }
+*/

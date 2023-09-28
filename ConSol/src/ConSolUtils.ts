@@ -10,12 +10,14 @@ import {
   DefaultASTWriterMapping,
   LatestCompilerVersion,
   ContractDefinition,
+  ASTContext,
 } from 'solc-typed-ast';
 import { ValSpec } from './spec/index.js';
 import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
 
 import * as fs from 'fs';
 import { ConSolTransformer } from './ConSolTransformer.js';
+import { ConSolFactory } from './ConSolFactory.js';
 
 export const SPEC_PREFIX = '@custom:consol';
 export const GUARD_ADDR_TYPE = 'uint256';
@@ -85,9 +87,8 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
   sourceUnit.vContracts.forEach((contract) => {
     if (contract.kind === 'interface') return;
     console.log(`Processing ${contract.kind} ${contract.name}.`);
-    const factory = new ASTNodeFactory(contract.context);
-    // XXX: create ConSolFactory here
-    const contractTransformer = new ConSolTransformer(factory, contract.scope, contract, ifs);
+    const factory = new ConSolFactory((contract.context || new ASTContext()), contract.scope);
+    const contractTransformer = new ConSolTransformer(factory, contract, ifs);
     contractTransformer.process();
   });
 

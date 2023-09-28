@@ -15,9 +15,9 @@ import { ValSpec } from './spec/index.js';
 import { extractFunName, uncheckedFunName, extractRawAddr } from './ConSolUtils.js';
 
 import { CheckFunFactory } from './CheckFunFactory.js';
-import { LowLevelAddrSpecTransformer } from './LowLevelAddrSpec.js';
+import { ConSolFactory } from './ConSolFactory.js';
 
-export class FunDefValSpecTransformer<T> extends CheckFunFactory<T> {
+export class FunDefValSpecTransformer<T> {
   funDef: FunctionDefinition;
   retTypes: TypeName[];
   declaredParams: VariableDeclaration[];
@@ -26,6 +26,10 @@ export class FunDefValSpecTransformer<T> extends CheckFunFactory<T> {
   postCondError: ErrorDefinition;
   preAddrError: ErrorDefinition;
   postAddrError: ErrorDefinition;
+  factory: ConSolFactory;
+  cfFactory: CheckFunFactory<T>;
+  spec: ValSpec<T>;
+  tgtName: string;
 
   constructor(
     funDef: FunctionDefinition,
@@ -34,18 +38,17 @@ export class FunDefValSpecTransformer<T> extends CheckFunFactory<T> {
     postCondError: ErrorDefinition,
     preAddrError: ErrorDefinition,
     postAddrError: ErrorDefinition,
-    factory: ASTNodeFactory,
+    factory: ConSolFactory
   ) {
     const declaredParams = (funDef as FunctionDefinition).vParameters.vParameters;
     const declaredRetParams = (funDef as FunctionDefinition).vReturnParameters.vParameters;
-    const tgtName = extractFunName(funDef);
-    if (spec.call.tgt.func !== tgtName) {
+    this.tgtName = extractFunName(funDef);
+    if (spec.call.tgt.func !== this.tgtName) {
       console.error(
-        `Error: Mismatch names between the attached function (${tgtName}) the spec (${spec.call.tgt.func}). Abort.`,
+        `Error: Mismatch names between the attached function (${this.tgtName}) the spec (${spec.call.tgt.func}). Abort.`,
       );
       process.exit(-1);
     }
-    super(funDef.context as ASTContext, funDef.scope, spec, declaredParams, declaredRetParams, factory);
     this.declaredParams = declaredParams;
     this.declaredRetParams = declaredRetParams;
     this.funDef = funDef;
@@ -56,6 +59,9 @@ export class FunDefValSpecTransformer<T> extends CheckFunFactory<T> {
     this.postCondError = postCondError;
     this.preAddrError = preAddrError;
     this.postAddrError = postAddrError;
+    this.factory = factory;
+    this.cfFactory = new CheckFunFactory(spec, declaredParams, declaredRetParams, factory);
+    this.spec = spec;
   }
 
   guardedFun(
@@ -68,12 +74,13 @@ export class FunDefValSpecTransformer<T> extends CheckFunFactory<T> {
 
     const retTypeStr =
       this.retTypes.length > 0 ? '(' + this.retTypes.map((t) => t.typeString).toString() + ')' : 'void';
-    const retTypeDecls = this.makeTypedVarDecls(this.retTypes, this.spec.call.rets);
+    const retTypeDecls = this.factory.makeTypedVarDecls(this.retTypes, this.spec.call.rets, this.funDef.scope);
     const stmts = [];
 
     // Generate function call to check pre-condition (if any)
     if (preCondFun) {
-      const preCondStmt = this.makeCallStmt(preCondFun.name, this.makeIdsFromVarDecs(this.declaredParams));
+      const preCondStmt = this.factory.makeCallStmt(preCondFun.name,
+        this.factory.makeIdsFromVarDecs(this.declaredParams));
       stmts.push(preCondStmt);
     }
 
@@ -82,7 +89,7 @@ export class FunDefValSpecTransformer<T> extends CheckFunFactory<T> {
       retTypeStr,
       FunctionCallKind.FunctionCall,
       this.factory.makeIdentifier('function', uncheckedFunName(this.tgtName), -1),
-      this.makeIdsFromVarDecs(this.declaredParams),
+      this.factory.makeIdsFromVarDecs(this.declaredParams),
     );
     if (retTypeDecls.length > 0) {
       const retIds = retTypeDecls.map((r) => r.id);
@@ -95,11 +102,11 @@ export class FunDefValSpecTransformer<T> extends CheckFunFactory<T> {
 
     // Generate function call to check post-condition (if any)
     if (postCondFun) {
-      let postCallArgs = this.makeIdsFromVarDecs(this.declaredParams);
+      let postCallArgs = this.factory.makeIdsFromVarDecs(this.declaredParams);
       if (this.retTypes.length > 0) {
-        postCallArgs = postCallArgs.concat(this.makeIdsFromVarDecs(retTypeDecls));
+        postCallArgs = postCallArgs.concat(this.factory.makeIdsFromVarDecs(retTypeDecls));
       }
-      const postCondStmt = this.makeCallStmt(postCondFun.name, postCallArgs);
+      const postCondStmt = this.factory.makeCallStmt(postCondFun.name, postCallArgs);
       stmts.push(postCondStmt);
     }
 
@@ -167,9 +174,9 @@ export class FunDefValSpecTransformer<T> extends CheckFunFactory<T> {
   }
 
   process(): void {
-    const preFun = this.preCondCheckFun(this.preCondError, this.tgtName);
+    const preFun = this.cfFactory.preCondCheckFun(this.preCondError, this.tgtName);
     if (preFun) this.funDef.vScope.appendChild(preFun);
-    const postFun = this.postCondCheckFun(this.postCondError, this.tgtName);
+    const postFun = this.cfFactory.postCondCheckFun(this.postCondError, this.tgtName);
     if (postFun) this.funDef.vScope.appendChild(postFun);
 
     /*
