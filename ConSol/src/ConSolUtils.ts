@@ -4,7 +4,6 @@ import {
   compileSol,
   CompileResult,
   ASTReader,
-  ASTNodeFactory,
   PrettyFormatter,
   ASTWriter,
   DefaultASTWriterMapping,
@@ -87,7 +86,7 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
   sourceUnit.vContracts.forEach((contract) => {
     if (contract.kind === 'interface') return;
     console.log(`Processing ${contract.kind} ${contract.name}.`);
-    const factory = new ConSolFactory((contract.context || new ASTContext()), contract.scope);
+    const factory = new ConSolFactory(contract.context || new ASTContext(), contract.scope);
     const contractTransformer = new ConSolTransformer(factory, contract, ifs);
     contractTransformer.process();
   });

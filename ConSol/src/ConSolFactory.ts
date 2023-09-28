@@ -16,7 +16,6 @@ import {
   FunctionCall,
   ASTContext,
 } from 'solc-typed-ast';
-import { Context } from 'vm';
 
 // Note(GW): this function changes `decls` in-place
 function attachNames(names: string[], decls: VariableDeclaration[]) {

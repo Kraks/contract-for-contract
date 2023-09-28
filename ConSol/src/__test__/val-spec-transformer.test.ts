@@ -1,4 +1,4 @@
-import { ASTContext, ASTNodeFactory, ASTReader, Block, compileSourceString, LiteralKind } from 'solc-typed-ast';
+import { ASTContext, ASTReader, compileSourceString, LiteralKind } from 'solc-typed-ast';
 import { genSource } from './util';
 import { ConSolFactory } from '../ConSolFactory';
 import { checkConSolOutput } from '../ConSolUtils';
@@ -32,7 +32,7 @@ describe('val spec transformer', () => {
     const reader = new ASTReader();
     const sourceUnits = reader.read(result.data);
     const contract = sourceUnits[0].vContracts[0];
-    const ctx = (contract.context as ASTContext || new ASTContext());
+    const ctx = (contract.context as ASTContext) || new ASTContext();
     factory = new ConSolFactory(ctx, contract.scope);
     scope = sourceUnits[0].vContracts[0].scope;
   });

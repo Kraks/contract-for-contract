@@ -1,6 +1,4 @@
 import {
-  ASTContext,
-  ASTNodeFactory,
   FunctionDefinition,
   FunctionVisibility,
   FunctionStateMutability,
@@ -8,8 +6,6 @@ import {
   FunctionKind,
   ParameterList,
   VariableDeclaration,
-  ExpressionStatement,
-  Expression,
   ErrorDefinition,
 } from 'solc-typed-ast';
 

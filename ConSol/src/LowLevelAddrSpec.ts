@@ -1,29 +1,3 @@
-import {
-  ASTContext,
-  ASTNodeFactory,
-  FunctionDefinition,
-  FunctionKind,
-  ParameterList,
-  VariableDeclaration,
-  ASTNode,
-  FunctionCallKind,
-  Expression,
-  assert,
-  TypeName,
-  FunctionCall,
-  FunctionCallOptions,
-  MemberAccess,
-  Identifier,
-  Literal,
-  replaceNode,
-  ErrorDefinition,
-} from 'solc-typed-ast';
-
-import { ValSpec } from './spec/index.js';
-import { properAddrName, extractRawAddr, extractAddrMember, needAbiEncoding } from './ConSolUtils.js';
-
-import { CheckFunFactory } from './CheckFunFactory.js';
-
 /*
 export class HighLevelAddrSpecTransformer<T> extends CheckFunFactory<T> {
   parentFunDef: FunctionDefinition;
@@ -66,7 +40,6 @@ export class HighLevelAddrSpecTransformer<T> extends CheckFunFactory<T> {
   }
 }
 */
-
 
 /*
 export class LowLevelAddrSpecTransformer<T> {

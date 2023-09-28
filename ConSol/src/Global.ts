@@ -1,4 +1,4 @@
-import { StructDefinition } from "solc-typed-ast";
+import { StructDefinition } from 'solc-typed-ast';
 
 /* eslint no-var: 0 */
 declare global {
@@ -21,4 +21,3 @@ export function nextAddrSpecId(): number {
 export function resetStructMap(): void {
   globalThis.structMap = new Map<string, StructDefinition>();
 }
-

@@ -1,12 +1,10 @@
 import {
-  ASTNodeFactory,
   EventDefinition,
   FunctionDefinition,
   ASTNode,
   StructuredDocumentation,
   ContractDefinition,
   ErrorDefinition,
-  UserDefinedValueTypeDefinition,
   StructDefinition,
 } from 'solc-typed-ast';
 
@@ -77,7 +75,7 @@ export class ConSolTransformer<T> {
         console.log(`Found struct ${astNode.canonicalName} with ${astNode.vMembers.length} members`);
         globalThis.structMap.set(astNode.canonicalName, astNode);
       }
-    })
+    });
 
     contract.walkChildren((astNode: ASTNode) => {
       const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;

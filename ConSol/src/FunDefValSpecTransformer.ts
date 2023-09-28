@@ -1,6 +1,4 @@
 import {
-  ASTContext,
-  ASTNodeFactory,
   FunctionDefinition,
   FunctionVisibility,
   FunctionKind,
@@ -12,7 +10,7 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
-import { extractFunName, uncheckedFunName, extractRawAddr } from './ConSolUtils.js';
+import { extractFunName, uncheckedFunName } from './ConSolUtils.js';
 
 import { CheckFunFactory } from './CheckFunFactory.js';
 import { ConSolFactory } from './ConSolFactory.js';
@@ -38,7 +36,7 @@ export class FunDefValSpecTransformer<T> {
     postCondError: ErrorDefinition,
     preAddrError: ErrorDefinition,
     postAddrError: ErrorDefinition,
-    factory: ConSolFactory
+    factory: ConSolFactory,
   ) {
     const declaredParams = (funDef as FunctionDefinition).vParameters.vParameters;
     const declaredRetParams = (funDef as FunctionDefinition).vReturnParameters.vParameters;
@@ -79,8 +77,10 @@ export class FunDefValSpecTransformer<T> {
 
     // Generate function call to check pre-condition (if any)
     if (preCondFun) {
-      const preCondStmt = this.factory.makeCallStmt(preCondFun.name,
-        this.factory.makeIdsFromVarDecs(this.declaredParams));
+      const preCondStmt = this.factory.makeCallStmt(
+        preCondFun.name,
+        this.factory.makeIdsFromVarDecs(this.declaredParams),
+      );
       stmts.push(preCondStmt);
     }
 
@@ -165,8 +165,8 @@ export class FunDefValSpecTransformer<T> {
     if (type === 'address') return true;
     if (type === 'address payable') return true;
     if (globalThis.structMap.has(type)) {
-      let members = (globalThis.structMap.get(type)?.vMembers || []);
-      for (var m of members) {
+      const members = globalThis.structMap.get(type)?.vMembers || [];
+      for (const m of members) {
         if (this.usesAddr(m.typeString)) return true;
       }
     }
@@ -195,7 +195,6 @@ export class FunDefValSpecTransformer<T> {
      * - The `f`_original function is the original function body, whose body might have been
      *   rewritten with dispatched address calls.
      */
-
 
     const wrapper = this.guardedFun(preFun, postFun);
     if (wrapper) {
