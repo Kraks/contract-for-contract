@@ -6,6 +6,8 @@ import {
   StructuredDocumentation,
   ContractDefinition,
   ErrorDefinition,
+  UserDefinedValueTypeDefinition,
+  StructDefinition,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -14,6 +16,7 @@ import { isValSpec, isTempSpec } from './spec/index.js';
 
 import { ConSolFactory } from './ConSolFactory.js';
 import { FunDefValSpecTransformer } from './FunDefValSpecTransformer.js';
+import { resetStructMap } from './Global.js';
 
 // AST node kinds that allow ConSol spec attachments
 type ConSolCheckNodes = FunctionDefinition | EventDefinition;
@@ -42,7 +45,6 @@ export class ConSolTransformer<T> {
   handleValSpec<T>(node: ASTNode, spec: ValSpec<T>) {
     console.log('Parsed spec AST:');
     console.log(spec);
-    console.log(spec.tag);
     if (node instanceof FunctionDefinition) {
       const trans = new FunDefValSpecTransformer(
         node,
@@ -53,7 +55,7 @@ export class ConSolTransformer<T> {
         this.postAddrError,
         this.factory,
       );
-      trans.apply();
+      trans.process();
     } else if (node instanceof EventDefinition) {
       // Note(GW): allowing to attach pre-cond to events, the pre-cond is
       // checked before the event is emitted. Optional.
@@ -69,7 +71,14 @@ export class ConSolTransformer<T> {
     contract.appendChild(this.preAddrError);
     contract.appendChild(this.postAddrError);
 
-    const id = 0;
+    resetStructMap();
+    contract.walkChildren((astNode) => {
+      // TODO: may also need to handle mapping types
+      if (astNode instanceof StructDefinition) {
+        console.log(`Found struct ${astNode.canonicalName} with ${astNode.vMembers.length} members`);
+        globalThis.structMap.set(astNode.canonicalName, astNode);
+      }
+    })
 
     contract.walkChildren((astNode: ASTNode) => {
       const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
@@ -84,7 +93,7 @@ export class ConSolTransformer<T> {
       if (isValSpec(spec)) {
         this.handleValSpec(astNode, spec);
       } else if (isTempSpec(spec)) {
-        // TODO
+        // TODO: handle temporal specification
       } else {
         console.assert(false);
       }

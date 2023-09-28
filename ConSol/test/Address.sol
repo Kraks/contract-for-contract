@@ -8,6 +8,13 @@ interface IReceiver {
 contract Caller {
   event Response(uint);
 
+  struct Vault {
+    address creator;
+    string name;
+    address users;
+    uint amount;
+  }
+
   // Let's imagine that contract Caller does not have the source code for the
   // contract Receiver, but we do know the address of contract Receiver and the
   // function to call as well as the interface of contract Receiver.
@@ -20,7 +27,7 @@ contract Caller {
   ///     ensures { y == x + 1 }
   ///   }
   /// }
-  function callFoo(address payable _addr, uint x) public payable {
+  function callFoo(Vault memory v, address payable _addr, uint x) public payable {
     // You can send ether and specify a custom gas amount
     uint y = IReceiver(_addr).foo{value: msg.value, gas: 5000}("call foo", x);
 

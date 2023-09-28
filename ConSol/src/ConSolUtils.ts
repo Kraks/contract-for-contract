@@ -18,6 +18,10 @@ import * as fs from 'fs';
 import { ConSolTransformer } from './ConSolTransformer.js';
 
 export const SPEC_PREFIX = '@custom:consol';
+export const GUARD_ADDR_TYPE = 'uint256';
+export const PRE_CHECK_FUN = '_pre';
+export const POST_CHECK_FUN = '_post';
+export const ORG_CHECK_FUN = '_original';
 
 export function toBeImplemented(): never {
   console.error('To be implemented');
@@ -79,13 +83,10 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
   const ifs: Array<ContractDefinition> = sourceUnit.vContracts.filter((contract) => contract.kind === 'interface');
 
   sourceUnit.vContracts.forEach((contract) => {
-    console.log(`Discover ${contract.kind} ${contract.name}.`);
-    if (contract.kind === 'interface') {
-      console.log(`Skip ${contract.kind} ${contract.name}.`);
-      return;
-    }
+    if (contract.kind === 'interface') return;
     console.log(`Processing ${contract.kind} ${contract.name}.`);
     const factory = new ASTNodeFactory(contract.context);
+    // XXX: create ConSolFactory here
     const contractTransformer = new ConSolTransformer(factory, contract.scope, contract, ifs);
     contractTransformer.process();
   });
@@ -123,15 +124,15 @@ export function extractFunName(node: ASTNode): string {
 }
 
 export function preCheckFunName(f: string): string {
-  return '_' + f + '_pre';
+  return '_' + f + PRE_CHECK_FUN;
 }
 
 export function postCheckFunName(f: string): string {
-  return '_' + f + '_post';
+  return '_' + f + POST_CHECK_FUN;
 }
 
 export function uncheckedFunName(f: string): string {
-  return f + '_original';
+  return f + ORG_CHECK_FUN;
 }
 
 export function properAddrName(addr: string, member: string): string {

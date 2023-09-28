@@ -24,6 +24,49 @@ import { properAddrName, extractRawAddr, extractAddrMember, needAbiEncoding } fr
 
 import { CheckFunFactory } from './CheckFunFactory.js';
 
+/*
+export class HighLevelAddrSpecTransformer<T> extends CheckFunFactory<T> {
+  parentFunDef: FunctionDefinition;
+  tgtAddr: VariableDeclaration;
+  callsites: FunctionCall[] = [];
+  optTypes: TypeName[];
+  argTypes: TypeName[];
+  retTypes: TypeName[];
+  preAddrError: ErrorDefinition;
+  postAddrError: ErrorDefinition;
+
+  constructor(
+    parent: FunctionDefinition,
+    tgtAddr: VariableDeclaration,
+    spec: ValSpec<T>,
+    ctx: ASTContext,
+    scope: number,
+    preAddrError: ErrorDefinition,
+    postAddrError: ErrorDefinition,
+    factory?: ASTNodeFactory
+  ) {
+    super(ctx, scope, spec, [], [], factory);
+    this.tgtAddr = tgtAddr;
+    this.parentFunDef = parent;
+    const [optTypes, argTypes, retTypes] = findAddrSignature(spec);
+    this.optTypes = optTypes;
+    this.argTypes = argTypes;
+    this.retTypes = retTypes;
+    this.paramVarDecs = this.makeNamelessTypedVarDecls([...optTypes, ...argTypes]);
+    this.retVarDecs = this.makeNamelessTypedVarDecls(retTypes);
+    this.preAddrError = preAddrError;
+    this.postAddrError = postAddrError;
+  }
+
+  apply(): void {
+    const preFun = this.preCondCheckFun(this.preAddrError, 0);
+    if (preFun) this.parentFunDef.vScope.appendChild(preFun);
+    const postFun = this.postCondCheckFun(this.postAddrError, 0);
+    if (postFun) this.parentFunDef.vScope.appendChild(postFun);
+  }
+}
+*/
+
 export class LowLevelAddrSpecTransformer<T> extends CheckFunFactory<T> {
   parentFunDef: FunctionDefinition;
   addr: string;

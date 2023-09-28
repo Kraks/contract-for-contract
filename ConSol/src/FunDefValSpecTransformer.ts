@@ -134,6 +134,7 @@ export class FunDefValSpecTransformer<T> extends CheckFunFactory<T> {
     return funDef;
   }
 
+  /*
   findTargetAddr(def: FunctionDefinition, parentSpec: ValSpec<T>, addr: string): VariableDeclaration {
     return def.vParameters.vParameters[parentSpec.call.args.findIndex((a) => a === addr)];
   }
@@ -151,18 +152,43 @@ export class FunDefValSpecTransformer<T> extends CheckFunFactory<T> {
       this.factory,
     );
   }
+  */
 
-  apply(): void {
+  usesAddr(type: string): boolean {
+    if (type === 'address') return true;
+    if (type === 'address payable') return true;
+    if (globalThis.structMap.has(type)) {
+      let members = (globalThis.structMap.get(type)?.vMembers || []);
+      for (var m of members) {
+        if (this.usesAddr(m.typeString)) return true;
+      }
+    }
+    return false;
+  }
+
+  process(): void {
     const preFun = this.preCondCheckFun(this.preCondError, this.tgtName);
     if (preFun) this.funDef.vScope.appendChild(preFun);
     const postFun = this.postCondCheckFun(this.postCondError, this.tgtName);
     if (postFun) this.funDef.vScope.appendChild(postFun);
 
-    // TODO (GW): now should also handle postFunSpec
     /*
     const addrTrans = this.spec.preFunSpec.map((s) => this.addrTransformers(s));
     addrTrans.forEach((tr) => tr.apply());
     */
+
+    /**
+     * Given an input function `f`, we will have `f`, `f`_guard, and `f`_original.
+     * - If `f` takes/returns values with addresses, we need to generate a new function
+     *   that preserves `f`'s name and signature. The body of the new function calls
+     *   `f`_guard with `wrapped` arguments.
+     *   If not, we should be able to directly insert the pre/post check function into `f`.
+     * - The `f`_guard function guards the call of `f`_original with pre/post condition check.
+     *   Importantly, `f`_guard will also take/return values with guarded address representation (i.e. uint256).
+     * - The `f`_original function is the original function body, whose body might have been
+     *   rewritten with dispatched address calls.
+     */
+
 
     const wrapper = this.guardedFun(preFun, postFun);
     if (wrapper) {
