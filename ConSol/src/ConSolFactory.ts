@@ -33,6 +33,11 @@ export class ConSolFactory extends ASTNodeFactory {
     this.scope = scope;
   }
 
+  address = this.makeElementaryTypeNameExpression('address', 'address');
+  uint160 = this.makeElementaryTypeNameExpression('uint160', 'uint160');
+  uint256 = this.makeElementaryTypeNameExpression('uint256', 'uint256');
+  payable = this.makeElementaryTypeNameExpression('payable', 'payable');
+
   makeCallStmt(funName: string, args: Expression[], retType = 'void'): ExpressionStatement {
     const f = this.makeIdentifier('function', funName, -1);
     const call = this.makeFunCall(f, args, retType);

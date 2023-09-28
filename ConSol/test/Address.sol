@@ -19,7 +19,7 @@ contract Caller {
   // contract Receiver, but we do know the address of contract Receiver and the
   // function to call as well as the interface of contract Receiver.
 
-  /// @custom:consol { callFoo(addr, x)
+  /// @custom:consol { callFoo(addr, x) returns (y)
   ///   requires {x > 0}
   ///   where {
   ///     IReceiver(addr).foo{value: v, gas: g}(mymsg, x) returns (y)
@@ -27,11 +27,12 @@ contract Caller {
   ///     ensures { y == x + 1 }
   ///   }
   /// }
-  function callFoo(address payable _addr, uint x) public payable {
+  function callFoo(address payable _addr, uint x) public payable returns (uint) {
     // You can send ether and specify a custom gas amount
     uint y = IReceiver(_addr).foo{value: msg.value, gas: 5000}("call foo", x);
 
     emit Response(y);
+    return y;
   }
 }
 

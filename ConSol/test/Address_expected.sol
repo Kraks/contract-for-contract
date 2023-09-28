@@ -23,9 +23,10 @@ contract Caller {
     ///      ensures { y == x + 1 }
     ///    }
     ///  }
-    function callFoo_original(uint256 addr, uint x) private {
+    function callFoo_original(uint256 addr, uint x) private returns (uint) {
         uint y = _dispatch_IReceiver_foo(addr, msg.value, 5000, "call foo", x);
         emit Response(y);
+        return y;
     }
 
     // Those parameter names should be the same as the specification
@@ -70,7 +71,7 @@ contract Caller {
         return uint96(1 << specId);
     }
 
-    function callFoo_guard(uint256 _addr, uint x) private {
+    function callFoo_guard(uint256 _addr, uint x) private returns (uint) {
         // Note (GW): technically we want to pass wrapped/guarded addresses into pre/post checking functiosn too,
         // since they may invoke these address values. However, they may also inspect the raw data of addresses
         // (eg compare equality), which would require unwrap them. So generally, we need to be able to parse
@@ -78,7 +79,7 @@ contract Caller {
         // Right now, we don't have that yet, so let's just pass unwrapped addr to pre/post check functions.
         _callFoo_pre(_unwrap(_addr), x);
         _addr = _attachSpec(_addr, encodeNatSpecId(0));
-        callFoo_original(_addr, x);
+        return callFoo_original(_addr, x);
     }
 
     // Should be inlined/applied at compile-time
@@ -92,7 +93,7 @@ contract Caller {
         return payable(address(uint160(guardedAddr)));
     }
 
-    function callFoo(address payable _addr, uint x) public payable {
-        callFoo_guard(_wrap(_addr), x);
+    function callFoo(address payable _addr, uint x) public payable returns (uint) {
+        return callFoo_guard(_wrap(_addr), x);
     }
 }

@@ -7,6 +7,8 @@ import {
   assert,
   TypeName,
   ErrorDefinition,
+  Identifier,
+  Expression,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -14,6 +16,7 @@ import { GUARD_ADDR_TYPE, extractFunName, uncheckedFunName } from './ConSolUtils
 
 import { CheckFunFactory } from './CheckFunFactory.js';
 import { ConSolFactory } from './ConSolFactory.js';
+import { freshName } from './Global.js';
 
 export class FunDefValSpecTransformer<T> {
   funDef: FunctionDefinition;
@@ -169,12 +172,12 @@ export class FunDefValSpecTransformer<T> {
       const b = globalThis.structMap.get(type)?.vMembers.some((m) => this.usesAddr(m.typeString));
       if (b) return true;
     }
-    // TODO: handle mapping
+    // TODO: handle mappings and arrays
     return false;
   }
 
   // Note: argument takes no prefix such as `struct`
-  wrap(type: string): string {
+  wrapType(type: string): string {
     if (type === 'address') return GUARD_ADDR_TYPE;
     if (type === 'address payable') return GUARD_ADDR_TYPE;
     // XXX (GW): we have directly changed the struct definition, would also need
@@ -182,8 +185,10 @@ export class FunDefValSpecTransformer<T> {
     if (globalThis.structMap.has(type)) {
       const struct = globalThis.structMap.get(type);
       const members = struct?.vMembers || [];
+      // FIXME: It seems we cannot just change the existing struct type, but need to
+      // create a new struct type with a different name but changed member types...
       for (const m of members) {
-        const newType = this.wrap(m.typeString);
+        const newType = this.wrapType(m.typeString);
         if (newType !== m.typeString) {
           // Note(GW): not sure if this enough, because there is some
           // inconsistency between typeString and vType
@@ -191,8 +196,23 @@ export class FunDefValSpecTransformer<T> {
         }
       }
     }
-    // TODO: handle mapping
+    // TODO: handle mappings and arrays
     return type;
+  }
+
+  // x -> uint256(uint160(address(x)))
+  wrap(x: Identifier): Expression {
+    if (this.usesAddr(x.typeString)) {
+      // TODO: only handles flat types so far, need to handle struct, array, mapping, etc.
+      // How should we do that?
+      // Note that (1) the struct type definition has been changed, (2) may need to recreate a value
+      // of the new struct type.
+      const cast1 = this.factory.makeFunctionCall('address', FunctionCallKind.TypeConversion, this.factory.address, [x]);
+      const cast2 = this.factory.makeFunctionCall('uint160', FunctionCallKind.TypeConversion, this.factory.uint160, [cast1]);
+      const cast3 = this.factory.makeFunctionCall('uint256', FunctionCallKind.TypeConversion, this.factory.uint256, [cast2]);
+      return cast3;
+    }
+    return x;
   }
 
   process(): void {
@@ -224,12 +244,39 @@ export class FunDefValSpecTransformer<T> {
     const retUseAddr = this.funDef.vReturnParameters.vParameters
       .map((p) => this.factory.normalize(p.typeString))
       .some((t) => this.usesAddr(t));
+
     if (paramUseAddr || retUseAddr) {
       const newFun = this.factory.copy(this.funDef);
       newFun.documentation = undefined;
       const callee = this.factory.makeIdentifier('function', this.tgtName + '_guard', -1);
-      const callsite = this.factory.makeFunCall(callee, [], 'void'); //TODO(GW): arg, retType
-      newFun.vBody = this.factory.makeBlock([callsite]); // TODO: may return
+      const args = this.funDef.vParameters.vParameters.map((p) => {
+        const id = this.factory.makeIdFromVarDec(p);
+        return this.wrap(id);
+      });
+      let guardRetTy: string = 'void';
+      const retTypes = newFun.vReturnParameters.vParameters.map((p) => {
+        const t = this.wrapType(p.typeString)
+        return this.factory.makeElementaryTypeName(t, t);
+      });
+      if (newFun.vReturnParameters.vParameters.length > 0) {
+        guardRetTy = '(' + retTypes.toString() + ')';
+      }
+      const callsite = this.factory.makeFunCall(callee, args, guardRetTy);
+      if (newFun.vReturnParameters.vParameters.length > 0) {
+         // TODO: unwrap
+        const retTypeDecls = this.factory.makeTypedVarDecls(retTypes, retTypes.map((x) => freshName()), this.funDef.scope);
+        const retIds = retTypeDecls.map((r) => r.id);
+        const callAndAssignStmt = this.factory.makeVariableDeclarationStatement(retIds, retTypeDecls, callsite);
+        const retValTuple = this.factory.makeTupleExpression(
+          guardRetTy,
+          false,
+          retTypeDecls.map((r) => this.factory.makeIdentifierFor(r)),
+        );
+        const retStmt = this.factory.makeReturn(retValTuple.id, retValTuple);
+        newFun.vBody = this.factory.makeBlock([callAndAssignStmt, retStmt]);
+      } else {
+        newFun.vBody = this.factory.makeBlock([callsite]);
+      }
       this.funDef.vScope.appendChild(newFun);
     }
 

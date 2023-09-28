@@ -6,6 +6,7 @@ declare global {
   // The id is assigned to address specs in the `where` clause.
   var addrSpecId: number;
   var structMap: Map<string, StructDefinition>;
+  var csVarId: number;
 }
 
 export function resetAddrSpecId(): void {
@@ -20,4 +21,14 @@ export function nextAddrSpecId(): number {
 
 export function resetStructMap(): void {
   globalThis.structMap = new Map<string, StructDefinition>();
+}
+
+export function resetCSVarId(): void {
+  globalThis.csVarId = 0;
+}
+
+export function freshName(): string {
+  const n = globalThis.csVarId;
+  globalThis.csVarId += 1;
+  return '_cs_' + n;
 }

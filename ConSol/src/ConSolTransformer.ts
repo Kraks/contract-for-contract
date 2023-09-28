@@ -14,7 +14,7 @@ import { isValSpec, isTempSpec } from './spec/index.js';
 
 import { ConSolFactory } from './ConSolFactory.js';
 import { FunDefValSpecTransformer } from './FunDefValSpecTransformer.js';
-import { resetStructMap } from './Global.js';
+import { resetCSVarId, resetStructMap } from './Global.js';
 
 // AST node kinds that allow ConSol spec attachments
 type ConSolCheckNodes = FunctionDefinition | EventDefinition;
@@ -69,8 +69,9 @@ export class ConSolTransformer<T> {
     contract.appendChild(this.postAddrError);
 
     resetStructMap();
+    resetCSVarId();
     contract.walkChildren((astNode) => {
-      // TODO: handle mapping types
+      // TODO: handle mapping and array types
       if (astNode instanceof StructDefinition) {
         console.log(`Found struct ${astNode.canonicalName} with ${astNode.vMembers.length} members`);
         globalThis.structMap.set(astNode.canonicalName, astNode);
