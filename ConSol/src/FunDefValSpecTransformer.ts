@@ -207,9 +207,15 @@ export class FunDefValSpecTransformer<T> {
       // How should we do that?
       // Note that (1) the struct type definition has been changed, (2) may need to recreate a value
       // of the new struct type.
-      const cast1 = this.factory.makeFunctionCall('address', FunctionCallKind.TypeConversion, this.factory.address, [x]);
-      const cast2 = this.factory.makeFunctionCall('uint160', FunctionCallKind.TypeConversion, this.factory.uint160, [cast1]);
-      const cast3 = this.factory.makeFunctionCall('uint256', FunctionCallKind.TypeConversion, this.factory.uint256, [cast2]);
+      const cast1 = this.factory.makeFunctionCall('address', FunctionCallKind.TypeConversion, this.factory.address, [
+        x,
+      ]);
+      const cast2 = this.factory.makeFunctionCall('uint160', FunctionCallKind.TypeConversion, this.factory.uint160, [
+        cast1,
+      ]);
+      const cast3 = this.factory.makeFunctionCall('uint256', FunctionCallKind.TypeConversion, this.factory.uint256, [
+        cast2,
+      ]);
       return cast3;
     }
     return x;
@@ -253,9 +259,9 @@ export class FunDefValSpecTransformer<T> {
         const id = this.factory.makeIdFromVarDec(p);
         return this.wrap(id);
       });
-      let guardRetTy: string = 'void';
+      let guardRetTy = 'void';
       const retTypes = newFun.vReturnParameters.vParameters.map((p) => {
-        const t = this.wrapType(p.typeString)
+        const t = this.wrapType(p.typeString);
         return this.factory.makeElementaryTypeName(t, t);
       });
       if (newFun.vReturnParameters.vParameters.length > 0) {
@@ -263,8 +269,12 @@ export class FunDefValSpecTransformer<T> {
       }
       const callsite = this.factory.makeFunCall(callee, args, guardRetTy);
       if (newFun.vReturnParameters.vParameters.length > 0) {
-         // TODO: unwrap
-        const retTypeDecls = this.factory.makeTypedVarDecls(retTypes, retTypes.map((x) => freshName()), this.funDef.scope);
+        // TODO: unwrap
+        const retTypeDecls = this.factory.makeTypedVarDecls(
+          retTypes,
+          retTypes.map((x) => freshName()),
+          this.funDef.scope,
+        );
         const retIds = retTypeDecls.map((r) => r.id);
         const callAndAssignStmt = this.factory.makeVariableDeclarationStatement(retIds, retTypeDecls, callsite);
         const retValTuple = this.factory.makeTupleExpression(
