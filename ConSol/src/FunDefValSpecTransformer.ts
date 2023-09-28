@@ -218,8 +218,12 @@ export class FunDefValSpecTransformer<T> {
      *   rewritten with dispatched address calls.
      */
 
-    const paramUseAddr = this.funDef.vParameters.vParameters.map((p) => this.factory.normalize(p.typeString)).some((t) => this.usesAddr(t));
-    const retUseAddr = this.funDef.vReturnParameters.vParameters.map((p) => this.factory.normalize(p.typeString)).some((t) => this.usesAddr(t));
+    const paramUseAddr = this.funDef.vParameters.vParameters
+      .map((p) => this.factory.normalize(p.typeString))
+      .some((t) => this.usesAddr(t));
+    const retUseAddr = this.funDef.vReturnParameters.vParameters
+      .map((p) => this.factory.normalize(p.typeString))
+      .some((t) => this.usesAddr(t));
     if (paramUseAddr || retUseAddr) {
       const newFun = this.factory.copy(this.funDef);
       newFun.documentation = undefined;
