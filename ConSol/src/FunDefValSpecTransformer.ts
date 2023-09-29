@@ -7,7 +7,6 @@ import {
   assert,
   TypeName,
   ErrorDefinition,
-  Identifier,
   Expression,
 } from 'solc-typed-ast';
 
@@ -224,8 +223,12 @@ export class FunDefValSpecTransformer<T> {
   // uint256 -> payable(address(uint160(...)))
   unwrap(x: Expression): Expression {
     const cast1 = this.factory.makeFunctionCall('uint160', FunctionCallKind.TypeConversion, this.factory.uint160, [x]);
-    const cast2 = this.factory.makeFunctionCall('address', FunctionCallKind.TypeConversion, this.factory.address, [cast1]);
-    const cast3 = this.factory.makeFunctionCall('payable', FunctionCallKind.TypeConversion, this.factory.payable, [cast2]);
+    const cast2 = this.factory.makeFunctionCall('address', FunctionCallKind.TypeConversion, this.factory.address, [
+      cast1,
+    ]);
+    const cast3 = this.factory.makeFunctionCall('payable', FunctionCallKind.TypeConversion, this.factory.payable, [
+      cast2,
+    ]);
     return cast3;
   }
 
@@ -298,7 +301,7 @@ export class FunDefValSpecTransformer<T> {
             if (this.usesAddr(newFun.vReturnParameters.vParameters[i].typeString)) {
               return this.unwrap(this.factory.makeIdentifierFor(r));
             }
-            return this.factory.makeIdentifierFor(r)
+            return this.factory.makeIdentifierFor(r);
           }),
         );
         const retStmt = this.factory.makeReturn(retValTuple.id, retValTuple);
