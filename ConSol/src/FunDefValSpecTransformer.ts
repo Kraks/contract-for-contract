@@ -200,8 +200,8 @@ export class FunDefValSpecTransformer<T> {
     return type;
   }
 
-  // x -> uint256(uint160(address(x)))
-  wrap(x: Identifier): Expression {
+  // address -> uint256(uint160(address(...)))
+  wrap(x: Expression): Expression {
     if (this.usesAddr(x.typeString)) {
       // TODO: only handles flat types so far, need to handle struct, array, mapping, etc.
       // How should we do that?
@@ -219,6 +219,20 @@ export class FunDefValSpecTransformer<T> {
       return cast3;
     }
     return x;
+  }
+
+  // uint256 -> payable(address(uint160(...)))
+  unwrap(x: Expression): Expression {
+    const cast1 = this.factory.makeFunctionCall('uint160', FunctionCallKind.TypeConversion, this.factory.uint160, [x]);
+    const cast2 = this.factory.makeFunctionCall('address', FunctionCallKind.TypeConversion, this.factory.address, [cast1]);
+    const cast3 = this.factory.makeFunctionCall('payable', FunctionCallKind.TypeConversion, this.factory.payable, [cast2]);
+    return cast3;
+  }
+
+  unwrapType(type: string): string {
+    if (type === 'uint256') return 'address payable';
+    // TODO: handle mappings and arrays
+    return type;
   }
 
   process(): void {
@@ -254,6 +268,7 @@ export class FunDefValSpecTransformer<T> {
     if (paramUseAddr || retUseAddr) {
       const newFun = this.factory.copy(this.funDef);
       newFun.documentation = undefined;
+      newFun.visibility = FunctionVisibility.Private;
       const callee = this.factory.makeIdentifier('function', this.tgtName + '_guard', -1);
       const args = this.funDef.vParameters.vParameters.map((p) => {
         const id = this.factory.makeIdFromVarDec(p);
@@ -269,7 +284,6 @@ export class FunDefValSpecTransformer<T> {
       }
       const callsite = this.factory.makeFunCall(callee, args, guardRetTy);
       if (newFun.vReturnParameters.vParameters.length > 0) {
-        // TODO: unwrap
         const retTypeDecls = this.factory.makeTypedVarDecls(
           retTypes,
           retTypes.map((x) => freshName()),
@@ -278,9 +292,14 @@ export class FunDefValSpecTransformer<T> {
         const retIds = retTypeDecls.map((r) => r.id);
         const callAndAssignStmt = this.factory.makeVariableDeclarationStatement(retIds, retTypeDecls, callsite);
         const retValTuple = this.factory.makeTupleExpression(
-          guardRetTy,
+          guardRetTy, // XXX: ths is not consistent but seems not no relevant in generated code
           false,
-          retTypeDecls.map((r) => this.factory.makeIdentifierFor(r)),
+          retTypeDecls.map((r, i) => {
+            if (this.usesAddr(newFun.vReturnParameters.vParameters[i].typeString)) {
+              return this.unwrap(this.factory.makeIdentifierFor(r));
+            }
+            return this.factory.makeIdentifierFor(r)
+          }),
         );
         const retStmt = this.factory.makeReturn(retValTuple.id, retValTuple);
         newFun.vBody = this.factory.makeBlock([callAndAssignStmt, retStmt]);
