@@ -135,6 +135,10 @@ export function uncheckedFunName(f: string): string {
   return f + ORG_CHECK_FUN;
 }
 
+export function guardedFunName(f: string): string {
+  return f + '_guard';
+}
+
 export function properAddrName(addr: string, member: string): string {
   return addr + '_' + member;
 }

@@ -11,7 +11,7 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
-import { GUARD_ADDR_TYPE, extractFunName, uncheckedFunName } from './ConSolUtils.js';
+import { GUARD_ADDR_TYPE, extractFunName, uncheckedFunName, guardedFunName } from './ConSolUtils.js';
 
 import { CheckFunFactory } from './CheckFunFactory.js';
 import { ConSolFactory } from './ConSolFactory.js';
@@ -253,9 +253,6 @@ export class FunDefValSpecTransformer<T> {
     /**
      * Given an input function `f`, we will at least generate `f` and `f`_original,
      * and possible `f`_guard.
-     * - The `f`_guard function guards the call of `f`_original with pre/post condition check.
-     *   Importantly, `f`_guard will also take/return values with guarded address representation
-     *   (i.e. uint256).
      * - The `f`_original function is the original function body, whose body might have been
      *   rewritten with dispatched address calls.
      */
@@ -270,12 +267,15 @@ export class FunDefValSpecTransformer<T> {
     /* - If `f` takes/returns values with addresses, we need to generate a new function
      *   that preserves `f`'s name and signature. The body of the new function calls
      *   `f`_guard with `wrapped` arguments.
+     * - The `f`_guard function guards the call of `f`_original with pre/post condition check.
+     *   Importantly, `f`_guard will also take/return values with guarded address representation
+     *   (i.e. uint256).
      */
     if (paramUseAddr || retUseAddr) {
       const newFun = this.factory.copy(this.funDef);
       newFun.documentation = undefined;
       newFun.visibility = FunctionVisibility.Private;
-      const callee = this.factory.makeIdentifier('function', this.tgtName + '_guard', -1);
+      const callee = this.factory.makeIdentifier('function', guardedFunName(this.tgtName), -1);
       const args = this.funDef.vParameters.vParameters.map((p) => {
         const id = this.factory.makeIdFromVarDec(p);
         return this.wrap(id);
@@ -312,7 +312,30 @@ export class FunDefValSpecTransformer<T> {
       } else {
         newFun.vBody = this.factory.makeBlock([callsite]);
       }
+      // add the signature-preserved function
       this.funDef.vScope.appendChild(newFun);
+      // rename the original function `f` to `f`_original
+      this.funDef.name = uncheckedFunName(this.tgtName);
+
+      // generate the actual f_guard function, which attaches address spec meta data
+      const guard = this.factory.copy(this.funDef);
+      guard.documentation = undefined
+      guard.visibility = FunctionVisibility.Private;
+      guard.name = guardedFunName(this.tgtName);
+      guard.vParameters = this.factory.makeParameterList(
+        // TODO: struct/mapping/array type
+        guard.vParameters.vParameters.map((p) => {
+          const q = this.factory.copy(p);
+          q.typeString = this.wrapType(q.typeString);
+          q.vType = this.factory.makeElementaryTypeName(q.typeString, q.typeString);
+          return q
+        }));
+      // TODO: change return types if necessary
+      guard.vBody = this.factory.makeBlock([]); // TODO: fill the body
+      this.funDef.vScope.appendChild(guard);
+
+      // TODO: change the argument/return types of `f`_original
+      // TODO: change the body of `f`_original with "address call dispatch"
     } else {
       /* If not, we should be able to directly insert the pre/post check function into `f`,
        * and not generating `f`_guard.
