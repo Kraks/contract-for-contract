@@ -319,7 +319,7 @@ export class FunDefValSpecTransformer<T> {
 
       // generate the actual f_guard function, which attaches address spec meta data
       const guard = this.factory.copy(this.funDef);
-      guard.documentation = undefined
+      guard.documentation = undefined;
       guard.visibility = FunctionVisibility.Private;
       guard.name = guardedFunName(this.tgtName);
       guard.vParameters = this.factory.makeParameterList(
@@ -328,8 +328,9 @@ export class FunDefValSpecTransformer<T> {
           const q = this.factory.copy(p);
           q.typeString = this.wrapType(q.typeString);
           q.vType = this.factory.makeElementaryTypeName(q.typeString, q.typeString);
-          return q
-        }));
+          return q;
+        }),
+      );
       // TODO: change return types if necessary
       guard.vBody = this.factory.makeBlock([]); // TODO: fill the body
       this.funDef.vScope.appendChild(guard);
