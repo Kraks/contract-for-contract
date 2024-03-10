@@ -163,7 +163,8 @@ export class FunDefValSpecTransformer<T> {
   }
   */
 
-  // Note: argument takes no prefix such as `struct`
+  // usesAddr checks if a type has address, if so it is subject to wrap/unwrap
+  // Note: argument type takes no prefix such as `struct`
   usesAddr(type: string): boolean {
     if (type === 'address') return true;
     if (type === 'address payable') return true;
@@ -175,7 +176,7 @@ export class FunDefValSpecTransformer<T> {
     return false;
   }
 
-  // Note: argument takes no prefix such as `struct`
+  // Note: argument type takes no prefix such as `struct`
   wrapType(type: string): string {
     if (type === 'address') return GUARD_ADDR_TYPE;
     if (type === 'address payable') return GUARD_ADDR_TYPE;
@@ -185,7 +186,7 @@ export class FunDefValSpecTransformer<T> {
       const struct = globalThis.structMap.get(type);
       const members = struct?.vMembers || [];
       // FIXME: It seems we cannot just change the existing struct type, but need to
-      // create a new struct type with a different name but changed member types...
+      // create a new struct type with a different name and changed member types...
       for (const m of members) {
         const newType = this.wrapType(m.typeString);
         if (newType !== m.typeString) {
@@ -204,8 +205,8 @@ export class FunDefValSpecTransformer<T> {
     if (this.usesAddr(x.typeString)) {
       // TODO: only handles flat types so far, need to handle struct, array, mapping, etc.
       // How should we do that?
-      // Note that (1) the struct type definition has been changed, (2) may need to recreate a value
-      // of the new struct type.
+      //   Note that (1) the struct type definition has been changed,
+      //   (2) we may need to recreate a value of the new struct type.
       const cast1 = this.factory.makeFunctionCall('address', FunctionCallKind.TypeConversion, this.factory.address, [
         x,
       ]);
@@ -222,6 +223,7 @@ export class FunDefValSpecTransformer<T> {
 
   // uint256 -> payable(address(uint160(...)))
   unwrap(x: Expression): Expression {
+    // TODO: so far only handles flat types
     const cast1 = this.factory.makeFunctionCall('uint160', FunctionCallKind.TypeConversion, this.factory.uint160, [x]);
     const cast2 = this.factory.makeFunctionCall('address', FunctionCallKind.TypeConversion, this.factory.address, [
       cast1,
@@ -239,24 +241,21 @@ export class FunDefValSpecTransformer<T> {
   }
 
   process(): void {
+    /*
+    const addrTrans = this.spec.preFunSpec.map((s) => this.addrTransformers(s));
+    addrTrans.forEach((tr) => tr.apply());
+    */
     const preFun = this.cfFactory.preCondCheckFun(this.preCondError, this.tgtName);
     if (preFun) this.funDef.vScope.appendChild(preFun);
     const postFun = this.cfFactory.postCondCheckFun(this.postCondError, this.tgtName);
     if (postFun) this.funDef.vScope.appendChild(postFun);
 
-    /*
-    const addrTrans = this.spec.preFunSpec.map((s) => this.addrTransformers(s));
-    addrTrans.forEach((tr) => tr.apply());
-    */
-
     /**
-     * Given an input function `f`, we will have `f`, `f`_guard, and `f`_original.
-     * - If `f` takes/returns values with addresses, we need to generate a new function
-     *   that preserves `f`'s name and signature. The body of the new function calls
-     *   `f`_guard with `wrapped` arguments.
-     *   If not, we should be able to directly insert the pre/post check function into `f`.
+     * Given an input function `f`, we will at least generate `f` and `f`_original,
+     * and possible `f`_guard.
      * - The `f`_guard function guards the call of `f`_original with pre/post condition check.
-     *   Importantly, `f`_guard will also take/return values with guarded address representation (i.e. uint256).
+     *   Importantly, `f`_guard will also take/return values with guarded address representation
+     *   (i.e. uint256).
      * - The `f`_original function is the original function body, whose body might have been
      *   rewritten with dispatched address calls.
      */
@@ -268,6 +267,10 @@ export class FunDefValSpecTransformer<T> {
       .map((p) => this.factory.normalize(p.typeString))
       .some((t) => this.usesAddr(t));
 
+    /* - If `f` takes/returns values with addresses, we need to generate a new function
+     *   that preserves `f`'s name and signature. The body of the new function calls
+     *   `f`_guard with `wrapped` arguments.
+     */
     if (paramUseAddr || retUseAddr) {
       const newFun = this.factory.copy(this.funDef);
       newFun.documentation = undefined;
@@ -295,7 +298,7 @@ export class FunDefValSpecTransformer<T> {
         const retIds = retTypeDecls.map((r) => r.id);
         const callAndAssignStmt = this.factory.makeVariableDeclarationStatement(retIds, retTypeDecls, callsite);
         const retValTuple = this.factory.makeTupleExpression(
-          guardRetTy, // XXX: ths is not consistent but seems not no relevant in generated code
+          guardRetTy, // XXX: ths is not consistent but seems not relevant in generated code
           false,
           retTypeDecls.map((r, i) => {
             if (this.usesAddr(newFun.vReturnParameters.vParameters[i].typeString)) {
@@ -310,18 +313,24 @@ export class FunDefValSpecTransformer<T> {
         newFun.vBody = this.factory.makeBlock([callsite]);
       }
       this.funDef.vScope.appendChild(newFun);
-    }
-
-    const wrapper = this.guardedFun(preFun, postFun);
-    if (wrapper) {
-      this.funDef.vScope.appendChild(wrapper);
-      this.funDef.name = uncheckedFunName(this.tgtName);
-      this.funDef.visibility = FunctionVisibility.Private;
-      if (this.funDef.isConstructor) {
-        // If the spec is attached on a constructor, we generate a new constructor,
-        // and the original constructor becomes an ordinary function.
-        this.funDef.isConstructor = false;
-        this.funDef.kind = FunctionKind.Function;
+    } else {
+      /* If not, we should be able to directly insert the pre/post check function into `f`,
+       * and not generating `f`_guard.
+       * We rename the original function `f` to `f`_original.
+       */
+      const wrapper = this.guardedFun(preFun, postFun);
+      if (wrapper) {
+        // if wrapper/guarded function is added, then
+        // rename the original function `f` to `f`_original.
+        this.funDef.vScope.appendChild(wrapper);
+        this.funDef.name = uncheckedFunName(this.tgtName);
+        this.funDef.visibility = FunctionVisibility.Private;
+        if (this.funDef.isConstructor) {
+          // If the spec is attached on a constructor, we generate a new constructor,
+          // and the original constructor becomes an ordinary function.
+          this.funDef.isConstructor = false;
+          this.funDef.kind = FunctionKind.Function;
+        }
       }
     }
     // TODO(DX): stateMutability: pure/payable/nonpayable ...

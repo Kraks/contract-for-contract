@@ -8,20 +8,11 @@ interface IReceiver {
 contract Caller {
   event Response(uint);
 
-  struct Vault {
-    address creator;
-    string name;
-    address users;
-    uint amount;
-  }
-
   // Let's imagine that contract Caller does not have the source code for the
   // contract Receiver, but we do know the address of contract Receiver and the
   // function to call as well as the interface of contract Receiver.
 
   // TODO: test return address
-  // TODO: test struct/array/mapping argument with addresses
-  // TODO: test return struct/array/mapping with addresses
 
   /// @custom:consol { callFoo(addr, x) returns (y)
   ///   requires {x > 0}

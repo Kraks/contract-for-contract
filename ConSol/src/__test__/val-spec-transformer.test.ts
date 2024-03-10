@@ -4,7 +4,12 @@ import { ConSolFactory } from '../ConSolFactory';
 import { checkConSolOutput } from '../ConSolUtils';
 
 describe('end to end tests', () => {
-  // TODO: mechanize more tests...
+  // For each file here, we call ConSol to generate filename_out.sol
+  // and compare it with filename_expected.sol.
+  // TODO: mechanize more tests, missing:
+  //   Address.sol,
+  //   testCallFoo.sol, LowLevelAddrCall.sol
+
   const programs = ['PreCond.sol', 'PreCond2.sol', 'Lock.sol', 'PostCond.sol'];
 
   programs.forEach((program) => {

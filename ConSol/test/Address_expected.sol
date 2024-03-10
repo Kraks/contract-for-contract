@@ -9,13 +9,13 @@ contract Caller {
 
     error postViolation(string funcName);
 
-    error PreViolationAddr(uint256 specId);
+    error preViolationAddr(uint256 specId);
 
-    error PostViolationAddr(uint256 specId);
+    error postViolationAddr(uint256 specId);
 
     event Response(uint);
 
-    /// @custom:consol { callFoo(addr, x)
+    /// @custom:consol { callFoo(addr, x) returns (y)
     ///    requires {x > 0}
     ///    where {
     ///      IReceiver(addr).foo{value: v, gas: g}(mymsg, x) returns (y)
@@ -29,8 +29,10 @@ contract Caller {
         return y;
     }
 
+    // Done
     // Those parameter names should be the same as the specification
-    function _callFoo_pre(address addr, uint x) private {
+    // QUESTION: should the argument always be `address payable`?
+    function _callFoo_pre(address payable addr, uint x) private {
         if (!(x>0)) revert preViolation("callFoo");
     }
 
@@ -61,15 +63,17 @@ contract Caller {
         return y;
     }
 
-    // Should be inlined/applied at compile-time
+    // Should be inlined/applied at compile-time by Solidity
     function _attachSpec(uint256 addr, uint96 specId) pure private returns (uint256) {
         return addr | (specId << 160);
     }
 
-    // Should be eliminated/applied at compile-time
+    // Should be eliminated/applied at compile-time by Solidity
     function encodeNatSpecId(uint96 specId) pure private returns (uint96) {
         return uint96(1 << specId);
     }
+
+    // TODO: generate callFoo_guard
 
     function callFoo_guard(uint256 _addr, uint x) private returns (uint) {
         // Note (GW): technically we want to pass wrapped/guarded addresses into pre/post checking functiosn too,
@@ -82,18 +86,14 @@ contract Caller {
         return callFoo_original(_addr, x);
     }
 
-    // Should be inlined/applied at compile-time
-    function _wrap(address payable addr) pure private returns (uint256) {
-        return uint256(uint160(address(addr)));
-    }
-
-    // Should be inlined/applied at compile-time
+    // TODO: inlined/applied at compile-time of consol
     function _unwrap(uint256 guardedAddr) pure private returns (address payable) {
         //address a = payable(address(uint160(guardedAddr)));
         return payable(address(uint160(guardedAddr)));
     }
 
     function callFoo(address payable _addr, uint x) public payable returns (uint) {
-        return callFoo_guard(_wrap(_addr), x);
+        uint256 _cs_0 = callFoo_guard(uint256(uint160(address(_addr))), x);
+        return (_cs_0);
     }
 }
