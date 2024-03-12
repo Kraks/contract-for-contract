@@ -73,8 +73,6 @@ contract Caller {
         return uint96(1 << specId);
     }
 
-    // TODO: generate callFoo_guard
-
     function callFoo_guard(uint256 _addr, uint x) private returns (uint) {
         // Note (GW): technically we want to pass wrapped/guarded addresses into pre/post checking functiosn too,
         // since they may invoke these address values. However, they may also inspect the raw data of addresses

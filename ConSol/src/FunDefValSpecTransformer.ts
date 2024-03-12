@@ -240,6 +240,146 @@ export class FunDefValSpecTransformer<T> {
     return type;
   }
 
+  wrapParameterList(params: VariableDeclaration[]): VariableDeclaration[] {
+    // TODO: struct/mapping/array type
+    return params.map((p) => {
+      const q = this.factory.copy(p);
+      q.typeString = this.wrapType(q.typeString);
+      q.vType = this.factory.makeElementaryTypeName(q.typeString, q.typeString);
+      return q;
+    });
+  }
+
+  unwrapArgumentList(args: VariableDeclaration[], types: string[]): Expression[] {
+    return args.map((p, idx) => {
+      const id = this.factory.makeIdFromVarDec(p);
+      if (this.usesAddr(types[idx])) {
+        return this.unwrap(id);
+      } else {
+        return id;
+      }
+    });
+  }
+
+  wrappingAddrForFunction(oldFun: FunctionDefinition): FunctionDefinition {
+    const newFun = this.factory.copy(oldFun);
+    newFun.documentation = undefined;
+    newFun.visibility = FunctionVisibility.Private;
+    const callee = this.factory.makeIdentifier('function', guardedFunName(this.tgtName), -1);
+    const args = oldFun.vParameters.vParameters.map((p) => {
+      const id = this.factory.makeIdFromVarDec(p);
+      return this.wrap(id);
+    });
+    let guardRetTy = 'void';
+    const retTypes = newFun.vReturnParameters.vParameters.map((p) => {
+      const t = this.wrapType(p.typeString);
+      return this.factory.makeElementaryTypeName(t, t);
+    });
+    if (newFun.vReturnParameters.vParameters.length > 0) {
+      guardRetTy = '(' + retTypes.toString() + ')';
+    }
+    const callsite = this.factory.makeFunCall(callee, args, guardRetTy);
+    if (newFun.vReturnParameters.vParameters.length > 0) {
+      const retTypeDecls = this.factory.makeTypedVarDecls(
+        retTypes,
+        retTypes.map((x) => freshName()),
+        oldFun.scope,
+      );
+      const retIds = retTypeDecls.map((r) => r.id);
+      const callAndAssignStmt = this.factory.makeVariableDeclarationStatement(retIds, retTypeDecls, callsite);
+      const retValTuple = this.factory.makeTupleExpression(
+        guardRetTy, // XXX: ths is not consistent but seems not relevant in generated code
+        false,
+        retTypeDecls.map((r, i) => {
+          if (this.usesAddr(newFun.vReturnParameters.vParameters[i].typeString)) {
+            return this.unwrap(this.factory.makeIdentifierFor(r));
+          }
+          return this.factory.makeIdentifierFor(r);
+        }),
+      );
+      const retStmt = this.factory.makeReturn(retValTuple.id, retValTuple);
+      newFun.vBody = this.factory.makeBlock([callAndAssignStmt, retStmt]);
+    } else {
+      newFun.vBody = this.factory.makeBlock([callsite]);
+    }
+    return newFun
+  }
+
+  // XXX: later we should refactor this with function guardedFun (which currently only
+  // hanldes non-address values).
+  guardedFunAddr(oldFun: FunctionDefinition,
+    preCondFun: FunctionDefinition | undefined,
+    postCondFun: FunctionDefinition | undefined): FunctionDefinition | undefined {
+    if (preCondFun === undefined && postCondFun === undefined) return undefined;
+    const guard = this.factory.copy(oldFun);
+    guard.documentation = undefined
+    guard.visibility = FunctionVisibility.Private;
+    guard.name = guardedFunName(this.tgtName);
+    guard.vParameters = this.factory.makeParameterList(
+      this.wrapParameterList(oldFun.vParameters.vParameters));
+    // TODO: change return types if necessary
+    // guard.vReturnParameters = ...
+
+    const stmts = [];
+
+    // Generate function call to check pre-condition (if any)
+    if (preCondFun) {
+      // TODO: extract this
+      const unwrappedArgs = this.unwrapArgumentList(
+        guard.vParameters.vParameters,
+        preCondFun.vParameters.vParameters.map((p) => p.typeString))
+      const preCondStmt = this.factory.makeCallStmt(
+        preCondFun.name, unwrappedArgs
+      );
+      stmts.push(preCondStmt);
+    }
+
+    // TODO: attachSpec
+
+    const retTypeStr =
+      this.retTypes.length > 0 ? '(' + this.retTypes.map((t) => t.typeString).toString() + ')' : 'void';
+    const retTypeDecls = this.factory.makeTypedVarDecls(this.retTypes, this.spec.call.rets, this.funDef.scope);
+    // Generate function call to the original function
+    const uncheckedCall = this.factory.makeFunctionCall(
+      retTypeStr,
+      FunctionCallKind.FunctionCall,
+      this.factory.makeIdentifier('function', uncheckedFunName(this.tgtName), -1),
+      this.factory.makeIdsFromVarDecs(this.declaredParams),
+    );
+    if (retTypeDecls.length > 0) {
+      const retIds = retTypeDecls.map((r) => r.id);
+      const callAndAssignStmt = this.factory.makeVariableDeclarationStatement(retIds, retTypeDecls, uncheckedCall);
+      stmts.push(callAndAssignStmt);
+    } else {
+      const uncheckedCallStmt = this.factory.makeExpressionStatement(uncheckedCall);
+      stmts.push(uncheckedCallStmt);
+    }
+
+    // Generate function call to check post-condition (if any)
+    if (postCondFun) {
+      let postCallArgs = this.factory.makeIdsFromVarDecs(this.declaredParams);
+      if (this.retTypes.length > 0) {
+        postCallArgs = postCallArgs.concat(this.factory.makeIdsFromVarDecs(retTypeDecls));
+      }
+      const postCondStmt = this.factory.makeCallStmt(postCondFun.name, postCallArgs);
+      stmts.push(postCondStmt);
+    }
+
+    // Create the return statement (if any)
+    if (retTypeDecls.length > 0) {
+      const retValTuple = this.factory.makeTupleExpression(
+        retTypeStr,
+        false,
+        retTypeDecls.map((r) => this.factory.makeIdentifierFor(r)),
+      );
+      const retStmt = this.factory.makeReturn(retValTuple.id, retValTuple);
+      stmts.push(retStmt);
+    }
+
+    guard.vBody = this.factory.makeBlock(stmts);
+    return guard;
+  }
+
   process(): void {
     /*
     const addrTrans = this.spec.preFunSpec.map((s) => this.addrTransformers(s));
@@ -272,71 +412,22 @@ export class FunDefValSpecTransformer<T> {
      *   (i.e. uint256).
      */
     if (paramUseAddr || retUseAddr) {
-      const newFun = this.factory.copy(this.funDef);
-      newFun.documentation = undefined;
-      newFun.visibility = FunctionVisibility.Private;
-      const callee = this.factory.makeIdentifier('function', guardedFunName(this.tgtName), -1);
-      const args = this.funDef.vParameters.vParameters.map((p) => {
-        const id = this.factory.makeIdFromVarDec(p);
-        return this.wrap(id);
-      });
-      let guardRetTy = 'void';
-      const retTypes = newFun.vReturnParameters.vParameters.map((p) => {
-        const t = this.wrapType(p.typeString);
-        return this.factory.makeElementaryTypeName(t, t);
-      });
-      if (newFun.vReturnParameters.vParameters.length > 0) {
-        guardRetTy = '(' + retTypes.toString() + ')';
-      }
-      const callsite = this.factory.makeFunCall(callee, args, guardRetTy);
-      if (newFun.vReturnParameters.vParameters.length > 0) {
-        const retTypeDecls = this.factory.makeTypedVarDecls(
-          retTypes,
-          retTypes.map((x) => freshName()),
-          this.funDef.scope,
-        );
-        const retIds = retTypeDecls.map((r) => r.id);
-        const callAndAssignStmt = this.factory.makeVariableDeclarationStatement(retIds, retTypeDecls, callsite);
-        const retValTuple = this.factory.makeTupleExpression(
-          guardRetTy, // XXX: ths is not consistent but seems not relevant in generated code
-          false,
-          retTypeDecls.map((r, i) => {
-            if (this.usesAddr(newFun.vReturnParameters.vParameters[i].typeString)) {
-              return this.unwrap(this.factory.makeIdentifierFor(r));
-            }
-            return this.factory.makeIdentifierFor(r);
-          }),
-        );
-        const retStmt = this.factory.makeReturn(retValTuple.id, retValTuple);
-        newFun.vBody = this.factory.makeBlock([callAndAssignStmt, retStmt]);
-      } else {
-        newFun.vBody = this.factory.makeBlock([callsite]);
-      }
+      // generate the signature-preserved function
+      // TODO: if there is no spec, should we generate this new function? seems yes
+      const newFun = this.wrappingAddrForFunction(this.funDef);
       // add the signature-preserved function
       this.funDef.vScope.appendChild(newFun);
       // rename the original function `f` to `f`_original
       this.funDef.name = uncheckedFunName(this.tgtName);
-
-      // generate the actual f_guard function, which attaches address spec meta data
-      const guard = this.factory.copy(this.funDef);
-      guard.documentation = undefined;
-      guard.visibility = FunctionVisibility.Private;
-      guard.name = guardedFunName(this.tgtName);
-      guard.vParameters = this.factory.makeParameterList(
-        // TODO: struct/mapping/array type
-        guard.vParameters.vParameters.map((p) => {
-          const q = this.factory.copy(p);
-          q.typeString = this.wrapType(q.typeString);
-          q.vType = this.factory.makeElementaryTypeName(q.typeString, q.typeString);
-          return q;
-        }),
-      );
-      // TODO: change return types if necessary
-      guard.vBody = this.factory.makeBlock([]); // TODO: fill the body
-      this.funDef.vScope.appendChild(guard);
-
-      // TODO: change the argument/return types of `f`_original
+      // change the argument type of f_original to wrapped types
+      this.funDef.vParameters = this.factory.makeParameterList(
+        this.wrapParameterList(this.funDef.vParameters.vParameters));
+      // TODO: change the return types of `f`_original
       // TODO: change the body of `f`_original with "address call dispatch"
+
+      // generate the f_guard function, which attaches address spec meta data
+      const guard = this.guardedFunAddr(this.funDef, preFun, postFun);
+      if (guard) this.funDef.vScope.appendChild(guard);
     } else {
       /* If not, we should be able to directly insert the pre/post check function into `f`,
        * and not generating `f`_guard.
