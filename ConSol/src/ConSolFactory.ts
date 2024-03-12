@@ -34,6 +34,7 @@ export class ConSolFactory extends ASTNodeFactory {
   }
 
   address = this.makeElementaryTypeNameExpression('address', 'address');
+  uint96  = this.makeElementaryTypeNameExpression('uint160', 'uint96');
   uint160 = this.makeElementaryTypeNameExpression('uint160', 'uint160');
   uint256 = this.makeElementaryTypeNameExpression('uint256', 'uint256');
   payable = this.makeElementaryTypeNameExpression('payable', 'payable');

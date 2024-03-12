@@ -38,12 +38,12 @@ contract Caller {
 
     // Those parameter names should be the same as the specification
     function _IReceiver_foo_spec0_pre(address addr, uint256 v, uint256 g, string memory mymsg, uint x) private {
-        if (!(v > 5 && g < 10000 && x != 0)) revert PreViolationAddr(1);
+        if (!(v > 5 && g < 10000 && x != 0)) revert preViolationAddr(1);
     }
 
     // Those parameter names should be the same as the specification
     function _IReceiver_foo_spec0_post(address addr, uint256 v, uint256 g, string memory mymsg, uint x, uint y) private {
-        if (!(y == x + 1)) revert PostViolationAddr(1);
+        if (!(y == x + 1)) revert postViolationAddr(1);
     }
 
     // XXX: parameter names, should come from the interface
@@ -80,7 +80,8 @@ contract Caller {
         // the specification expression and insert proper unwrap inside, in contrast to treating them as strings.
         // Right now, we don't have that yet, so let's just pass unwrapped addr to pre/post check functions.
         _callFoo_pre(_unwrap(_addr), x);
-        _addr = _attachSpec(_addr, encodeNatSpecId(0));
+        _addr = _addr | (uint96(1 << 0) << 160);
+        //_addr = _attachSpec(_addr, encodeNatSpecId(0));
         return callFoo_original(_addr, x);
     }
 

@@ -8,6 +8,7 @@ import {
   TypeName,
   ErrorDefinition,
   Expression,
+  LiteralKind,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -234,6 +235,21 @@ export class FunDefValSpecTransformer<T> {
     return cast3;
   }
 
+  attachSpec(addr: Expression, specId: Expression): Expression {
+    // addr | (specId << 160);
+    const width = this.factory.makeLiteral('uint256', LiteralKind.Number, (160).toString(16), '160')
+    const rhs = this.factory.makeBinaryOperation('uint256', '<<', specId, width)
+    return this.factory.makeBinaryOperation('uint256', '|', addr, rhs)
+  }
+
+  encodeSpecIdToUInt96(specId: number): Expression {
+    // uint96(1 << specId);
+    const specIdExpr = this.factory.makeLiteral('uint96', LiteralKind.Number, specId.toString(16), specId.toString())
+    const one = this.factory.makeLiteral('uint256', LiteralKind.Number, (1).toString(16), '1')
+    const shiftExpr = this.factory.makeBinaryOperation('uint256', '<<', one, specIdExpr)
+    return this.factory.makeFunctionCall('uint96', FunctionCallKind.TypeConversion, this.factory.uint96, [shiftExpr]);
+  }
+
   unwrapType(type: string): string {
     if (type === 'uint256') return 'address payable';
     // TODO: handle mappings and arrays
@@ -334,7 +350,14 @@ export class FunDefValSpecTransformer<T> {
       stmts.push(preCondStmt);
     }
 
-    // TODO: attachSpec
+    oldFun.vParameters.vParameters.forEach((p) => {
+      const id = this.factory.makeIdFromVarDec(p)
+      if (this.usesAddr(p.typeString)) {
+        const asgn = this.factory.makeAssignment('void', '=', id, this.attachSpec(id, this.encodeSpecIdToUInt96(0 /*TODO spec id*/)))
+        const asgnStmt = this.factory.makeExpressionStatement(asgn)
+        stmts.push(asgnStmt)
+      }
+    })
 
     const retTypeStr =
       this.retTypes.length > 0 ? '(' + this.retTypes.map((t) => t.typeString).toString() + ')' : 'void';
@@ -415,6 +438,13 @@ export class FunDefValSpecTransformer<T> {
       // generate the signature-preserved function
       // TODO: if there is no spec, should we generate this new function? seems yes
       const newFun = this.wrappingAddrForFunction(this.funDef);
+      // TODO: change the return types of `f`_original
+      // TODO: change the body of `f`_original with "address call dispatch"
+
+      // generate the f_guard function, which attaches address spec meta data
+      const guard = this.guardedFunAddr(this.funDef, preFun, postFun);
+      if (guard) this.funDef.vScope.appendChild(guard);
+
       // add the signature-preserved function
       this.funDef.vScope.appendChild(newFun);
       // rename the original function `f` to `f`_original
@@ -423,12 +453,6 @@ export class FunDefValSpecTransformer<T> {
       this.funDef.vParameters = this.factory.makeParameterList(
         this.wrapParameterList(this.funDef.vParameters.vParameters),
       );
-      // TODO: change the return types of `f`_original
-      // TODO: change the body of `f`_original with "address call dispatch"
-
-      // generate the f_guard function, which attaches address spec meta data
-      const guard = this.guardedFunAddr(this.funDef, preFun, postFun);
-      if (guard) this.funDef.vScope.appendChild(guard);
     } else {
       /* If not, we should be able to directly insert the pre/post check function into `f`,
        * and not generating `f`_guard.
