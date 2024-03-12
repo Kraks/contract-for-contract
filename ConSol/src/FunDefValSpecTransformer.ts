@@ -237,16 +237,16 @@ export class FunDefValSpecTransformer<T> {
 
   attachSpec(addr: Expression, specId: Expression): Expression {
     // addr | (specId << 160);
-    const width = this.factory.makeLiteral('uint256', LiteralKind.Number, (160).toString(16), '160')
-    const rhs = this.factory.makeBinaryOperation('uint256', '<<', specId, width)
-    return this.factory.makeBinaryOperation('uint256', '|', addr, rhs)
+    const width = this.factory.makeLiteral('uint256', LiteralKind.Number, (160).toString(16), '160');
+    const rhs = this.factory.makeBinaryOperation('uint256', '<<', specId, width);
+    return this.factory.makeBinaryOperation('uint256', '|', addr, rhs);
   }
 
   encodeSpecIdToUInt96(specId: number): Expression {
     // uint96(1 << specId);
-    const specIdExpr = this.factory.makeLiteral('uint96', LiteralKind.Number, specId.toString(16), specId.toString())
-    const one = this.factory.makeLiteral('uint256', LiteralKind.Number, (1).toString(16), '1')
-    const shiftExpr = this.factory.makeBinaryOperation('uint256', '<<', one, specIdExpr)
+    const specIdExpr = this.factory.makeLiteral('uint96', LiteralKind.Number, specId.toString(16), specId.toString());
+    const one = this.factory.makeLiteral('uint256', LiteralKind.Number, (1).toString(16), '1');
+    const shiftExpr = this.factory.makeBinaryOperation('uint256', '<<', one, specIdExpr);
     return this.factory.makeFunctionCall('uint96', FunctionCallKind.TypeConversion, this.factory.uint96, [shiftExpr]);
   }
 
@@ -351,13 +351,18 @@ export class FunDefValSpecTransformer<T> {
     }
 
     oldFun.vParameters.vParameters.forEach((p) => {
-      const id = this.factory.makeIdFromVarDec(p)
+      const id = this.factory.makeIdFromVarDec(p);
       if (this.usesAddr(p.typeString)) {
-        const asgn = this.factory.makeAssignment('void', '=', id, this.attachSpec(id, this.encodeSpecIdToUInt96(0 /*TODO spec id*/)))
-        const asgnStmt = this.factory.makeExpressionStatement(asgn)
-        stmts.push(asgnStmt)
+        const asgn = this.factory.makeAssignment(
+          'void',
+          '=',
+          id,
+          this.attachSpec(id, this.encodeSpecIdToUInt96(0 /*TODO spec id*/)),
+        );
+        const asgnStmt = this.factory.makeExpressionStatement(asgn);
+        stmts.push(asgnStmt);
       }
-    })
+    });
 
     const retTypeStr =
       this.retTypes.length > 0 ? '(' + this.retTypes.map((t) => t.typeString).toString() + ')' : 'void';
