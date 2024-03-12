@@ -302,21 +302,22 @@ export class FunDefValSpecTransformer<T> {
     } else {
       newFun.vBody = this.factory.makeBlock([callsite]);
     }
-    return newFun
+    return newFun;
   }
 
   // XXX: later we should refactor this with function guardedFun (which currently only
   // hanldes non-address values).
-  guardedFunAddr(oldFun: FunctionDefinition,
+  guardedFunAddr(
+    oldFun: FunctionDefinition,
     preCondFun: FunctionDefinition | undefined,
-    postCondFun: FunctionDefinition | undefined): FunctionDefinition | undefined {
+    postCondFun: FunctionDefinition | undefined,
+  ): FunctionDefinition | undefined {
     if (preCondFun === undefined && postCondFun === undefined) return undefined;
     const guard = this.factory.copy(oldFun);
-    guard.documentation = undefined
+    guard.documentation = undefined;
     guard.visibility = FunctionVisibility.Private;
     guard.name = guardedFunName(this.tgtName);
-    guard.vParameters = this.factory.makeParameterList(
-      this.wrapParameterList(oldFun.vParameters.vParameters));
+    guard.vParameters = this.factory.makeParameterList(this.wrapParameterList(oldFun.vParameters.vParameters));
     // TODO: change return types if necessary
     // guard.vReturnParameters = ...
 
@@ -327,10 +328,9 @@ export class FunDefValSpecTransformer<T> {
       // TODO: extract this
       const unwrappedArgs = this.unwrapArgumentList(
         guard.vParameters.vParameters,
-        preCondFun.vParameters.vParameters.map((p) => p.typeString))
-      const preCondStmt = this.factory.makeCallStmt(
-        preCondFun.name, unwrappedArgs
+        preCondFun.vParameters.vParameters.map((p) => p.typeString),
       );
+      const preCondStmt = this.factory.makeCallStmt(preCondFun.name, unwrappedArgs);
       stmts.push(preCondStmt);
     }
 
@@ -421,7 +421,8 @@ export class FunDefValSpecTransformer<T> {
       this.funDef.name = uncheckedFunName(this.tgtName);
       // change the argument type of f_original to wrapped types
       this.funDef.vParameters = this.factory.makeParameterList(
-        this.wrapParameterList(this.funDef.vParameters.vParameters));
+        this.wrapParameterList(this.funDef.vParameters.vParameters),
+      );
       // TODO: change the return types of `f`_original
       // TODO: change the body of `f`_original with "address call dispatch"
 
