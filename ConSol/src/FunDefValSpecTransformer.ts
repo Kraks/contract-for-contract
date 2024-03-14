@@ -9,6 +9,8 @@ import {
   ErrorDefinition,
   Expression,
   LiteralKind,
+  FunctionCall,
+  FunctionCallOptions,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -443,8 +445,6 @@ export class FunDefValSpecTransformer<T> {
       // generate the signature-preserved function
       // TODO: if there is no spec, should we generate this new function? seems yes
       const newFun = this.wrappingAddrForFunction(this.funDef);
-      // TODO: change the return types of `f`_original
-      // TODO: change the body of `f`_original with "address call dispatch"
 
       // generate the f_guard function, which attaches address spec meta data
       const guard = this.guardedFunAddr(this.funDef, preFun, postFun);
@@ -458,6 +458,21 @@ export class FunDefValSpecTransformer<T> {
       this.funDef.vParameters = this.factory.makeParameterList(
         this.wrapParameterList(this.funDef.vParameters.vParameters),
       );
+      // TODO: change the return types of `f`_original (DX, can you take care of this?)
+      // TODO: change the body of `f`_original with "address call dispatch"
+      //       identify the call that cast address to interface, and the associated
+      //       function call on the interface:
+      //       Iface(addr).f{value: v, gas: g}(args, ...) -> dispatch_IFace_f(addr, v, g, args, ...)
+      //       Iface(addr).f(args, ...) -> dispatch_IFace_f(addr, args, ...)
+      this.funDef.vBody?.walkChildren((node) => {
+        if (node instanceof FunctionCall) {
+          console.log("fcall")
+          console.log(node.src);
+        } else if (node instanceof FunctionCallOptions) {
+          console.log("focall")
+          console.log(node.src);
+        }
+      });
     } else {
       /* If not, we should be able to directly insert the pre/post check function into `f`,
        * and not generating `f`_guard.
