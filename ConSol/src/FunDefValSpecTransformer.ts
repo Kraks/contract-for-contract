@@ -466,10 +466,10 @@ export class FunDefValSpecTransformer<T> {
       //       Iface(addr).f(args, ...) -> dispatch_IFace_f(addr, args, ...)
       this.funDef.vBody?.walkChildren((node) => {
         if (node instanceof FunctionCall) {
-          console.log("fcall")
+          console.log('fcall');
           console.log(node.src);
         } else if (node instanceof FunctionCallOptions) {
-          console.log("focall")
+          console.log('focall');
           console.log(node.src);
         }
       });
