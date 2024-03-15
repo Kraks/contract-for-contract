@@ -6856,21 +6856,11 @@
         "ast": {
           "absolutePath": "test/case/unchecked-user-input-SushiSwap-3.3M.sol",
           "exportedSymbols": {
-            "IMPOSSIBLE_POOL_ADDRESS": [
-              7
-            ],
-            "MAX_SQRT_RATIO": [
-              15
-            ],
-            "MIN_SQRT_RATIO": [
-              11
-            ],
-            "NATIVE_ADDRESS": [
-              4
-            ],
-            "RouteProcessor2": [
-              146
-            ]
+            "IMPOSSIBLE_POOL_ADDRESS": [7],
+            "MAX_SQRT_RATIO": [15],
+            "MIN_SQRT_RATIO": [11],
+            "NATIVE_ADDRESS": [4],
+            "RouteProcessor2": [146]
           },
           "id": 147,
           "license": "UNLICENSED",
@@ -6878,11 +6868,7 @@
           "nodes": [
             {
               "id": 1,
-              "literals": [
-                "solidity",
-                "0.8",
-                ".10"
-              ],
+              "literals": ["solidity", "0.8", ".10"],
               "nodeType": "PragmaDirective",
               "src": "40:23:0"
             },
@@ -7074,9 +7060,7 @@
               },
               "fullyImplemented": true,
               "id": 146,
-              "linearizedBaseContracts": [
-                146
-              ],
+              "linearizedBaseContracts": [146],
               "name": "RouteProcessor2",
               "nameLocation": "684:15:0",
               "nodeType": "ContractDefinition",
@@ -7238,10 +7222,7 @@
                             "id": 23,
                             "name": "require",
                             "nodeType": "Identifier",
-                            "overloadedDeclarations": [
-                              4294967278,
-                              4294967278
-                            ],
+                            "overloadedDeclarations": [4294967278, 4294967278],
                             "referencedDeclaration": 4294967278,
                             "src": "841:7:0",
                             "typeDescriptions": {
@@ -7623,10 +7604,7 @@
                         }
                       },
                       {
-                        "assignments": [
-                          75,
-                          77
-                        ],
+                        "assignments": [75, 77],
                         "declarations": [
                           {
                             "constant": false,
@@ -7812,9 +7790,7 @@
                         "src": "1706:70:0"
                       },
                       {
-                        "assignments": [
-                          89
-                        ],
+                        "assignments": [89],
                         "declarations": [
                           {
                             "constant": false,
@@ -8220,10 +8196,7 @@
                         "src": "2244:40:0"
                       },
                       {
-                        "assignments": [
-                          122,
-                          124
-                        ],
+                        "assignments": [122, 124],
                         "declarations": [
                           {
                             "constant": false,
@@ -8409,9 +8382,7 @@
                         "src": "2290:70:0"
                       },
                       {
-                        "assignments": [
-                          136
-                        ],
+                        "assignments": [136],
                         "declarations": [
                           {
                             "constant": false,

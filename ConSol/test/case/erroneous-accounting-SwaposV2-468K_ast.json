@@ -3232,10 +3232,7 @@
                   ]
                 }
               },
-              "sourceList": [
-                "test/case/erroneous-accounting-SwaposV2-468K.sol",
-                "#utility.yul"
-              ]
+              "sourceList": ["test/case/erroneous-accounting-SwaposV2-468K.sol", "#utility.yul"]
             },
             "methodIdentifiers": {
               "factory()": "c45a0155",
@@ -3397,21 +3394,14 @@
         "ast": {
           "absolutePath": "test/case/erroneous-accounting-SwaposV2-468K.sol",
           "exportedSymbols": {
-            "SwaposV2Pair": [
-              129
-            ]
+            "SwaposV2Pair": [129]
           },
           "id": 130,
           "nodeType": "SourceUnit",
           "nodes": [
             {
               "id": 1,
-              "literals": [
-                "solidity",
-                "^",
-                "0.8",
-                ".9"
-              ],
+              "literals": ["solidity", "^", "0.8", ".9"],
               "nodeType": "PragmaDirective",
               "src": "0:23:0"
             },
@@ -3423,9 +3413,7 @@
               "contractKind": "contract",
               "fullyImplemented": true,
               "id": 129,
-              "linearizedBaseContracts": [
-                129
-              ],
+              "linearizedBaseContracts": [129],
               "name": "SwaposV2Pair",
               "nameLocation": "62:12:0",
               "nodeType": "ContractDefinition",
@@ -4174,9 +4162,7 @@
                     "src": "1344:517:0",
                     "statements": [
                       {
-                        "assignments": [
-                          71
-                        ],
+                        "assignments": [71],
                         "declarations": [
                           {
                             "constant": false,
@@ -4351,9 +4337,7 @@
                         "src": "1354:55:0"
                       },
                       {
-                        "assignments": [
-                          83
-                        ],
+                        "assignments": [83],
                         "declarations": [
                           {
                             "constant": false,

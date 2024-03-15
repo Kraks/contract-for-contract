@@ -11343,10 +11343,7 @@
                   ]
                 }
               },
-              "sourceList": [
-                "./test/testCallFoo.sol",
-                "#utility.yul"
-              ]
+              "sourceList": ["./test/testCallFoo.sol", "#utility.yul"]
             },
             "methodIdentifiers": {
               "anotherTest(address,int256)": "af2a1a58",
@@ -11415,21 +11412,14 @@
         "ast": {
           "absolutePath": "./test/testCallFoo.sol",
           "exportedSymbols": {
-            "Caller": [
-              75
-            ]
+            "Caller": [75]
           },
           "id": 76,
           "nodeType": "SourceUnit",
           "nodes": [
             {
               "id": 1,
-              "literals": [
-                "solidity",
-                "^",
-                "0.8",
-                ".9"
-              ],
+              "literals": ["solidity", "^", "0.8", ".9"],
               "nodeType": "PragmaDirective",
               "src": "0:23:0"
             },
@@ -11441,9 +11431,7 @@
               "contractKind": "contract",
               "fullyImplemented": true,
               "id": 75,
-              "linearizedBaseContracts": [
-                75
-              ],
+              "linearizedBaseContracts": [75],
               "name": "Caller",
               "nameLocation": "33:6:0",
               "nodeType": "ContractDefinition",
@@ -11527,10 +11515,7 @@
                     "src": "600:287:0",
                     "statements": [
                       {
-                        "assignments": [
-                          16,
-                          18
-                        ],
+                        "assignments": [16, 18],
                         "declarations": [
                           {
                             "constant": false,
@@ -11740,10 +11725,7 @@
                             "isLValue": false,
                             "isPure": false,
                             "lValueRequested": false,
-                            "names": [
-                              "value",
-                              "gas"
-                            ],
+                            "names": ["value", "gas"],
                             "nodeType": "FunctionCallOptions",
                             "options": [
                               {
@@ -11816,9 +11798,7 @@
                         "src": "665:151:0"
                       },
                       {
-                        "assignments": [
-                          34
-                        ],
+                        "assignments": [34],
                         "declarations": [
                           {
                             "constant": false,
@@ -12083,10 +12063,7 @@
                     "src": "1177:169:0",
                     "statements": [
                       {
-                        "assignments": [
-                          55,
-                          57
-                        ],
+                        "assignments": [55, 57],
                         "declarations": [
                           {
                             "constant": false,

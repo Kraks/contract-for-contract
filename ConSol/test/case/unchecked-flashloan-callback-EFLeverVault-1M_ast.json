@@ -18654,20 +18654,14 @@
         "ast": {
           "absolutePath": "test/case/unchecked-flashloan-callback-EFLeverVault-1M.sol",
           "exportedSymbols": {
-            "EFLeverVault": [
-              156
-            ]
+            "EFLeverVault": [156]
           },
           "id": 157,
           "nodeType": "SourceUnit",
           "nodes": [
             {
               "id": 1,
-              "literals": [
-                "solidity",
-                "0.8",
-                ".10"
-              ],
+              "literals": ["solidity", "0.8", ".10"],
               "nodeType": "PragmaDirective",
               "src": "37:23:0"
             },
@@ -18679,9 +18673,7 @@
               "contractKind": "contract",
               "fullyImplemented": true,
               "id": 156,
-              "linearizedBaseContracts": [
-                156
-              ],
+              "linearizedBaseContracts": [156],
               "name": "EFLeverVault",
               "nameLocation": "107:12:0",
               "nodeType": "ContractDefinition",
@@ -19793,9 +19785,7 @@
                     "src": "1478:313:0",
                     "statements": [
                       {
-                        "assignments": [
-                          97
-                        ],
+                        "assignments": [97],
                         "declarations": [
                           {
                             "constant": false,
@@ -19871,9 +19861,7 @@
                         "src": "1488:32:0"
                       },
                       {
-                        "assignments": [
-                          103
-                        ],
+                        "assignments": [103],
                         "declarations": [
                           {
                             "constant": false,

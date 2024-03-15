@@ -2044,20 +2044,14 @@
         "ast": {
           "absolutePath": "test/case/reentrancy-N00d-29K.sol",
           "exportedSymbols": {
-            "SushiBar": [
-              18
-            ]
+            "SushiBar": [18]
           },
           "id": 19,
           "nodeType": "SourceUnit",
           "nodes": [
             {
               "id": 1,
-              "literals": [
-                "solidity",
-                "0.8",
-                ".10"
-              ],
+              "literals": ["solidity", "0.8", ".10"],
               "nodeType": "PragmaDirective",
               "src": "0:23:0"
             },
@@ -2069,9 +2063,7 @@
               "contractKind": "contract",
               "fullyImplemented": true,
               "id": 18,
-              "linearizedBaseContracts": [
-                18
-              ],
+              "linearizedBaseContracts": [18],
               "name": "SushiBar",
               "nameLocation": "34:8:0",
               "nodeType": "ContractDefinition",

@@ -5109,10 +5109,7 @@
                   ]
                 }
               },
-              "sourceList": [
-                "test/case/access-control-LEVUSDC-105K.sol",
-                "#utility.yul"
-              ]
+              "sourceList": ["test/case/access-control-LEVUSDC-105K.sol", "#utility.yul"]
             },
             "methodIdentifiers": {
               "ADDRESSPROVIDER()": "6bb9025a",
@@ -5249,9 +5246,7 @@
         "ast": {
           "absolutePath": "test/case/access-control-LEVUSDC-105K.sol",
           "exportedSymbols": {
-            "CurveSwap": [
-              35
-            ]
+            "CurveSwap": [35]
           },
           "id": 36,
           "license": "UNLICENSED",
@@ -5259,12 +5254,7 @@
           "nodes": [
             {
               "id": 1,
-              "literals": [
-                "solidity",
-                "^",
-                "0.8",
-                ".9"
-              ],
+              "literals": ["solidity", "^", "0.8", ".9"],
               "nodeType": "PragmaDirective",
               "src": "39:23:0"
             },
@@ -5276,9 +5266,7 @@
               "contractKind": "contract",
               "fullyImplemented": true,
               "id": 35,
-              "linearizedBaseContracts": [
-                35
-              ],
+              "linearizedBaseContracts": [35],
               "name": "CurveSwap",
               "nameLocation": "73:9:0",
               "nodeType": "ContractDefinition",
