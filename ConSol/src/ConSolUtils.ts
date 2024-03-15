@@ -75,6 +75,7 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
     fs.writeFileSync(outputJson, JSON.stringify(convertResultToPlainObject(compileResult), null, 2));
   }
 
+
   // convert to typed ast
   const reader = new ASTReader();
   const sourceUnits = reader.read(compileResult.data);
@@ -82,7 +83,7 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
   // Note: assume there is only one source unit/file
   const sourceUnit = sourceUnits[0];
   const ifs: Array<ContractDefinition> = sourceUnit.vContracts.filter((contract) => contract.kind === 'interface');
-
+  
   sourceUnit.vContracts.forEach((contract) => {
     if (contract.kind === 'interface') return;
     console.log(`Processing ${contract.kind} ${contract.name}.`);
