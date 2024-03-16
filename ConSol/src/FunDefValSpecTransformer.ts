@@ -467,36 +467,42 @@ export class FunDefValSpecTransformer<T> {
       // XXX (GW): performance of this nesting can be bad...
       this.spec.preFunSpec.forEach((s, idx) => {
         console.log('Target: ' + JSON.stringify(s));
-        const realTgtVar = this.funDef.vParameters.vParameters[idx].name
-        const ifaceName = s.call.tgt.interface
-        const funName = s.call.tgt.func
+        const realTgtVar = this.funDef.vParameters.vParameters[idx].name;
+        const ifaceName = s.call.tgt.interface;
+        const funName = s.call.tgt.func;
         this.funDef.vBody?.walkChildren((node) => {
           // Iface(addr).f(args, ...) -> dispatch_IFace_f(addr, 0, 0 args, ...)
           // we insert dummy value for "msg.value" and "gas", i.e. 0
-          if (node instanceof FunctionCall && node.vFunctionName === funName &&
-              node.vExpression instanceof MemberAccess &&
-              node.vExpression.vExpression instanceof FunctionCall &&
-              node.vExpression.vExpression.kind == FunctionCallKind.TypeConversion &&
-              node.vExpression.vExpression.vFunctionName === ifaceName) {
-              node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'))
-              node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'))
-              node.vArguments.unshift(node.vExpression.vExpression.vArguments[0])
-              node.vExpression = this.factory.makeIdentifier('function', 'dispatch_' + ifaceName + '_' + funName, -1)
+          if (
+            node instanceof FunctionCall &&
+            node.vFunctionName === funName &&
+            node.vExpression instanceof MemberAccess &&
+            node.vExpression.vExpression instanceof FunctionCall &&
+            node.vExpression.vExpression.kind == FunctionCallKind.TypeConversion &&
+            node.vExpression.vExpression.vFunctionName === ifaceName
+          ) {
+            node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
+            node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
+            node.vArguments.unshift(node.vExpression.vExpression.vArguments[0]);
+            node.vExpression = this.factory.makeIdentifier('function', 'dispatch_' + ifaceName + '_' + funName, -1);
           }
           // Iface(addr).f{value: v, gas: g}(args, ...) -> dispatch_IFace_f(addr, v, g, args, ...)
-          else if (node instanceof FunctionCall && node.vFunctionName === funName &&
-                  node.vExpression instanceof FunctionCallOptions &&
-                  node.vExpression.vExpression instanceof MemberAccess &&
-                  node.vExpression.vExpression.vExpression instanceof FunctionCall &&
-                  node.vExpression.vExpression.vExpression.kind == FunctionCallKind.TypeConversion &&
-                  node.vExpression.vExpression.vExpression.vFunctionName === ifaceName) {
+          else if (
+            node instanceof FunctionCall &&
+            node.vFunctionName === funName &&
+            node.vExpression instanceof FunctionCallOptions &&
+            node.vExpression.vExpression instanceof MemberAccess &&
+            node.vExpression.vExpression.vExpression instanceof FunctionCall &&
+            node.vExpression.vExpression.vExpression.kind == FunctionCallKind.TypeConversion &&
+            node.vExpression.vExpression.vExpression.vFunctionName === ifaceName
+          ) {
             // Let's assume there is only one value and one gas
-            const g = node.vExpression.vOptionsMap.get("gas")
-            if (g) node.vArguments.unshift(g)
-            const v = node.vExpression.vOptionsMap.get("value")
-            if (v) node.vArguments.unshift(v)
-            node.vArguments.unshift(node.vExpression.vExpression.vExpression.vArguments[0])
-            node.vExpression = this.factory.makeIdentifier('function', 'dispatch_' + ifaceName + '_' + funName, -1)
+            const g = node.vExpression.vOptionsMap.get('gas');
+            if (g) node.vArguments.unshift(g);
+            const v = node.vExpression.vOptionsMap.get('value');
+            if (v) node.vArguments.unshift(v);
+            node.vArguments.unshift(node.vExpression.vExpression.vExpression.vArguments[0]);
+            node.vExpression = this.factory.makeIdentifier('function', 'dispatch_' + ifaceName + '_' + funName, -1);
           }
         });
       });
