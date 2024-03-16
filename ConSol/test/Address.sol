@@ -23,6 +23,8 @@ contract Caller {
   ///   }
   /// }
   function callFoo(address payable _addr, uint x) public payable returns (uint) {
+    // call without options
+    uint z = IReceiver(_addr).foo("call foo", x);
     // You can send ether and specify a custom gas amount
     uint y = IReceiver(_addr).foo{value: msg.value, gas: 5000}("call foo", x);
 

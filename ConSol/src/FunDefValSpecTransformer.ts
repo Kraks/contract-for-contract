@@ -19,6 +19,7 @@ import { GUARD_ADDR_TYPE, extractFunName, uncheckedFunName, guardedFunName } fro
 import { CheckFunFactory } from './CheckFunFactory.js';
 import { ConSolFactory } from './ConSolFactory.js';
 import { freshName } from './Global.js';
+import { isInt16Array } from 'util/types';
 
 export class FunDefValSpecTransformer<T> {
   funDef: FunctionDefinition;
@@ -459,19 +460,24 @@ export class FunDefValSpecTransformer<T> {
         this.wrapParameterList(this.funDef.vParameters.vParameters),
       );
       // TODO: change the return types of `f`_original (DX, can you take care of this?)
-      // TODO: change the body of `f`_original with "address call dispatch"
+      // TODO: for each spec-attached argument, change the body of `f`_original with "address call dispatch"
       //       identify the call that cast address to interface, and the associated
       //       function call on the interface:
       //       Iface(addr).f{value: v, gas: g}(args, ...) -> dispatch_IFace_f(addr, v, g, args, ...)
       //       Iface(addr).f(args, ...) -> dispatch_IFace_f(addr, args, ...)
-      this.funDef.vBody?.walkChildren((node) => {
-        if (node instanceof FunctionCall) {
-          console.log('fcall');
-          console.log(node.src);
-        } else if (node instanceof FunctionCallOptions) {
-          console.log('focall');
-          console.log(node.src);
-        }
+      // XXX (GW): performance of this nesting can be bad...
+      this.spec.preFunSpec.forEach((s) => {
+        console.log("Target: " + JSON.stringify(s))
+        this.funDef.vBody?.walkChildren((node) => {
+          if (node instanceof FunctionCall) {
+            console.log("1: "+ node.vFunctionName)
+            if (node.vExpression instanceof FunctionCall) {
+              console.log("2: " + node.vExpression.vFunctionName)
+            }
+          } else if (node instanceof FunctionCallOptions) {
+            //console.log("focall")
+          }
+        });
       });
     } else {
       /* If not, we should be able to directly insert the pre/post check function into `f`,
