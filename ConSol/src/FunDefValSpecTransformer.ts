@@ -11,6 +11,7 @@ import {
   LiteralKind,
   FunctionCall,
   FunctionCallOptions,
+  MemberAccess,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -459,22 +460,43 @@ export class FunDefValSpecTransformer<T> {
         this.wrapParameterList(this.funDef.vParameters.vParameters),
       );
       // TODO: change the return types of `f`_original (DX, can you take care of this?)
-      // TODO: for each spec-attached argument, change the body of `f`_original with "address call dispatch"
-      //       identify the call that cast address to interface, and the associated
-      //       function call on the interface:
-      //       Iface(addr).f{value: v, gas: g}(args, ...) -> dispatch_IFace_f(addr, v, g, args, ...)
-      //       Iface(addr).f(args, ...) -> dispatch_IFace_f(addr, args, ...)
+
+      // For each spec-attached argument, change the body of `f`_original with "address call dispatch"
+      // identify the call that cast address to interface, and the associated
+      // function call on the interface:
       // XXX (GW): performance of this nesting can be bad...
-      this.spec.preFunSpec.forEach((s) => {
+      this.spec.preFunSpec.forEach((s, idx) => {
         console.log('Target: ' + JSON.stringify(s));
+        const realTgtVar = this.funDef.vParameters.vParameters[idx].name
+        const ifaceName = s.call.tgt.interface
+        const funName = s.call.tgt.func
         this.funDef.vBody?.walkChildren((node) => {
-          if (node instanceof FunctionCall) {
-            console.log('1: ' + node.vFunctionName);
-            if (node.vExpression instanceof FunctionCall) {
-              console.log('2: ' + node.vExpression.vFunctionName);
-            }
-          } else if (node instanceof FunctionCallOptions) {
-            //console.log("focall")
+          // Iface(addr).f(args, ...) -> dispatch_IFace_f(addr, 0, 0 args, ...)
+          // we insert dummy value for "msg.value" and "gas", i.e. 0
+          if (node instanceof FunctionCall && node.vFunctionName === funName &&
+              node.vExpression instanceof MemberAccess &&
+              node.vExpression.vExpression instanceof FunctionCall &&
+              node.vExpression.vExpression.kind == FunctionCallKind.TypeConversion &&
+              node.vExpression.vExpression.vFunctionName === ifaceName) {
+              node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'))
+              node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'))
+              node.vArguments.unshift(node.vExpression.vExpression.vArguments[0])
+              node.vExpression = this.factory.makeIdentifier('function', 'dispatch_' + ifaceName + '_' + funName, -1)
+          }
+          // Iface(addr).f{value: v, gas: g}(args, ...) -> dispatch_IFace_f(addr, v, g, args, ...)
+          else if (node instanceof FunctionCall && node.vFunctionName === funName &&
+                  node.vExpression instanceof FunctionCallOptions &&
+                  node.vExpression.vExpression instanceof MemberAccess &&
+                  node.vExpression.vExpression.vExpression instanceof FunctionCall &&
+                  node.vExpression.vExpression.vExpression.kind == FunctionCallKind.TypeConversion &&
+                  node.vExpression.vExpression.vExpression.vFunctionName === ifaceName) {
+            // Let's assume there is only one value and one gas
+            const g = node.vExpression.vOptionsMap.get("gas")
+            if (g) node.vArguments.unshift(g)
+            const v = node.vExpression.vOptionsMap.get("value")
+            if (v) node.vArguments.unshift(v)
+            node.vArguments.unshift(node.vExpression.vExpression.vExpression.vArguments[0])
+            node.vExpression = this.factory.makeIdentifier('function', 'dispatch_' + ifaceName + '_' + funName, -1)
           }
         });
       });

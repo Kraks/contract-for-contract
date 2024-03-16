@@ -23,8 +23,9 @@ contract Caller {
     ///      ensures { y == x + 1 }
     ///    }
     ///  }
-    function callFoo_original(uint256 addr, uint x) private returns (uint) {
-        uint y = _dispatch_IReceiver_foo(addr, msg.value, 5000, "call foo", x);
+    function callFoo_original(uint256 _addr, uint x) private returns (uint) {
+        uint z = dispatch_IReceiver_foo(_addr, "call foo", x);
+        uint y = dispatch_IReceiver_foo(_addr, msg.value, 5000, "call foo", x);
         emit Response(y);
         return y;
     }
