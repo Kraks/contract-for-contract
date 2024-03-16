@@ -19,7 +19,6 @@ import { GUARD_ADDR_TYPE, extractFunName, uncheckedFunName, guardedFunName } fro
 import { CheckFunFactory } from './CheckFunFactory.js';
 import { ConSolFactory } from './ConSolFactory.js';
 import { freshName } from './Global.js';
-import { isInt16Array } from 'util/types';
 
 export class FunDefValSpecTransformer<T> {
   funDef: FunctionDefinition;
@@ -467,12 +466,12 @@ export class FunDefValSpecTransformer<T> {
       //       Iface(addr).f(args, ...) -> dispatch_IFace_f(addr, args, ...)
       // XXX (GW): performance of this nesting can be bad...
       this.spec.preFunSpec.forEach((s) => {
-        console.log("Target: " + JSON.stringify(s))
+        console.log('Target: ' + JSON.stringify(s));
         this.funDef.vBody?.walkChildren((node) => {
           if (node instanceof FunctionCall) {
-            console.log("1: "+ node.vFunctionName)
+            console.log('1: ' + node.vFunctionName);
             if (node.vExpression instanceof FunctionCall) {
-              console.log("2: " + node.vExpression.vFunctionName)
+              console.log('2: ' + node.vExpression.vFunctionName);
             }
           } else if (node instanceof FunctionCallOptions) {
             //console.log("focall")
