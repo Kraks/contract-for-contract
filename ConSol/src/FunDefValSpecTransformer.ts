@@ -19,7 +19,7 @@ import { GUARD_ADDR_TYPE, extractFunName, uncheckedFunName, guardedFunName } fro
 
 import { CheckFunFactory } from './CheckFunFactory.js';
 import { ConSolFactory } from './ConSolFactory.js';
-import { freshName } from './Global.js';
+import { findContract, freshName } from './Global.js';
 
 export class FunDefValSpecTransformer<T> {
   funDef: FunctionDefinition;
@@ -466,10 +466,38 @@ export class FunDefValSpecTransformer<T> {
       // function call on the interface:
       // XXX (GW): performance of this nesting can be bad...
       this.spec.preFunSpec.forEach((s, idx) => {
-        console.log('Target: ' + JSON.stringify(s));
         const realTgtVar = this.funDef.vParameters.vParameters[idx].name;
         const ifaceName = s.call.tgt.interface;
         const funName = s.call.tgt.func;
+        if (ifaceName == undefined || funName == undefined) {
+          console.log("Warning: no interface or function name in the spec. Abort.");
+          process.exit(-1);
+        }
+
+        // TODO: generate the pre/post condition check function for each spec
+        //       Iface_f_spec_id_pre, Iface_f_spec_id_post
+        const iface = findContract(ifaceName);
+        if (iface == undefined) {
+          console.error(`Error: interface ${ifaceName} not found. Abort.`);
+          process.exit(-1);
+        }
+        const tgtFunc = iface.vFunctions.find((f) => f.name === funName);
+        if (tgtFunc == undefined) {
+          console.error(`Error: function ${funName} not found in ${ifaceName}. Abort.`);
+          process.exit(-1);
+        }
+        const tgtFuncParams = tgtFunc.vParameters.vParameters; // TODO: need rename
+        const tgtFuncRetParams = tgtFunc.vReturnParameters.vParameters;
+        // HERE FIXME
+        const factory = new CheckFunFactory(s, tgtFuncParams, tgtFuncRetParams, this.factory);
+        //const addrCallPreFun = factory.preCondCheckFun(this.preCondError, this.tgtName);
+        //if (addrCallPreFun) this.funDef.vScope.appendChild(addrCallPreFun);
+        //const postFun = this.cfFactory.postCondCheckFun(this.postCondError, this.tgtName);
+        //if (postFun) this.funDef.vScope.appendChild(postFun);
+
+        // TODO: generate dispatch_Iface_f
+        console.log('Target: ' + JSON.stringify(s));
+        // Rewrite the address calls in the function body
         this.funDef.vBody?.walkChildren((node) => {
           // Iface(addr).f(args, ...) -> dispatch_IFace_f(addr, 0, 0 args, ...)
           // we insert dummy value for "msg.value" and "gas", i.e. 0
@@ -487,7 +515,7 @@ export class FunDefValSpecTransformer<T> {
             node.vExpression = this.factory.makeIdentifier('function', 'dispatch_' + ifaceName + '_' + funName, -1);
           }
           // Iface(addr).f{value: v, gas: g}(args, ...) -> dispatch_IFace_f(addr, v, g, args, ...)
-          else if (
+          if (
             node instanceof FunctionCall &&
             node.vFunctionName === funName &&
             node.vExpression instanceof FunctionCallOptions &&

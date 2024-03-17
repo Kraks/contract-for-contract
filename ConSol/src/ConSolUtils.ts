@@ -17,6 +17,7 @@ import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
 import * as fs from 'fs';
 import { ConSolTransformer } from './ConSolTransformer.js';
 import { ConSolFactory } from './ConSolFactory.js';
+import { setSourceUnits } from './Global.js';
 
 export const SPEC_PREFIX = '@custom:consol';
 export const GUARD_ADDR_TYPE = 'uint256';
@@ -78,6 +79,7 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
   // convert to typed ast
   const reader = new ASTReader();
   const sourceUnits = reader.read(compileResult.data);
+  setSourceUnits(sourceUnits);
 
   // Note: assume there is only one source unit/file
   const sourceUnit = sourceUnits[0];
