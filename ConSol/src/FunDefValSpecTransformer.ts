@@ -470,7 +470,7 @@ export class FunDefValSpecTransformer<T> {
         const ifaceName = s.call.tgt.interface;
         const funName = s.call.tgt.func;
         if (ifaceName == undefined || funName == undefined) {
-          console.log("Warning: no interface or function name in the spec. Abort.");
+          console.log('Warning: no interface or function name in the spec. Abort.');
           process.exit(-1);
         }
 
