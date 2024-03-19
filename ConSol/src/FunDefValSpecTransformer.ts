@@ -280,6 +280,16 @@ export class FunDefValSpecTransformer<T> {
     });
   }
 
+  dispatchingFunction(name: string, oldFun: FunctionDefinition): FunctionDefinition {
+    const newFun = this.factory.copy(oldFun);
+    newFun.documentation = undefined;
+    newFun.visibility = FunctionVisibility.Private;
+    newFun.name = name
+
+    newFun.vBody = this.factory.makeBlock([]);
+    return newFun
+  }
+
   wrappingAddrForFunction(oldFun: FunctionDefinition): FunctionDefinition {
     const newFun = this.factory.copy(oldFun);
     newFun.documentation = undefined;
@@ -507,6 +517,9 @@ export class FunDefValSpecTransformer<T> {
         if (postFun) this.funDef.vScope.appendChild(postFun);
 
         // TODO: generate dispatch_Iface_f
+        const dispatchFunName = 'dispatch_' + ifaceName + '_' + funName
+        const dispatchingFun = this.dispatchingFunction(dispatchFunName, this.funDef)
+        this.funDef.vScope.appendChild(dispatchingFun)
 
         // Rewrite the address calls in the function body
         this.funDef.vBody?.walkChildren((node) => {
@@ -523,7 +536,7 @@ export class FunDefValSpecTransformer<T> {
             node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
             node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
             node.vArguments.unshift(node.vExpression.vExpression.vArguments[0]);
-            node.vExpression = this.factory.makeIdentifier('function', 'dispatch_' + ifaceName + '_' + funName, -1);
+            node.vExpression = this.factory.makeIdentifier('function', dispatchFunName, -1);
           }
           // Iface(addr).f{value: v, gas: g}(args, ...) -> dispatch_IFace_f(addr, v, g, args, ...)
           if (
