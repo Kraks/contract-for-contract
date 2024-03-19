@@ -29,13 +29,20 @@ export class CheckFunFactory<T> {
     params: VariableDeclaration[],
     retVarDecs: VariableDeclaration[],
     factory: ConSolFactory,
+    tgtAddrName?: string
   ) {
     this.factory = factory;
     this.spec = spec;
     const target = spec.call.tgt;
-    if (target.addr !== undefined && target.interface !== undefined) {
+    this.paramVarDecs = params;
+    this.retVarDecs = retVarDecs;
+    this.guardedParamNames = [...this.spec.call.kwargs.map((p) => p.snd), ...this.spec.call.args];
+    this.guardedRetParamNames = this.spec.call.rets;
+    this.guardedAllParamNames = [...this.guardedParamNames, ...this.guardedRetParamNames];
+    if (target.addr !== undefined && target.interface !== undefined && tgtAddrName !== undefined) {
       // High-level address call
       this.tgtName = target.interface + '_' + target.func + '_' + spec.id;
+      this.guardedParamNames.unshift(tgtAddrName)
     } else if (target.interface !== undefined) {
       // Low-level address call
       toBeImplemented();
@@ -43,11 +50,6 @@ export class CheckFunFactory<T> {
       // Ordinary function call
       this.tgtName = target.func;
     }
-    this.paramVarDecs = params;
-    this.retVarDecs = retVarDecs;
-    this.guardedParamNames = [...this.spec.call.kwargs.map((p) => p.snd), ...this.spec.call.args];
-    this.guardedRetParamNames = this.spec.call.rets;
-    this.guardedAllParamNames = [...this.guardedParamNames, ...this.guardedRetParamNames];
   }
 
   private makeCheckFun(

@@ -327,6 +327,7 @@ export class FunDefValSpecTransformer<T> {
   // XXX: later we should refactor this with function guardedFun (which currently only
   // hanldes non-address values).
   guardedFunAddr(
+    specId: number,
     oldFun: FunctionDefinition,
     preCondFun: FunctionDefinition | undefined,
     postCondFun: FunctionDefinition | undefined,
@@ -356,11 +357,12 @@ export class FunDefValSpecTransformer<T> {
     oldFun.vParameters.vParameters.forEach((p) => {
       const id = this.factory.makeIdFromVarDec(p);
       if (this.usesAddr(p.typeString)) {
+        // TODO: attach multiple specId, need a loop here
         const asgn = this.factory.makeAssignment(
           'void',
           '=',
           id,
-          this.attachSpec(id, this.encodeSpecIdToUInt96(0 /*TODO spec id*/)),
+          this.attachSpec(id, this.encodeSpecIdToUInt96(specId)),
         );
         const asgnStmt = this.factory.makeExpressionStatement(asgn);
         stmts.push(asgnStmt);
@@ -446,9 +448,8 @@ export class FunDefValSpecTransformer<T> {
       // generate the signature-preserved function
       // TODO: if there is no spec, should we generate this new function? seems yes
       const newFun = this.wrappingAddrForFunction(this.funDef);
-
       // generate the f_guard function, which attaches address spec meta data
-      const guard = this.guardedFunAddr(this.funDef, preFun, postFun);
+      const guard = this.guardedFunAddr(42 /*TODO: spec id list */, this.funDef, preFun, postFun);
       if (guard) this.funDef.vScope.appendChild(guard);
 
       // add the signature-preserved function
@@ -466,7 +467,14 @@ export class FunDefValSpecTransformer<T> {
       // function call on the interface:
       // XXX (GW): performance of this nesting can be bad...
       this.spec.preFunSpec.forEach((s, idx) => {
+        console.log('Target: ' + JSON.stringify(s));
+        if (s.id === undefined) {
+          console.log('Error: address spec id missing (parsing error). Abort.');
+          process.exit(-1);
+        }
+
         const realTgtVar = this.funDef.vParameters.vParameters[idx].name;
+        const tgtVarNameInSpec = this.spec.call.args[idx]
         const ifaceName = s.call.tgt.interface;
         const funName = s.call.tgt.func;
         if (ifaceName == undefined || funName == undefined) {
@@ -474,8 +482,8 @@ export class FunDefValSpecTransformer<T> {
           process.exit(-1);
         }
 
-        // TODO: generate the pre/post condition check function for each spec
-        //       Iface_f_spec_id_pre, Iface_f_spec_id_post
+        // Generate the pre/post condition check function for each spec
+        // i.e., Iface_f_spec_id_pre, Iface_f_spec_id_post
         const iface = findContract(ifaceName);
         if (iface == undefined) {
           console.error(`Error: interface ${ifaceName} not found. Abort.`);
@@ -486,17 +494,20 @@ export class FunDefValSpecTransformer<T> {
           console.error(`Error: function ${funName} not found in ${ifaceName}. Abort.`);
           process.exit(-1);
         }
-        const tgtFuncParams = tgtFunc.vParameters.vParameters; // TODO: need rename
+
+        const addrParam = this.factory.makeTypedVarDecls([this.factory.address], ['seems doesnt matter'], tgtFunc.scope)
+        const tgtFuncParams = tgtFunc.vParameters.vParameters;
+        const valGasParams = this.factory.makeTypedVarDecls([this.factory.uint256, this.factory.uint256], ['value', 'gas'], tgtFunc.scope)
+        const allFuncParams = addrParam.concat(valGasParams.concat(tgtFuncParams))
         const tgtFuncRetParams = tgtFunc.vReturnParameters.vParameters;
-        // HERE FIXME
-        const factory = new CheckFunFactory(s, tgtFuncParams, tgtFuncRetParams, this.factory);
-        //const addrCallPreFun = factory.preCondCheckFun(this.preCondError, this.tgtName);
-        //if (addrCallPreFun) this.funDef.vScope.appendChild(addrCallPreFun);
-        //const postFun = this.cfFactory.postCondCheckFun(this.postCondError, this.tgtName);
-        //if (postFun) this.funDef.vScope.appendChild(postFun);
+        const factory = new CheckFunFactory(s, allFuncParams, tgtFuncRetParams, this.factory, tgtVarNameInSpec);
+        const addrCallPreFun = factory.preCondCheckFun(this.preAddrError, s.id);
+        if (addrCallPreFun) this.funDef.vScope.appendChild(addrCallPreFun);
+        const postFun = factory.postCondCheckFun(this.postAddrError, s.id);
+        if (postFun) this.funDef.vScope.appendChild(postFun);
 
         // TODO: generate dispatch_Iface_f
-        console.log('Target: ' + JSON.stringify(s));
+
         // Rewrite the address calls in the function body
         this.funDef.vBody?.walkChildren((node) => {
           // Iface(addr).f(args, ...) -> dispatch_IFace_f(addr, 0, 0 args, ...)
