@@ -321,8 +321,6 @@ export class FunDefValSpecTransformer<T> {
     // TODO: generate addr call
     // type freshVar = interface(unwrap(addr)).f{value: value, gas: gas}(args ...);
 
-
-
     // TODO: generate post-check for addr call (only for ifaceName and funName)
 
     newFun.vBody = this.factory.makeBlock([specIdStmt]);
