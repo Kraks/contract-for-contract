@@ -256,8 +256,10 @@ export class FunDefValSpecTransformer<T> {
   extractSpecId(addr: Expression): Expression {
     const width = this.factory.makeLiteral('uint256', LiteralKind.Number, (160).toString(16), '160');
     const shiftExpr = this.factory.makeBinaryOperation('uint96', '>>', addr, width);
-    const castExpr = this.factory.makeFunctionCall('uint96', FunctionCallKind.TypeConversion, this.factory.uint96, [shiftExpr]);
-    return castExpr
+    const castExpr = this.factory.makeFunctionCall('uint96', FunctionCallKind.TypeConversion, this.factory.uint96, [
+      shiftExpr,
+    ]);
+    return castExpr;
   }
 
   unwrapType(type: string): string {
@@ -300,14 +302,19 @@ export class FunDefValSpecTransformer<T> {
     // prepend uint256 addr, uint256 value, uint256 gas parameters
     const vardecls = this.factory.makeTypedVarDecls(
       [this.factory.uint256, this.factory.uint256, this.factory.uint256],
-      ['addr', 'value', 'gas'], newFun.scope)
+      ['addr', 'value', 'gas'],
+      newFun.scope,
+    );
     newFun.vParameters.vParameters.unshift(vardecls[0], vardecls[1], vardecls[2]);
     // extract specId
     // uint96 specId = uint96(addr >> 160);
     const specId = this.factory.makeIdentifier('uint96', 'specId', -1);
     const castExpr = this.extractSpecId(this.factory.makeIdFromVarDec(vardecls[0]));
-    const specIdStmt = this.factory.makeVariableDeclarationStatement([specId.id],
-      this.factory.makeTypedVarDecls([this.factory.uint96], ['specId'], newFun.scope), castExpr);
+    const specIdStmt = this.factory.makeVariableDeclarationStatement(
+      [specId.id],
+      this.factory.makeTypedVarDecls([this.factory.uint96], ['specId'], newFun.scope),
+      castExpr,
+    );
 
     // TODO: generate pre-check for addr call (only for ifaceName and funName)
     // TODO: generate addr call
