@@ -305,11 +305,12 @@ export class FunDefValSpecTransformer<T> {
       ['addr', 'value', 'gas'],
       newFun.scope,
     );
-    newFun.vParameters.vParameters.unshift(vardecls[0], vardecls[1], vardecls[2]);
-    // extract specId
+    const addrVarDec = vardecls[0];
+    newFun.vParameters.vParameters.unshift(addrVarDec, vardecls[1], vardecls[2]);
+    // extract specId, generate:
     // uint96 specId = uint96(addr >> 160);
     const specId = this.factory.makeIdentifier('uint96', 'specId', -1);
-    const castExpr = this.extractSpecId(this.factory.makeIdFromVarDec(vardecls[0]));
+    const castExpr = this.extractSpecId(this.factory.makeIdFromVarDec(addrVarDec));
     const specIdStmt = this.factory.makeVariableDeclarationStatement(
       [specId.id],
       this.factory.makeTypedVarDecls([this.factory.uint96], ['specId'], newFun.scope),
@@ -318,6 +319,10 @@ export class FunDefValSpecTransformer<T> {
 
     // TODO: generate pre-check for addr call (only for ifaceName and funName)
     // TODO: generate addr call
+    // type freshVar = interface(unwrap(addr)).f{value: value, gas: gas}(args ...);
+
+
+
     // TODO: generate post-check for addr call (only for ifaceName and funName)
 
     newFun.vBody = this.factory.makeBlock([specIdStmt]);
@@ -558,7 +563,7 @@ export class FunDefValSpecTransformer<T> {
         const postFun = factory.postCondCheckFun(this.postAddrError, s.id);
         if (postFun) this.funDef.vScope.appendChild(postFun);
 
-        // TODO: generate dispatch_Iface_f
+        // Generate dispatch_Iface_f
         const dispatchingFun = this.dispatchingFunction(ifaceName, funName, tgtFunc);
         this.funDef.vScope.appendChild(dispatchingFun);
 
