@@ -253,6 +253,13 @@ export class FunDefValSpecTransformer<T> {
     return this.factory.makeFunctionCall('uint96', FunctionCallKind.TypeConversion, this.factory.uint96, [shiftExpr]);
   }
 
+  extractSpecId(addr: Expression): Expression {
+    const width = this.factory.makeLiteral('uint256', LiteralKind.Number, (160).toString(16), '160');
+    const shiftExpr = this.factory.makeBinaryOperation('uint96', '>>', addr, width);
+    const castExpr = this.factory.makeFunctionCall('uint96', FunctionCallKind.TypeConversion, this.factory.uint96, [shiftExpr]);
+    return castExpr
+  }
+
   unwrapType(type: string): string {
     if (type === 'uint256') return 'address payable';
     // TODO: handle mappings and arrays
@@ -280,13 +287,33 @@ export class FunDefValSpecTransformer<T> {
     });
   }
 
-  dispatchingFunction(name: string, oldFun: FunctionDefinition): FunctionDefinition {
+  dispatchFunName(ifaceName: string, funName: string): string {
+    const dispatchFunName = 'dispatch_' + ifaceName + '_' + funName;
+    return dispatchFunName;
+  }
+
+  dispatchingFunction(ifaceName: string, funName: string, oldFun: FunctionDefinition): FunctionDefinition {
     const newFun = this.factory.copy(oldFun);
     newFun.documentation = undefined;
     newFun.visibility = FunctionVisibility.Private;
-    newFun.name = name;
+    newFun.name = this.dispatchFunName(ifaceName, funName);
+    // prepend uint256 addr, uint256 value, uint256 gas parameters
+    const vardecls = this.factory.makeTypedVarDecls(
+      [this.factory.uint256, this.factory.uint256, this.factory.uint256],
+      ['addr', 'value', 'gas'], newFun.scope)
+    newFun.vParameters.vParameters.unshift(vardecls[0], vardecls[1], vardecls[2]);
+    // extract specId
+    // uint96 specId = uint96(addr >> 160);
+    const specId = this.factory.makeIdentifier('uint96', 'specId', -1);
+    const castExpr = this.extractSpecId(this.factory.makeIdFromVarDec(vardecls[0]));
+    const specIdStmt = this.factory.makeVariableDeclarationStatement([specId.id],
+      this.factory.makeTypedVarDecls([this.factory.uint96], ['specId'], newFun.scope), castExpr);
 
-    newFun.vBody = this.factory.makeBlock([]);
+    // TODO: generate pre-check for addr call (only for ifaceName and funName)
+    // TODO: generate addr call
+    // TODO: generate post-check for addr call (only for ifaceName and funName)
+
+    newFun.vBody = this.factory.makeBlock([specIdStmt]);
     return newFun;
   }
 
@@ -525,8 +552,7 @@ export class FunDefValSpecTransformer<T> {
         if (postFun) this.funDef.vScope.appendChild(postFun);
 
         // TODO: generate dispatch_Iface_f
-        const dispatchFunName = 'dispatch_' + ifaceName + '_' + funName;
-        const dispatchingFun = this.dispatchingFunction(dispatchFunName, this.funDef);
+        const dispatchingFun = this.dispatchingFunction(ifaceName, funName, tgtFunc);
         this.funDef.vScope.appendChild(dispatchingFun);
 
         // Rewrite the address calls in the function body
@@ -544,7 +570,7 @@ export class FunDefValSpecTransformer<T> {
             node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
             node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
             node.vArguments.unshift(node.vExpression.vExpression.vArguments[0]);
-            node.vExpression = this.factory.makeIdentifier('function', dispatchFunName, -1);
+            node.vExpression = this.factory.makeIdentifier('function', this.dispatchFunName(ifaceName, funName), -1);
           }
           // Iface(addr).f{value: v, gas: g}(args, ...) -> dispatch_IFace_f(addr, v, g, args, ...)
           if (

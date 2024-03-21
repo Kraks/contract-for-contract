@@ -50,23 +50,25 @@ export class ConSolFactory extends ASTNodeFactory {
     return call;
   }
 
+  makeTypedVarDecl(type: TypeName, name: string, scope: number = this.scope): VariableDeclaration {
+    const retTypeDecl = this.makeVariableDeclaration(
+      false,
+      false,
+      name,
+      scope,
+      false,
+      DataLocation.Default,
+      StateVariableVisibility.Default,
+      Mutability.Constant,
+      type.typeString,
+    );
+    retTypeDecl.vType = type;
+    return retTypeDecl;
+  }
+
   makeTypedVarDecls(types: TypeName[], names: string[], scope: number = this.scope): VariableDeclaration[] {
     assert(types.length == names.length, 'The number of types should equal to the number of names');
-    return types.map((ty, i) => {
-      const retTypeDecl = this.makeVariableDeclaration(
-        false,
-        false,
-        names[i],
-        scope,
-        false,
-        DataLocation.Default,
-        StateVariableVisibility.Default,
-        Mutability.Constant,
-        types[i].typeString,
-      );
-      retTypeDecl.vType = ty;
-      return retTypeDecl;
-    });
+    return types.map((ty, i) => this.makeTypedVarDecl(ty, names[i], scope));
   }
 
   makeNeg(e: Expression): Expression {
