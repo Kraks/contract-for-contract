@@ -29,7 +29,7 @@ export class CheckFunFactory<T> {
     params: VariableDeclaration[],
     retVarDecs: VariableDeclaration[],
     factory: ConSolFactory,
-    tgtAddrName?: string
+    tgtAddrName?: string,
   ) {
     this.factory = factory;
     this.spec = spec;
@@ -42,7 +42,7 @@ export class CheckFunFactory<T> {
     if (target.addr !== undefined && target.interface !== undefined && tgtAddrName !== undefined) {
       // High-level address call
       this.tgtName = target.interface + '_' + target.func + '_' + spec.id;
-      this.guardedParamNames.unshift(tgtAddrName)
+      this.guardedParamNames.unshift(tgtAddrName);
     } else if (target.interface !== undefined) {
       // Low-level address call
       toBeImplemented();

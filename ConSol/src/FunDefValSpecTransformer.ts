@@ -284,10 +284,10 @@ export class FunDefValSpecTransformer<T> {
     const newFun = this.factory.copy(oldFun);
     newFun.documentation = undefined;
     newFun.visibility = FunctionVisibility.Private;
-    newFun.name = name
+    newFun.name = name;
 
     newFun.vBody = this.factory.makeBlock([]);
-    return newFun
+    return newFun;
   }
 
   wrappingAddrForFunction(oldFun: FunctionDefinition): FunctionDefinition {
@@ -484,7 +484,7 @@ export class FunDefValSpecTransformer<T> {
         }
 
         const realTgtVar = this.funDef.vParameters.vParameters[idx].name;
-        const tgtVarNameInSpec = this.spec.call.args[idx]
+        const tgtVarNameInSpec = this.spec.call.args[idx];
         const ifaceName = s.call.tgt.interface;
         const funName = s.call.tgt.func;
         if (ifaceName == undefined || funName == undefined) {
@@ -505,10 +505,18 @@ export class FunDefValSpecTransformer<T> {
           process.exit(-1);
         }
 
-        const addrParam = this.factory.makeTypedVarDecls([this.factory.address], ['seems doesnt matter'], tgtFunc.scope)
+        const addrParam = this.factory.makeTypedVarDecls(
+          [this.factory.address],
+          ['seems doesnt matter'],
+          tgtFunc.scope,
+        );
         const tgtFuncParams = tgtFunc.vParameters.vParameters;
-        const valGasParams = this.factory.makeTypedVarDecls([this.factory.uint256, this.factory.uint256], ['value', 'gas'], tgtFunc.scope)
-        const allFuncParams = addrParam.concat(valGasParams.concat(tgtFuncParams))
+        const valGasParams = this.factory.makeTypedVarDecls(
+          [this.factory.uint256, this.factory.uint256],
+          ['value', 'gas'],
+          tgtFunc.scope,
+        );
+        const allFuncParams = addrParam.concat(valGasParams.concat(tgtFuncParams));
         const tgtFuncRetParams = tgtFunc.vReturnParameters.vParameters;
         const factory = new CheckFunFactory(s, allFuncParams, tgtFuncRetParams, this.factory, tgtVarNameInSpec);
         const addrCallPreFun = factory.preCondCheckFun(this.preAddrError, s.id);
@@ -517,9 +525,9 @@ export class FunDefValSpecTransformer<T> {
         if (postFun) this.funDef.vScope.appendChild(postFun);
 
         // TODO: generate dispatch_Iface_f
-        const dispatchFunName = 'dispatch_' + ifaceName + '_' + funName
-        const dispatchingFun = this.dispatchingFunction(dispatchFunName, this.funDef)
-        this.funDef.vScope.appendChild(dispatchingFun)
+        const dispatchFunName = 'dispatch_' + ifaceName + '_' + funName;
+        const dispatchingFun = this.dispatchingFunction(dispatchFunName, this.funDef);
+        this.funDef.vScope.appendChild(dispatchingFun);
 
         // Rewrite the address calls in the function body
         this.funDef.vBody?.walkChildren((node) => {
