@@ -296,14 +296,19 @@ export class FunDefValSpecTransformer<T> {
     return dispatchFunName;
   }
 
-  dispatchingFunction(rawSpecId: number, ifaceName: string, funName: string, oldFun: FunctionDefinition): FunctionDefinition {
+  dispatchingFunction(
+    rawSpecId: number,
+    ifaceName: string,
+    funName: string,
+    oldFun: FunctionDefinition,
+  ): FunctionDefinition {
     const newFun = this.factory.copy(oldFun);
     newFun.documentation = undefined;
     newFun.visibility = FunctionVisibility.Private;
     newFun.name = this.dispatchFunName(ifaceName, funName);
 
-    const bodyStmts: Array<Statement> = []
-    const lastStmts: Array<Statement> = []
+    const bodyStmts: Array<Statement> = [];
+    const lastStmts: Array<Statement> = [];
 
     // prepend uint256 addr, uint256 value, uint256 gas parameters
     const addrVarDec = this.factory.makeTypedVarDecl(this.factory.uint256, 'addr', newFun.scope);
@@ -328,33 +333,50 @@ export class FunDefValSpecTransformer<T> {
     // Generate pre-check for addr call
     // TODO: put it into a loop, but only for ifaceName and funName)
     const binAnd = this.factory.makeBinaryOperation('uint', '&', specId, this.encodeSpecIdToUInt96(rawSpecId));
-    const cond = this.factory.makeBinaryOperation('uint', '!=', binAnd,
-      this.factory.makeLiteral('uint', LiteralKind.Number, '0', '0'));
-    const args = [this.unwrap(addrId), valueId, gasId].concat(this.factory.makeIdsFromVarDecs(oldFun.vParameters.vParameters));
-    const preCheck = this.factory.makeFunctionCall('void', FunctionCallKind.FunctionCall,
-      this.factory.makeIdentifier('function', `_${ifaceName}_${funName}_${rawSpecId}_pre`, -1), args)
-    const ifPreCheck = this.factory.makeIfStatement(cond, this.factory.makeExpressionStatement(preCheck))
+    const cond = this.factory.makeBinaryOperation(
+      'uint',
+      '!=',
+      binAnd,
+      this.factory.makeLiteral('uint', LiteralKind.Number, '0', '0'),
+    );
+    const args = [this.unwrap(addrId), valueId, gasId].concat(
+      this.factory.makeIdsFromVarDecs(oldFun.vParameters.vParameters),
+    );
+    const preCheck = this.factory.makeFunctionCall(
+      'void',
+      FunctionCallKind.FunctionCall,
+      this.factory.makeIdentifier('function', `_${ifaceName}_${funName}_${rawSpecId}_pre`, -1),
+      args,
+    );
+    const ifPreCheck = this.factory.makeIfStatement(cond, this.factory.makeExpressionStatement(preCheck));
     bodyStmts.push(ifPreCheck);
 
     // Generate addr call
     // type freshVar = interface(unwrap(addr)).f{value: value, gas: gas}(args ...);
-    const castedAddr = this.factory.makeFunctionCall(ifaceName, FunctionCallKind.TypeConversion,
-      this.factory.makeElementaryTypeNameExpression(ifaceName, ifaceName), [this.unwrap(addrId)])
+    const castedAddr = this.factory.makeFunctionCall(
+      ifaceName,
+      FunctionCallKind.TypeConversion,
+      this.factory.makeElementaryTypeNameExpression(ifaceName, ifaceName),
+      [this.unwrap(addrId)],
+    );
     const options = new Map<string, Expression>([
-      ["value", this.factory.makeIdentifierFor(valueVarDec)],
-      ["gas", this.factory.makeIdentifierFor(gasVarDec)],
+      ['value', this.factory.makeIdentifierFor(valueVarDec)],
+      ['gas', this.factory.makeIdentifierFor(gasVarDec)],
     ]);
-    const f = this.factory.makeMemberAccess('function', castedAddr, funName, -1)
-    const callOpt = this.factory.makeFunctionCallOptions(oldFun.vReturnParameters.type, f, options)
-    const call = this.factory.makeFunctionCall(oldFun.vReturnParameters.type,
+    const f = this.factory.makeMemberAccess('function', castedAddr, funName, -1);
+    const callOpt = this.factory.makeFunctionCallOptions(oldFun.vReturnParameters.type, f, options);
+    const call = this.factory.makeFunctionCall(
+      oldFun.vReturnParameters.type,
       FunctionCallKind.FunctionCall,
       callOpt,
-      this.factory.makeIdsFromVarDecs(oldFun.vParameters.vParameters))
+      this.factory.makeIdsFromVarDecs(oldFun.vParameters.vParameters),
+    );
     let retTypeStr = 'void';
     let retVars: Expression[] = [];
     if (oldFun.vReturnParameters.vParameters.length > 0) {
       const retTypes = oldFun.vReturnParameters.vParameters.map((p) =>
-        this.factory.makeElementaryTypeName(p.typeString, p.typeString))
+        this.factory.makeElementaryTypeName(p.typeString, p.typeString),
+      );
       retTypeStr = '(' + retTypes.toString() + ')';
       const retTypeDecls = this.factory.makeTypedVarDecls(
         retTypes,
@@ -362,34 +384,36 @@ export class FunDefValSpecTransformer<T> {
         oldFun.scope,
       );
       const retIds = retTypeDecls.map((r) => r.id);
-      const callAndAssignStmt = this.factory.makeVariableDeclarationStatement(retIds, retTypeDecls, call)
-      bodyStmts.push(callAndAssignStmt)
+      const callAndAssignStmt = this.factory.makeVariableDeclarationStatement(retIds, retTypeDecls, call);
+      bodyStmts.push(callAndAssignStmt);
 
       retVars = retTypeDecls.map((r, i) => {
         if (this.usesAddr(newFun.vReturnParameters.vParameters[i].typeString)) {
           return this.unwrap(this.factory.makeIdentifierFor(r));
         }
         return this.factory.makeIdentifierFor(r);
-      })
-      const retValTuple = this.factory.makeTupleExpression(
-        retTypeStr,
-        false,
-        retVars
-      );
+      });
+      const retValTuple = this.factory.makeTupleExpression(retTypeStr, false, retVars);
       const retStmt = this.factory.makeReturn(retValTuple.id, retValTuple);
       lastStmts.push(retStmt);
     } else {
-      const callStmt = this.factory.makeExpressionStatement(call)
+      const callStmt = this.factory.makeExpressionStatement(call);
       bodyStmts.push(callStmt);
     }
 
     // Generate post-check for addr call
     // TODO: put it into a loop, but only for ifaceName and funName)
-    const argsWithRet = [...args]
-    if (retVars.length > 0) { argsWithRet.push(...retVars) }
-    const postCheck = this.factory.makeFunctionCall('void', FunctionCallKind.FunctionCall,
-      this.factory.makeIdentifier('function', `_${ifaceName}_${funName}_${rawSpecId}_post`, -1), argsWithRet)
-    const ifPostCheck = this.factory.makeIfStatement(cond, this.factory.makeExpressionStatement(postCheck))
+    const argsWithRet = [...args];
+    if (retVars.length > 0) {
+      argsWithRet.push(...retVars);
+    }
+    const postCheck = this.factory.makeFunctionCall(
+      'void',
+      FunctionCallKind.FunctionCall,
+      this.factory.makeIdentifier('function', `_${ifaceName}_${funName}_${rawSpecId}_post`, -1),
+      argsWithRet,
+    );
+    const ifPostCheck = this.factory.makeIfStatement(cond, this.factory.makeExpressionStatement(postCheck));
     bodyStmts.push(ifPostCheck);
 
     newFun.vBody = this.factory.makeBlock(bodyStmts.concat(lastStmts));
