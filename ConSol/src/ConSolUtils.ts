@@ -124,7 +124,7 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
 
 export function isConSolSpec(doc: string): boolean {
   if (typeof doc !== 'string') {
-    return false; 
+    return false;
   }
   return doc.startsWith(SPEC_PREFIX);
 }
