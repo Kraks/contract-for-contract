@@ -10,7 +10,6 @@ import {
   LatestCompilerVersion,
   ContractDefinition,
   ASTContext,
-  getCompilerVersionsBySpecifiers,
 } from 'solc-typed-ast';
 import { ValSpec } from './spec/index.js';
 import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
@@ -93,13 +92,12 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
       console.log(`Processing ${contract.kind} ${contract.name}.`);
       const factory = new ConSolFactory(contract.context || new ASTContext(), contract.scope);
       const contractTransformer = new ConSolTransformer(factory, contract, ifs);
-      if (contractTransformer.process()){
+      if (contractTransformer.process()) {
         hasConSolSpec = true;
       }
-
     });
 
-    if (!hasConSolSpec){
+    if (!hasConSolSpec) {
       console.log(`No ConSol spec found in current file ${sourceUnit.raw.absolutePath}. Skip.`);
       return;
     }
@@ -122,7 +120,6 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
       console.error(`Error saving file ${outputFile}: ${error}`);
     }
   });
-  
 }
 
 export function isConSolSpec(doc: string): boolean {
