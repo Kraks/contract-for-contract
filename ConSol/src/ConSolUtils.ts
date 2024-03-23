@@ -10,6 +10,7 @@ import {
   LatestCompilerVersion,
   ContractDefinition,
   ASTContext,
+  getCompilerVersionsBySpecifiers,
 } from 'solc-typed-ast';
 import { ValSpec } from './spec/index.js';
 import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
@@ -82,34 +83,46 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
   setSourceUnits(sourceUnits);
 
   // Note: assume there is only one source unit/file
-  const sourceUnit = sourceUnits[0];
-  const ifs: Array<ContractDefinition> = sourceUnit.vContracts.filter((contract) => contract.kind === 'interface');
+  // const sourceUnit = sourceUnits[0];
+  sourceUnits.forEach((sourceUnit) => {
+    const ifs: Array<ContractDefinition> = sourceUnit.vContracts.filter((contract) => contract.kind === 'interface');
 
-  sourceUnit.vContracts.forEach((contract) => {
-    if (contract.kind === 'interface') return;
-    console.log(`Processing ${contract.kind} ${contract.name}.`);
-    const factory = new ConSolFactory(contract.context || new ASTContext(), contract.scope);
-    const contractTransformer = new ConSolTransformer(factory, contract, ifs);
-    contractTransformer.process();
+    let hasConSolSpec = false;
+    sourceUnit.vContracts.forEach((contract) => {
+      if (contract.kind === 'interface') return;
+      console.log(`Processing ${contract.kind} ${contract.name}.`);
+      const factory = new ConSolFactory(contract.context || new ASTContext(), contract.scope);
+      const contractTransformer = new ConSolTransformer(factory, contract, ifs);
+      if (contractTransformer.process()){
+        hasConSolSpec = true;
+      }
+
+    });
+
+    if (!hasConSolSpec){
+      console.log(`No ConSol spec found in current file ${sourceUnit.raw.absolutePath}. Skip.`);
+      return;
+    }
+
+    // reify the ast back to source code
+    const formatter = new PrettyFormatter(4, 0);
+    const writer = new ASTWriter(
+      DefaultASTWriterMapping,
+      formatter,
+      compileResult.compilerVersion ? compileResult.compilerVersion : LatestCompilerVersion,
+    );
+
+    console.log('Processed ' + sourceUnit.absolutePath);
+    const outFileContent = writer.write(sourceUnit);
+    try {
+      // Use the writeFile method to save the content to a file
+      fs.writeFileSync(outputFile, outFileContent);
+      console.log(`Compiled to ${outputFile} successfully`);
+    } catch (error) {
+      console.error(`Error saving file ${outputFile}: ${error}`);
+    }
   });
-
-  // reify the ast back to source code
-  const formatter = new PrettyFormatter(4, 0);
-  const writer = new ASTWriter(
-    DefaultASTWriterMapping,
-    formatter,
-    compileResult.compilerVersion ? compileResult.compilerVersion : LatestCompilerVersion,
-  );
-
-  console.log('Processed ' + sourceUnit.absolutePath);
-  const outFileContent = writer.write(sourceUnit);
-  try {
-    // Use the writeFile method to save the content to a file
-    fs.writeFileSync(outputFile, outFileContent);
-    console.log(`Compiled to ${outputFile} successfully`);
-  } catch (error) {
-    console.error(`Error saving file ${outputFile}: ${error}`);
-  }
+  
 }
 
 export function isConSolSpec(doc: string): boolean {

@@ -61,7 +61,7 @@ export class ConSolTransformer<T> {
     }
   }
 
-  process(): void {
+  process(): boolean {
     const contract = this.contract;
     contract.appendChild(this.preCondError);
     contract.appendChild(this.postCondError);
@@ -78,6 +78,7 @@ export class ConSolTransformer<T> {
       }
     });
 
+    let hasConSolSpec = false;
     contract.walkChildren((astNode: ASTNode) => {
       const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
       if (!astNodeDoc) return;
@@ -85,6 +86,7 @@ export class ConSolTransformer<T> {
       const specStr = astNodeDoc.text;
       if (!isConSolSpec(specStr)) return;
 
+      hasConSolSpec = true;
       const spec = parseConSolSpec(specStr);
       console.log('Processing spec :  ' + specStr.substring(SPEC_PREFIX.length).trim());
 
@@ -96,5 +98,6 @@ export class ConSolTransformer<T> {
         console.assert(false);
       }
     });
+    return hasConSolSpec;
   }
 }
