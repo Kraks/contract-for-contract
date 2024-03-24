@@ -7,7 +7,7 @@ SPEC = "spec-fix"
 
 TYPES = [ORIGINAL, ASSERTION, SPEC]
 
-ONLY_VULNERABLE = False
+ONLY_VULNERABLE = True
 
 def find_directories():
     current_directory = os.getcwd()  # get the current directory
@@ -85,7 +85,8 @@ if __name__ == "__main__":
         victim = hack_data[-2][0].upper() + hack_data[-2][1:]
         fund_loss = hack_data[-1]
 
-        print(f"{victim}\t{fund_loss}\t{hack_type}\t{n}\t{(a_gas-o_gas)/o_gas*10000:.02f}\t{(s_gas-o_gas)/o_gas*10000:.02f}\t{a_fee-o_fee:.4f}\t{s_fee-o_fee:.4f}")
+        # print(f"{victim}\t{fund_loss}\t{hack_type}\t{n}\t{(a_gas-o_gas)/o_gas*10000:.02f}\t{(s_gas-o_gas)/o_gas*10000:.02f}\t{a_fee-o_fee:.4f}\t{s_fee-o_fee:.4f}")
+        print(f"{victim}\t{fund_loss}\t{hack_type}\t{n}\t{a_fee-o_fee:.3f}\t{(a_gas-o_gas)/o_gas*100:.3f}\t{s_fee-o_fee:.3f}\t{(s_gas-o_gas)/o_gas*100:.3f}")
 
 
 
