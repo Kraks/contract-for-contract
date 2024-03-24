@@ -57,10 +57,9 @@ export class ConSolTransformer<T> {
     } else if (node instanceof EventDefinition) {
       // Note(GW): allowing to attach pre-cond to events, the pre-cond is
       // checked before the event is emitted. Optional.
-    } else if (node instanceof VariableDeclaration){
+    } else if (node instanceof VariableDeclaration) {
       // TODO
-    } 
-    else {
+    } else {
       console.assert(false, 'unexpected node type: ' + node.constructor.name);
     }
   }
@@ -95,7 +94,7 @@ export class ConSolTransformer<T> {
         contract.appendChild(this.postCondError);
         contract.appendChild(this.preAddrError);
         contract.appendChild(this.postAddrError);
-        
+
         this.handleValSpec(astNode, spec);
       } else if (isTempSpec(spec)) {
         // TODO: handle temporal specification
