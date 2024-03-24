@@ -1,0 +1,1 @@
+consol ../eval-data/hacks/read-only-reentrancy-sturdy-800K/lib/BALWSTETHWETHOracle.sol
