@@ -21,10 +21,12 @@ output: eval-data/hacks/arbitrary-external-call-dexible-1.5M/lib/SwapHandler_out
 
 can compile with the current version
 fail to compile with >0.7
+too many errors to fix
+manually crafted the generated file to `eval-data/hacks/erroneous-accounting-SwaposV2-468K/lib/SwaposV2Pair_out.sol`
 
 ## inflation-manipulate-BaoCommunity-46K
 ```
-consol ../eval-data/hacks/inflation-manipulate-BaoCommunity-46K/lib/contracts/CToken/CToken.sol
+consol ../eval-data/hacks/inflation-manipulate-BaoCommunity-46K/lib/CToken.sol
 ```
 
 can compile with the current version
