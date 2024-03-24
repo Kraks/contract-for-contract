@@ -31,7 +31,8 @@ can compile with the current version
 fail to compile with >0.7
 
 ## integer-overflow-Umbrella-700K
-```consol ../eval-data/hacks/integer-overflow-Umbrella-700K/lib/staking/StakingRewards.sol
+```
+consol ../eval-data/hacks/integer-overflow-Umbrella-700K/lib/staking/StakingRewards.sol
 ```
 
 output: eval-data/hacks/integer-overflow-Umbrella-700K/lib/StakingRewards_out.sol
