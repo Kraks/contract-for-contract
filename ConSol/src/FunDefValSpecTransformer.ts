@@ -438,6 +438,7 @@ export class FunDefValSpecTransformer<T> {
       guardRetTy = '(' + retTypes.toString() + ')';
     }
     const callsite = this.factory.makeFunCall(callee, args, guardRetTy);
+
     if (newFun.vReturnParameters.vParameters.length > 0) {
       const retTypeDecls = this.factory.makeTypedVarDecls(
         retTypes,
@@ -459,7 +460,8 @@ export class FunDefValSpecTransformer<T> {
       const retStmt = this.factory.makeReturn(retValTuple.id, retValTuple);
       newFun.vBody = this.factory.makeBlock([callAndAssignStmt, retStmt]);
     } else {
-      newFun.vBody = this.factory.makeBlock([callsite]);
+      const callsiteStatement = this.factory.makeExpressionStatement(callsite);
+      newFun.vBody = this.factory.makeBlock([callsiteStatement]);
     }
     return newFun;
   }
