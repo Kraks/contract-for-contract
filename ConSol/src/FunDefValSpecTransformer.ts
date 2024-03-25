@@ -532,11 +532,15 @@ export class FunDefValSpecTransformer<T> {
 
     // Generate function call to check post-condition (if any)
     if (postCondFun) {
-      let postCallArgs = this.factory.makeIdsFromVarDecs(this.declaredParams);
+      let unwrappedArgs = this.unwrapArgumentList(
+        guard.vParameters.vParameters,
+        postCondFun.vParameters.vParameters.map((p) => p.typeString),
+      );
+      // let postCallArgs = this.factory.makeIdsFromVarDecs(this.declaredParams);
       if (this.retTypes.length > 0) {
-        postCallArgs = postCallArgs.concat(this.factory.makeIdsFromVarDecs(retTypeDecls));
+        unwrappedArgs = unwrappedArgs.concat(this.factory.makeIdsFromVarDecs(retTypeDecls));
       }
-      const postCondStmt = this.factory.makeCallStmt(postCondFun.name, postCallArgs);
+      const postCondStmt = this.factory.makeCallStmt(postCondFun.name, unwrappedArgs);
       stmts.push(postCondStmt);
     }
 
