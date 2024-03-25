@@ -15,6 +15,7 @@ import { isValSpec, isTempSpec } from './spec/index.js';
 
 import { ConSolFactory } from './ConSolFactory.js';
 import { FunDefValSpecTransformer } from './FunDefValSpecTransformer.js';
+import { VarDefValSpecTransformer } from './VarDefValSpecTransformer.js';
 import { resetCSVarId, resetStructMap } from './Global.js';
 
 // AST node kinds that allow ConSol spec attachments
@@ -59,6 +60,17 @@ export class ConSolTransformer<T> {
       // checked before the event is emitted. Optional.
     } else if (node instanceof VariableDeclaration) {
       // TODO
+      // varname node.name, type: typestring
+      // TODO: check if var is address
+      const trans = new VarDefValSpecTransformer(
+        this.contract,
+        node,
+        spec,
+        this.preAddrError,
+        this.postAddrError,
+        this.factory,
+      );
+      trans.process();
     } else {
       console.assert(false, 'unexpected node type: ' + node.constructor.name);
     }
@@ -90,11 +102,6 @@ export class ConSolTransformer<T> {
       console.log('Processing spec :  ' + specStr.substring(SPEC_PREFIX.length).trim());
 
       if (isValSpec(spec)) {
-        contract.appendChild(this.preCondError);
-        contract.appendChild(this.postCondError);
-        contract.appendChild(this.preAddrError);
-        contract.appendChild(this.postAddrError);
-
         this.handleValSpec(astNode, spec);
       } else if (isTempSpec(spec)) {
         // TODO: handle temporal specification
@@ -102,6 +109,12 @@ export class ConSolTransformer<T> {
         console.assert(false);
       }
     });
+    if (hasConSolSpec) {
+      contract.appendChild(this.preCondError);
+      contract.appendChild(this.postCondError);
+      contract.appendChild(this.preAddrError);
+      contract.appendChild(this.postAddrError);
+    }
     return hasConSolSpec;
   }
 }
