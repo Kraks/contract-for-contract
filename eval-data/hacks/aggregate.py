@@ -56,7 +56,10 @@ def get_statistics(data):
     gas_fee_total = sum([gas * price for tx_hash, (gas, price) in data.items()])
     n = len(data)
 
-    return (n, gas_total / n, gas_fee_total / n)
+    if n != 0:
+        return (n, gas_total / n, gas_fee_total / n)
+    else:
+        return (0, 0, 0)
 
 if __name__ == "__main__":
     if len(sys.argv) > 2:
@@ -85,8 +88,11 @@ if __name__ == "__main__":
         victim = hack_data[-2][0].upper() + hack_data[-2][1:]
         fund_loss = hack_data[-1]
 
-        # print(f"{victim}\t{fund_loss}\t{hack_type}\t{n}\t{(a_gas-o_gas)/o_gas*10000:.02f}\t{(s_gas-o_gas)/o_gas*10000:.02f}\t{a_fee-o_fee:.4f}\t{s_fee-o_fee:.4f}")
-        print(f"{victim}\t{fund_loss}\t{hack_type}\t{n}\t{a_fee-o_fee:.3f}\t{(a_gas-o_gas)/o_gas*100:.3f}\t{s_fee-o_fee:.3f}\t{(s_gas-o_gas)/o_gas*100:.3f}")
+        if n != 0:
+            # print(f"{victim}\t{fund_loss}\t{hack_type}\t{n}\t{(a_gas-o_gas)/o_gas*10000:.02f}\t{(s_gas-o_gas)/o_gas*10000:.02f}\t{a_fee-o_fee:.4f}\t{s_fee-o_fee:.4f}")
+            print(f"{victim}\t{fund_loss}\t{hack_type}\t{n}\t{a_fee-o_fee:.3f}\t{(a_gas-o_gas)/o_gas*100:.3f}\t{s_fee-o_fee:.3f}\t{(s_gas-o_gas)/o_gas*100:.3f}")
+        else:
+            print(f"{victim}\t{fund_loss}\t{hack_type}\t{n}\tNo Reached")
 
 
 
