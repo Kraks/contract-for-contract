@@ -15,10 +15,12 @@ contract Caller {
 
     event Response(uint);
 
+    /// @custom:consol {non_addr_var{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v==100 } ensures { data == true }}
+    uint160 internal non_addr_var;
     /// @custom:consol {testaddr{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v==100 } ensures { data == true }}
-    address internal testaddr = _wrap_testaddr(0);
+    uint256 internal testaddr = _wrap_testaddr(0);
     /// @custom:consol {testaddr2{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v==200 }}
-    address internal testaddr2 = _wrap_testaddr2(0x86392dC19c0b719886221c78AB11eb8Cf5c52812);
+    uint256 internal testaddr2 = _wrap_testaddr2(0x86392dC19c0b719886221c78AB11eb8Cf5c52812);
 
     /// @custom:consol { callFoo(addr, x) returns (y)
     ///    requires {x > 0}

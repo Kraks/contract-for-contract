@@ -10,7 +10,7 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
-import { SPEC_PREFIX, isConSolSpec, parseConSolSpec } from './ConSolUtils.js';
+import { SPEC_PREFIX, isConSolSpec, parseConSolSpec, usesAddr } from './ConSolUtils.js';
 import { isValSpec, isTempSpec } from './spec/index.js';
 
 import { ConSolFactory } from './ConSolFactory.js';
@@ -41,7 +41,7 @@ export class ConSolTransformer<T> {
     this.postAddrError = factory.makeError('postViolationAddr', 'specId', 'uint256');
   }
 
-  handleValSpec<T>(node: ASTNode, spec: ValSpec<T>) {
+  handleValSpec<T>(node: ASTNode, spec: ValSpec<T>): boolean {
     console.log('Parsed spec AST:');
     console.log(spec);
     if (node instanceof FunctionDefinition) {
@@ -59,9 +59,10 @@ export class ConSolTransformer<T> {
       // Note(GW): allowing to attach pre-cond to events, the pre-cond is
       // checked before the event is emitted. Optional.
     } else if (node instanceof VariableDeclaration) {
-      // TODO
-      // varname node.name, type: typestring
-      // TODO: check if var is address
+      if (!usesAddr(node.typeString)) {
+        console.log('ValSpec on non-address variables is not supported.');
+        return false;
+      }
       const trans = new VarDefValSpecTransformer(
         this.contract,
         node,
@@ -73,7 +74,9 @@ export class ConSolTransformer<T> {
       trans.process();
     } else {
       console.assert(false, 'unexpected node type: ' + node.constructor.name);
+      return false;
     }
+    return true;
   }
 
   process(): boolean {
@@ -97,12 +100,14 @@ export class ConSolTransformer<T> {
       const specStr = astNodeDoc.text;
       if (!isConSolSpec(specStr)) return;
 
-      hasConSolSpec = true;
       const spec = parseConSolSpec(specStr);
       console.log('Processing spec :  ' + specStr.substring(SPEC_PREFIX.length).trim());
 
       if (isValSpec(spec)) {
-        this.handleValSpec(astNode, spec);
+        const success = this.handleValSpec(astNode, spec);
+        if (success) {
+          hasConSolSpec = true;
+        }
       } else if (isTempSpec(spec)) {
         // TODO: handle temporal specification
       } else {

@@ -176,3 +176,16 @@ export function extractAddrMember<T>(spec: ValSpec<T>): string {
 export function needAbiEncoding(member: string): boolean {
   return member === 'call' || member === 'delegatecall' || member === 'staticcall';
 }
+
+// usesAddr checks if a type has address, if so it is subject to wrap/unwrap
+// Note: argument type takes no prefix such as `struct`
+export function usesAddr(type: string): boolean {
+  if (type === 'address') return true;
+  if (type === 'address payable') return true;
+  if (globalThis.structMap.has(type)) {
+    const b = globalThis.structMap.get(type)?.vMembers.some((m) => usesAddr(m.typeString));
+    if (b) return true;
+  }
+  // TODO: handle mappings and arrays
+  return false;
+}

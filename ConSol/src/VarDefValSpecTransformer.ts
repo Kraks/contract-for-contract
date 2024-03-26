@@ -11,7 +11,7 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
-
+import { GUARD_ADDR_TYPE } from './ConSolUtils.js';
 import { ConSolFactory } from './ConSolFactory.js';
 
 export class VarDefValSpecTransformer<T> {
@@ -40,7 +40,7 @@ export class VarDefValSpecTransformer<T> {
     this.tgtName = '_wrap_' + varDef.name;
   }
 
-  createWrapFunction(): FunctionDefinition {
+  createWrapFun(): FunctionDefinition {
     // Create the wrap_fun function
 
     const param = this.factory.makeTypedVarDecl(this.factory.address, 'addr', 0);
@@ -51,9 +51,12 @@ export class VarDefValSpecTransformer<T> {
       this.factory.makeIdFromVarDec(param),
     ]);
 
-    const cast2 = this.factory.makeFunctionCall('uint256', FunctionCallKind.TypeConversion, this.factory.uint256, [
-      cast1,
-    ]);
+    const cast2 = this.factory.makeFunctionCall(
+      GUARD_ADDR_TYPE,
+      FunctionCallKind.TypeConversion,
+      this.factory.uint256,
+      [cast1],
+    );
     const returnStmt = this.factory.makeReturn(0, cast2);
 
     const funBody = this.factory.makeBlock([returnStmt]);
@@ -82,19 +85,21 @@ export class VarDefValSpecTransformer<T> {
       expr = this.varDef.vValue;
     }
 
-    const wrappedInitializer = this.factory.makeFunctionCall(
-      'uint256',
+    const wrapFun = this.factory.makeFunctionCall(
+      GUARD_ADDR_TYPE,
       FunctionCallKind.FunctionCall,
       this.factory.makeIdentifier('function', this.tgtName, 0),
       [expr],
     );
 
-    this.varDef.vValue = wrappedInitializer;
+    this.varDef.vValue = wrapFun;
+    this.varDef.typeString = GUARD_ADDR_TYPE;
+    this.varDef.vType = this.factory.makeElementaryTypeName('', GUARD_ADDR_TYPE);
   }
 
   process(): void {
-    const wrapFunction = this.createWrapFunction();
-    this.contract.appendChild(wrapFunction);
+    const wrapFun = this.createWrapFun();
+    this.contract.appendChild(wrapFun);
 
     this.updateVarDeclaration();
   }

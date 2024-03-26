@@ -14,6 +14,8 @@ contract Caller {
 
   // TODO: test return address
 
+  /// @custom:consol {non_addr_var{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v==100 } ensures { data == true }}
+  uint160 non_addr_var;
   /// @custom:consol {testaddr{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v==100 } ensures { data == true }}
   address testaddr;
 

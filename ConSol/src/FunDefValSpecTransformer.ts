@@ -16,7 +16,7 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
-import { GUARD_ADDR_TYPE, extractFunName, uncheckedFunName, guardedFunName } from './ConSolUtils.js';
+import { GUARD_ADDR_TYPE, extractFunName, uncheckedFunName, guardedFunName, usesAddr } from './ConSolUtils.js';
 
 import { CheckFunFactory } from './CheckFunFactory.js';
 import { ConSolFactory } from './ConSolFactory.js';
@@ -168,19 +168,6 @@ export class FunDefValSpecTransformer<T> {
   }
   */
 
-  // usesAddr checks if a type has address, if so it is subject to wrap/unwrap
-  // Note: argument type takes no prefix such as `struct`
-  usesAddr(type: string): boolean {
-    if (type === 'address') return true;
-    if (type === 'address payable') return true;
-    if (globalThis.structMap.has(type)) {
-      const b = globalThis.structMap.get(type)?.vMembers.some((m) => this.usesAddr(m.typeString));
-      if (b) return true;
-    }
-    // TODO: handle mappings and arrays
-    return false;
-  }
-
   // Note: argument type takes no prefix such as `struct`
   wrapType(type: string): string {
     if (type === 'address') return GUARD_ADDR_TYPE;
@@ -207,7 +194,7 @@ export class FunDefValSpecTransformer<T> {
 
   // address -> uint256(uint160(address(...)))
   wrap(x: Expression): Expression {
-    if (this.usesAddr(x.typeString)) {
+    if (usesAddr(x.typeString)) {
       // TODO: only handles flat types so far, need to handle struct, array, mapping, etc.
       // How should we do that?
       //   Note that (1) the struct type definition has been changed,
@@ -283,7 +270,7 @@ export class FunDefValSpecTransformer<T> {
   unwrapArgumentList(args: VariableDeclaration[], types: string[]): Expression[] {
     return args.map((p, idx) => {
       const id = this.factory.makeIdFromVarDec(p);
-      if (this.usesAddr(types[idx])) {
+      if (usesAddr(types[idx])) {
         return this.unwrap(id);
       } else {
         return id;
@@ -388,7 +375,7 @@ export class FunDefValSpecTransformer<T> {
       bodyStmts.push(callAndAssignStmt);
 
       retVars = retTypeDecls.map((r, i) => {
-        if (this.usesAddr(newFun.vReturnParameters.vParameters[i].typeString)) {
+        if (usesAddr(newFun.vReturnParameters.vParameters[i].typeString)) {
           return this.unwrap(this.factory.makeIdentifierFor(r));
         }
         return this.factory.makeIdentifierFor(r);
@@ -451,7 +438,7 @@ export class FunDefValSpecTransformer<T> {
         guardRetTy, // XXX: ths is not consistent but seems not relevant in generated code
         false,
         retTypeDecls.map((r, i) => {
-          if (this.usesAddr(newFun.vReturnParameters.vParameters[i].typeString)) {
+          if (usesAddr(newFun.vReturnParameters.vParameters[i].typeString)) {
             return this.unwrap(this.factory.makeIdentifierFor(r));
           }
           return this.factory.makeIdentifierFor(r);
@@ -498,7 +485,7 @@ export class FunDefValSpecTransformer<T> {
 
     oldFun.vParameters.vParameters.forEach((p) => {
       const id = this.factory.makeIdFromVarDec(p);
-      if (this.usesAddr(p.typeString)) {
+      if (usesAddr(p.typeString)) {
         // TODO: attach multiple specId, need a loop here
         const asgn = this.factory.makeAssignment(
           'void',
@@ -578,10 +565,10 @@ export class FunDefValSpecTransformer<T> {
 
     const paramUseAddr = this.funDef.vParameters.vParameters
       .map((p) => this.factory.normalize(p.typeString))
-      .some((t) => this.usesAddr(t));
+      .some((t) => usesAddr(t));
     const retUseAddr = this.funDef.vReturnParameters.vParameters
       .map((p) => this.factory.normalize(p.typeString))
-      .some((t) => this.usesAddr(t));
+      .some((t) => usesAddr(t));
 
     /* - If `f` takes/returns values with addresses, we need to generate a new function
      *   that preserves `f`'s name and signature. The body of the new function calls
