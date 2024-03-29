@@ -13,6 +13,7 @@ import {
   FunctionCallOptions,
   MemberAccess,
   Statement,
+  FunctionStateMutability,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -284,6 +285,7 @@ export class FunDefValSpecTransformer<T> {
     const newFun = this.factory.copy(oldFun);
     newFun.documentation = undefined;
     newFun.visibility = FunctionVisibility.Private;
+    newFun.stateMutability = FunctionStateMutability.NonPayable;
     newFun.name = this.dispatchFunName(ifaceName, funName);
 
     const bodyStmts: Array<Statement> = [];
@@ -402,7 +404,6 @@ export class FunDefValSpecTransformer<T> {
   wrappingAddrForFunction(oldFun: FunctionDefinition): FunctionDefinition {
     const newFun = this.factory.copy(oldFun);
     newFun.documentation = undefined;
-    newFun.visibility = FunctionVisibility.Private;
     const callee = this.factory.makeIdentifier('function', guardedFunName(this.tgtName), -1);
     const args = oldFun.vParameters.vParameters.map((p) => {
       const id = this.factory.makeIdFromVarDec(p);
@@ -457,6 +458,7 @@ export class FunDefValSpecTransformer<T> {
     const guard = this.factory.copy(oldFun);
     guard.documentation = undefined;
     guard.visibility = FunctionVisibility.Private;
+    guard.stateMutability = FunctionStateMutability.NonPayable;
     guard.name = guardedFunName(this.tgtName);
     guard.vParameters = this.factory.makeParameterList(this.wrapParameterList(oldFun.vParameters.vParameters));
     // TODO: change return types if necessary
