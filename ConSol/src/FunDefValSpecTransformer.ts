@@ -16,7 +16,15 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
-import { GUARD_ADDR_TYPE, extractFunName, uncheckedFunName, guardedFunName, usesAddr } from './ConSolUtils.js';
+import {
+  GUARD_ADDR_TYPE,
+  extractFunName,
+  uncheckedFunName,
+  guardedFunName,
+  usesAddr,
+  attachSpec,
+  encodeSpecIdToUInt96,
+} from './ConSolUtils.js';
 
 import { CheckFunFactory } from './CheckFunFactory.js';
 import { ConSolFactory } from './ConSolFactory.js';
@@ -226,22 +234,6 @@ export class FunDefValSpecTransformer<T> {
     return cast3;
   }
 
-  attachSpec(addr: Expression, specId: Expression): Expression {
-    // addr | (specId << 160);
-    const width = this.factory.makeLiteral('uint256', LiteralKind.Number, (160).toString(16), '160');
-    const rhs = this.factory.makeBinaryOperation('uint256', '<<', specId, width);
-    return this.factory.makeBinaryOperation('uint256', '|', addr, rhs);
-  }
-
-  // specId starts 0, but its encoded value starts from 1
-  encodeSpecIdToUInt96(specId: number): Expression {
-    // uint96(1 << specId);
-    const specIdExpr = this.factory.makeLiteral('uint96', LiteralKind.Number, specId.toString(16), specId.toString());
-    const one = this.factory.makeLiteral('uint256', LiteralKind.Number, (1).toString(16), '1');
-    const shiftExpr = this.factory.makeBinaryOperation('uint256', '<<', one, specIdExpr);
-    return this.factory.makeFunctionCall('uint96', FunctionCallKind.TypeConversion, this.factory.uint96, [shiftExpr]);
-  }
-
   extractSpecId(addr: Expression): Expression {
     const width = this.factory.makeLiteral('uint256', LiteralKind.Number, (160).toString(16), '160');
     const shiftExpr = this.factory.makeBinaryOperation('uint96', '>>', addr, width);
@@ -319,7 +311,7 @@ export class FunDefValSpecTransformer<T> {
 
     // Generate pre-check for addr call
     // TODO: put it into a loop, but only for ifaceName and funName)
-    const binAnd = this.factory.makeBinaryOperation('uint', '&', specId, this.encodeSpecIdToUInt96(rawSpecId));
+    const binAnd = this.factory.makeBinaryOperation('uint', '&', specId, encodeSpecIdToUInt96(this.factory, rawSpecId));
     const cond = this.factory.makeBinaryOperation(
       'uint',
       '!=',
@@ -491,7 +483,7 @@ export class FunDefValSpecTransformer<T> {
           'void',
           '=',
           id,
-          this.attachSpec(id, this.encodeSpecIdToUInt96(specId)),
+          attachSpec(this.factory, id, encodeSpecIdToUInt96(this.factory, specId)),
         );
         const asgnStmt = this.factory.makeExpressionStatement(asgn);
         stmts.push(asgnStmt);

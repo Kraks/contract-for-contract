@@ -10,6 +10,9 @@ import {
   LatestCompilerVersion,
   ContractDefinition,
   ASTContext,
+  Expression,
+  LiteralKind,
+  FunctionCallKind,
 } from 'solc-typed-ast';
 import { ValSpec } from './spec/index.js';
 import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
@@ -188,4 +191,20 @@ export function usesAddr(type: string): boolean {
   }
   // TODO: handle mappings and arrays
   return false;
+}
+
+export function attachSpec(factory: ConSolFactory, addr: Expression, specId: Expression): Expression {
+  // addr | (specId << 160);
+  const width = factory.makeLiteral('uint256', LiteralKind.Number, (160).toString(16), '160');
+  const rhs = factory.makeBinaryOperation('uint256', '<<', specId, width);
+  return factory.makeBinaryOperation('uint256', '|', addr, rhs);
+}
+
+// specId starts 0, but its encoded value starts from 1
+export function encodeSpecIdToUInt96(factory: ConSolFactory, specId: number): Expression {
+  // uint96(1 << specId);
+  const specIdExpr = factory.makeLiteral('uint96', LiteralKind.Number, specId.toString(16), specId.toString());
+  const one = factory.makeLiteral('uint256', LiteralKind.Number, (1).toString(16), '1');
+  const shiftExpr = factory.makeBinaryOperation('uint256', '<<', one, specIdExpr);
+  return factory.makeFunctionCall('uint96', FunctionCallKind.TypeConversion, factory.uint96, [shiftExpr]);
 }
