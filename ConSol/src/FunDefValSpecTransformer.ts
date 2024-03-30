@@ -449,7 +449,7 @@ export class FunDefValSpecTransformer<T> {
   // XXX: later we should refactor this with function guardedFun (which currently only
   // hanldes non-address values).
   guardedFunAddr(
-    specId: number,
+    specIds: Map<string, Array<number>>,
     oldFun: FunctionDefinition,
     preCondFun: FunctionDefinition | undefined,
     postCondFun: FunctionDefinition | undefined,
@@ -477,18 +477,20 @@ export class FunDefValSpecTransformer<T> {
       stmts.push(preCondStmt);
     }
 
+    // Generate statements that attach spec ids to the address arguments
     oldFun.vParameters.vParameters.forEach((p) => {
-      const id = this.factory.makeIdFromVarDec(p);
       if (usesAddr(p.typeString)) {
-        // TODO: attach multiple specId, need a loop here
-        const asgn = this.factory.makeAssignment(
-          'void',
-          '=',
-          id,
-          attachSpec(this.factory, id, encodeSpecIdToUInt96(this.factory, specId)),
-        );
-        const asgnStmt = this.factory.makeExpressionStatement(asgn);
-        stmts.push(asgnStmt);
+        const id = this.factory.makeIdFromVarDec(p);
+        specIds.get(p.name)?.forEach((specId) => {
+          const asgn = this.factory.makeAssignment(
+            'void',
+            '=',
+            id,
+            attachSpec(this.factory, id, encodeSpecIdToUInt96(this.factory, specId)),
+          );
+          const asgnStmt = this.factory.makeExpressionStatement(asgn);
+          stmts.push(asgnStmt);
+        })
       }
     });
 
@@ -576,7 +578,22 @@ export class FunDefValSpecTransformer<T> {
       // TODO: if there is no spec, should we generate this new function? seems yes
       const newFun = this.wrappingAddrForFunction(this.funDef);
       // generate the f_guard function, which attaches address spec meta data
-      const guard = this.guardedFunAddr(42 /*TODO: spec id list */, this.funDef, preFun, postFun);
+
+      const argSpecIdMaps = new Map<string, Array<number>>();
+      this.spec.preFunSpec.forEach((s) => {
+        if (s.call.tgt.addr != undefined && s.id != undefined) {
+          const idx = this.spec.call.args.findIndex((a) => a === s.call.tgt.addr);
+          const arg = this.funDef.vParameters.vParameters[idx].name;
+          if (argSpecIdMaps.has(arg)) {
+            argSpecIdMaps.get(arg)?.push(s.id);
+          } else {
+            argSpecIdMaps.set(arg, [s.id]);
+          }
+        }
+      })
+      console.log(argSpecIdMaps)
+
+      const guard = this.guardedFunAddr(argSpecIdMaps, this.funDef, preFun, postFun);
       if (guard) this.funDef.vScope.appendChild(guard);
 
       // add the signature-preserved function
