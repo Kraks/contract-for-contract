@@ -490,7 +490,7 @@ export class FunDefValSpecTransformer<T> {
           );
           const asgnStmt = this.factory.makeExpressionStatement(asgn);
           stmts.push(asgnStmt);
-        })
+        });
       }
     });
 
@@ -590,8 +590,8 @@ export class FunDefValSpecTransformer<T> {
             argSpecIdMaps.set(arg, [s.id]);
           }
         }
-      })
-      console.log(argSpecIdMaps)
+      });
+      console.log(argSpecIdMaps);
 
       const guard = this.guardedFunAddr(argSpecIdMaps, this.funDef, preFun, postFun);
       if (guard) this.funDef.vScope.appendChild(guard);
