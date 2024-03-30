@@ -12,22 +12,22 @@ contract Caller {
   // contract Receiver, but we do know the address of contract Receiver and the
   // function to call as well as the interface of contract Receiver.
 
-  /// @custom:consol { callFoo(addr, x) returns (y)
+  /// @custom:consol { callFoo(addr1, x) returns (addr2)
   ///   requires {x > 0}
   ///   where {
-  ///     IReceiver(addr).foo{value: v, gas: g}(mymsg, x) returns (y)
+  ///     IReceiver(addr2).foo{value: v, gas: g}(mymsg, x) returns (y)
   ///     requires { v > 5 && g < 10000 && x != 0 }
   ///     ensures { y == x + 1 }
   ///   }
   /// }
-  function callFoo(address payable _addr, uint x) public payable returns (uint) {
+  function callFoo(address payable _addr, uint x) public payable returns (address) {
     // call without options
     uint z = IReceiver(_addr).foo("call foo", x);
     // You can send ether and specify a custom gas amount
     uint y = IReceiver(_addr).foo{value: msg.value, gas: 5000}("call foo", x);
 
     emit Response(y);
-    return y;
+    return _addr;
   }
 }
 
