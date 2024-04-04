@@ -56,7 +56,7 @@ export class VarDefValSpecTransformer<T> {
       wrappedAddr,
       this.factory.makeFunctionCall(GUARD_ADDR_TYPE, FunctionCallKind.TypeConversion, this.factory.uint256, [
         this.factory.makeFunctionCall('uint160', FunctionCallKind.TypeConversion, this.factory.uint160, [
-          this.factory.makeIdFromVarDec(wrappedAddr),
+          this.factory.makeIdFromVarDec(param),
         ]),
       ]),
     );

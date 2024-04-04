@@ -10,7 +10,7 @@ describe('end to end tests', () => {
   //   Address.sol,
   //   testCallFoo.sol, LowLevelAddrCall.sol
 
-  const programs = ['Address.sol', 'PreCond.sol', 'PreCond2.sol', 'Lock.sol', 'PostCond.sol'];
+  const programs = ['Address.sol', 'Address_storage.sol', 'PreCond.sol', 'PreCond2.sol', 'Lock.sol', 'PostCond.sol'];
 
   programs.forEach((program) => {
     test(program, async () => {
