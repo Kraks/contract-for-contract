@@ -1,0 +1,15 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+remappings = ["forge-std/=lib/forge-std/src/", "@openzeppelin=src/@openzeppelin/", "contracts/dexible=src/dexible/", "contracts/common=src/common/", "contracts/vault=src/vault/", "contracts/token=src/token/", "hardhat=src/hardhat/"]
+chain_id = 1
+auto_detect_solc = false
+solc_version = "0.8.17"
+evm_version = "london"
+use_literal_content = true
+optimizer = true
+optimizer_runs = 100
+libraries = []
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

@@ -1,0 +1,14 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+remappings = ["forge-std/=lib/forge-std/src/", "@openzeppelin=src/@openzeppelin/", "contracts/EIP20NonStandardInterface.sol=src/EIP20NonStandardInterface.sol/", "contracts/DepTokenInterfaces.sol=src/DepTokenInterfaces.sol/", "contracts/DepositWithdraw.sol=src/DepositWithdraw.sol/", "contracts/TensorpricerInterface.sol=src/TensorpricerInterface.sol/", "contracts/MatrixpricerInterface.sol=src/MatrixpricerInterface.sol/", "contracts/ErrorReporter.sol=src/ErrorReporter.sol/", "contracts/CurveSwap.sol=src/CurveSwap.sol/", "contracts/DepositWithdrawInterface.sol=src/DepositWithdrawInterface.sol/", "contracts/CurveContractInterface.sol=src/CurveContractInterface.sol/", "contracts/DepErc20.sol=src/DepErc20.sol/", "contracts/vendor=src/vendor/", "contracts/ExponentialNoError.sol=src/ExponentialNoError.sol/", "contracts/InterestRateModel.sol=src/InterestRateModel.sol/", "contracts/EIP20Interface.sol=src/EIP20Interface.sol/", "contracts/DepToken.sol=src/DepToken.sol/", "contracts/LevTokenInterfaces.sol=src/LevTokenInterfaces.sol/", "hardhat=src/hardhat/"]
+chain_id = 1
+auto_detect_solc = false
+solc_version = "0.8.15"
+evm_version = "london"
+optimizer = true
+optimizer_runs = 200
+libraries = []
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
