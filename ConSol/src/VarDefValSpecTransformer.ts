@@ -133,7 +133,6 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
         process.exit(-1);
       }
 
-
       // Generate pre/post function for addr calls
 
       const addrParam = this.factory.makeTypedVarDecls(
@@ -161,10 +160,8 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
       const postFun = checkFunFactory.postCondCheckFun(this.postAddrError, specid);
       if (postFun) this.contract.appendChild(postFun);
 
-
-
       // Generate dispatch_Iface_f
-      
+
       const dispatchingFun = this.dispatchingFunction(specid, tgtInterface, tgtFun, addrCallFun);
       this.contract.appendChild(dispatchingFun);
     }
