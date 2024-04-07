@@ -14,12 +14,12 @@ contract Caller {
 
   // TODO: test return address
 
-  /// @custom:consol {non_addr_var{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v==100 } ensures { data == true }}
+  /// @custom:consol {non_addr_var{value: v, gas: g}(mymsg, x) returns (y) requires { v==100 } ensures { data == true }}
   uint160 non_addr_var;
-  /// @custom:consol {IReceiver(testaddr).foo{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v==100 } ensures { data == true }}
+  /// @custom:consol {IReceiver(testaddr).foo{value: v, gas: g}(mymsg, x) returns (y) requires { v==100 } ensures { data == true }}
   address testaddr;
 
-  /// @custom:consol {IReceiver(testaddr2).foo{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v==200 }}
+  /// @custom:consol {IReceiver(testaddr2).foo{value: v, gas: g}(mymsg, x) returns (y) requires { v==200 }}
   address testaddr2 = 0x86392dC19c0b719886221c78AB11eb8Cf5c52812;
 
   function callFoo(uint x) public payable returns (uint) {

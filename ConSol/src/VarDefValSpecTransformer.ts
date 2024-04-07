@@ -14,7 +14,8 @@ import { ValSpec } from './spec/index.js';
 import { GUARD_ADDR_TYPE } from './ConSolUtils.js';
 import { ConSolFactory } from './ConSolFactory.js';
 import { ValSpecTransformer } from './ValSpecTransformer.js';
-
+import { findContract } from './Global.js';
+import { CheckFunFactory } from './CheckFunFactory.js';
 export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   contract: ContractDefinition;
   varDef: VariableDeclaration;
@@ -119,6 +120,54 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     const tgtFun = this.spec.call.tgt.func;
     const tgtInterface = this.spec.call.tgt.interface;
     const tgtAddr = this.spec.call.tgt.addr;
+    // const tgtVarNameInSpec = this.spec.call.args[idx];
+    if (tgtInterface != undefined) {
+      const iface = findContract(tgtInterface);
+      if (iface == undefined) {
+        console.error(`Error: interface ${tgtInterface} not found. Abort.`);
+        process.exit(-1);
+      }
+      const addrCallFun = iface.vFunctions.find((f) => f.name === tgtFun);
+      if (addrCallFun == undefined) {
+        console.error(`Error: function ${tgtFun} not found in ${tgtInterface}. Abort.`);
+        process.exit(-1);
+      }
+
+
+      // Generate pre/post function for addr calls
+
+      const addrParam = this.factory.makeTypedVarDecls(
+        [this.factory.address],
+        ['seems doesnt matter'],
+        addrCallFun.scope,
+      );
+      const tgtFuncParams = addrCallFun.vParameters.vParameters;
+      const valGasParams = this.factory.makeTypedVarDecls(
+        [this.factory.uint256, this.factory.uint256],
+        ['value', 'gas'],
+        addrCallFun.scope,
+      );
+      // TODO(DX): hard code spec id for now. storage value spec doesn't have id now
+
+      const specid = 1;
+
+      const allFuncParams = addrParam.concat(valGasParams.concat(tgtFuncParams));
+      const tgtFuncRetParams = addrCallFun.vReturnParameters.vParameters;
+      const checkFunFactory = new CheckFunFactory(this.spec, allFuncParams, tgtFuncRetParams, this.factory, tgtAddr);
+      // console.log(allFuncParams);
+      // console.log(tgtFuncRetParams);
+      const addrCallPreFun = checkFunFactory.preCondCheckFun(this.preAddrError, specid);
+      if (addrCallPreFun) this.contract.appendChild(addrCallPreFun);
+      const postFun = checkFunFactory.postCondCheckFun(this.postAddrError, specid);
+      if (postFun) this.contract.appendChild(postFun);
+
+
+
+      // Generate dispatch_Iface_f
+      
+      const dispatchingFun = this.dispatchingFunction(specid, tgtInterface, tgtFun, addrCallFun);
+      this.contract.appendChild(dispatchingFun);
+    }
 
     for (const func of this.contract.vFunctions) {
       func.vBody?.walkChildren((node) => {
