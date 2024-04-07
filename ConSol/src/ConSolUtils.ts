@@ -208,3 +208,8 @@ export function encodeSpecIdToUInt96(factory: ConSolFactory, specId: number): Ex
   const shiftExpr = factory.makeBinaryOperation('uint256', '<<', one, specIdExpr);
   return factory.makeFunctionCall('uint96', FunctionCallKind.TypeConversion, factory.uint96, [shiftExpr]);
 }
+
+export function dispatchFunName(ifaceName: string, funName: string): string {
+  const dispatchFunName = 'dispatch_' + ifaceName + '_' + funName;
+  return dispatchFunName;
+}

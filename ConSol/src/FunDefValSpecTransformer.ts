@@ -14,6 +14,7 @@ import {
   MemberAccess,
   Statement,
   FunctionStateMutability,
+  Identifier,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -25,6 +26,7 @@ import {
   usesAddr,
   attachSpec,
   encodeSpecIdToUInt96,
+  dispatchFunName,
 } from './ConSolUtils.js';
 
 import { CheckFunFactory } from './CheckFunFactory.js';
@@ -271,11 +273,6 @@ export class FunDefValSpecTransformer<T> {
     });
   }
 
-  dispatchFunName(ifaceName: string, funName: string): string {
-    const dispatchFunName = 'dispatch_' + ifaceName + '_' + funName;
-    return dispatchFunName;
-  }
-
   dispatchingFunction(
     rawSpecId: number,
     ifaceName: string,
@@ -286,7 +283,7 @@ export class FunDefValSpecTransformer<T> {
     newFun.documentation = undefined;
     newFun.visibility = FunctionVisibility.Private;
     newFun.stateMutability = FunctionStateMutability.NonPayable;
-    newFun.name = this.dispatchFunName(ifaceName, funName);
+    newFun.name = dispatchFunName(ifaceName, funName);
 
     const bodyStmts: Array<Statement> = [];
     const lastStmts: Array<Statement> = [];
@@ -621,6 +618,7 @@ export class FunDefValSpecTransformer<T> {
         const tgtVarNameInSpec = this.spec.call.args[idx];
         const ifaceName = s.call.tgt.interface;
         const funName = s.call.tgt.func;
+        const addrName = s.call.tgt.addr;
         if (ifaceName == undefined || funName == undefined) {
           console.log('Warning: no interface or function name in the spec. Abort.');
           process.exit(-1);
@@ -672,12 +670,14 @@ export class FunDefValSpecTransformer<T> {
             node.vExpression instanceof MemberAccess &&
             node.vExpression.vExpression instanceof FunctionCall &&
             node.vExpression.vExpression.kind == FunctionCallKind.TypeConversion &&
-            node.vExpression.vExpression.vFunctionName === ifaceName
+            node.vExpression.vExpression.vFunctionName === ifaceName &&
+            node.vExpression.vExpression.vArguments[0] instanceof Identifier &&
+            node.vExpression.vExpression.vArguments[0].name == addrName
           ) {
             node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
             node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
             node.vArguments.unshift(node.vExpression.vExpression.vArguments[0]);
-            node.vExpression = this.factory.makeIdentifier('function', this.dispatchFunName(ifaceName, funName), -1);
+            node.vExpression = this.factory.makeIdentifier('function', dispatchFunName(ifaceName, funName), -1);
           }
           // Iface(addr).f{value: v, gas: g}(args, ...) -> dispatch_IFace_f(addr, v, g, args, ...)
           if (
@@ -687,7 +687,9 @@ export class FunDefValSpecTransformer<T> {
             node.vExpression.vExpression instanceof MemberAccess &&
             node.vExpression.vExpression.vExpression instanceof FunctionCall &&
             node.vExpression.vExpression.vExpression.kind == FunctionCallKind.TypeConversion &&
-            node.vExpression.vExpression.vExpression.vFunctionName === ifaceName
+            node.vExpression.vExpression.vExpression.vFunctionName === ifaceName &&
+            node.vExpression.vExpression.vExpression.vArguments[0] instanceof Identifier &&
+            node.vExpression.vExpression.vExpression.vArguments[0].name == addrName
           ) {
             // Let's assume there is only one value and one gas
             const g = node.vExpression.vOptionsMap.get('gas');

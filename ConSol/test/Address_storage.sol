@@ -16,17 +16,20 @@ contract Caller {
 
   /// @custom:consol {non_addr_var{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v==100 } ensures { data == true }}
   uint160 non_addr_var;
-  /// @custom:consol {testaddr{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v==100 } ensures { data == true }}
+  /// @custom:consol {IReceiver(testaddr).foo{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v==100 } ensures { data == true }}
   address testaddr;
 
-  /// @custom:consol {testaddr2{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v==200 }}
+  /// @custom:consol {IReceiver(testaddr2).foo{value: v, gas: g}(mymsg, x) returns (flag, data) requires { v==200 }}
   address testaddr2 = 0x86392dC19c0b719886221c78AB11eb8Cf5c52812;
 
   function callFoo(uint x) public payable returns (uint) {
     // call without options
+    // uint y = IReceiver(testaddr).foo("call foo", x);
     uint z = IReceiver(testaddr).foo("call foo", x);
+    uint y = IReceiver(testaddr).foo{value: msg.value, gas: 5000}("call foo", x);
+    (bool success, )  = testaddr2.call(abi.encodeWithSignature("foo(uint256)", x));
     // You can send ether and specify a custom gas amount
-    uint y = IReceiver(testaddr2).foo{value: msg.value, gas: 5000}("call foo", x);
+    
 
     emit Response(y);
     return y;

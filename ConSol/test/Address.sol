@@ -12,10 +12,10 @@ contract Caller {
   // contract Receiver, but we do know the address of contract Receiver and the
   // function to call as well as the interface of contract Receiver.
 
-  /// @custom:consol { callFoo(addr, x) returns (y)
+  /// @custom:consol { callFoo(_addr, x) returns (y)
   ///   requires {x > 0}
   ///   where {
-  ///     IReceiver(addr).foo{value: v, gas: g}(mymsg, x) returns (y)
+  ///     IReceiver(_addr).foo{value: v, gas: g}(mymsg, x) returns (y)
   ///     requires { v > 5 && g < 10000 && x != 0 }
   ///     ensures { y == x + 1 }
   ///   }
