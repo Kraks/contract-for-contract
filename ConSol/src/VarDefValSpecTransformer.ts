@@ -8,14 +8,10 @@ import {
   FunctionKind,
   FunctionCallKind,
   LiteralKind,
-  FunctionCall,
-  MemberAccess,
-  FunctionCallOptions,
-  Identifier,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
-import { GUARD_ADDR_TYPE, attachSpec, encodeSpecIdToUInt96, rewriteAddrCallsInFunBody, dispatchFunName } from './ConSolUtils.js';
+import { GUARD_ADDR_TYPE, attachSpec, encodeSpecIdToUInt96, rewriteAddrCallsInFunBody } from './ConSolUtils.js';
 import { ConSolFactory } from './ConSolFactory.js';
 
 export class VarDefValSpecTransformer<T> {
@@ -132,7 +128,6 @@ export class VarDefValSpecTransformer<T> {
       func.vBody?.walkChildren((node) => {
         rewriteAddrCallsInFunBody(node, this.factory, tgtFun, tgtInterface, tgtAddr);
       });
-      
     }
   }
   process(): void {

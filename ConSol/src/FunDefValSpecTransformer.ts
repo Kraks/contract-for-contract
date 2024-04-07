@@ -9,12 +9,8 @@ import {
   ErrorDefinition,
   Expression,
   LiteralKind,
-  FunctionCall,
-  FunctionCallOptions,
-  MemberAccess,
   Statement,
   FunctionStateMutability,
-  Identifier,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -27,7 +23,7 @@ import {
   attachSpec,
   encodeSpecIdToUInt96,
   dispatchFunName,
-  rewriteAddrCallsInFunBody
+  rewriteAddrCallsInFunBody,
 } from './ConSolUtils.js';
 
 import { CheckFunFactory } from './CheckFunFactory.js';
@@ -663,7 +659,7 @@ export class FunDefValSpecTransformer<T> {
 
         // Rewrite the address calls in the function body
         this.funDef.vBody?.walkChildren((node) => {
-        rewriteAddrCallsInFunBody(node, this.factory, funName, ifaceName, addrName);
+          rewriteAddrCallsInFunBody(node, this.factory, funName, ifaceName, addrName);
         });
       });
     } else {
