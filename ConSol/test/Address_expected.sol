@@ -15,10 +15,10 @@ contract Caller {
 
     event Response(uint);
 
-    /// @custom:consol { callFoo(addr, x) returns (y)
+    /// @custom:consol { callFoo(_addr, x) returns (y)
     ///    requires {x > 0}
     ///    where {
-    ///      IReceiver(addr).foo{value: v, gas: g}(mymsg, x) returns (y)
+    ///      IReceiver(_addr).foo{value: v, gas: g}(mymsg, x) returns (y)
     ///      requires { v > 5 && g < 10000 && x != 0 }
     ///      ensures { y == x + 1 }
     ///    }
@@ -30,7 +30,7 @@ contract Caller {
         return y;
     }
 
-    function _callFoo_pre(address payable addr, uint x) private {
+    function _callFoo_pre(address payable _addr, uint x) private {
         if (!(x>0)) revert preViolation("callFoo");
     }
 
@@ -46,11 +46,11 @@ contract Caller {
         return (_cs_0);
     }
 
-    function _IReceiver_foo_0_pre(address addr, uint256 v, uint256 g, string memory mymsg, uint x) private {
+    function _IReceiver_foo_0_pre(address _addr, uint256 v, uint256 g, string memory mymsg, uint x) private {
         if (!(v>5&&g<10000&&x!=0)) revert preViolationAddr(0);
     }
 
-    function _IReceiver_foo_0_post(address addr, uint256 v, uint256 g, string memory mymsg, uint x, uint y) private {
+    function _IReceiver_foo_0_post(address _addr, uint256 v, uint256 g, string memory mymsg, uint x, uint y) private {
         if (!(y==x+1)) revert postViolationAddr(0);
     }
 

@@ -11,15 +11,15 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
-import { GUARD_ADDR_TYPE, attachSpec, encodeSpecIdToUInt96, rewriteAddrCallsInFunBody } from './ConSolUtils.js';
+import { GUARD_ADDR_TYPE } from './ConSolUtils.js';
 import { ConSolFactory } from './ConSolFactory.js';
+import { ValSpecTransformer } from './ValSpecTransformer.js';
 
-export class VarDefValSpecTransformer<T> {
+export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   contract: ContractDefinition;
   varDef: VariableDeclaration;
   preAddrError: ErrorDefinition;
   postAddrError: ErrorDefinition;
-  factory: ConSolFactory;
   spec: ValSpec<T>;
   tgtName: string;
 
@@ -31,11 +31,11 @@ export class VarDefValSpecTransformer<T> {
     postAddrError: ErrorDefinition,
     factory: ConSolFactory,
   ) {
+    super(factory);
     this.contract = contract;
     this.varDef = varDef;
     this.preAddrError = preAddrError;
     this.postAddrError = postAddrError;
-    this.factory = factory;
     this.spec = spec;
     this.tgtName = '_wrap_' + varDef.name;
   }
@@ -67,12 +67,7 @@ export class VarDefValSpecTransformer<T> {
     // attach spec ids
     specIds.forEach((specId) => {
       const id = this.factory.makeIdFromVarDec(wrappedAddr);
-      const asgn = this.factory.makeAssignment(
-        'void',
-        '=',
-        id,
-        attachSpec(this.factory, id, encodeSpecIdToUInt96(this.factory, specId)),
-      );
+      const asgn = this.factory.makeAssignment('void', '=', id, this.attachSpec(id, this.encodeSpecIdToUInt96(specId)));
       const asgnStmt = this.factory.makeExpressionStatement(asgn);
       stmts.push(asgnStmt);
     });
@@ -124,9 +119,10 @@ export class VarDefValSpecTransformer<T> {
     const tgtFun = this.spec.call.tgt.func;
     const tgtInterface = this.spec.call.tgt.interface;
     const tgtAddr = this.spec.call.tgt.addr;
+
     for (const func of this.contract.vFunctions) {
       func.vBody?.walkChildren((node) => {
-        rewriteAddrCallsInFunBody(node, this.factory, tgtFun, tgtInterface, tgtAddr);
+        this.rewriteAddrCallsInFunBody(node, tgtFun, tgtInterface, tgtAddr);
       });
     }
   }
