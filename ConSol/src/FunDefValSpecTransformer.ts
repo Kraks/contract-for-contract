@@ -27,6 +27,7 @@ import {
   attachSpec,
   encodeSpecIdToUInt96,
   dispatchFunName,
+  rewriteAddrCallsInFunBody
 } from './ConSolUtils.js';
 
 import { CheckFunFactory } from './CheckFunFactory.js';
@@ -662,43 +663,7 @@ export class FunDefValSpecTransformer<T> {
 
         // Rewrite the address calls in the function body
         this.funDef.vBody?.walkChildren((node) => {
-          // Iface(addr).f(args, ...) -> dispatch_IFace_f(addr, 0, 0 args, ...)
-          // we insert dummy value for "msg.value" and "gas", i.e. 0
-          if (
-            node instanceof FunctionCall &&
-            node.vFunctionName === funName &&
-            node.vExpression instanceof MemberAccess &&
-            node.vExpression.vExpression instanceof FunctionCall &&
-            node.vExpression.vExpression.kind == FunctionCallKind.TypeConversion &&
-            node.vExpression.vExpression.vFunctionName === ifaceName &&
-            node.vExpression.vExpression.vArguments[0] instanceof Identifier &&
-            node.vExpression.vExpression.vArguments[0].name == addrName
-          ) {
-            node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
-            node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
-            node.vArguments.unshift(node.vExpression.vExpression.vArguments[0]);
-            node.vExpression = this.factory.makeIdentifier('function', dispatchFunName(ifaceName, funName), -1);
-          }
-          // Iface(addr).f{value: v, gas: g}(args, ...) -> dispatch_IFace_f(addr, v, g, args, ...)
-          if (
-            node instanceof FunctionCall &&
-            node.vFunctionName === funName &&
-            node.vExpression instanceof FunctionCallOptions &&
-            node.vExpression.vExpression instanceof MemberAccess &&
-            node.vExpression.vExpression.vExpression instanceof FunctionCall &&
-            node.vExpression.vExpression.vExpression.kind == FunctionCallKind.TypeConversion &&
-            node.vExpression.vExpression.vExpression.vFunctionName === ifaceName &&
-            node.vExpression.vExpression.vExpression.vArguments[0] instanceof Identifier &&
-            node.vExpression.vExpression.vExpression.vArguments[0].name == addrName
-          ) {
-            // Let's assume there is only one value and one gas
-            const g = node.vExpression.vOptionsMap.get('gas');
-            if (g) node.vArguments.unshift(g);
-            const v = node.vExpression.vOptionsMap.get('value');
-            if (v) node.vArguments.unshift(v);
-            node.vArguments.unshift(node.vExpression.vExpression.vExpression.vArguments[0]);
-            node.vExpression = this.factory.makeIdentifier('function', 'dispatch_' + ifaceName + '_' + funName, -1);
-          }
+        rewriteAddrCallsInFunBody(node, this.factory, funName, ifaceName, addrName);
         });
       });
     } else {

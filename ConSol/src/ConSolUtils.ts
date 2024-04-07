@@ -13,6 +13,10 @@ import {
   Expression,
   LiteralKind,
   FunctionCallKind,
+  FunctionCall,
+  Identifier,
+  FunctionCallOptions,
+  MemberAccess
 } from 'solc-typed-ast';
 import { ValSpec } from './spec/index.js';
 import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
@@ -212,4 +216,45 @@ export function encodeSpecIdToUInt96(factory: ConSolFactory, specId: number): Ex
 export function dispatchFunName(ifaceName: string, funName: string): string {
   const dispatchFunName = 'dispatch_' + ifaceName + '_' + funName;
   return dispatchFunName;
+}
+
+export function rewriteAddrCallsInFunBody(node:ASTNode, factory: ConSolFactory, tgtFun: string, tgtInterface: string|undefined, tgtAddr: string|undefined){
+  // DX: what if tgtInterface/tgtAddr is undefined?
+    // Iface(addr).f(args, ...) -> dispatch_IFace_f(addr, 0, 0 args, ...)
+    if (
+      node instanceof FunctionCall &&
+      node.vFunctionName === tgtFun &&
+      node.vExpression instanceof MemberAccess &&
+      node.vExpression.vExpression instanceof FunctionCall &&
+      node.vExpression.vExpression.kind == FunctionCallKind.TypeConversion &&
+      node.vExpression.vExpression.vFunctionName === tgtInterface &&
+      node.vExpression.vExpression.vArguments[0] instanceof Identifier &&
+      node.vExpression.vExpression.vArguments[0].name == tgtAddr
+    ) {
+      node.vArguments.unshift(factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
+      node.vArguments.unshift(factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
+      node.vArguments.unshift(node.vExpression.vExpression.vArguments[0]);
+      node.vExpression = factory.makeIdentifier('function', dispatchFunName(tgtInterface, tgtFun), -1);
+    }
+    // Iface(addr).f{value: v, gas: g}(args, ...) -> dispatch_IFace_f(addr, v, g, args, ...)
+    if (
+      node instanceof FunctionCall &&
+      node.vFunctionName === tgtFun &&
+      node.vExpression instanceof FunctionCallOptions &&
+      node.vExpression.vExpression instanceof MemberAccess &&
+      node.vExpression.vExpression.vExpression instanceof FunctionCall &&
+      node.vExpression.vExpression.vExpression.kind == FunctionCallKind.TypeConversion &&
+      node.vExpression.vExpression.vExpression.vFunctionName === tgtInterface &&
+      node.vExpression.vExpression.vExpression.vArguments[0] instanceof Identifier &&
+      node.vExpression.vExpression.vExpression.vArguments[0].name == tgtAddr
+    ) {
+      // Let's assume there is only one value and one gas
+      const g = node.vExpression.vOptionsMap.get('gas');
+      if (g) node.vArguments.unshift(g);
+      const v = node.vExpression.vOptionsMap.get('value');
+      if (v) node.vArguments.unshift(v);
+      node.vArguments.unshift(node.vExpression.vExpression.vExpression.vArguments[0]);
+      node.vExpression = factory.makeIdentifier('function', 'dispatch_' + tgtInterface + '_' + tgtFun, -1);
+    }
+
 }
