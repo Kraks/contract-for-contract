@@ -26,7 +26,7 @@ contract P2Controller is P2ControllerStorage, Exponential,  Initializable{
         if (supplyCap != 0) {
             uint256 _totalSupply = IXToken(xToken).totalSupply();
             uint256 _exchangeRate = IXToken(xToken).exchangeRateStored();
-            
+
             uint256 totalUnderlyingSupply = mulScalarTruncate(_exchangeRate, _totalSupply);
             uint nextTotalUnderlyingSupply = totalUnderlyingSupply.add(mintAmount);
             require(nextTotalUnderlyingSupply < supplyCap, "market supply cap reached");
@@ -43,7 +43,7 @@ contract P2Controller is P2ControllerStorage, Exponential,  Initializable{
 
     function redeemVerify(address xToken, address redeemer) external whenNotPaused(xToken, 2){
         updateSupplyVerify(xToken, redeemer, false);
-    } 
+    }
 
     function orderAllowed(uint256 orderId, address borrower) internal view returns(address){
         (address _collection , , address _pledger) = xNFT.getOrderDetail(orderId);
@@ -64,7 +64,7 @@ contract P2Controller is P2ControllerStorage, Exponential,  Initializable{
         CollateralState storage _collateralState = collateralStates[_collection];
         require(_collateralState.isListed, "collection not exist");
         require(_collateralState.supportPools[xToken] || _collateralState.isSupportAllPools, "collection don't support this pool");
-        
+
         address _lastXToken = orderDebtStates[orderId];
         require(_lastXToken == address(0) || _lastXToken == xToken, "only support borrowing of one xToken");
 
@@ -72,9 +72,10 @@ contract P2Controller is P2ControllerStorage, Exponential,  Initializable{
         require(_price > 0 && valid, "price is not valid");
     }
 
-    /// @custom:consol
+    /// @custom:consol {
     /// borrowAllowed(xToken, orderId, borrower, borrowAmount) returns ()
-    ///   requires _checkBorrowAllowed(xToken, orderId, borrower, borrowAmount)
+    ///   requires { _checkBorrowAllowed(xToken, orderId, borrower, borrowAmount) }
+    /// ?
     function borrowAllowed(address xToken, uint256 orderId, address borrower, uint256 borrowAmount) external whenNotPaused(xToken, 3){
         require(_checkBorrwoAllowed(xToken, orderId, borrower, borrowAmount), "borrow not allowed");
         (address _collection , , ) = xNFT.getOrderDetail(orderId);
@@ -93,7 +94,7 @@ contract P2Controller is P2ControllerStorage, Exponential,  Initializable{
         uint256 _maxBorrow = mulScalarTruncate(_price, _collateralState.collateralFactor);
         uint256 _mayBorrowed = borrowAmount;
         if (_lastXToken != address(0)){
-            _mayBorrowed = IXToken(_lastXToken).borrowBalanceStored(orderId).add(borrowAmount);  
+            _mayBorrowed = IXToken(_lastXToken).borrowBalanceStored(orderId).add(borrowAmount);
         }
         require(_mayBorrowed <= _maxBorrow, "borrow amount exceed");
 
@@ -148,7 +149,7 @@ contract P2Controller is P2ControllerStorage, Exponential,  Initializable{
         uint256 _liquidateBalance = mulScalarTruncate(_price, collateralStates[_collection].liquidateFactor);
 
         require(_borrowBalance > _liquidateBalance, "order don't exceed borrow balance");
-    } 
+    }
 
     function liquidateBorrowVerify(address xToken, uint256 orderId, address borrower, address liquidator, uint256 repayAmount)external whenNotPaused(xToken, 5){
         orderAllowed(orderId, borrower);
@@ -211,7 +212,7 @@ contract P2Controller is P2ControllerStorage, Exponential,  Initializable{
         require(!collateralStates[_collection].isListed, "collection has added");
         require(_collateralFactor <= COLLATERAL_FACTOR_MAX, "_collateralFactor is greater than COLLATERAL_FACTOR_MAX");
         require(_liquidateFactor <= LIQUIDATE_FACTOR_MAX, " _liquidateFactor is greater than LIQUIDATE_FACTOR_MAX");
-        
+
         collateralStates[_collection].isListed = true;
         collateralStates[_collection].collateralFactor = _collateralFactor;
         collateralStates[_collection].liquidateFactor = _liquidateFactor;
@@ -237,7 +238,7 @@ contract P2Controller is P2ControllerStorage, Exponential,  Initializable{
 
     function setCollateralSupportPools(address _collection, address[] calldata _pools) external onlyAdmin{
         require(collateralStates[_collection].isListed, "collection has not added");
-        
+
         if (_pools.length == 0){
             collateralStates[_collection].isSupportAllPools = true;
         }else{
