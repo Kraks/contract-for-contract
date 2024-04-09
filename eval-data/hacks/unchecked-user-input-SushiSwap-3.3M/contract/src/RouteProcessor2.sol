@@ -2,12 +2,12 @@
 
 pragma solidity 0.8.10;
 
-import '../interfaces/IUniswapV2Pair.sol';
-import '../interfaces/IUniswapV3Pool.sol';
-import '../interfaces/ITridentCLPool.sol';
-import '../interfaces/IBentoBoxMinimal.sol';
-import '../interfaces/IPool.sol';
-import '../interfaces/IWETH.sol';
+import './interfaces/IUniswapV2Pair.sol';
+import './interfaces/IUniswapV3Pool.sol';
+import './interfaces/ITridentCLPool.sol';
+import './interfaces/IBentoBoxMinimal.sol';
+import './interfaces/IPool.sol';
+import './interfaces/IWETH.sol';
 import './InputStream.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 
