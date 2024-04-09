@@ -151,9 +151,10 @@ contract TcrToken {
         _burn(msg.sender, amount);
     }
 
-    /// @custom:consol
-    /// burnFrom(from, amount) returns ()
-    ///     requires _allowances[from][msg.sender] >= amount && _balances[from] >= amount
+    /// @custom:consol {
+    ///   burnFrom(from, amount) returns ()
+    ///   requires { _allowances[from][msg.sender] >= amount && _balances[from] >= amount }
+    /// }
     function burnFrom(address from, uint256 amount) external {
         _approve(msg.sender, from, _allowances[from][msg.sender] - amount);
         _burn(from, amount);
