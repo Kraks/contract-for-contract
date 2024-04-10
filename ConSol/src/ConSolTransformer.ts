@@ -10,7 +10,7 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
-import { SPEC_PREFIX, isConSolSpec, parseConSolSpec, usesAddr } from './ConSolUtils.js';
+import { SPEC_PREFIX, isConSolSpec, isConSolSpecDev, parseConSolSpec, trimSpec, usesAddr } from './ConSolUtils.js';
 import { isValSpec, isTempSpec } from './spec/index.js';
 
 import { ConSolFactory } from './ConSolFactory.js';
@@ -97,11 +97,22 @@ export class ConSolTransformer<T> {
       const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
       if (!astNodeDoc) return;
 
-      const specStr = astNodeDoc.text;
-      if (!isConSolSpec(specStr)) return;
+      let specStr ;
+      if (typeof astNodeDoc === 'string'){
+          // @dev 
+        specStr = astNodeDoc;
+        if (!isConSolSpecDev(specStr)) return;
+      }
+      else{
+        // @custom:consol
+        specStr = astNodeDoc.text;
+        if (!isConSolSpec(specStr)) return;
+      }
+
+      
 
       const spec = parseConSolSpec(specStr);
-      console.log('Processing spec :  ' + specStr.substring(SPEC_PREFIX.length).trim());
+      console.log('Processing spec :  ' + trimSpec(specStr));
 
       if (isValSpec(spec)) {
         const success = this.handleValSpec(astNode, spec);

@@ -20,6 +20,7 @@ import { ConSolFactory } from './ConSolFactory.js';
 import { setSourceUnits } from './Global.js';
 
 export const SPEC_PREFIX = '@custom:consol';
+const DEV_PREFIX = '@dev'
 export const GUARD_ADDR_TYPE = 'uint256';
 export const PRE_CHECK_FUN = '_pre';
 export const POST_CHECK_FUN = '_post';
@@ -30,8 +31,20 @@ export function toBeImplemented(): never {
   process.exit(-1);
 }
 
+export function trimSpec(doc:string): string{
+  if (doc.startsWith(SPEC_PREFIX)){
+    return doc.substring(SPEC_PREFIX.length).trim();
+  }
+  else if (doc.startsWith(DEV_PREFIX)){
+    return doc.substring(DEV_PREFIX.length).trim();
+  }
+  else{
+    return ""
+  }
+}
+
 export function parseConSolSpec(doc: string): CSSpec<string> {
-  const specStr = doc.substring(SPEC_PREFIX.length).trim();
+  const specStr = trimSpec(doc);
   const visitor = new CSSpecVisitor<string>((s) => s);
   const spec = CSSpecParse<string>(specStr, visitor);
   return spec;
@@ -122,11 +135,20 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
   });
 }
 
+// @custom:consol
 export function isConSolSpec(doc: string): boolean {
   if (typeof doc !== 'string') {
     return false;
   }
-  return doc.startsWith(SPEC_PREFIX);
+  return doc.startsWith(SPEC_PREFIX);   
+}
+
+// @dev
+export function isConSolSpecDev(doc: string): boolean {
+  if (typeof doc !== 'string') {
+    return false;
+  }
+  return doc.startsWith(DEV_PREFIX);   
 }
 
 export function isConstructor(node: ASTNode): node is FunctionDefinition {
