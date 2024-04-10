@@ -133,26 +133,11 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
   });
 }
 
-<<<<<<< Updated upstream
-// @custom:consol
 export function isConSolSpec(doc: string): boolean {
   if (typeof doc !== 'string') {
     return false;
   }
-  return doc.startsWith(SPEC_PREFIX);
-}
-=======
->>>>>>> Stashed changes
-
-export function isConSolSpec(doc: string): boolean {
-  if (typeof doc !== 'string') {
-    return false;
-  }
-<<<<<<< Updated upstream
-  return doc.startsWith(DEV_PREFIX);
-=======
-  return doc.startsWith(SPEC_PREFIX)||(INCLUDE_DEV_SPEC&&doc.startsWith(DEV_PREFIX));   
->>>>>>> Stashed changes
+  return doc.startsWith(SPEC_PREFIX) || (INCLUDE_DEV_SPEC && doc.startsWith(DEV_PREFIX));
 }
 
 export function isConstructor(node: ASTNode): node is FunctionDefinition {
