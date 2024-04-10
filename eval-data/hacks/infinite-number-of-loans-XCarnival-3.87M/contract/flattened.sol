@@ -954,8 +954,8 @@ contract P2Controller is P2ControllerStorage, Exponential,  Initializable{
     }
 
     /// @custom:consol
-    /// borrowAllowed(xToken, orderId, borrower, borrowAmount) returns ()
-    ///   requires _checkBorrowAllowed(xToken, orderId, borrower, borrowAmount)
+    /// {borrowAllowed(xToken, orderId, borrower, borrowAmount) returns ()
+    ///   requires {_checkBorrowAllowed(xToken, orderId, borrower, borrowAmount)}}
     function borrowAllowed(address xToken, uint256 orderId, address borrower, uint256 borrowAmount) external whenNotPaused(xToken, 3){
         require(_checkBorrwoAllowed(xToken, orderId, borrower, borrowAmount), "borrow not allowed");
         (address _collection , , ) = xNFT.getOrderDetail(orderId);

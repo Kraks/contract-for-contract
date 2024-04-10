@@ -10,7 +10,11 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
+<<<<<<< Updated upstream
 import { isConSolSpec, isConSolSpecDev, parseConSolSpec, trimSpec, usesAddr } from './ConSolUtils.js';
+=======
+import { SPEC_PREFIX, isConSolSpec, parseConSolSpec, trimSpec, usesAddr } from './ConSolUtils.js';
+>>>>>>> Stashed changes
 import { isValSpec, isTempSpec } from './spec/index.js';
 
 import { ConSolFactory } from './ConSolFactory.js';
@@ -20,6 +24,7 @@ import { resetCSVarId, resetStructMap } from './Global.js';
 
 // AST node kinds that allow ConSol spec attachments
 type ConSolCheckNodes = FunctionDefinition | EventDefinition | VariableDeclaration;
+export const INCLUDE_DEV_SPEC = true;
 
 export class ConSolTransformer<T> {
   factory: ConSolFactory;
@@ -96,18 +101,33 @@ export class ConSolTransformer<T> {
     contract.walkChildren((astNode: ASTNode) => {
       const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
       if (!astNodeDoc) return;
+      console.log(astNodeDoc.text);
 
+<<<<<<< Updated upstream
       let specStr;
       if (typeof astNodeDoc === 'string') {
         // @dev
         specStr = astNodeDoc;
         if (!isConSolSpecDev(specStr)) return;
       } else {
+=======
+      let specStr ;
+      if (INCLUDE_DEV_SPEC && typeof astNodeDoc === 'string'){
+        specStr = astNodeDoc;
+      }
+      else{
+>>>>>>> Stashed changes
         // @custom:consol
         specStr = astNodeDoc.text;
-        if (!isConSolSpec(specStr)) return;
       }
 
+<<<<<<< Updated upstream
+=======
+      if (!isConSolSpec(specStr)) return;
+
+      console.log('.................');
+      console.log(specStr);
+>>>>>>> Stashed changes
       const spec = parseConSolSpec(specStr);
       console.log('Processing spec :  ' + trimSpec(specStr));
 

@@ -339,9 +339,9 @@ contract SwaposV2Pair is ISwaposV2Pair, SwaposV2ERC20 {
     }
 
     // update reserves and, on the first call per block, price accumulators
-    /// @custom:consol
-    /// _update(balance0, balance1, _reserve0, _reserve1) returns () 
-    ///   requires __update_pre_condition(balance0, balance1, _reserve0, _reserve1)
+    /// @dev
+    /// {_update(balance0, balance1, _reserve0, _reserve1) returns () 
+    ///   requires {__update_pre_condition(balance0, balance1, _reserve0, _reserve1)}}
     function _update(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) private {
         require(balance0 <= uint112(-1) && balance1 <= uint112(-1), 'SwaposV2: OVERFLOW');
         uint32 blockTimestamp = uint32(block.timestamp % 2**32);

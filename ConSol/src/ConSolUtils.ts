@@ -15,7 +15,7 @@ import { ValSpec } from './spec/index.js';
 import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
 
 import * as fs from 'fs';
-import { ConSolTransformer } from './ConSolTransformer.js';
+import { ConSolTransformer, INCLUDE_DEV_SPEC } from './ConSolTransformer.js';
 import { ConSolFactory } from './ConSolFactory.js';
 import { setSourceUnits } from './Global.js';
 
@@ -133,6 +133,7 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
   });
 }
 
+<<<<<<< Updated upstream
 // @custom:consol
 export function isConSolSpec(doc: string): boolean {
   if (typeof doc !== 'string') {
@@ -140,13 +141,18 @@ export function isConSolSpec(doc: string): boolean {
   }
   return doc.startsWith(SPEC_PREFIX);
 }
+=======
+>>>>>>> Stashed changes
 
-// @dev
-export function isConSolSpecDev(doc: string): boolean {
+export function isConSolSpec(doc: string): boolean {
   if (typeof doc !== 'string') {
     return false;
   }
+<<<<<<< Updated upstream
   return doc.startsWith(DEV_PREFIX);
+=======
+  return doc.startsWith(SPEC_PREFIX)||(INCLUDE_DEV_SPEC&&doc.startsWith(DEV_PREFIX));   
+>>>>>>> Stashed changes
 }
 
 export function isConstructor(node: ASTNode): node is FunctionDefinition {

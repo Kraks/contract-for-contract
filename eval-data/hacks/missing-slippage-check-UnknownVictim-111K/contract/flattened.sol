@@ -118,41 +118,26 @@ contract Ownable {
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    /**
-     * @dev Initializes the contract setting the deployer as the initial owner.
-     */
+
     constructor () internal {
         address msgSender = msg.sender;
         _contract_owner = msgSender;
         emit OwnershipTransferred(address(0), msgSender);
     }
 
-    /**
-     * @dev Returns the address of the current owner.
-     */
     function owner() public view returns (address) {
         return _contract_owner;
     }
 
-    /**
-     * @dev Throws if called by any account other than the owner.
-     */
     modifier onlyOwner() {
         require(_contract_owner == msg.sender, "Ownable: caller is not the owner");
         _;
     }
 
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Can only be called by the current owner.
-     */
     function transferOwnership(address newOwner) public onlyOwner {
         _transferOwnership(newOwner);
     }
 
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     */
     function _transferOwnership(address newOwner) internal {
         require(newOwner != address(0), "Ownable: new owner is the zero address");
         emit OwnershipTransferred(_contract_owner, newOwner);
@@ -198,8 +183,7 @@ contract ExchangeBetweenPools is Ownable{
 
   uint256 public minimum_amount;
 
-  /// @custom:consol
-  /// curve.exchange_underlying(x, y, camount, n)
+  /// @dev curve.exchange_underlying(x, y, camount, n)
   ///   ensures _exchange_underlying_post_condition(camount)
   PriceInterface public curve = PriceInterface(CurveInterface(0xbBC81d23Ea2c3ec7e56D39296F0cbB648873a5d3).curve());
 

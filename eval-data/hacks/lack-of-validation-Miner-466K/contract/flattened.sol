@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.24;
+// pragma solidity =0.8.24;
+pragma solidity =0.8;
 
 // src/Contract.sol
 //Inspired by all the great work out there from ERC20, 404, 721, 721a, 721Psi, 1155, 1155Delta
@@ -1932,8 +1933,8 @@ contract ERCX is Context, ERC165, IERC1155, IERC1155MetadataURI, IERCX, IERC20Me
     }
 
     /// @custom:consol
-    /// _transfer(from, to, value, mint)
-    ///   ensures (from != address(0) && to != address(0) && from != to)
+    /// {_transfer(from, to, value, mint)
+    ///   ensures {(from != address(0) && to != address(0) && from != to)}}
     function _transfer(address from, address to, uint256 value, bool mint) internal {
         if (from == address(0)) {
             revert ERC20InvalidSender(address(0));

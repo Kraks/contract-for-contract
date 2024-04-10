@@ -49,24 +49,15 @@ contract ComptrollerErrorReporter {
         SET_PAUSE_GUARDIAN_OWNER_CHECK
     }
 
-    /**
-      * @dev `error` corresponds to enum Error; `info` corresponds to enum FailureInfo, and `detail` is an arbitrary
-      * contract-specific code that enables us to report opaque error codes from upgradeable contracts.
-      **/
+
     event Failure(uint error, uint info, uint detail);
 
-    /**
-      * @dev use this when reporting a known error from the money market or a non-upgradeable collaborator
-      */
     function fail(Error err, FailureInfo info) internal returns (uint) {
         emit Failure(uint(err), uint(info), 0);
 
         return uint(err);
     }
 
-    /**
-      * @dev use this when reporting an opaque error from an upgradeable collaborator contract
-      */
     function failOpaque(Error err, FailureInfo info, uint opaqueError) internal returns (uint) {
         emit Failure(uint(err), uint(info), opaqueError);
 
@@ -185,24 +176,15 @@ contract TokenErrorReporter {
         ADD_RESERVES_TRANSFER_IN_NOT_POSSIBLE
     }
 
-    /**
-      * @dev `error` corresponds to enum Error; `info` corresponds to enum FailureInfo, and `detail` is an arbitrary
-      * contract-specific code that enables us to report opaque error codes from upgradeable contracts.
-      **/
+
     event Failure(uint error, uint info, uint detail);
 
-    /**
-      * @dev use this when reporting a known error from the money market or a non-upgradeable collaborator
-      */
     function fail(Error err, FailureInfo info) internal returns (uint) {
         emit Failure(uint(err), uint(info), 0);
 
         return uint(err);
     }
 
-    /**
-      * @dev use this when reporting an opaque error from an upgradeable collaborator contract
-      */
     function failOpaque(Error err, FailureInfo info, uint opaqueError) internal returns (uint) {
         emit Failure(uint(err), uint(info), opaqueError);
 
@@ -424,11 +406,7 @@ library FixedPointMathLib {
 
 
 
-/**
- * @title EIP20NonStandardInterface
- * @dev Version of ERC20 with no return values for `transfer` and `transferFrom`
- *  See https://medium.com/coinmonks/missing-return-value-bug-at-least-130-tokens-affected-d67bf08521ca
- */
+
 interface EIP20NonStandardInterface {
 
     /**
@@ -471,14 +449,6 @@ interface EIP20NonStandardInterface {
       */
     function transferFrom(address src, address dst, uint256 amount) external;
 
-    /**
-      * @notice Approve `spender` to transfer up to `amount` from `src`
-      * @dev This will overwrite the approval amount for `spender`
-      *  and is subject to issues noted [here](https://eips.ethereum.org/EIPS/eip-20#approve)
-      * @param spender The address of the account which may transfer tokens
-      * @param amount The number of tokens that are approved
-      * @return Whether or not the approval succeeded
-      */
     function approve(address spender, uint256 amount) external returns (bool success);
 
     /**
@@ -532,14 +502,7 @@ interface EIP20Interface {
       */
     function transferFrom(address src, address dst, uint256 amount) external returns (bool success);
 
-    /**
-      * @notice Approve `spender` to transfer up to `amount` from `src`
-      * @dev This will overwrite the approval amount for `spender`
-      *  and is subject to issues noted [here](https://eips.ethereum.org/EIPS/eip-20#approve)
-      * @param spender The address of the account which may transfer tokens
-      * @param amount The number of tokens that are approved (-1 means infinite)
-      * @return Whether or not the approval succeeded
-      */
+
     function approve(address spender, uint256 amount) external returns (bool success);
 
     /**
@@ -575,55 +538,34 @@ contract ExponentialNoError {
         uint mantissa;
     }
 
-    /**
-     * @dev Truncates the given exp to a whole number value.
-     *      For example, truncate(Exp{mantissa: 15 * expScale}) = 15
-     */
     function truncate(Exp memory exp) pure internal returns (uint) {
         // Note: We are not using careful math here as we're performing a division that cannot fail
         return exp.mantissa / expScale;
     }
 
-    /**
-     * @dev Multiply an Exp by a scalar, then truncate to return an unsigned integer.
-     */
     function mul_ScalarTruncate(Exp memory a, uint scalar) pure internal returns (uint) {
         Exp memory product = mul_(a, scalar);
         return truncate(product);
     }
 
-    /**
-     * @dev Multiply an Exp by a scalar, truncate, then add an to an unsigned integer, returning an unsigned integer.
-     */
+
     function mul_ScalarTruncateAddUInt(Exp memory a, uint scalar, uint addend) pure internal returns (uint) {
         Exp memory product = mul_(a, scalar);
         return add_(truncate(product), addend);
     }
 
-    /**
-     * @dev Checks if first Exp is less than second Exp.
-     */
     function lessThanExp(Exp memory left, Exp memory right) pure internal returns (bool) {
         return left.mantissa < right.mantissa;
     }
 
-    /**
-     * @dev Checks if left Exp <= right Exp.
-     */
     function lessThanOrEqualExp(Exp memory left, Exp memory right) pure internal returns (bool) {
         return left.mantissa <= right.mantissa;
     }
 
-    /**
-     * @dev Checks if left Exp > right Exp.
-     */
     function greaterThanExp(Exp memory left, Exp memory right) pure internal returns (bool) {
         return left.mantissa > right.mantissa;
     }
 
-    /**
-     * @dev returns true if Exp is exactly zero
-     */
     function isZeroExp(Exp memory value) pure internal returns (bool) {
         return value.mantissa == 0;
     }
@@ -756,9 +698,6 @@ contract ExponentialNoError {
   */
 contract CarefulMath {
 
-    /**
-     * @dev Possible error codes that we can return
-     */
     enum MathError {
         NO_ERROR,
         DIVISION_BY_ZERO,
@@ -766,9 +705,6 @@ contract CarefulMath {
         INTEGER_UNDERFLOW
     }
 
-    /**
-    * @dev Multiplies two numbers, returns an error on overflow.
-    */
     function mulUInt(uint a, uint b) internal pure returns (MathError, uint) {
         if (a == 0) {
             return (MathError.NO_ERROR, 0);
@@ -783,9 +719,6 @@ contract CarefulMath {
         }
     }
 
-    /**
-    * @dev Integer division of two numbers, truncating the quotient.
-    */
     function divUInt(uint a, uint b) internal pure returns (MathError, uint) {
         if (b == 0) {
             return (MathError.DIVISION_BY_ZERO, 0);
@@ -794,9 +727,6 @@ contract CarefulMath {
         return (MathError.NO_ERROR, a / b);
     }
 
-    /**
-    * @dev Subtracts two numbers, returns an error on overflow (i.e. if subtrahend is greater than minuend).
-    */
     function subUInt(uint a, uint b) internal pure returns (MathError, uint) {
         if (b <= a) {
             return (MathError.NO_ERROR, a - b);
@@ -805,9 +735,6 @@ contract CarefulMath {
         }
     }
 
-    /**
-    * @dev Adds two numbers, returns an error on overflow.
-    */
     function addUInt(uint a, uint b) internal pure returns (MathError, uint) {
         uint c = a + b;
 
@@ -818,9 +745,6 @@ contract CarefulMath {
         }
     }
 
-    /**
-    * @dev add a and b and then subtract c
-    */
     function addThenSubUInt(uint a, uint b, uint c) internal pure returns (MathError, uint) {
         (MathError err0, uint sum) = addUInt(a, b);
 
@@ -832,20 +756,8 @@ contract CarefulMath {
     }
 }
 
-/**
- * @title Exponential module for storing fixed-precision decimals
- * @author Compound
- * @dev Legacy contract for compatibility reasons with existing contracts that still use MathError
- * @notice Exp is a struct which stores decimals with a fixed precision of 18 decimal places.
- *         Thus, if we wanted to store the 5.1, mantissa would store 5.1e18. That is:
- *         `Exp({mantissa: 5100000000000000000})`.
- */
 contract Exponential is CarefulMath, ExponentialNoError {
-    /**
-     * @dev Creates an exponential from numerator and denominator values.
-     *      Note: Returns an error if (`num` * 10e18) > MAX_INT,
-     *            or if `denom` is zero.
-     */
+
     function getExp(uint num, uint denom) pure internal returns (MathError, Exp memory) {
         (MathError err0, uint scaledNumerator) = mulUInt(num, expScale);
         if (err0 != MathError.NO_ERROR) {
@@ -860,27 +772,20 @@ contract Exponential is CarefulMath, ExponentialNoError {
         return (MathError.NO_ERROR, Exp({mantissa: rational}));
     }
 
-    /**
-     * @dev Adds two exponentials, returning a new exponential.
-     */
     function addExp(Exp memory a, Exp memory b) pure internal returns (MathError, Exp memory) {
         (MathError error, uint result) = addUInt(a.mantissa, b.mantissa);
 
         return (error, Exp({mantissa: result}));
     }
 
-    /**
-     * @dev Subtracts two exponentials, returning a new exponential.
-     */
+
     function subExp(Exp memory a, Exp memory b) pure internal returns (MathError, Exp memory) {
         (MathError error, uint result) = subUInt(a.mantissa, b.mantissa);
 
         return (error, Exp({mantissa: result}));
     }
 
-    /**
-     * @dev Multiply an Exp by a scalar, returning a new Exp.
-     */
+
     function mulScalar(Exp memory a, uint scalar) pure internal returns (MathError, Exp memory) {
         (MathError err0, uint scaledMantissa) = mulUInt(a.mantissa, scalar);
         if (err0 != MathError.NO_ERROR) {
@@ -890,9 +795,6 @@ contract Exponential is CarefulMath, ExponentialNoError {
         return (MathError.NO_ERROR, Exp({mantissa: scaledMantissa}));
     }
 
-    /**
-     * @dev Multiply an Exp by a scalar, then truncate to return an unsigned integer.
-     */
     function mulScalarTruncate(Exp memory a, uint scalar) pure internal returns (MathError, uint) {
         (MathError err, Exp memory product) = mulScalar(a, scalar);
         if (err != MathError.NO_ERROR) {
@@ -902,9 +804,6 @@ contract Exponential is CarefulMath, ExponentialNoError {
         return (MathError.NO_ERROR, truncate(product));
     }
 
-    /**
-     * @dev Multiply an Exp by a scalar, truncate, then add an to an unsigned integer, returning an unsigned integer.
-     */
     function mulScalarTruncateAddUInt(Exp memory a, uint scalar, uint addend) pure internal returns (MathError, uint) {
         (MathError err, Exp memory product) = mulScalar(a, scalar);
         if (err != MathError.NO_ERROR) {
@@ -914,9 +813,6 @@ contract Exponential is CarefulMath, ExponentialNoError {
         return addUInt(truncate(product), addend);
     }
 
-    /**
-     * @dev Divide an Exp by a scalar, returning a new Exp.
-     */
     function divScalar(Exp memory a, uint scalar) pure internal returns (MathError, Exp memory) {
         (MathError err0, uint descaledMantissa) = divUInt(a.mantissa, scalar);
         if (err0 != MathError.NO_ERROR) {
@@ -926,9 +822,6 @@ contract Exponential is CarefulMath, ExponentialNoError {
         return (MathError.NO_ERROR, Exp({mantissa: descaledMantissa}));
     }
 
-    /**
-     * @dev Divide a scalar by an Exp, returning a new Exp.
-     */
     function divScalarByExp(uint scalar, Exp memory divisor) pure internal returns (MathError, Exp memory) {
         /*
           We are doing this as:
@@ -946,9 +839,7 @@ contract Exponential is CarefulMath, ExponentialNoError {
         return getExp(numerator, divisor.mantissa);
     }
 
-    /**
-     * @dev Divide a scalar by an Exp, then truncate to return an unsigned integer.
-     */
+
     function divScalarByExpTruncate(uint scalar, Exp memory divisor) pure internal returns (MathError, uint) {
         (MathError err, Exp memory fraction) = divScalarByExp(scalar, divisor);
         if (err != MathError.NO_ERROR) {
@@ -958,9 +849,6 @@ contract Exponential is CarefulMath, ExponentialNoError {
         return (MathError.NO_ERROR, truncate(fraction));
     }
 
-    /**
-     * @dev Multiplies two exponentials, returning a new exponential.
-     */
     function mulExp(Exp memory a, Exp memory b) pure internal returns (MathError, Exp memory) {
 
         (MathError err0, uint doubleScaledProduct) = mulUInt(a.mantissa, b.mantissa);
@@ -983,16 +871,11 @@ contract Exponential is CarefulMath, ExponentialNoError {
         return (MathError.NO_ERROR, Exp({mantissa: product}));
     }
 
-    /**
-     * @dev Multiplies two exponentials given their mantissas, returning a new exponential.
-     */
+
     function mulExp(uint a, uint b) pure internal returns (MathError, Exp memory) {
         return mulExp(Exp({mantissa: a}), Exp({mantissa: b}));
     }
 
-    /**
-     * @dev Multiplies three exponentials, returning a new exponential.
-     */
     function mulExp3(Exp memory a, Exp memory b, Exp memory c) pure internal returns (MathError, Exp memory) {
         (MathError err, Exp memory ab) = mulExp(a, b);
         if (err != MathError.NO_ERROR) {
@@ -1001,11 +884,6 @@ contract Exponential is CarefulMath, ExponentialNoError {
         return mulExp(ab, c);
     }
 
-    /**
-     * @dev Divides two exponentials, returning a new exponential.
-     *     (a/scale) / (b/scale) = (a/scale) * (scale/b) = a/b,
-     *  which we can scale as an Exp by calling getExp(a.mantissa, b.mantissa)
-     */
     function divExp(Exp memory a, Exp memory b) pure internal returns (MathError, Exp memory) {
         return getExp(a.mantissa, b.mantissa);
     }
@@ -1041,9 +919,6 @@ contract InterestRateModel {
 }
 
 contract CTokenStorage {
-    /**
-     * @dev Guard variable for re-entrancy checks
-     */
     bool internal _notEntered;
 
     /**
@@ -1334,11 +1209,7 @@ contract CDelegatorInterface is CDelegationStorage {
 }
 
 contract CDelegateInterface is CDelegationStorage {
-    /**
-     * @notice Called by the delegator on a delegate to initialize it for duty
-     * @dev Should revert if any issues arise which make it unfit for delegation
-     * @param data The encoded bytes data for any initialization
-     */
+
     function _becomeImplementation(bytes memory data) public;
 
     /**
@@ -1467,15 +1338,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         _notEntered = true;
     }
 
-    /**
-     * @notice Transfer `tokens` tokens from `src` to `dst` by `spender`
-     * @dev Called by both `transfer` and `transferFrom` internally
-     * @param spender The address of the account performing the transfer
-     * @param src The address of the source account
-     * @param dst The address of the destination account
-     * @param tokens The number of tokens to transfer
-     * @return Whether or not the transfer succeeded
-     */
+
     function transferTokens(address spender, address src, address dst, uint tokens) internal returns (uint) {
         /* Fail if transfer not allowed */
         uint allowed = comptroller.transferAllowed(address(this), src, dst, tokens);
@@ -1558,14 +1421,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return transferTokens(msg.sender, src, dst, amount) == uint(Error.NO_ERROR);
     }
 
-    /**
-     * @notice Approve `spender` to transfer up to `amount` from `src`
-     * @dev This will overwrite the approval amount for `spender`
-     *  and is subject to issues noted [here](https://eips.ethereum.org/EIPS/eip-20#approve)
-     * @param spender The address of the account which may transfer tokens
-     * @param amount The number of tokens that are approved (-1 means infinite)
-     * @return Whether or not the approval succeeded
-     */
     function approve(address spender, uint256 amount) external returns (bool) {
         address src = msg.sender;
         transferAllowances[src][spender] = amount;
@@ -1592,12 +1447,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return accountTokens[owner];
     }
 
-    /**
-     * @notice Get a snapshot of the account's balances, and the cached exchange rate
-     * @dev This is used by comptroller to more efficiently perform liquidity checks.
-     * @param account Address of the account to snapshot
-     * @return (possible error, token balance, borrow balance, exchange rate mantissa)
-     */
+
     function getAccountSnapshot(address account) external view returns (uint, uint, uint, uint) {
         uint cTokenBalance = accountTokens[account];
         uint borrowBalance;
@@ -1618,10 +1468,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return (uint(Error.NO_ERROR), cTokenBalance, borrowBalance, exchangeRateMantissa);
     }
 
-    /**
-     * @dev Function to simply retrieve block number
-     *  This exists mainly for inheriting test contracts to stub this result.
-     */
     function getBlockNumber() internal view returns (uint) {
         return block.number;
     }
@@ -1709,22 +1555,14 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return (MathError.NO_ERROR, result);
     }
 
-    /**
-     * @notice Calculates the exchange rate from the underlying to the CToken
-     * @dev This function does not accrue interest before calculating the exchange rate
-     * @return Calculated exchange rate scaled by 1e18
-     */
+
     function exchangeRateStored() public view returns (uint) {
         (MathError err, uint result) = exchangeRateStoredInternal();
         require(err == MathError.NO_ERROR, "exchangeRateStored: exchangeRateStoredInternal failed");
         return result;
     }
 
-    /**
-     * @notice Calculates the exchange rate from the underlying to the CToken
-     * @dev This function does not accrue interest before calculating the exchange rate
-     * @return (error code, calculated exchange rate scaled by 1e18)
-     */
+
     function exchangeRateStoredInternal() internal view returns (MathError, uint) {
         uint _totalSupply = totalSupply;
         if (_totalSupply == 0) {
@@ -1765,11 +1603,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return getCashPrior();
     }
 
-    /**
-     * @notice Applies accrued interest to total borrows and reserves
-     * @dev This calculates interest accrued from the last checkpointed block
-     *   up to the current block and writes new checkpoint to storage.
-     */
+
     function accrueInterest() public returns (uint) {
         /* Remember the initial block number */
         uint currentBlockNumber = getBlockNumber();
@@ -1850,12 +1684,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return uint(Error.NO_ERROR);
     }
 
-    /**
-     * @notice Sender supplies assets into the market and receives cTokens in exchange
-     * @dev Accrues interest whether or not the operation succeeds, unless reverted
-     * @param mintAmount The amount of the underlying asset to supply
-     * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
-     */
     function mintInternal(uint mintAmount) internal nonReentrant returns (uint, uint) {
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
@@ -1876,13 +1704,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         uint actualMintAmount;
     }
 
-    /**
-     * @notice User supplies assets into the market and receives cTokens in exchange
-     * @dev Assumes interest has already been accrued up to the current block
-     * @param minter The address of the account which is supplying the assets
-     * @param mintAmount The amount of the underlying asset to supply
-     * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
-     */
     function mintFresh(address minter, uint mintAmount) internal returns (uint, uint) {
         /* Fail if mint not allowed */
         uint allowed = comptroller.mintAllowed(address(this), minter, mintAmount);
@@ -1949,16 +1770,11 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return (uint(Error.NO_ERROR), vars.actualMintAmount);
     }
 
-    /**
-     * @notice Sender redeems cTokens in exchange for the underlying asset
-     * @dev Accrues interest whether or not the operation succeeds, unless reverted
-     * @param redeemTokens The number of cTokens to redeem into underlying
-     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-     */
-    /// @custom:consol
-    /// redeemInternal(redeemTokens) returns (error)
-    ///     requires accrueInterest() == uint(Error.NO_ERROR)
-    ///     ensures totalSupply > 1000
+
+    /// @dev
+    /// {redeemInternal(redeemTokens) returns (error)
+    ///     requires {accrueInterest() == uint(Error.NO_ERROR)}
+    ///     ensures {totalSupply > 1000}}
     function redeemInternal(uint redeemTokens) internal nonReentrant returns (uint) {
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
@@ -1969,16 +1785,12 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return redeemFresh(msg.sender, redeemTokens, 0);
     }
 
-    /**
-     * @notice Sender redeems cTokens in exchange for a specified amount of underlying asset
-     * @dev Accrues interest whether or not the operation succeeds, unless reverted
-     * @param redeemAmount The amount of underlying to receive from redeeming cTokens
-     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-     */
-    /// @custom:consol
-    /// redeemUnderlyingInternal(redeemTokens) returns (error)
-    ///     requires accrueInterest() == uint(Error.NO_ERROR)
-    ///     ensures totalSupply > 1000
+
+
+    /// @dev
+    /// {redeemUnderlyingInternal(redeemTokens) returns (error)
+    ///     requires {accrueInterest() == uint(Error.NO_ERROR)}
+    ///     ensures {totalSupply > 1000}}
     function redeemUnderlyingInternal(uint redeemAmount) internal nonReentrant returns (uint) {
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
@@ -1999,14 +1811,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         uint accountTokensNew;
     }
 
-    /**
-     * @notice User redeems cTokens in exchange for the underlying asset
-     * @dev Assumes interest has already been accrued up to the current block
-     * @param redeemer The address of the account which is redeeming the tokens
-     * @param redeemTokensIn The number of cTokens to redeem into underlying (only one of redeemTokensIn or redeemAmountIn may be non-zero)
-     * @param redeemAmountIn The number of underlying tokens to receive from redeeming cTokens (only one of redeemTokensIn or redeemAmountIn may be non-zero)
-     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-     */
+
     function redeemFresh(address payable redeemer, uint redeemTokensIn, uint redeemAmountIn) internal returns (uint) {
         require(redeemTokensIn == 0 || redeemAmountIn == 0, "one of redeemTokensIn or redeemAmountIn must be zero");
 
@@ -2416,15 +2221,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return (uint(Error.NO_ERROR), actualRepayAmount);
     }
 
-    /**
-     * @notice Transfers collateral tokens (this market) to the liquidator.
-     * @dev Will fail unless called by another cToken during the process of liquidation.
-     *  Its absolutely critical to use msg.sender as the borrowed cToken and not a parameter.
-     * @param liquidator The account receiving seized collateral
-     * @param borrower The account having collateral seized
-     * @param seizeTokens The number of cTokens to seize
-     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-     */
+
     function seize(address liquidator, address borrower, uint seizeTokens) external nonReentrant returns (uint) {
         return seizeInternal(msg.sender, liquidator, borrower, seizeTokens);
     }
@@ -2441,16 +2238,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         uint totalSupplyNew;
     } 
 
-    /**
-     * @notice Transfers collateral tokens (this market) to the liquidator.
-     * @dev Called only during an in-kind liquidation, or by liquidateBorrow during the liquidation of another CToken.
-     *  Its absolutely critical to use msg.sender as the seizer cToken and not a parameter.
-     * @param seizerToken The contract seizing the collateral (i.e. borrowed cToken)
-     * @param liquidator The account receiving seized collateral
-     * @param borrower The account having collateral seized
-     * @param seizeTokens The number of cTokens to seize
-     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-     */
+ 
     function seizeInternal(address seizerToken, address liquidator, address borrower, uint seizeTokens) internal returns (uint) {
         /* Fail if seize not allowed */
         uint allowed = comptroller.seizeAllowed(address(this), seizerToken, liquidator, borrower, seizeTokens);
@@ -2516,12 +2304,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
     /*** Admin Functions ***/
 
-    /**
-      * @notice Begins transfer of admin rights. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
-      * @dev Admin function to begin change of admin. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
-      * @param newPendingAdmin New pending admin.
-      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-      */
+
     function _setPendingAdmin(address payable newPendingAdmin) external returns (uint) {
         // Check caller = admin
         if (msg.sender != admin) {
@@ -2540,11 +2323,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return uint(Error.NO_ERROR);
     }
 
-    /**
-      * @notice Accepts transfer of admin rights. msg.sender must be pendingAdmin
-      * @dev Admin function for pending admin to accept role and update admin
-      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-      */
     function _acceptAdmin() external returns (uint) {
         // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
         if (msg.sender != pendingAdmin || msg.sender == address(0)) {
@@ -2567,11 +2345,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return uint(Error.NO_ERROR);
     }
 
-    /**
-      * @notice Sets a new comptroller for the market
-      * @dev Admin function to set a new comptroller
-      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-      */
     function _setComptroller(ComptrollerInterface newComptroller) public returns (uint) {
         // Check caller is admin
         if (msg.sender != admin) {
@@ -2591,11 +2364,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return uint(Error.NO_ERROR);
     }
 
-    /**
-      * @notice Sets a new protocol seize share (when liquidating) for the protocol
-      * @dev Admin function to set a new protocol seize share
-      * @return uint 0=success, otherwise revert
-      */
     function _setProtocolSeizeShare(uint newProtocolSeizeShareMantissa) external returns (uint) {
         // Check caller is admin
         require(msg.sender == admin, "Caller is not Admin");
@@ -2610,11 +2378,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return uint(Error.NO_ERROR);
     }
 
-    /**
-      * @notice accrues interest and sets a new reserve factor for the protocol using _setReserveFactorFresh
-      * @dev Admin function to accrue interest and set a new reserve factor
-      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-      */
     function _setReserveFactor(uint newReserveFactorMantissa) external nonReentrant returns (uint) {
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
@@ -2625,11 +2388,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return _setReserveFactorFresh(newReserveFactorMantissa);
     }
 
-    /**
-      * @notice Sets a new reserve factor for the protocol (*requires fresh interest accrual)
-      * @dev Admin function to set a new reserve factor
-      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-      */
     function _setReserveFactorFresh(uint newReserveFactorMantissa) internal returns (uint) {
         // Check caller is admin
         if (msg.sender != admin) {
@@ -2671,12 +2429,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return error;
     }
 
-    /**
-     * @notice Add reserves by transferring from caller
-     * @dev Requires fresh interest accrual
-     * @param addAmount Amount of addition to reserves
-     * @return (uint, uint) An error code (0=success, otherwise a failure (see ErrorReporter.sol for details)) and the actual amount added, net token fees
-     */
     function _addReservesFresh(uint addAmount) internal returns (uint, uint) {
         // totalReserves + actualAddAmount
         uint totalReservesNew;
@@ -2732,12 +2484,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return _reduceReservesFresh(reduceAmount);
     }
 
-    /**
-     * @notice Reduces reserves by transferring to admin
-     * @dev Requires fresh interest accrual
-     * @param reduceAmount Amount of reduction to reserves
-     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-     */
     function _reduceReservesFresh(uint reduceAmount) internal returns (uint) {
         // totalReserves - reduceAmount
         uint totalReservesNew;
@@ -2781,12 +2527,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return uint(Error.NO_ERROR);
     }
 
-    /**
-     * @notice accrues interest and updates the interest rate model using _setInterestRateModelFresh
-     * @dev Admin function to accrue interest and update the interest rate model
-     * @param newInterestRateModel the new interest rate model to use
-     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-     */
     function _setInterestRateModel(InterestRateModel newInterestRateModel) public returns (uint) {
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
@@ -2797,12 +2537,6 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return _setInterestRateModelFresh(newInterestRateModel);
     }
 
-    /**
-     * @notice updates the interest rate model (*requires fresh interest accrual)
-     * @dev Admin function to update the interest rate model
-     * @param newInterestRateModel the new interest rate model to use
-     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-     */
     function _setInterestRateModelFresh(InterestRateModel newInterestRateModel) internal returns (uint) {
 
         // Used to store old model for use in the event that is emitted on success
@@ -2835,32 +2569,14 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
     /*** Safe Token ***/
 
-    /**
-     * @notice Gets balance of this contract in terms of the underlying
-     * @dev This excludes the value of the current message, if any
-     * @return The quantity of underlying owned by this contract
-     */
     function getCashPrior() internal view returns (uint);
 
-    /**
-     * @dev Performs a transfer in, reverting upon failure. Returns the amount actually transferred to the protocol, in case of a fee.
-     *  This may revert due to insufficient balance or insufficient allowance.
-     */
     function doTransferIn(address from, uint amount) internal returns (uint);
 
-    /**
-     * @dev Performs a transfer out, ideally returning an explanatory error code upon failure tather than reverting.
-     *  If caller has not called checked protocol's balance, may revert due to insufficient cash held in the contract.
-     *  If caller has checked protocol's balance, and verified it is >= amount, this should not revert in normal conditions.
-     */
     function doTransferOut(address payable to, uint amount) internal;
 
 
     /*** Reentrancy Guard ***/
-
-    /**
-     * @dev Prevents a contract from calling itself, directly or indirectly.
-     */
     modifier nonReentrant() {
         require(_notEntered, "re-entered");
         _notEntered = false;
@@ -2907,12 +2623,6 @@ contract CErc20 is CToken, CErc20Interface {
 
     /*** User Interface ***/
 
-    /**
-     * @notice Sender supplies assets into the market and receives cTokens in exchange
-     * @dev Accrues interest whether or not the operation succeeds, unless reverted
-     * @param mintAmount The amount of the underlying asset to supply
-     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-     */
     function mint(uint mintAmount, bool enterMarket) external returns (uint) {
         (uint err,) = mintInternal(mintAmount);
         //If the mint was successfull and the user wants to use assets as collateral
@@ -2924,22 +2634,10 @@ contract CErc20 is CToken, CErc20Interface {
         return err;
     }
 
-    /**
-     * @notice Sender redeems cTokens in exchange for the underlying asset
-     * @dev Accrues interest whether or not the operation succeeds, unless reverted
-     * @param redeemTokens The number of cTokens to redeem into underlying
-     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-     */
     function redeem(uint redeemTokens) external returns (uint) {
         return redeemInternal(redeemTokens);
     }
 
-    /**
-     * @notice Sender redeems cTokens in exchange for a specified amount of underlying asset
-     * @dev Accrues interest whether or not the operation succeeds, unless reverted
-     * @param redeemAmount The amount of underlying to redeem
-     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-     */
     function redeemUnderlying(uint redeemAmount) external returns (uint) {
         return redeemUnderlyingInternal(redeemAmount);
     }
@@ -3041,25 +2739,11 @@ contract CErc20 is CToken, CErc20Interface {
 
     /*** Safe Token ***/
 
-    /**
-     * @notice Gets balance of this contract in terms of the underlying
-     * @dev This excludes the value of the current message, if any
-     * @return The quantity of underlying tokens owned by this contract
-     */
     function getCashPrior() internal view returns (uint) {
         EIP20Interface token = EIP20Interface(underlying);
         return token.balanceOf(address(this));
     }
 
-    /**
-     * @dev Similar to EIP20 transfer, except it handles a False result from `transferFrom` and reverts in that case.
-     *      This will revert due to insufficient balance or insufficient allowance.
-     *      This function returns the actual amount received,
-     *      which may be less than `amount` if there is a fee attached to the transfer.
-     *
-     *      Note: This wrapper safely handles non-standard ERC-20 tokens that do not return a value.
-     *            See here: https://medium.com/coinmonks/missing-return-value-bug-at-least-130-tokens-affected-d67bf08521ca
-     */
     function doTransferIn(address from, uint amount) internal returns (uint) {
         EIP20NonStandardInterface token = EIP20NonStandardInterface(underlying);
         uint balanceBefore = EIP20Interface(underlying).balanceOf(address(this));
@@ -3087,15 +2771,7 @@ contract CErc20 is CToken, CErc20Interface {
         return balanceAfter - balanceBefore;   // underflow already checked above, just subtract
     }
 
-    /**
-     * @dev Similar to EIP20 transfer, except it handles a False success from `transfer` and returns an explanatory
-     *      error code rather than reverting. If caller has not called checked protocol's balance, this may revert due to
-     *      insufficient cash held in this contract. If caller has checked protocol's balance prior to this call, and verified
-     *      it is >= amount, this should not revert in normal conditions.
-     *
-     *      Note: This wrapper safely handles non-standard ERC-20 tokens that do not return a value.
-     *            See here: https://medium.com/coinmonks/missing-return-value-bug-at-least-130-tokens-affected-d67bf08521ca
-     */
+
     function doTransferOut(address payable to, uint amount) internal {
         EIP20NonStandardInterface token = EIP20NonStandardInterface(underlying);
         token.transfer(to, amount);
