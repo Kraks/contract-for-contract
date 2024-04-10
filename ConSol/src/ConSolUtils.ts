@@ -20,7 +20,7 @@ import { ConSolFactory } from './ConSolFactory.js';
 import { setSourceUnits } from './Global.js';
 
 export const SPEC_PREFIX = '@custom:consol';
-const DEV_PREFIX = '@dev'
+const DEV_PREFIX = '@dev';
 export const GUARD_ADDR_TYPE = 'uint256';
 export const PRE_CHECK_FUN = '_pre';
 export const POST_CHECK_FUN = '_post';
@@ -31,15 +31,13 @@ export function toBeImplemented(): never {
   process.exit(-1);
 }
 
-export function trimSpec(doc:string): string{
-  if (doc.startsWith(SPEC_PREFIX)){
+export function trimSpec(doc: string): string {
+  if (doc.startsWith(SPEC_PREFIX)) {
     return doc.substring(SPEC_PREFIX.length).trim();
-  }
-  else if (doc.startsWith(DEV_PREFIX)){
+  } else if (doc.startsWith(DEV_PREFIX)) {
     return doc.substring(DEV_PREFIX.length).trim();
-  }
-  else{
-    return ""
+  } else {
+    return '';
   }
 }
 
@@ -140,7 +138,7 @@ export function isConSolSpec(doc: string): boolean {
   if (typeof doc !== 'string') {
     return false;
   }
-  return doc.startsWith(SPEC_PREFIX);   
+  return doc.startsWith(SPEC_PREFIX);
 }
 
 // @dev
@@ -148,7 +146,7 @@ export function isConSolSpecDev(doc: string): boolean {
   if (typeof doc !== 'string') {
     return false;
   }
-  return doc.startsWith(DEV_PREFIX);   
+  return doc.startsWith(DEV_PREFIX);
 }
 
 export function isConstructor(node: ASTNode): node is FunctionDefinition {
