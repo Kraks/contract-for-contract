@@ -17,7 +17,7 @@ import { ValSpecTransformer } from './ValSpecTransformer.js';
 import { findContract } from './Global.js';
 import { CheckFunFactory } from './CheckFunFactory.js';
 
-const  HARDCODE_SPECID=1;  // hard coded for now
+const HARDCODE_SPECID = 1; // hard coded for now
 
 export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   contract: ContractDefinition;
