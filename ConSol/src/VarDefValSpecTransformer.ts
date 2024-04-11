@@ -16,6 +16,9 @@ import { ConSolFactory } from './ConSolFactory.js';
 import { ValSpecTransformer } from './ValSpecTransformer.js';
 import { findContract } from './Global.js';
 import { CheckFunFactory } from './CheckFunFactory.js';
+
+const  HARDCODE_SPECID=1;  // hard coded for now
+
 export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   contract: ContractDefinition;
   varDef: VariableDeclaration;
@@ -148,7 +151,7 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
       );
       // TODO(DX): hard code spec id for now. storage value spec doesn't have id now
 
-      const specid = 1;
+      const specid = HARDCODE_SPECID;
 
       const allFuncParams = addrParam.concat(valGasParams.concat(tgtFuncParams));
       const tgtFuncRetParams = addrCallFun.vReturnParameters.vParameters;
@@ -174,7 +177,8 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   }
   process(): void {
     // console.log(this.spec);
-    const wrapFun = this.createWrapFun([42, 2]); // fix: hard code spec id for now
+    this.spec.id = HARDCODE_SPECID;
+    const wrapFun = this.createWrapFun([this.spec.id]); // fix: hard code spec id for now
     this.contract.appendChild(wrapFun);
 
     this.updateVarDeclaration();
