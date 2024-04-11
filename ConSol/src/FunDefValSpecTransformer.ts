@@ -408,7 +408,8 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
      *   Importantly, `f`_guard will also take/return values with guarded address representation
      *   (i.e. uint256).
      */
-    if (paramUseAddr || retUseAddr) {
+    //if (paramUseAddr || retUseAddr ) {
+    if (this.spec.preFunSpec.length > 0 || this.spec.postFunSpec.length > 0) {
       // generate the signature-preserved function
       // TODO: if there is no spec, should we generate this new function? seems yes
       const newFun = this.wrappingAddrForFunction(this.funDef);
@@ -515,6 +516,7 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
         this.funDef.vScope.appendChild(wrapper);
         this.funDef.name = uncheckedFunName(this.tgtName);
         this.funDef.visibility = FunctionVisibility.Private;
+        this.funDef.stateMutability = FunctionStateMutability.NonPayable;
         if (this.funDef.isConstructor) {
           // If the spec is attached on a constructor, we generate a new constructor,
           // and the original constructor becomes an ordinary function.
