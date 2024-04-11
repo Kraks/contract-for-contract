@@ -694,7 +694,7 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
 
     /// @dev {_withdraw(amount, user, recipient) 
     ///       requires {_balances[user] >= amount && amount != 0}}
-    function _withdraw_original(uint256 amount, uint256 user, uint256 recipient) internal nonReentrant() updateReward(user) {
+    function _withdraw_original(uint256 amount, address user, address recipient) private nonReentrant() updateReward(user) {
         require(amount != 0, "Cannot withdraw 0");
         _totalSupply = _totalSupply - amount;
         _balances[user] = _balances[user] - amount;
@@ -717,12 +717,8 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
         if (!(_balancesuser>=amount&&amount!=0)) revert preViolation("_withdraw");
     }
 
-    function _withdraw_guard(uint256 amount, uint256 user, uint256 recipient) private nonReentrant() updateReward(user) {
-        __withdraw_pre(amount, payable(address(uint160(user))), payable(address(uint160(recipient))));
+    function _withdraw(uint256 amount, address user, address recipient) internal {
+        __withdraw_pre(amount, user, recipient);
         _withdraw_original(amount, user, recipient);
-    }
-
-    function _withdraw(uint256 amount, address user, address recipient) internal nonReentrant() updateReward(user) {
-        _withdraw_guard(amount, uint256(uint160(address(user))), uint256(uint160(address(recipient))));
     }
 }

@@ -116,7 +116,7 @@ contract TcrToken {
     /// @custom:consol
     ///  {burnFrom(from, amount) returns ()
     ///      requires {_allowances[from][msg.sender] >= amount && _balances[from] >= amount}}
-    function burnFrom_original(uint256 from, uint256 amount) external {
+    function burnFrom_original(address from, uint256 amount) private {
         _approve(msg.sender, from, _allowances[from][msg.sender] - amount);
         _burn(from, amount);
     }
@@ -314,12 +314,8 @@ contract TcrToken {
         if (!(_allowancesfrommsg.sender>=amount&&_balancesfrom>=amount)) revert preViolation("burnFrom");
     }
 
-    function burnFrom_guard(uint256 from, uint256 amount) private {
-        _burnFrom_pre(payable(address(uint160(from))), amount);
-        burnFrom_original(from, amount);
-    }
-
     function burnFrom(address from, uint256 amount) external {
-        burnFrom_guard(uint256(uint160(address(from))), amount);
+        _burnFrom_pre(from, amount);
+        burnFrom_original(from, amount);
     }
 }

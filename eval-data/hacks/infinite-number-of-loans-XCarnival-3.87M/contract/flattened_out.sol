@@ -643,7 +643,7 @@ contract P2Controller is P2ControllerStorage, Exponential, Initializable {
     /// @custom:consol
     ///  {borrowAllowed(xToken, orderId, borrower, borrowAmount) returns ()
     ///    requires {_checkBorrowAllowed(xToken, orderId, borrower, borrowAmount)}}
-    function borrowAllowed_original(uint256 xToken, uint256 orderId, uint256 borrower, uint256 borrowAmount) external whenNotPaused(xToken,3) {
+    function borrowAllowed_original(address xToken, uint256 orderId, address borrower, uint256 borrowAmount) private whenNotPaused(xToken,3) {
         require(_checkBorrwoAllowed(xToken, orderId, borrower, borrowAmount), "borrow not allowed");
         (address _collection, , ) = xNFT.getOrderDetail(orderId);
         CollateralState storage _collateralState = collateralStates[_collection];
@@ -817,12 +817,8 @@ contract P2Controller is P2ControllerStorage, Exponential, Initializable {
         if (!(_checkBorrowAllowed(xToken,orderId,borrower,borrowAmount))) revert preViolation("borrowAllowed");
     }
 
-    function borrowAllowed_guard(uint256 xToken, uint256 orderId, uint256 borrower, uint256 borrowAmount) private whenNotPaused(xToken,3) {
-        _borrowAllowed_pre(payable(address(uint160(xToken))), orderId, payable(address(uint160(borrower))), borrowAmount);
+    function borrowAllowed(address xToken, uint256 orderId, address borrower, uint256 borrowAmount) external {
+        _borrowAllowed_pre(xToken, orderId, borrower, borrowAmount);
         borrowAllowed_original(xToken, orderId, borrower, borrowAmount);
-    }
-
-    function borrowAllowed(address xToken, uint256 orderId, address borrower, uint256 borrowAmount) external whenNotPaused(xToken,3) {
-        borrowAllowed_guard(uint256(uint160(address(xToken))), orderId, uint256(uint160(address(borrower))), borrowAmount);
     }
 }
