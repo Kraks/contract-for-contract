@@ -13,7 +13,7 @@ describe('end to end tests', () => {
 
   const programs = [
     'Address.sol',
-    'Address_nospec.sol'
+    'Address_nospec.sol',
     'PreCond.sol',
     'PreCond2.sol',
     'Lock.sol',
