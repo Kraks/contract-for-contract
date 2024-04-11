@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
-// pragma solidity ^0.8.17;
-pragma solidity ^0.5;
+pragma solidity ^0.8.17;
 
-// interface IReceiver {
-//   function foo(string memory _message, uint _x) external payable returns (uint);
-// }
+interface IReceiver {
+  function foo(string memory _message, uint _x) external payable returns (uint);
+}
 
 contract Caller {
   event Response(uint);
@@ -23,9 +22,9 @@ contract Caller {
   /// }
   function callFoo(address payable _addr, uint x) public payable returns (uint) {
     // call without options
-    // uint z = IReceiver(_addr).foo("call foo", x);
+    uint z = IReceiver(_addr).foo("call foo", x);
     // You can send ether and specify a custom gas amount
-    // uint y = IReceiver(_addr).foo{value: msg.value, gas: 5000}("call foo", x);
+    uint y = IReceiver(_addr).foo{value: msg.value, gas: 5000}("call foo", x);
 
     emit Response(x);
     return x;
