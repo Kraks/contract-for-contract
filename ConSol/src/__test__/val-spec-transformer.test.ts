@@ -11,7 +11,13 @@ describe('end to end tests', () => {
   //   Address_storage.sol
   // DO NOT PUT IT INTO `programs` UNLESS IT PASSES THE TEST
 
-  const programs = ['Address.sol', 'PreCond.sol', 'PreCond2.sol', 'Lock.sol', 'PostCond.sol'];
+  const programs = [
+    'Address.sol',
+    'Address_nospec.sol'
+    'PreCond.sol',
+    'PreCond2.sol',
+    'Lock.sol',
+    'PostCond.sol'];
 
   programs.forEach((program) => {
     test(program, async () => {
