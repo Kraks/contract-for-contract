@@ -937,7 +937,7 @@ contract P2Controller is P2ControllerStorage, Exponential,  Initializable{
         return _collection;
     }
 
-    function _checkBorrwoAllowed(address xToken, uint256 orderId, address borrower, uint256 borrowAmount) internal returns (bool) {
+    function _checkBorrowAllowed(address xToken, uint256 orderId, address borrower, uint256 borrowAmount) internal returns (bool) {
         require(poolStates[xToken].isListed, "token not listed");
         orderAllowed(orderId, borrower);
         (address _collection , , ) = xNFT.getOrderDetail(orderId);

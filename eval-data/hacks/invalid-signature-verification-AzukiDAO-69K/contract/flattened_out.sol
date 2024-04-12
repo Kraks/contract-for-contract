@@ -1290,7 +1290,7 @@ contract Bean is ERC20, Pausable, Ownable, ReentrancyGuard {
 
     /// @custom:consol
     ///  {claim(_contracts, _amounts, _tokenIds, _claimAmount, _endTime, _signature) returns ()
-    ///    ensures {claim_check(_contracts, _amounts, _tokenIds, _claimAmount, _endTime)}}
+    ///    ensures {claim_check(_contracts, _amounts, _tokenIds, _claimAmount, _endTime, _signature)}}
     function claim_original(address[] memory _contracts, uint256[] memory _amounts, uint256[] memory _tokenIds, uint256 _claimAmount, uint256 _endTime, bytes memory _signature) private whenNotPaused() nonReentrant() {
         require(_contracts.length == _amounts.length, "contracts length not match amounts length");
         for (uint256 i = 0; i < _contracts.length; i++) {
@@ -1352,7 +1352,7 @@ contract Bean is ERC20, Pausable, Ownable, ReentrancyGuard {
     }
 
     function _claim_post(address[] memory _contracts, uint256[] memory _amounts, uint256[] memory _tokenIds, uint256 _claimAmount, uint256 _endTime, bytes memory _signature) private {
-        if (!(claim_check(_contracts,_amounts,_tokenIds,_claimAmount,_endTime))) revert();
+        if (!(claim_check(_contracts,_amounts,_tokenIds,_claimAmount,_endTime,_signature))) revert();
     }
 
     function claim(address[] memory _contracts, uint256[] memory _amounts, uint256[] memory _tokenIds, uint256 _claimAmount, uint256 _endTime, bytes memory _signature) external {

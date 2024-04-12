@@ -338,6 +338,20 @@ contract SwaposV2Pair is ISwaposV2Pair, SwaposV2ERC20 {
         token1 = _token1;
     }
 
+    function __update_pre_condition(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) private returns (bool) {
+        if (balance0 > _reserve0 || balance1 > _reserve1) {
+            if (balance0.mul(balance1) < uint(_reserve0).mul(_reserve1)) {
+                return false;
+            }
+        }
+
+        if (balance0 > uint112(-1) || balance1 > uint112(-1)) {
+            return false;
+        }
+
+        return true;
+    }
+
     // update reserves and, on the first call per block, price accumulators
     /// @dev
     /// {_update(balance0, balance1, _reserve0, _reserve1) returns () 
