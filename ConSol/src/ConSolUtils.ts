@@ -15,9 +15,9 @@ import { ValSpec } from './spec/index.js';
 import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
 
 import * as fs from 'fs';
-import { ConSolTransformer} from './ConSolTransformer.js';
+import { ConSolTransformer } from './ConSolTransformer.js';
 import { ConSolFactory } from './ConSolFactory.js';
-import { disableCustomError, disableIncludeDevSpec, setIncludeDevSpec, setSourceUnits } from './Global.js';
+import { disableCustomError, setIncludeDevSpec, setSourceUnits } from './Global.js';
 
 export const SPEC_PREFIX = '@custom:consol';
 const DEV_PREFIX = '@dev';

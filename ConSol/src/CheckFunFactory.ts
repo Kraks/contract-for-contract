@@ -84,7 +84,12 @@ export class CheckFunFactory<T> {
     if (globalThis.customError) {
       revertStmt = this.factory.makeRevertStatement(errorCall);
     } else {
-      const call = this.factory.makeFunctionCall('void', FunctionCallKind.FunctionCall, this.factory.makeIdentifier('this', 'revert', -1), []);
+      const call = this.factory.makeFunctionCall(
+        'void',
+        FunctionCallKind.FunctionCall,
+        this.factory.makeIdentifier('this', 'revert', -1),
+        [],
+      );
       revertStmt = this.factory.makeExpressionStatement(call);
     }
     // Make the if-statement
