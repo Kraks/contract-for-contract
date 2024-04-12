@@ -20,9 +20,10 @@ contract AdvancedTokenVote1202 {
     optionDescMap[1][2] = "Yes";
   }
 
-  // @custom:consol 
-  // createIssue(issueId, _tokenAddr, options_, qualifiedVoters_, issueDesc_) 
-  // 	requires options.length >= 2 && options[issudId].length == 0
+  /// @dev {
+  /// createIssue(issueId, _tokenAddr, options_, qualifiedVoters_, issueDesc_)
+  /// 	requires { options.length >= 2 && options[issudId].length == 0 }
+  /// }
   function createIssue(uint issueId, address _tokenAddr, uint[] memory options_, address[] memory qualifiedVoters_, string memory issueDesc_) public {
     // Should not replace existing issues.
     options[issueId] = options_;
@@ -36,9 +37,10 @@ contract AdvancedTokenVote1202 {
     issueDescriptions[issueId] = issueDesc_;
   }
 
-  // @custom:consol 
-  // 	vote(issueId, option) returns (b) 
-  // 	requires isOpen[issueId]
+  /// @dev {
+  /// 	vote(issueId, option) returns (b)
+  /// 	requires { isOpen[issueId] }
+  /// }
   function vote(uint issueId, uint option) public returns (bool success) {
     // TODO check if option is valid
 
