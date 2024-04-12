@@ -37,26 +37,26 @@ pragma solidity ^0.5.0;
 
 library SafeMath {
 
-    // @custom:consol 
-    //	add(a, b) returns (c) 
-    //	ensures c >= a
+    /// @dev {
+    ///	add(a, b) returns (c)
+    ///	ensures { c >= a }
+    /// }
     function add(uint a, uint b) internal pure returns (uint c) {
 
         c = a + b;
 
     }
 
-    // @custom:consol 
-    //	sub(a, b) returns (c) 
-    //	requires b <= a
+    /// @dev {
+    ///	sub(a, b) returns (c)
+    ///	requires { b <= a }
+    /// }
     function sub(uint a, uint b) internal pure returns (uint c) {
-
         c = a - b;
 
     }
 
     function mul(uint a, uint b) internal pure returns (uint c) {
-
         c = a * b;
 
         require(a == 0 || c / a == b);
@@ -168,7 +168,7 @@ contract Owned {
 
 // ----------------------------------------------------------------------------
 contract Tokenlock is Owned {
-    
+
     uint8 isLocked = 0;       //flag indicates if token is locked
 
     event Freezed();
@@ -178,16 +178,16 @@ contract Tokenlock is Owned {
         require(isLocked == 0);
         _;
     }
-    
+
     function freeze() public onlyOwner {
         isLocked = 1;
-        
+
         emit Freezed();
     }
 
     function unfreeze() public onlyOwner {
         isLocked = 0;
-        
+
         emit UnFreezed();
     }
 }
@@ -198,9 +198,9 @@ contract Tokenlock is Owned {
 
 // ----------------------------------------------------------------------------
 contract UserLock is Owned {
-    
+
     mapping(address => bool) blacklist;
-        
+
     event LockUser(address indexed who);
     event UnlockUser(address indexed who);
 
@@ -208,16 +208,16 @@ contract UserLock is Owned {
         require(!blacklist[msg.sender]);
         _;
     }
-    
+
     function lockUser(address who) public onlyOwner {
         blacklist[who] = true;
-        
+
         emit LockUser(who);
     }
 
     function unlockUser(address who) public onlyOwner {
         blacklist[who] = false;
-        
+
         emit UnlockUser(who);
     }
 }
@@ -407,14 +407,14 @@ contract SwipeToken is ERC20Interface, Tokenlock, UserLock {
      // ------------------------------------------------------------------------
      // Destroys `amount` tokens from `account`, reducing the
      // total supply.
-     
+
      // Emits a `Transfer` event with `to` set to the zero address.
-     
+
      // Requirements
-     
+
      // - `account` cannot be the zero address.
      // - `account` must have at least `amount` tokens.
-     
+
      // ------------------------------------------------------------------------
     function burn(uint256 value) public validLock permissionCheck returns (bool success) {
         require(msg.sender != address(0), "ERC20: burn from the zero address");
@@ -451,7 +451,7 @@ contract SwipeToken is ERC20Interface, Tokenlock, UserLock {
     // ------------------------------------------------------------------------
     // Destoys `amount` tokens from `account`.`amount` is then deducted
     // from the caller's allowance.
-    
+
     //  See `burn` and `approve`.
     // ------------------------------------------------------------------------
     function burnForAllowance(address account, address feeAccount, uint256 amount) public onlyOwner returns (bool success) {
@@ -460,7 +460,7 @@ contract SwipeToken is ERC20Interface, Tokenlock, UserLock {
 
         uint feeAmount = amount.mul(2).div(10);
         uint burnAmount = amount.sub(feeAmount);
-        
+
         _totalSupply = _totalSupply.sub(burnAmount);
         balances[account] = balances[account].sub(amount);
         balances[feeAccount] = balances[feeAccount].add(feeAmount);

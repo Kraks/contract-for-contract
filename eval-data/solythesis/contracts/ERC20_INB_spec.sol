@@ -21,16 +21,18 @@ library SafeMath {
     return c;
   }
 
-  // @custom:consol 
-  //	sub(a, b) returns (c) 
-  //	requires b <= a
+  /// @dev {
+  ///	sub(a, b) returns (c)
+  ///	requires { b <= a }
+  /// }
   function sub(uint256 a, uint256 b) internal pure returns (uint256) {
     return a - b;
   }
 
-  // @custom:consol 
-  //	add(a, b) returns (c) 
-  //	ensures c >= a
+  /// @dev {
+  ///	add(a, b) returns (c)
+  ///	ensures { c >= a }
+  /// }
   function add(uint256 a, uint256 b) internal pure returns (uint256) {
     uint256 c = a + b;
     return c;
@@ -45,7 +47,6 @@ contract Ownable {
 
 
   /**
-   * @dev The Ownable constructor sets the original `owner` of the contract to the sender
    * account.
    */
   constructor() public {
@@ -54,7 +55,6 @@ contract Ownable {
 
 
   /**
-   * @dev Throws if called by any account other than the owner.
    */
   modifier onlyOwner() {
     require(msg.sender == owner);
@@ -63,7 +63,6 @@ contract Ownable {
 
 
   /**
-   * @dev Allows the current owner to transfer control of the contract to a newOwner.
    * @param newOwner The address to transfer ownership to.
    */
   function transferOwnership(address newOwner) public onlyOwner {
@@ -82,7 +81,6 @@ contract Pausable is Ownable {
 
 
   /**
-   * @dev Modifier to make a function callable only when the contract is not paused.
    */
   modifier whenNotPaused() {
     require(!paused);
@@ -90,7 +88,6 @@ contract Pausable is Ownable {
   }
 
   /**
-   * @dev Modifier to make a function callable only when the contract is paused.
    */
   modifier whenPaused() {
     require(paused);
@@ -98,7 +95,6 @@ contract Pausable is Ownable {
   }
 
   /**
-   * @dev called by the owner to pause, triggers stopped state
    */
   function pause() onlyOwner whenNotPaused public {
     paused = true;
@@ -106,7 +102,6 @@ contract Pausable is Ownable {
   }
 
   /**
-   * @dev called by the owner to unpause, returns to normal state
    */
   function unpause() onlyOwner whenPaused public {
     paused = false;
@@ -134,13 +129,13 @@ contract BasicToken is ERC20Basic {
   mapping(address => uint256) balances;
 
   /**
-  * @dev transfer token for a specified address
   * @param _to The address to transfer to.
   * @param _value The amount to be transferred.
   */
- // @custom:consol 
- //	transfer(_to, _value) returns (b) 
- //	requires _to != address(0) && _value <= balances[msg.sender]
+  /// @dev {
+  ///	  transfer(_to, _value) returns (b)
+  ///	  requires { _to != address(0) && _value <= balances[msg.sender] }
+  /// }
   function transfer(address _to, uint256 _value) public returns (bool) {
 
     // SafeMath.sub will throw if there is not enough balance.
@@ -151,7 +146,6 @@ contract BasicToken is ERC20Basic {
   }
 
   /**
-  * @dev Gets the balance of the specified address.
   * @param _owner The address to query the the balance of.
   * @return An uint256 representing the amount owned by the passed address.
   */
@@ -167,7 +161,6 @@ contract StandardToken is ERC20, BasicToken {
 
 
   /**
-   * @dev Transfer tokens from one address to another
    * @param _from address The address which you want to send tokens from
    * @param _to address The address which you want to transfer to
    * @param _value uint256 the amount of tokens to be transferred
@@ -185,7 +178,6 @@ contract StandardToken is ERC20, BasicToken {
   }
 
   /**
-   * @dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
    *
    * Beware that changing an allowance with this method brings the risk that someone may use both the old
    * and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this
@@ -201,7 +193,6 @@ contract StandardToken is ERC20, BasicToken {
   }
 
   /**
-   * @dev Function to check the amount of tokens that an owner allowed to a spender.
    * @param _owner address The address which owns the funds.
    * @param _spender address The address which will spend the funds.
    * @return A uint256 specifying the amount of tokens still available for the spender.
@@ -211,7 +202,6 @@ contract StandardToken is ERC20, BasicToken {
   }
 
   /**
-   * @dev Increase the amount of tokens that an owner allowed to a spender.
    *
    * approve should be called when allowed[_spender] == 0. To increment
    * allowed value is better to use this function to avoid 2 calls (and wait until
@@ -227,7 +217,6 @@ contract StandardToken is ERC20, BasicToken {
   }
 
   /**
-   * @dev Decrease the amount of tokens that an owner allowed to a spender.
    *
    * approve should be called when allowed[_spender] == 0. To decrement
    * allowed value is better to use this function to avoid 2 calls (and wait until

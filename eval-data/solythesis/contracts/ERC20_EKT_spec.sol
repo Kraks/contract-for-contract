@@ -18,17 +18,19 @@ contract SafeMath {
         return c;
     }
 
-    // @custom:consol 
-    //	safeSub(a, b) returns (c) 
-    //	requires b <= a
+    /// @dev {
+    ///	safeSub(a, b) returns (c)
+    ///	  requires { b <= a }
+    /// }
     function safeSub(uint256 a, uint256 b) internal pure returns (uint256) {
         _assert(b <= a);
         return a - b;
     }
 
-    // @custom:consol 
-    //	safeAdd(a, b) returns (c) 
-    //	ensures c >= a && c >= b
+    /// @dev {
+    ///	safeAdd(a, b) returns (c)
+    ///	ensures { c >= a && c >= b }
+    /// }
     function safeAdd(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
         _assert(c >= a && c >= b);
@@ -62,9 +64,10 @@ contract EKT is SafeMath {
     }
 
 
-    // @custom:consol 
-    //	burn(_value) returns (b) 
-    //	requires _value > 0 && _value <= _balances[msg.sender] && (_to == address(0) || _balances[_to] + _value >= _balances[_to])
+    /// @dev {
+    ///	transfer(_to, _value) returns (b)
+    ///	requires { _value > 0 && _value <= _balances[msg.sender] && (_to == address(0) || _balances[_to] + _value >= _balances[_to]) }
+    /// }
     function transfer(address _to, uint256 _value)  public returns (bool) {
 //        require(_to != address(0));
         if (_to == address(0)) {
@@ -77,9 +80,10 @@ contract EKT is SafeMath {
         }
     }
 
-    // @custom:consol 
-    //	burn(_value) returns (b) 
-    //	requires _value > 0 && _value <= _balances[msg.sender] && totalSupply >= _value
+    /// @dev {
+    ///	burn(_value) returns (b)
+    ///	requires { _value > 0 && _value <= _balances[msg.sender] && totalSupply >= _value }
+    /// }
     function burn(uint256 _value) public returns (bool) {
         _balances[msg.sender] = safeSub(_balances[msg.sender], _value);
         totalSupply = safeSub(totalSupply, _value);

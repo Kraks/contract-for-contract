@@ -23,15 +23,17 @@ pragma solidity ^0.5.0;
 /* pragma solidity ^0.4.13; */
 
 contract DSMath {
-    // @custom:consol 
-    //	add(x, y) returns (z) 
-    //	ensures z >= x
+    /// @dev {
+    ///	add(x, y) returns (z)
+    ///	ensures { z >= x }
+    /// }
     function add(uint x, uint y) internal pure returns (uint z) {
 	z = x + y;
     }
-    // @custom:consol 
-    //	sub(x, y) returns (z) 
-    //	ensures z <= x
+    /// @dev {
+    ///	sub(x, y) returns (z)
+    ///	  ensures { z <= x }
+    /// }
     function sub(uint x, uint y) internal pure returns (uint z) {
 	z = x - y;
     }
@@ -378,7 +380,7 @@ contract DSToken is DSTokenBase(0), DSStop {
     bytes32  public  symbol = '';
     uint256  public  decimals = 18; // standard token precision. override to customize
 
-    constructor() public { 
+    constructor() public {
         _supply = 3000000000000;
 
         _balances[msg.sender] = _supply;

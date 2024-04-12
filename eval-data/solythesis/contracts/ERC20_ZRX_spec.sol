@@ -103,8 +103,7 @@ contract StandardToken is Token {
 contract UnlimitedAllowanceToken is StandardToken {
 
     uint constant MAX_UINT = 2**256 - 1;
-    
-    /// @dev ERC20 transferFrom, modified such that an allowance of MAX_UINT represents an unlimited allowance.
+
     /// @param _from Address to transfer from.
     /// @param _to Address to transfer to.
     /// @param _value Amount to transfer.
