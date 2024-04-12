@@ -774,12 +774,12 @@ interface IPausable {
  */
 library LibConstants {
 
-    
-    
+
+
     uint16 constant HOUR = 3600;
     uint24 constant DAY = 86400;
 
-    //storage and calldata requirements significantly higher when using more than 
+    //storage and calldata requirements significantly higher when using more than
     //6decs for USD price precision
     uint constant USD_PRECISION = 1e6;
 
@@ -811,8 +811,8 @@ library LibConstants {
 
 interface IDexibleEvents {
 
-    event SwapFailed(address indexed trader, 
-                     address feeToken, 
+    event SwapFailed(address indexed trader,
+                     address feeToken,
                      uint gasFeePaid);
     event SwapSuccess(address indexed trader,
                         address indexed affiliate,
@@ -829,20 +829,20 @@ interface IDexibleEvents {
     event ChangedRevshareVault(address indexed old, address indexed newRevshare);
     event ChangedRevshareSplit(uint8 split);
     event ChangedBpsRates(uint32 stdRate, uint32 minRate);
-    
+
 }
 
 // src/dexible/interfaces/IDexibleView.sol
 
 interface IDexibleView {
     function revshareSplitRatio() external view returns (uint8);
-         
+
     function stdBpsRate() external view returns (uint16);
 
     function minBpsRate() external view returns (uint16);
 
     function minFeeUSD() external view returns (uint112);
-        
+
     function communityVault() external view returns(address);
 
     function treasury() external view returns (address);
@@ -861,7 +861,7 @@ interface IArbitrumGasOracle {
 // src/dexible/oracles/IOptimismGasOracle.sol
 
 interface IOptimismGasOracle {
-    
+
     function getL1Fee(bytes calldata data) external view returns(uint);
 }
 
@@ -3103,7 +3103,7 @@ library TokenTypes {
         uint112 amount;
         IERC20 token;
     }
-    
+
 }
 
 // src/vault/VaultStorage.sol
@@ -3112,7 +3112,7 @@ library VaultStorage {
 
     bytes32 constant VAULT_STORAGE_KEY = 0xbfa76ec2967ed7f8d3d40cd552f1451ab03573b596bfce931a6a016f7733078c;
 
-    
+
     //mint rate bucket
     struct MintRateRangeConfig {
         uint16 minMMVolume;
@@ -3166,8 +3166,8 @@ library VaultStorage {
     /*****************************************************************************************
      * STORAGE
     ******************************************************************************************/
-    
-    
+
+
     struct VaultData {
         //whether the vault is paused
         bool paused;
@@ -3209,7 +3209,7 @@ library VaultStorage {
         //the current volume range we're operating in for mint rate
         MintRateRange currentMintRate;
 
-        //The ranges of 24hr volume and their percentage-per-MM increase to 
+        //The ranges of 24hr volume and their percentage-per-MM increase to
         //mint a single token
         MintRateRange[] mintRateRanges;
 
@@ -3272,7 +3272,7 @@ library ExecutionTypes {
     }
 
     /**
-     * Shared information in every execution request. This will evolve 
+     * Shared information in every execution request. This will evolve
      * over time to support signatures and privacy proofs as the protocol
      * decentralizes
      */
@@ -3289,7 +3289,7 @@ library ExecutionTypes {
 
 interface V1MigrationTarget {
     /**
-     * Call from current vault to migrate the state of the old vault to the new one. 
+     * Call from current vault to migrate the state of the old vault to the new one.
      */
     function migrationFromV1(VaultStorage.VaultMigrationV1 memory data) external;
 }
@@ -3308,11 +3308,11 @@ interface V1Migrateable {
 
     /**
      * Migrate the vault to a new vault address that implements the target interface
-     * to receive this vault's state. This will transfer all fee token assets to the 
+     * to receive this vault's state. This will transfer all fee token assets to the
      * new vault. This can only be called after timelock is expired.
      */
     function migrateV1() external;
-    
+
 }
 
 // src/common/SwapTypes.sol
@@ -3323,7 +3323,7 @@ interface V1Migrateable {
 library SwapTypes {
 
     /**
-     * Individual router called to execute some action. Only approved 
+     * Individual router called to execute some action. Only approved
      * router addresses will execute successfully
      */
     struct RouterRequest {
@@ -3409,17 +3409,17 @@ interface IDexibleConfig is IPausable {
     event ArbGasOracleChanged(address newVault);
 
     function setRevshareSplitRatio(uint8 bps) external;
-         
+
     function setStdBpsRate(uint16 bps) external;
 
     function setMinBpsRate(uint16 bps) external;
 
     function setMinFeeUSD(uint112 minFee) external;
-        
+
     function setCommunityVault(ICommunityVault vault) external;
 
     function setTreasury(address t) external;
-    
+
     function setArbitrumGasOracle(IArbitrumGasOracle oracle) external;
 }
 
@@ -3430,7 +3430,7 @@ library DexibleStorage {
 
     //primary initialization config settings
     struct DexibleConfig {
-        
+
         //percent to split to revshare
         uint8 revshareSplitRatio;
 
@@ -3476,7 +3476,7 @@ library DexibleStorage {
 
         //how much of fee goes to revshare vault
         uint8 revshareSplitRatio;
-         
+
         //standard bps fee rate
         uint16 stdBpsRate;
 
@@ -3485,7 +3485,7 @@ library DexibleStorage {
 
         //min fee to charge if bps too low
         uint112 minFeeUSD;
-        
+
         //vault address
         ICommunityVault communityVault;
 
@@ -3515,7 +3515,7 @@ library DexibleStorage {
 // src/dexible/baseContracts/AdminBase.sol
 
 abstract contract AdminBase {
-    
+
     modifier notPaused() {
         require(!DexibleStorage.load().paused, "Contract operations are paused");
         _;
@@ -3551,7 +3551,7 @@ abstract contract DexibleView is IDexibleView {
     function revshareSplitRatio() external view returns (uint8){
         return DexibleStorage.load().revshareSplitRatio;
     }
-         
+
     function stdBpsRate() external view returns (uint16){
         return DexibleStorage.load().stdBpsRate;
     }
@@ -3563,7 +3563,7 @@ abstract contract DexibleView is IDexibleView {
     function minFeeUSD() external view returns (uint112){
         return DexibleStorage.load().minFeeUSD;
     }
-        
+
     function communityVault() external view returns(address){
         return address(DexibleStorage.load().communityVault);
     }
@@ -3579,7 +3579,7 @@ abstract contract DexibleView is IDexibleView {
     function dxblToken() external view returns(address){
         return address(DexibleStorage.load().dxblToken);
     }
-    
+
     function arbitrumGasOracle() external view returns(address){
         return address(DexibleStorage.load().arbitrumGasOracle);
     }
@@ -3648,7 +3648,7 @@ abstract contract ConfigBase is AdminBase, IDexibleConfig {
         DexibleStorage.load().revshareSplitRatio = bps;
         emit SplitRatioChanged(bps);
     }
-         
+
     function setStdBpsRate(uint16 bps) external onlyAdmin {
         DexibleStorage.load().stdBpsRate = bps;
         emit StdBpsChanged(bps);
@@ -3663,7 +3663,7 @@ abstract contract ConfigBase is AdminBase, IDexibleConfig {
         DexibleStorage.load().minFeeUSD = minFee;
         emit MinFeeChanged(minFee);
     }
-        
+
     function setCommunityVault(ICommunityVault vault) external onlyVault {
         DexibleStorage.load().communityVault = vault;
         emit VaultChanged(address(vault));
@@ -3673,7 +3673,7 @@ abstract contract ConfigBase is AdminBase, IDexibleConfig {
         DexibleStorage.load().treasury = t;
         emit TreasuryChanged(t);
     }
-    
+
     function setArbitrumGasOracle(IArbitrumGasOracle oracle) external onlyAdmin {
         DexibleStorage.load().arbitrumGasOracle = oracle;
         emit ArbGasOracleChanged(address(oracle));
@@ -3735,7 +3735,7 @@ library LibFees {
 
         uint8 ftDecs = IERC20Metadata(feeToken).decimals();
 
-        //fee USD configuration is expressed in 18-decimals. Have to convert to fee-token units and 
+        //fee USD configuration is expressed in 18-decimals. Have to convert to fee-token units and
         //account for price units
         uint minFeeUSD = (rs.minFeeUSD * (ftDecs != 18 ? ((10**ftDecs) / 1e18) : 1)) * LibConstants.PRICE_PRECISION;
 
@@ -3748,7 +3748,7 @@ library LibFees {
 
 interface IDexible is IDexibleView, IDexibleConfig, ISwapHandler {
 
-    
+
 }
 
 // src/dexible/baseContracts/SwapHandler.sol
@@ -3788,14 +3788,14 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
     }
 
     /// @custom:consol
-    /// {fill(request, meta) returns (meta)
+    /// {fill(request, meta1) returns (meta2)
     ///     requires {_checkRequest(request)}
-    ///     ensures {meta.outAmount >= request.tokenOut.amount}}
+    ///     ensures {meta2.outAmount >= request.tokenOut.amount}}
     function fill(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) external onlySelf returns (SwapMeta memory)  {
 
         preCheck(request, meta);
         meta.outAmount = request.tokenOut.token.balanceOf(address(this));
-        
+
         for(uint i=0;i<request.routes.length;++i) {
             SwapTypes.RouterRequest calldata rr = request.routes[i];
             IERC20(rr.routeAmount.token).safeApprove(rr.spender, rr.routeAmount.amount);
@@ -3811,7 +3811,7 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
         } else {
             meta.outAmount = 0;
         }
-        
+
         console.log("Expected", request.tokenOut.amount, "Received", meta.outAmount);
         //first, make sure enough output was generated
         require(meta.outAmount >= request.tokenOut.amount, "Insufficient output generated");
@@ -3822,7 +3822,7 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
 
         if(success) {
             //if we succeeded, then do successful post-swap ops
-            handleSwapSuccess(request, meta); 
+            handleSwapSuccess(request, meta);
         }  else {
             //otherwise, handle as a failure
             handleSwapFailure(request, meta);
@@ -3836,14 +3836,14 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
      * token is the fee token. That's what this function does
      */
     function handleSwapFailure(SwapTypes.SwapRequest memory request, SwapMeta memory meta) internal {
-       
+
         DexibleStorage.DexibleData storage dd = DexibleStorage.load();
         uint gasInFeeToken = 0;
         if(meta.feeIsInput) {
-            unchecked { 
+            unchecked {
                 //the total gas used thus far plus some post-op stuff that needs to get done
                 uint totalGas = (meta.startGas - gasleft());
-                
+
                 console.log("Estimated gas used for failed gas payment", totalGas);
                 meta.nativeGasAmount = LibFees.computeGasCost(totalGas, false);
             }
@@ -3851,14 +3851,14 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
             gasInFeeToken = dd.communityVault.convertGasToFeeToken(address(request.executionRequest.fee.feeToken), meta.nativeGasAmount);
 
             //console.log("Transferring partial input token to devteam for failure gas fees");
-            
+
             //console.log("Failed gas fee", gasInFeeToken);
 
             //transfer input assets from trader to treasury. Recall that any previous transfer amount
             //to this contract was rolled back on failure, so we transfer the funds for gas only
             request.executionRequest.fee.feeToken.safeTransferFrom(request.executionRequest.requester, dd.treasury, gasInFeeToken);
         }
-        
+
         emit SwapFailed(request.executionRequest.requester, address(request.executionRequest.fee.feeToken), gasInFeeToken);
     }
 
@@ -3866,9 +3866,9 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
      * This is called when a relay-based swap is successful. It basically rewards DXBL tokens
      * to trader and pays appropriate fees.
      */
-    function handleSwapSuccess(SwapTypes.SwapRequest memory request, 
+    function handleSwapSuccess(SwapTypes.SwapRequest memory request,
                 SwapMeta memory meta) internal {
-        
+
         //reward trader with DXBL tokens
         collectDXBL(request, meta.feeIsInput, meta.outAmount);
 
@@ -3893,10 +3893,10 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
         //Dexible is the only one allowed to ask the vault to mint tokens on behalf of a trader
         //See RevshareVault for logic of minting rewards
 
-        //NOTE: a migration to a new vault could occur as part of this call. It would just 
-        //change the address of the vault in storage and all proceeds would be forwarded to 
-        //the new vault address. All minting occurs before the migration so mint rates and 
-        //token balances are all forwarded to the new vault as part of the migration. It is 
+        //NOTE: a migration to a new vault could occur as part of this call. It would just
+        //change the address of the vault in storage and all proceeds would be forwarded to
+        //the new vault address. All minting occurs before the migration so mint rates and
+        //token balances are all forwarded to the new vault as part of the migration. It is
         //possible, however, that gas estimates would not account for the migration.
         dd.communityVault.rewardTrader(request.executionRequest.requester, address(request.executionRequest.fee.feeToken), value);
     }
@@ -3904,7 +3904,7 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
     /**
      * Distribute payments to revshare pool, affiliates, treasury, and trader
      */
-    function payAndDistribute(SwapTypes.SwapRequest memory request, 
+    function payAndDistribute(SwapTypes.SwapRequest memory request,
                                 SwapMeta memory meta) internal  {
         allocateRevshareAndAffiliate(request, meta);
         payProtocolAndTrader(request, meta);
@@ -3913,7 +3913,7 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
     /**
      * Allocate bps portions to revshare pool and any associated affiliate
      */
-    function allocateRevshareAndAffiliate(SwapTypes.SwapRequest memory request, 
+    function allocateRevshareAndAffiliate(SwapTypes.SwapRequest memory request,
                                 SwapMeta memory meta) internal view {
 
         DexibleStorage.DexibleData storage dd = DexibleStorage.load();
@@ -3921,9 +3921,9 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
         //assume trader gets all output
         meta.outToTrader = meta.outAmount;
 
-        //the bps portion of fee. 
+        //the bps portion of fee.
         meta.bpsAmount = computeBpsFee(request, meta.feeIsInput, meta.preDXBLBalance, meta.outAmount);
-    
+
         //console.log("Total bps fee", payments.bpsAmount);
         uint minFee = LibFees.computeMinFeeUnits(address(request.executionRequest.fee.feeToken));
         if(minFee > meta.bpsAmount) {
@@ -3947,7 +3947,7 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
 
         //fees accounted for thus far
         uint total = meta.toRevshare + meta.toProtocol + request.executionRequest.fee.affiliatePortion;
-            
+
         if(!meta.feeIsInput) {
             //this is an interim calculation. Gas fees get deducted later as well. This will
             //also revert if insufficient output was generated to cover all fees
@@ -3970,20 +3970,20 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
     }
 
     /**
-     * Final step to compute gas consumption for trader and pay the vault, protocol, affiliate, and trader 
+     * Final step to compute gas consumption for trader and pay the vault, protocol, affiliate, and trader
      * their portions.
      */
     function payProtocolAndTrader(SwapTypes.SwapRequest memory request,
                             SwapMeta memory meta) internal {
-        
+
         DexibleStorage.DexibleData storage dd = DexibleStorage.load();
 
         if(!meta.isSelfSwap) {
             //If this was a relay-based swap, we need to pay treasury an estimated gas fee
-            
-            //we leave unguarded for gas savings since we know start gas is always higher 
+
+            //we leave unguarded for gas savings since we know start gas is always higher
             //than used and will never rollover without costing an extremely large amount of $$
-            unchecked { 
+            unchecked {
                 //console.log("Start gas", meta.startGas, "Left", gasleft());
 
                 //the total gas used thus far plus some post-op buffer for transfers and events
@@ -3991,7 +3991,7 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
                 if(address(dd.communityVault) != meta.preSwapVault && totalGas > 200_000) {
                     totalGas -= 200_000; //give credit for estimated migration gas
                 }
-                
+
                 console.log("Estimated gas used for trader gas payment", totalGas);
                 meta.nativeGasAmount = LibFees.computeGasCost(totalGas, true); //(totalGas * tx.gasprice);
             }
@@ -4005,7 +4005,7 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
 
             if(!meta.feeIsInput) {
                 //if output was fee, deduct gas payment from proceeds, revert if there isn't enough output
-                //for it (should have been caught offchain before submit). We make sure the trader gets 
+                //for it (should have been caught offchain before submit). We make sure the trader gets
                 //something out of the deal by ensuring output is more than gas.
                 if(meta.outToTrader <= meta.gasAmount) {
                     revert(
@@ -4062,18 +4062,18 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
                 emit AffiliatePaid(request.executionRequest.fee.affiliate, address(feeToken), request.executionRequest.fee.affiliatePortion);
             }
         }
-        
+
         //and send trader their proceeds
         request.tokenOut.token.safeTransfer(request.executionRequest.requester, meta.outToTrader);
-        
+
         emit SwapSuccess(request.executionRequest.requester,
                     request.executionRequest.fee.affiliate,
                     request.tokenOut.amount,
-                    meta.outToTrader, 
+                    meta.outToTrader,
                     address(request.executionRequest.fee.feeToken),
                     meta.gasAmount,
                     request.executionRequest.fee.affiliatePortion,
-                    meta.bpsAmount); 
+                    meta.bpsAmount);
     }
 
     function preCheck(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) internal {
@@ -4081,21 +4081,21 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
         address fToken = address(request.executionRequest.fee.feeToken);
         DexibleStorage.DexibleData storage dd = DexibleStorage.load();
         require(
-            dd.communityVault.isFeeTokenAllowed(fToken), 
+            dd.communityVault.isFeeTokenAllowed(fToken),
             "Fee token is not allowed"
         );
 
         //and that it's one of the tokens swapped
         require(fToken == address(request.tokenIn.token) ||
-                fToken == address(request.tokenOut.token), 
+                fToken == address(request.tokenOut.token),
                 "Fee token must be input or output token");
 
          //get the current DXBL balance at the start to apply discounts
         meta.preDXBLBalance = dd.dxblToken.balanceOf(request.executionRequest.requester);
-        
+
         //flag whether the input token is the fee token
         meta.feeIsInput = address(request.tokenIn.token) == address(request.executionRequest.fee.feeToken);
-        
+
         //transfer input tokens for router so it can perform swap
         //console.log("Transfering input for trading:", request.routes[0].routeAmount.amount);
         request.tokenIn.token.safeTransferFrom(request.executionRequest.requester, address(this), request.routes[0].routeAmount.amount);
@@ -4103,7 +4103,7 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
     }
 
     /**
-     * Pay the relay with gas funds stored in this contract. The gas used provided 
+     * Pay the relay with gas funds stored in this contract. The gas used provided
      * does not include arbitrum multiplier but may include additional amount for post-op
      * gas estimates.
      */
@@ -4111,7 +4111,7 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
         if(gasFee == 0) {
             return;
         }
-        
+
         //console.log("Relay Gas Reimbursement", gasFee);
         //if there is ETH in the contract, reimburse the relay that called the fill function
         if(address(this).balance < gasFee) {
@@ -4131,7 +4131,7 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
     function computeBpsFee(SwapTypes.SwapRequest memory request, bool feeIsInput, uint preDXBL, uint outAmount) internal view returns (uint) {
         //apply any discounts
         DexibleStorage.DexibleData storage ds = DexibleStorage.load();
-        
+
         return ds.dxblToken.computeDiscountedFee(
             IDXBL.FeeRequest({
                 trader: request.executionRequest.requester,

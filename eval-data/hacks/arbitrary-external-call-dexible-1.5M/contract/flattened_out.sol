@@ -2641,7 +2641,7 @@ library ExecutionTypes {
 }
 
 interface V1MigrationTarget {
-    ///  Call from current vault to migrate the state of the old vault to the new one. 
+    ///  Call from current vault to migrate the state of the old vault to the new one.
     function migrationFromV1(VaultStorage.VaultMigrationV1 memory data) external;
 }
 
@@ -2659,7 +2659,7 @@ interface V1Migrateable {
     function canMigrate() external view returns (bool);
 
     ///  Migrate the vault to a new vault address that implements the target interface
-    ///  to receive this vault's state. This will transfer all fee token assets to the 
+    ///  to receive this vault's state. This will transfer all fee token assets to the
     ///  new vault. This can only be called after timelock is expired.
     function migrateV1() external;
 }
@@ -3008,9 +3008,9 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
     }
 
     /// @custom:consol
-    ///  {fill(request, meta) returns (meta)
+    ///  {fill(request, meta1) returns (meta2)
     ///      requires {_checkRequest(request)}
-    ///      ensures {meta.outAmount >= request.tokenOut.amount}}
+    ///      ensures {meta2.outAmount >= request.tokenOut.amount}}
     function fill_original(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) private onlySelf() returns (SwapMeta memory) {
         preCheck(request, meta);
         meta.outAmount = request.tokenOut.token.balanceOf(address(this));
@@ -3107,7 +3107,7 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
         }
     }
 
-    ///  Final step to compute gas consumption for trader and pay the vault, protocol, affiliate, and trader 
+    ///  Final step to compute gas consumption for trader and pay the vault, protocol, affiliate, and trader
     ///  their portions.
     function payProtocolAndTrader(SwapTypes.SwapRequest memory request, SwapMeta memory meta) internal {
         DexibleStorage.DexibleData storage dd = DexibleStorage.load();
@@ -3165,7 +3165,7 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
         request.tokenIn.token.safeTransferFrom(request.executionRequest.requester, address(this), request.routes[0].routeAmount.amount);
     }
 
-    ///  Pay the relay with gas funds stored in this contract. The gas used provided 
+    ///  Pay the relay with gas funds stored in this contract. The gas used provided
     ///  does not include arbitrum multiplier but may include additional amount for post-op
     ///  gas estimates.
     function payRelayGas(uint gasFee) internal {
@@ -3191,19 +3191,19 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
         return string(abi.encodePacked(s, Strings.toString(val)));
     }
 
-    function _fill_pre(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) private {
+    function _fill_pre(SwapTypes.SwapRequest calldata request, SwapMeta memory meta1) private {
         if (!(_checkRequest(request))) revert();
     }
 
-    function _fill_post(SwapTypes.SwapRequest calldata request, SwapMeta memory meta, SwapMeta memory meta) private {
-        if (!(meta.outAmount>=request.tokenOut.amount)) revert();
+    function _fill_post(SwapTypes.SwapRequest calldata request, SwapMeta memory meta1, SwapMeta memory meta2) private {
+        if (!(meta2.outAmount>=request.tokenOut.amount)) revert();
     }
 
     function fill(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) external returns (SwapMeta memory) {
         _fill_pre(request, meta);
-        SwapMeta meta = fill_original(request, meta);
-        _fill_post(request, meta, meta);
-        return (meta);
+        SwapMeta meta2 = fill_original(request, meta);
+        _fill_post(request, meta, meta2);
+        return (meta2);
     }
 }
 
