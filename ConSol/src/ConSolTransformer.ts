@@ -123,10 +123,12 @@ export class ConSolTransformer<T> {
       }
     });
     if (hasConSolSpec) {
-      contract.appendChild(this.preCondError);
-      contract.appendChild(this.postCondError);
-      contract.appendChild(this.preAddrError);
-      contract.appendChild(this.postAddrError);
+      if (globalThis.customError) {
+        contract.appendChild(this.preCondError);
+        contract.appendChild(this.postCondError);
+        contract.appendChild(this.preAddrError);
+        contract.appendChild(this.postAddrError);
+      }
     }
     return hasConSolSpec;
   }
