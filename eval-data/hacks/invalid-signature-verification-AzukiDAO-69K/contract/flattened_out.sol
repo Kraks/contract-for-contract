@@ -1253,14 +1253,6 @@ contract Bean is ERC20, Pausable, Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     using ECDSA for bytes32;
 
-    error preViolation(string funcName);
-
-    error postViolation(string funcName);
-
-    error preViolationAddr(uint256 specId);
-
-    error postViolationAddr(uint256 specId);
-
     uint256 public constant MAX_SUPPLY = 1_000_000_000 * (10 ** 18);
     address public signatureManager;
     mapping(address => mapping(uint256 => bool)) public tokenClaimed;
@@ -1277,6 +1269,23 @@ contract Bean is ERC20, Pausable, Ownable, ReentrancyGuard {
         for (uint256 i = 0; i < _contracts.length; i++) {
             contractSupports[_contracts[i]] = true;
         }
+    }
+
+    function claim_check(address[] memory _contracts, uint256[] memory _amounts, uint256[] memory _tokenIds, uint256 _claimAmount, uint256 _endTime, bytes memory _signature) internal returns (bool success) {
+        if (signatureClaimed[_signature]) return false;
+        if (_contracts.length != _amounts.length) return false;
+        for (uint256 i = 0; i < _contracts.length; i++) {
+            if (!contractSupports[_contracts[i]]) return false;
+        }
+        uint256 totalAmount;
+        for (uint256 j = 0; j < _amounts.length; j++) {
+            totalAmount = totalAmount + _amounts[j];
+        }
+        if (totalAmount != _tokenIds.length) return false;
+        bytes32 message = keccak256(abi.encodePacked(msg.sender, _contracts, _tokenIds, _claimAmount, _endTime));
+        if (signatureManager != message.toEthSignedMessageHash().recover(_signature)) return false;
+        if (block.timestamp > _endTime) return false;
+        return true;
     }
 
     /// @custom:consol
@@ -1343,7 +1352,7 @@ contract Bean is ERC20, Pausable, Ownable, ReentrancyGuard {
     }
 
     function _claim_post(address[] memory _contracts, uint256[] memory _amounts, uint256[] memory _tokenIds, uint256 _claimAmount, uint256 _endTime, bytes memory _signature) private {
-        if (!(claim_check(_contracts,_amounts,_tokenIds,_claimAmount,_endTime))) revert postViolation("claim");
+        if (!(claim_check(_contracts,_amounts,_tokenIds,_claimAmount,_endTime))) revert();
     }
 
     function claim(address[] memory _contracts, uint256[] memory _amounts, uint256[] memory _tokenIds, uint256 _claimAmount, uint256 _endTime, bytes memory _signature) external {
