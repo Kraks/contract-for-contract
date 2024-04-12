@@ -951,13 +951,13 @@ contract P2Controller is P2ControllerStorage, Exponential,  Initializable{
 
         (uint256 _price, bool valid) = oracle.getPrice(_collection, IXToken(xToken).underlying());
         require(_price > 0 && valid, "price is not valid");
+        return true;
     }
 
     /// @custom:consol
     /// {borrowAllowed(xToken, orderId, borrower, borrowAmount) returns ()
     ///   requires {_checkBorrowAllowed(xToken, orderId, borrower, borrowAmount)}}
     function borrowAllowed(address xToken, uint256 orderId, address borrower, uint256 borrowAmount) external whenNotPaused(xToken, 3){
-        require(_checkBorrwoAllowed(xToken, orderId, borrower, borrowAmount), "borrow not allowed");
         (address _collection , , ) = xNFT.getOrderDetail(orderId);
 
         CollateralState storage _collateralState = collateralStates[_collection];

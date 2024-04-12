@@ -290,8 +290,6 @@ contract EFLeverVault is Ownable, ReentrancyGuard{
         uint256[] memory feeAmounts,
         bytes memory userData
     ) public payable {
-        require(msg.sender == balancer, "only flashloan vault");
-
         uint256 loan_amount = amounts[0];
         uint256 fee_amount = feeAmounts[0];
 

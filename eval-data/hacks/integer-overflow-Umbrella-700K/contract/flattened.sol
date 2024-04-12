@@ -893,8 +893,6 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
     /// @dev {_withdraw(amount, user, recipient) 
     ///      requires {_balances[user] >= amount && amount != 0}}
     function _withdraw(uint256 amount, address user, address recipient) internal nonReentrant updateReward(user) {
-        require(amount != 0, "Cannot withdraw 0");
-
         // not using safe math, because there is no way to overflow if stake tokens not overflow
         _totalSupply = _totalSupply - amount;
         _balances[user] = _balances[user] - amount;

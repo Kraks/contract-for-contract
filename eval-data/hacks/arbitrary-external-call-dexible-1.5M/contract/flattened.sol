@@ -3813,8 +3813,6 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
         }
 
         console.log("Expected", request.tokenOut.amount, "Received", meta.outAmount);
-        //first, make sure enough output was generated
-        require(meta.outAmount >= request.tokenOut.amount, "Insufficient output generated");
         return meta;
     }
 

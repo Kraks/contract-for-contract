@@ -1230,11 +1230,9 @@ contract RouteProcessor2 {
     int256 amount1Delta,
     bytes calldata data
   ) external {
-    require(msg.sender == lastCalledPool, 'RouteProcessor.uniswapV3SwapCallback: call from unknown source');
     lastCalledPool = IMPOSSIBLE_POOL_ADDRESS;
     (address tokenIn, address from) = abi.decode(data, (address, address));
     int256 amount = amount0Delta > 0 ? amount0Delta : amount1Delta;
-    require(amount > 0, 'RouteProcessor.uniswapV3SwapCallback: not positive amount');
 
     if (from == address(this)) IERC20(tokenIn).safeTransfer(msg.sender, uint256(amount));
      else IERC20(tokenIn).safeTransferFrom(from, msg.sender, uint256(amount));

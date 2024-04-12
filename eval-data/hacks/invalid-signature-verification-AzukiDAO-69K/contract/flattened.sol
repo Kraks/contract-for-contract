@@ -1913,7 +1913,7 @@ contract Bean is ERC20, Pausable, Ownable, ReentrancyGuard {
 
     /// @custom:consol
     /// {claim(_contracts, _amounts, _tokenIds, _claimAmount, _endTime, _signature) returns ()
-    ///   ensures {claim_check(_contracts, _amounts, _tokenIds, _claimAmount, _endTime, _signature)}}
+    ///   requires {claim_check(_contracts, _amounts, _tokenIds, _claimAmount, _endTime, _signature)}}
     function claim(
         address[] memory _contracts,      // NFT contracts: azuki + beanz + elementals
         uint256[] memory _amounts,        // token amount for every contract: 2 + 3 + 1
@@ -1922,25 +1922,6 @@ contract Bean is ERC20, Pausable, Ownable, ReentrancyGuard {
         uint256 _endTime,
         bytes memory _signature          // sender + contracts + tokenIds + claimAmount + endTime
     ) external whenNotPaused nonReentrant {
-        // check length
-        require(_contracts.length == _amounts.length, "contracts length not match amounts length");
-
-        // check contracts
-        for (uint256 i = 0; i < _contracts.length; i++) {
-            require(contractSupports[_contracts[i]], "contract not support");
-        }
-
-        uint256 totalAmount;
-        for (uint256 j = 0; j < _amounts.length; j++) {
-            totalAmount = totalAmount + _amounts[j];
-        }
-        require(totalAmount == _tokenIds.length, "total amount not match tokenId length");
-
-        // check signature
-        bytes32 message = keccak256(abi.encodePacked(msg.sender, _contracts, _tokenIds, _claimAmount, _endTime));
-        require(signatureManager == message.toEthSignedMessageHash().recover(_signature), "invalid signature");
-        require(block.timestamp <= _endTime, "signature expired");
-
         // check NFT
         uint256 endIndex;
         uint256 startIndex;

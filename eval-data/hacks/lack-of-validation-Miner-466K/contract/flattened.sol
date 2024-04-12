@@ -1936,12 +1936,6 @@ contract ERCX is Context, ERC165, IERC1155, IERC1155MetadataURI, IERCX, IERC20Me
     /// {_transfer(from, to, value, mint)
     ///   ensures {(from != address(0) && to != address(0) && from != to)}}
     function _transfer(address from, address to, uint256 value, bool mint) internal {
-        if (from == address(0)) {
-            revert ERC20InvalidSender(address(0));
-        }
-        if (to == address(0)) {
-            revert ERC20InvalidReceiver(address(0));
-        }
         _update(from, to, value, mint);
     }
 
