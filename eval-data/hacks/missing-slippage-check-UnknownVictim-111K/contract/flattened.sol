@@ -183,8 +183,9 @@ contract ExchangeBetweenPools is Ownable{
 
   uint256 public minimum_amount;
 
-  /// @dev curve.exchange_underlying(x, y, camount, n)
-  ///   ensures _exchange_underlying_post_condition(camount)
+  /// @dev curve.exchange_underlying(x, y, camount, n) {
+  ///   ensures { _exchange_underlying_post_condition(camount) }
+  /// }
   PriceInterface public curve = PriceInterface(CurveInterface(0xbBC81d23Ea2c3ec7e56D39296F0cbB648873a5d3).curve());
 
   constructor(address _from_bank, address _to_bank, uint256 _min_amount) public{
@@ -211,9 +212,10 @@ contract ExchangeBetweenPools is Ownable{
     emit MinimumAmountChanged(old, minimum_amount);
   }
 
-  /// @custom:consol
-  /// doExchange(amount) public returns (success)
-  ///   requires amount >= minimum_amount && amount <= ERC20TokenBankInterface(from_bank).balance()
+  /// @dev {
+  /// doExchange(amount) returns (success)
+  ///   requires { amount >= minimum_amount && amount <= ERC20TokenBankInterface(from_bank).balance() }
+  /// }
   function doExchange(uint256 amount) public returns(bool){
     require(amount >= minimum_amount, "invalid amount");
     require(amount <= ERC20TokenBankInterface(from_bank).balance(), "too much amount");
