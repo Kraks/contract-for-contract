@@ -19,16 +19,16 @@ library SafeMath256 {
         return a / b;
     }
 
-    // @custom:consol
-    //  sub(a, b) returns (c)
-    //  requires b <= a
+    /// @dev
+    ///  {sub(a, b) returns (c)
+    ///  requires{ b <= a}}
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         return a - b;
     }
 
-    // @custom:consol
-    //  add(a, b) returns (c)
-    //  ensures c >= a
+    /// @dev
+    ///  {add(a, b) returns (c)
+    ///  ensures {c >= a}}
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
         return c;
@@ -252,9 +252,9 @@ contract ERC721BasicToken is ERC721Basic, Upgradable {
         return operatorApprovals[_owner][_operator];
     }
 
-    // @custom:consol
-    //  transferFrom(_from, _to, _tokenId)
-    //  requires isApprovedOrOwner(msg.sender, _tokenId) && _from != address(0) && _to != address(0)
+    /// @dev
+    ///  {transferFrom(_from, _to, _tokenId)
+    ///  requires {isApprovedOrOwner(msg.sender, _tokenId) && _from != address(0) && _to != address(0)}}
     function transferFrom(address _from, address _to, uint256 _tokenId) public {
         clearApproval(_from, _tokenId);
         removeTokenFrom(_from, _tokenId);
@@ -286,9 +286,9 @@ contract ERC721BasicToken is ERC721Basic, Upgradable {
         return _spender == owner || getApproved(_tokenId) == _spender || isApprovedForAll(owner, _spender);
     }
 
-    // @custom:consol
-    //  _mint(_to, _tokenId)
-    //  requires _to != address(0)
+    /// @dev
+    /// { _mint(_to, _tokenId)
+    ///  requires {_to != address(0)}}
     function _mint(address _to, uint256 _tokenId) internal {
         addTokenTo(_to, _tokenId);
         emit Transfer(address(0), _to, _tokenId);
@@ -300,9 +300,9 @@ contract ERC721BasicToken is ERC721Basic, Upgradable {
         emit Transfer(_owner, address(0), _tokenId);
     }
 
-    // @custom:consol
-    //  _checkAndCallSafeTransfer(_from, _to, _tokenId, _data)
-    //  requires ownerOf[_tokenId] == _owner
+    /// @dev
+    /// { _checkAndCallSafeTransfer(_from, _to, _tokenId, _data)
+    ///  requires {ownerOf[_tokenId] == _owner}}
     function clearApproval(address _owner, uint256 _tokenId) internal {
         if (tokenApprovals[_tokenId] != address(0)) {
             tokenApprovals[_tokenId] = address(0);
@@ -310,17 +310,17 @@ contract ERC721BasicToken is ERC721Basic, Upgradable {
         }
     }
 
-    // @custom:consol
-    //  addTokenTo(_to, _tokenId)
-    //  requires tokenOwner[_tokenId] == address(0)
+    /// @dev
+    /// { addTokenTo(_to, _tokenId)
+    ///  requires {tokenOwner[_tokenId] == address(0)}}
     function addTokenTo(address _to, uint256 _tokenId) internal {
         tokenOwner[_tokenId] = _to;
         ownedTokensCount[_to] = ownedTokensCount[_to].add(1);
     }
 
-    // @custom:consol
-    //  removeTokenFrom(_from, _tokenId)
-    //  requires ownerOf(_tokenId) == _from && ownedTokensCount[_from] > 0
+    /// @dev
+    ///  {removeTokenFrom(_from, _tokenId)
+    ///  requires {ownerOf(_tokenId) == _from && ownedTokensCount[_from] > 0}}
     function removeTokenFrom(address _from, uint256 _tokenId) internal {
         ownedTokensCount[_from] = ownedTokensCount[_from].sub(1);
         tokenOwner[_tokenId] = address(0);

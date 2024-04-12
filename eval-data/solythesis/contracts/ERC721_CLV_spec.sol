@@ -9,7 +9,7 @@ pragma solidity ^0.5.0;
 
 /**
  * @title ERC20Basic
- * @dev Simpler version of ERC20 interface
+ * dev Simpler version of ERC20 interface
  * See https://github.com/ethereum/EIPs/issues/179
  */
 contract ERC20Basic {
@@ -26,7 +26,7 @@ contract ERC20Basic {
 
 /**
  * @title ERC20 interface
- * @dev see https://github.com/ethereum/EIPs/issues/20
+ * dev see https://github.com/ethereum/EIPs/issues/20
  */
 contract ERC20 is ERC20Basic {
   function allowance(address owner, address spender)
@@ -49,14 +49,14 @@ contract ERC20 is ERC20Basic {
 
 /**
  * @title ERC165
- * @dev https://github.com/ethereum/EIPs/blob/master/EIPS/eip-165.md
+ * dev https://github.com/ethereum/EIPs/blob/master/EIPS/eip-165.md
  */
 interface ERC165 {
 
   /**
    * @notice Query if a contract implements an interface
    * @param _interfaceId The interface identifier, as specified in ERC-165
-   * @dev Interface identification is specified in ERC-165. This function
+   * dev Interface identification is specified in ERC-165. This function
    * uses less than 30,000 gas.
    */
   function supportsInterface(bytes4 _interfaceId)
@@ -72,7 +72,7 @@ interface ERC165 {
 
 /**
  * @title ERC721 Non-Fungible Token Standard basic interface
- * @dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
+ * dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
  */
 contract ERC721Basic is ERC165 {
   event Transfer(
@@ -127,7 +127,7 @@ contract ERC721Basic is ERC165 {
 
 /**
  * @title ERC-721 Non-Fungible Token Standard, optional enumeration extension
- * @dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
+ * dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
  */
 contract ERC721Enumerable is ERC721Basic {
   function totalSupply() public view returns (uint256);
@@ -145,7 +145,7 @@ contract ERC721Enumerable is ERC721Basic {
 
 /**
  * @title ERC-721 Non-Fungible Token Standard, optional metadata extension
- * @dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
+ * dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
  */
 contract ERC721Metadata is ERC721Basic {
   function name() external view returns (string memory _name);
@@ -156,7 +156,7 @@ contract ERC721Metadata is ERC721Basic {
 
 /**
  * @title ERC-721 Non-Fungible Token Standard, full implementation interface
- * @dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
+ * dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
  */
 contract ERC721 is ERC721Basic, ERC721Enumerable, ERC721Metadata {
 }
@@ -166,12 +166,12 @@ contract ERC721 is ERC721Basic, ERC721Enumerable, ERC721Metadata {
 
 /**
  * @title ERC721 token receiver interface
- * @dev Interface for any contract that wants to support safeTransfers
+ * dev Interface for any contract that wants to support safeTransfers
  * from ERC721 asset contracts.
  */
 contract ERC721Receiver {
   /**
-   * @dev Magic value to be returned upon successful reception of an NFT
+   * dev Magic value to be returned upon successful reception of an NFT
    *  Equals to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`,
    *  which can be also obtained as `ERC721Receiver(0).onERC721Received.selector`
    */
@@ -179,7 +179,7 @@ contract ERC721Receiver {
 
   /**
    * @notice Handle the receipt of an NFT
-   * @dev The ERC721 smart contract calls this function on the recipient
+   * dev The ERC721 smart contract calls this function on the recipient
    * after a `safetransfer`. This function MAY throw to revert and reject the
    * transfer. Return of other than the magic value MUST result in the
    * transaction being reverted.
@@ -205,12 +205,12 @@ contract ERC721Receiver {
 
 /**
  * @title SafeMath
- * @dev Math operations with safety checks that throw on error
+ * dev Math operations with safety checks that throw on error
  */
 library SafeMath {
 
   /**
-  * @dev Multiplies two numbers, throws on overflow.
+  * dev Multiplies two numbers, throws on overflow.
   */
   function mul(uint256 a, uint256 b) internal pure returns (uint256 c) {
     // Gas optimization: this is cheaper than asserting 'a' not being zero, but the
@@ -226,7 +226,7 @@ library SafeMath {
   }
 
   /**
-  * @dev Integer division of two numbers, truncating the quotient.
+  * dev Integer division of two numbers, truncating the quotient.
   */
   function div(uint256 a, uint256 b) internal pure returns (uint256) {
     // assert(b > 0); // Solidity automatically throws when dividing by 0
@@ -236,21 +236,21 @@ library SafeMath {
   }
 
   /**
-  * @dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
+  * dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
   */
-  // @custom:consol
-  //    sub(a, b) returns (c)
-  //    requires b <= a
+  /// @dev
+  ///   { sub(a, b) returns (c)
+  ///    requires {b <= a}}
   function sub(uint256 a, uint256 b) internal pure returns (uint256) {
     return a - b;
   }
 
   /**
-  * @dev Adds two numbers, throws on overflow.
+  * dev Adds two numbers, throws on overflow.
   */
-  // @custom:consol
-  //    add(a, b) returns (c)
-  //    ensures c >= a
+  /// @dev
+  ///    {add(a, b) returns (c)
+  ///    ensures {c >= a}}
   function add(uint256 a, uint256 b) internal pure returns (uint256 c) {
     c = a + b;
     return c;
@@ -268,7 +268,7 @@ library AddressUtils {
 
   /**
    * Returns whether the target address is a contract
-   * @dev This function will return false if invoked during the constructor of a contract,
+   * dev This function will return false if invoked during the constructor of a contract,
    * as the code is not actually created until after the constructor finishes.
    * @param addr address to check
    * @return whether the target address is a contract
@@ -295,7 +295,7 @@ library AddressUtils {
 /**
  * @title SupportsInterfaceWithLookup
  * @author Matt Condon (@shrugs)
- * @dev Implements ERC165 using a lookup table.
+ * dev Implements ERC165 using a lookup table.
  */
 contract SupportsInterfaceWithLookup is ERC165 {
   bytes4 public constant InterfaceId_ERC165 = 0x01ffc9a7;
@@ -305,12 +305,12 @@ contract SupportsInterfaceWithLookup is ERC165 {
    */
 
   /**
-   * @dev a mapping of interface id to whether or not it's supported
+   * dev a mapping of interface id to whether or not it's supported
    */
   mapping(bytes4 => bool) internal supportedInterfaces;
 
   /**
-   * @dev A contract implementing SupportsInterfaceWithLookup
+   * dev A contract implementing SupportsInterfaceWithLookup
    * implement ERC165 itself
    */
   constructor()
@@ -320,7 +320,7 @@ contract SupportsInterfaceWithLookup is ERC165 {
   }
 
   /**
-   * @dev implement supportsInterface(bytes4) using a lookup table
+   * dev implement supportsInterface(bytes4) using a lookup table
    */
   function supportsInterface(bytes4 _interfaceId)
     external
@@ -331,7 +331,7 @@ contract SupportsInterfaceWithLookup is ERC165 {
   }
 
   /**
-   * @dev private method for registering an interface
+   * dev private method for registering an interface
    */
   function _registerInterface(bytes4 _interfaceId)
     internal
@@ -348,7 +348,7 @@ contract SupportsInterfaceWithLookup is ERC165 {
 
 /**
  * @title ERC721 Non-Fungible Token Standard basic implementation
- * @dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
+ * dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
  */
 contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
 
@@ -392,7 +392,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   mapping (address => mapping (address => bool)) internal operatorApprovals;
 
   /**
-   * @dev Guarantees msg.sender is owner of the given token
+   * dev Guarantees msg.sender is owner of the given token
    * @param _tokenId uint256 ID of the token to validate its ownership belongs to msg.sender
    */
   modifier onlyOwnerOf(uint256 _tokenId) {
@@ -401,7 +401,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   }
 
   /**
-   * @dev Checks msg.sender can transfer a token, by being owner, approved, or operator
+   * dev Checks msg.sender can transfer a token, by being owner, approved, or operator
    * @param _tokenId uint256 ID of the token to validate
    */
   modifier canTransfer(uint256 _tokenId) {
@@ -418,7 +418,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   }
 
   /**
-   * @dev Gets the balance of the specified address
+   * dev Gets the balance of the specified address
    * @param _owner address to query the balance of
    * @return uint256 representing the amount owned by the passed address
    */
@@ -428,7 +428,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   }
 
   /**
-   * @dev Gets the owner of the specified token ID
+   * dev Gets the owner of the specified token ID
    * @param _tokenId uint256 ID of the token to query the owner of
    * @return owner address currently marked as the owner of the given token ID
    */
@@ -439,7 +439,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   }
 
   /**
-   * @dev Returns whether the specified token exists
+   * dev Returns whether the specified token exists
    * @param _tokenId uint256 ID of the token to query the existence of
    * @return whether the token exists
    */
@@ -449,7 +449,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   }
 
   /**
-   * @dev Approves another address to transfer the given token ID
+   * dev Approves another address to transfer the given token ID
    * The zero address indicates there is no approved address.
    * There can only be one approved address per token at a given time.
    * Can only be called by the token owner or an approved operator.
@@ -466,7 +466,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   }
 
   /**
-   * @dev Gets the approved address for a token ID, or zero if no address set
+   * dev Gets the approved address for a token ID, or zero if no address set
    * @param _tokenId uint256 ID of the token to query the approval of
    * @return address currently approved for the given token ID
    */
@@ -475,7 +475,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   }
 
   /**
-   * @dev Sets or unsets the approval of a given operator
+   * dev Sets or unsets the approval of a given operator
    * An operator is allowed to transfer all tokens of the sender on their behalf
    * @param _to operator address to set the approval
    * @param _approved representing the status of the approval to be set
@@ -487,7 +487,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   }
 
   /**
-   * @dev Tells whether an operator is approved by a given owner
+   * dev Tells whether an operator is approved by a given owner
    * @param _owner owner address which you want to query the approval of
    * @param _operator operator address which you want to query the approval of
    * @return bool whether the given operator is approved by the given owner
@@ -504,16 +504,16 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   }
 
   /**
-   * @dev Transfers the ownership of a given token ID to another address
+   * dev Transfers the ownership of a given token ID to another address
    * Usage of this method is discouraged, use `safeTransferFrom` whenever possible
    * Requires the msg sender to be the owner, approved, or operator
    * @param _from current owner of the token
    * @param _to address to receive the ownership of the given token ID
    * @param _tokenId uint256 ID of the token to be transferred
   */
-  // @custom:consol
-  //    transferFrom(_from, _to, _tokenId)
-  //    requires _from != address(0) && _to != address(0)
+  /// @dev
+  ///    {transferFrom(_from, _to, _tokenId)
+  ///    requires {_from != address(0) && _to != address(0)}}
   function transferFrom(
     address _from,
     address _to,
@@ -530,7 +530,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   }
 
   /**
-   * @dev Safely transfers the ownership of a given token ID to another address
+   * dev Safely transfers the ownership of a given token ID to another address
    * If the target address is a contract, it must implement `onERC721Received`,
    * which is called upon a safe transfer, and return the magic value
    * `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`; otherwise,
@@ -554,7 +554,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   }
 
   /**
-   * @dev Safely transfers the ownership of a given token ID to another address
+   * dev Safely transfers the ownership of a given token ID to another address
    * If the target address is a contract, it must implement `onERC721Received`,
    * which is called upon a safe transfer, and return the magic value
    * `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`; otherwise,
@@ -580,7 +580,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   }
 
   /**
-   * @dev Returns whether the given spender can transfer a given token ID
+   * dev Returns whether the given spender can transfer a given token ID
    * @param _spender address of the spender to query
    * @param _tokenId uint256 ID of the token to be transferred
    * @return bool whether the msg.sender is approved for the given token ID,
@@ -606,21 +606,21 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   }
 
   /**
-   * @dev Internal function to mint a new token
+   * dev Internal function to mint a new token
    * Reverts if the given token ID already exists
    * @param _to The address that will own the minted token
    * @param _tokenId uint256 ID of the token to be minted by the msg.sender
    */
-  // @custom:consol
-  //    _mint(_to, _tokenId)
-  //    requires _to != address(0)
+  /// @dev
+  ///    {_mint(_to, _tokenId)
+  ///    requires {_to != address(0)}}
   function _mint(address _to, uint256 _tokenId) internal {
     addTokenTo(_to, _tokenId);
     emit Transfer(address(0), _to, _tokenId);
   }
 
   /**
-   * @dev Internal function to burn a specific token
+   * dev Internal function to burn a specific token
    * Reverts if the token does not exist
    * @param _tokenId uint256 ID of the token being burned by the msg.sender
    */
@@ -631,14 +631,14 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   }
 
   /**
-   * @dev Internal function to clear current approval of a given token ID
+   * dev Internal function to clear current approval of a given token ID
    * Reverts if the given address is not indeed the owner of the token
    * @param _owner owner of the token
    * @param _tokenId uint256 ID of the token to be transferred
    */
-  // @custom:consol
-  //    _clearApproval(_owner, _tokenId)
-  //    requires ownerOf(_tokenId) == _owner
+  /// @dev
+  ///    {_clearApproval(_owner, _tokenId)
+  ///    requires {ownerOf(_tokenId) == _owner}}
   function clearApproval(address _owner, uint256 _tokenId) internal {
     if (tokenApprovals[_tokenId] != address(0)) {
       tokenApprovals[_tokenId] = address(0);
@@ -646,33 +646,33 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
   }
 
   /**
-   * @dev Internal function to add a token ID to the list of a given address
+   * dev Internal function to add a token ID to the list of a given address
    * @param _to address representing the new owner of the given token ID
    * @param _tokenId uint256 ID of the token to be added to the tokens list of the given address
    */
-  // @custom:consol
-  //    _addTokenTo(_to, _tokenId)
-  //    requires tokenOwner[_tokenId] == address(0)] }
+  /// @dev
+  ///    {_addTokenTo(_to, _tokenId)
+  ///    requires {tokenOwner[_tokenId] == address(0)]} }
   function addTokenTo(address _to, uint256 _tokenId) internal {
     tokenOwner[_tokenId] = _to;
     ownedTokensCount[_to] = ownedTokensCount[_to].add(1);
   }
 
   /**
-   * @dev Internal function to remove a token ID from the list of a given address
+   * dev Internal function to remove a token ID from the list of a given address
    * @param _from address representing the previous owner of the given token ID
    * @param _tokenId uint256 ID of the token to be removed from the tokens list of the given address
    */
-  // @custom:consol
-  //    _removeTokenFrom(_from, _tokenId)
-  //    requires ownerOf(_tokenId) == _from
+  /// @dev
+  ///    {_removeTokenFrom(_from, _tokenId)
+  ///    requires {ownerOf(_tokenId) == _from}}
   function removeTokenFrom(address _from, uint256 _tokenId) internal {
     ownedTokensCount[_from] = ownedTokensCount[_from].sub(1);
     tokenOwner[_tokenId] = address(0);
   }
 
   /**
-   * @dev Internal function to invoke `onERC721Received` on a target address
+   * dev Internal function to invoke `onERC721Received` on a target address
    * The call is not executed if the target address is not a contract
    * @param _from address representing the previous owner of the given token ID
    * @param _to target address that will receive the tokens
@@ -705,7 +705,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
  * @title Full ERC721 Token
  * This implementation includes all the required and some optional functionality of the ERC721 standard
  * Moreover, it includes approve all functionality using operator terminology
- * @dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
+ * dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
  */
 contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
 
@@ -745,7 +745,7 @@ contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
   mapping(uint256 => string) internal tokenURIs;
 
   /**
-   * @dev Constructor function
+   * dev Constructor function
    */
   constructor(string memory _name, string memory _symbol) public {
     name_ = _name;
@@ -757,7 +757,7 @@ contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
   }
 
   /**
-   * @dev Gets the token name
+   * dev Gets the token name
    * @return string representing the token name
    */
   function name() external view returns (string memory) {
@@ -765,7 +765,7 @@ contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
   }
 
   /**
-   * @dev Gets the token symbol
+   * dev Gets the token symbol
    * @return string representing the token symbol
    */
   function symbol() external view returns (string memory) {
@@ -773,7 +773,7 @@ contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
   }
 
   /**
-   * @dev Returns an URI for a given token ID
+   * dev Returns an URI for a given token ID
    * Throws if the token ID does not exist. May return an empty string.
    * @param _tokenId uint256 ID of the token to query
    */
@@ -783,7 +783,7 @@ contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
   }
 
   /**
-   * @dev Gets the token ID at a given index of the tokens list of the requested owner
+   * dev Gets the token ID at a given index of the tokens list of the requested owner
    * @param _owner address owning the tokens list to be accessed
    * @param _index uint256 representing the index to be accessed of the requested tokens list
    * @return uint256 token ID at the given index of the tokens list owned by the requested address
@@ -801,7 +801,7 @@ contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
   }
 
   /**
-   * @dev Gets the total amount of tokens stored by the contract
+   * dev Gets the total amount of tokens stored by the contract
    * @return uint256 representing the total amount of tokens
    */
   function totalSupply() public view returns (uint256) {
@@ -809,7 +809,7 @@ contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
   }
 
   /**
-   * @dev Gets the token ID at a given index of all the tokens in this contract
+   * dev Gets the token ID at a given index of all the tokens in this contract
    * Reverts if the index is greater or equal to the total number of tokens
    * @param _index uint256 representing the index to be accessed of the tokens list
    * @return uint256 token ID at the given index of the tokens list
@@ -820,7 +820,7 @@ contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
   }
 
   /**
-   * @dev Internal function to set the token URI for a given token
+   * dev Internal function to set the token URI for a given token
    * Reverts if the token ID does not exist
    * @param _tokenId uint256 ID of the token to set its URI
    * @param _uri string URI to assign
@@ -831,7 +831,7 @@ contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
   }
 
   /**
-   * @dev Internal function to add a token ID to the list of a given address
+   * dev Internal function to add a token ID to the list of a given address
    * @param _to address representing the new owner of the given token ID
    * @param _tokenId uint256 ID of the token to be added to the tokens list of the given address
    */
@@ -843,7 +843,7 @@ contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
   }
 
   /**
-   * @dev Internal function to remove a token ID from the list of a given address
+   * dev Internal function to remove a token ID from the list of a given address
    * @param _from address representing the previous owner of the given token ID
    * @param _tokenId uint256 ID of the token to be removed from the tokens list of the given address
    */
@@ -866,7 +866,7 @@ contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
   }
 
   /**
-   * @dev Internal function to mint a new token
+   * dev Internal function to mint a new token
    * Reverts if the given token ID already exists
    * @param _to address the beneficiary that will own the minted token
    * @param _tokenId uint256 ID of the token to be minted by the msg.sender
@@ -879,7 +879,7 @@ contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
   }
 
   /**
-   * @dev Internal function to burn a specific token
+   * dev Internal function to burn a specific token
    * Reverts if the token does not exist
    * @param _owner owner of the token to burn
    * @param _tokenId uint256 ID of the token being burned by the msg.sender
@@ -911,7 +911,7 @@ contract ERC721Token is SupportsInterfaceWithLookup, ERC721BasicToken, ERC721 {
 
 /**
  * @title Ownable
- * @dev The Ownable contract has an owner address, and provides basic authorization control
+ * dev The Ownable contract has an owner address, and provides basic authorization control
  * functions, this simplifies the implementation of "user permissions".
  */
 contract Ownable {
@@ -926,7 +926,7 @@ contract Ownable {
 
 
   /**
-   * @dev The Ownable constructor sets the original `owner` of the contract to the sender
+   * dev The Ownable constructor sets the original `owner` of the contract to the sender
    * account.
    */
   constructor() public {
@@ -934,7 +934,7 @@ contract Ownable {
   }
 
   /**
-   * @dev Throws if called by any account other than the owner.
+   * dev Throws if called by any account other than the owner.
    */
   modifier onlyOwner() {
     require(msg.sender == owner);
@@ -942,7 +942,7 @@ contract Ownable {
   }
 
   /**
-   * @dev Allows the current owner to relinquish control of the contract.
+   * dev Allows the current owner to relinquish control of the contract.
    * @notice Renouncing to ownership will leave the contract without an owner.
    * It will not be possible to call the functions with the `onlyOwner`
    * modifier anymore.
@@ -953,7 +953,7 @@ contract Ownable {
   }
 
   /**
-   * @dev Allows the current owner to transfer control of the contract to a newOwner.
+   * dev Allows the current owner to transfer control of the contract to a newOwner.
    * @param _newOwner The address to transfer ownership to.
    */
   function transferOwnership(address _newOwner) public onlyOwner {
@@ -961,7 +961,7 @@ contract Ownable {
   }
 
   /**
-   * @dev Transfers control of the contract to a newOwner.
+   * dev Transfers control of the contract to a newOwner.
    * @param _newOwner The address to transfer ownership to.
    */
   function _transferOwnership(address _newOwner) internal {
@@ -976,7 +976,7 @@ contract Ownable {
 
 /**
  * @title Ownable
- * @dev The Ownable contract has an admin address, and provides basic authorization control
+ * dev The Ownable contract has an admin address, and provides basic authorization control
  * functions, this simplifies the implementation of "user permissions".
  */
 contract Admin {
@@ -991,7 +991,7 @@ contract Admin {
 
 
   /**
-   * @dev The Ownable constructor sets the original `admin` of the contract to the sender
+   * dev The Ownable constructor sets the original `admin` of the contract to the sender
    * account.
    */
   constructor() public {
@@ -999,7 +999,7 @@ contract Admin {
   }
 
   /**
-   * @dev Throws if called by any account other than the admin.
+   * dev Throws if called by any account other than the admin.
    */
   modifier onlyAdmin() {
     require(admins[msg.sender]);
@@ -1011,7 +1011,7 @@ contract Admin {
   }
 
   /**
-   * @dev Allows the current admin to relinquish control of the contract.
+   * dev Allows the current admin to relinquish control of the contract.
    * @notice Renouncing to adminship will leave the contract without an admin.
    * It will not be possible to call the functions with the `onlyAdmin`
    * modifier anymore.
@@ -1022,7 +1022,7 @@ contract Admin {
   }
 
   /**
-   * @dev Allows the current admin to transfer control of the contract to a newAdmin.
+   * dev Allows the current admin to transfer control of the contract to a newAdmin.
    * @param _newAdmin The address to transfer adminship to.
    */
   function transferAdminship(address _newAdmin) public onlyAdmin {
@@ -1030,7 +1030,7 @@ contract Admin {
   }
 
   /**
-   * @dev Transfers control of the contract to a newAdmin.
+   * dev Transfers control of the contract to a newAdmin.
    * @param _newAdmin The address to transfer adminship to.
    */
   function _transferAdminship(address _newAdmin) internal {
@@ -1046,7 +1046,7 @@ contract Admin {
  * @title String & slice utility library for Solidity contracts.
  * @author Nick Johnson <arachnid@notdot.net>
  *
- * @dev Functionality in this library is largely implemented using an
+ * dev Functionality in this library is largely implemented using an
  *      abstraction called a 'slice'. A slice represents a part of a string -
  *      anything from the entire string to a single character, or even no
  *      characters at all (a 0-length slice). Since a slice only has to specify
@@ -1132,7 +1132,7 @@ contract Clovers is ERC721Token, Admin, Ownable {
 
 
     /**
-    * @dev Checks msg.sender can transfer a token, by being owner, approved, operator or cloversController
+    * dev Checks msg.sender can transfer a token, by being owner, approved, operator or cloversController
     * @param _tokenId uint256 ID of the token to validate
     */
     modifier canTransfer(uint256 _tokenId) {
@@ -1179,7 +1179,7 @@ contract Clovers is ERC721Token, Admin, Ownable {
 /* ---------------------------------------------------------------------------------------------------------------------- */
 
     /**
-    * @dev Moves Token to a certain address for use in the CloversController
+    * dev Moves Token to a certain address for use in the CloversController
     * @param _to The address to receive the Token.
     * @param _amount The amount of Token to be transferred.
     * @param _token The address of the Token to be transferred.
@@ -1189,7 +1189,7 @@ contract Clovers is ERC721Token, Admin, Ownable {
         return ERC20(_token).transfer(_to, _amount);
     }
     /**
-    * @dev Approves Tokens to a certain address for use in the CloversController
+    * dev Approves Tokens to a certain address for use in the CloversController
     * @param _to The address to receive the Token approval.
     * @param _amount The amount of Token to be approved.
     * @param _token The address of the Token to be approved.
@@ -1199,7 +1199,7 @@ contract Clovers is ERC721Token, Admin, Ownable {
     }
 
     /**
-    * @dev Sets whether the minter will keep the clover
+    * dev Sets whether the minter will keep the clover
     * @param _tokenId The token Id.
     * @param value Whether the clover will be kept.
     */
@@ -1220,7 +1220,7 @@ contract Clovers is ERC721Token, Admin, Ownable {
     }
 
     /**
-    * @dev Sets total tallies of symmetry counts. For use by the controller to correct for invalid Clovers.
+    * dev Sets total tallies of symmetry counts. For use by the controller to correct for invalid Clovers.
     * @param _totalSymmetries The total number of Symmetries.
     * @param RotSym The total number of RotSym Symmetries.
     * @param Y0Sym The total number of Y0Sym Symmetries.
@@ -1238,7 +1238,7 @@ contract Clovers is ERC721Token, Admin, Ownable {
     }
 
     /**
-    * @dev Deletes data about a Clover.
+    * dev Deletes data about a Clover.
     * @param _tokenId The Id of the clover token to be deleted.
     */
     function deleteClover(uint256 _tokenId) public onlyOwnerOrController {
@@ -1246,13 +1246,13 @@ contract Clovers is ERC721Token, Admin, Ownable {
         unmint(_tokenId);
     }
     /**
-    * @dev Updates the CloversController contract address and approves that contract to manage the Clovers owned by the Clovers contract.
+    * dev Updates the CloversController contract address and approves that contract to manage the Clovers owned by the Clovers contract.
     * @param _cloversController The address of the new contract.
     */
 
 
     /**
-    * @dev Mints new Clovers.
+    * dev Mints new Clovers.
     * @param _to The address of the new clover owner.
     * @param _tokenId The Id of the new clover token.
     */
@@ -1279,7 +1279,7 @@ contract Clovers is ERC721Token, Admin, Ownable {
     }
 
     /**
-    * @dev Unmints Clovers.
+    * dev Unmints Clovers.
     * @param _tokenId The Id of the clover token to be destroyed.
     */
     function unmint (uint256 _tokenId) public onlyOwnerOrController {

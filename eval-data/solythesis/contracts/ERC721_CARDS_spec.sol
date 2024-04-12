@@ -191,9 +191,9 @@ contract IERC721Receiver {
 
 library SafeMath {
 
-    // @custom:consol
-    //  add(a, b) returns (c)
-    //  ensures c >= a
+    /// @dev
+    ///  {add(a, b) returns (c)
+    ///  ensures {c >= a}}
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
 
@@ -201,9 +201,9 @@ library SafeMath {
     }
 
 
-    // @custom:consol
-    //  sub(a, b) returns (c)
-    //  requires b <= a
+    /// @dev
+    ///  {sub(a, b) returns (c)
+    ///  requires {b <= a}}
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a - b;
 
@@ -326,9 +326,9 @@ contract ERC721 is ERC165, IERC721 {
     }
 
 
-    // @custom:consol
-    //  transferFrom(from, to, tokenId)
-    //  requires _isApprovedOrOwner(msg.sender, tokenId)
+    /// @dev
+    ///  {transferFrom(from, to, tokenId)
+    ///  requires {_isApprovedOrOwner(msg.sender, tokenId)}}
     function transferFrom(address from, address to, uint256 tokenId) public {
         _transferFrom(from, to, tokenId);
     }
@@ -364,9 +364,9 @@ contract ERC721 is ERC165, IERC721 {
     }
 
 
-    // @custom:consol
-    //  _mint(to, tokenId)
-    //  requires to != address(0) && !_exists(tokenId)
+    /// @dev
+    ///  {_mint(to, tokenId)
+    ///  requires {to != address(0) && !_exists(tokenId)}}
     function _mint(address to, uint256 tokenId) internal {
 
         _tokenOwner[tokenId] = to;
@@ -401,9 +401,9 @@ contract ERC721 is ERC165, IERC721 {
     }
 
 
-    // @custom:consol
-    //  _transferFrom(from, to, tokenId)
-    //  requires ownerOf(tokenId) == from && to != address(0)
+    /// @dev
+    ///  {_transferFrom(from, to, tokenId)
+    ///  requires {ownerOf(tokenId) == from && to != address(0)}}
     function _transferFrom(address from, address to, uint256 tokenId) internal {
 
         _clearApproval(tokenId);

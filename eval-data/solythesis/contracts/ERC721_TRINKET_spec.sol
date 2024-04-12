@@ -6,13 +6,6 @@ pragma solidity ^0.5.0;
 
 library Address {
 
-  /**
-   * Returns whether the target address is a contract
-   * @dev This function will return false if invoked during the constructor of a contract,
-   * as the code is not actually created until after the constructor finishes.
-   * @param addr address to check
-   * @return whether the target address is a contract
-   */
     function isContract(address addr) internal view returns (bool) {
         uint256 size;
         // XXX Currently there is no better way to check if there is a contract in an address
@@ -53,9 +46,7 @@ contract Ownable {
 
 library SafeMath {
 
-    /**
-    * @dev Multiplies two numbers, throws on overflow.
-    */
+
     function mul(uint256 a, uint256 b) internal pure returns (uint256 c) {
         // Gas optimization: this is cheaper than asserting 'a' not being zero, but the
         // benefit is lost if 'b' is also tested.
@@ -69,9 +60,7 @@ library SafeMath {
         return c;
     }
 
-    /**
-    * @dev Integer division of two numbers, truncating the quotient.
-    */
+
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
         // assert(b > 0); // Solidity automatically throws when dividing by 0
         // uint256 c = a / b;
@@ -80,21 +69,21 @@ library SafeMath {
     }
 
     /**
-    * @dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
+    * dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
     */
-    // @custom:consol
-    //  sub(a, b) returns (c)
-    //  requires b <= a
+    /// @dev 
+    ///  {sub(a, b) returns (c)
+    ///  requires {b <= a}}
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         return a - b;
     }
 
     /**
-    * @dev Adds two numbers, throws on overflow.
+    * dev Adds two numbers, throws on overflow.
     */
-    // @custom:consol
-    //  add(a, b) returns (c)
-    //  ensures c >= a
+    /// @dev
+    ///  {add(a, b) returns (c)
+    ///  ensures {c >= a}}
     function add(uint256 a, uint256 b) internal pure returns (uint256 c) {
         c = a + b;
         return c;
@@ -157,7 +146,7 @@ interface IERC165 {
   /**
    * @notice Query if a contract implements an interface
    * @param _interfaceId The interface identifier, as specified in ERC-165
-   * @dev Interface identification is specified in ERC-165. This function
+   * dev Interface identification is specified in ERC-165. This function
    * uses less than 30,000 gas.
    */
   function supportsInterface(bytes4 _interfaceId) external view returns (bool);
@@ -166,7 +155,7 @@ interface IERC165 {
 
 contract IERC721Receiver {
     /**
-    * @dev Magic value to be returned upon successful reception of an NFT
+    * dev Magic value to be returned upon successful reception of an NFT
     *  Equals to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`,
     *  which can be also obtained as `ERC721Receiver(0).onERC721Received.selector`
     */
@@ -174,7 +163,7 @@ contract IERC721Receiver {
 
     /**
     * @notice Handle the receipt of an NFT
-    * @dev The ERC721 smart contract calls this function on the recipient
+    * dev The ERC721 smart contract calls this function on the recipient
     * after a `safetransfer`. This function MAY throw to revert and reject the
     * transfer. Return of other than the magic value MUST result in the
     * transaction being reverted.
@@ -255,12 +244,12 @@ contract SupportsInterfaceWithLookup is IERC165 {
     */
 
     /**
-    * @dev a mapping of interface id to whether or not it's supported
+    * dev a mapping of interface id to whether or not it's supported
     */
     mapping(bytes4 => bool) internal supportedInterfaces;
 
     /**
-    * @dev A contract implementing SupportsInterfaceWithLookup
+    * dev A contract implementing SupportsInterfaceWithLookup
     * implement ERC165 itself
     */
     constructor() public {
@@ -268,14 +257,14 @@ contract SupportsInterfaceWithLookup is IERC165 {
     }
 
     /**
-    * @dev implement supportsInterface(bytes4) using a lookup table
+    * dev implement supportsInterface(bytes4) using a lookup table
     */
     function supportsInterface(bytes4 _interfaceId) external view returns (bool) {
         return supportedInterfaces[_interfaceId];
     }
 
     /**
-    * @dev private method for registering an interface
+    * dev private method for registering an interface
     */
     function _registerInterface(bytes4 _interfaceId) internal {
         require(_interfaceId != 0xffffffff);
@@ -302,7 +291,7 @@ contract Delegate {
 /**
  * @title ERC165
  * @author Matt Condon (@shrugs)
- * @dev Implements ERC165 using a lookup table.
+ * dev Implements ERC165 using a lookup table.
  */
 contract ERC165 is IERC165 {
 
@@ -313,12 +302,12 @@ contract ERC165 is IERC165 {
     */
 
     /**
-    * @dev a mapping of interface id to whether or not it's supported
+    * dev a mapping of interface id to whether or not it's supported
     */
     mapping(bytes4 => bool) private _supportedInterfaces;
 
     /**
-    * @dev A contract implementing SupportsInterfaceWithLookup
+    * dev A contract implementing SupportsInterfaceWithLookup
     * implement ERC165 itself
     */
     constructor()
@@ -328,7 +317,7 @@ contract ERC165 is IERC165 {
     }
 
     /**
-    * @dev implement supportsInterface(bytes4) using a lookup table
+    * dev implement supportsInterface(bytes4) using a lookup table
     */
     function supportsInterface(bytes4 interfaceId)
       external
@@ -339,7 +328,7 @@ contract ERC165 is IERC165 {
     }
 
     /**
-    * @dev internal method for registering an interface
+    * dev internal method for registering an interface
     */
     function _registerInterface(bytes4 interfaceId)
       internal
@@ -392,7 +381,7 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     /**
-    * @dev Gets the balance of the specified address
+    * dev Gets the balance of the specified address
     * @param owner address to query the balance of
     * @return uint256 representing the amount owned by the passed address
     */
@@ -402,7 +391,7 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     /**
-    * @dev Gets the owner of the specified token ID
+    * dev Gets the owner of the specified token ID
     * @param tokenId uint256 ID of the token to query the owner of
     * @return owner address currently marked as the owner of the given token ID
     */
@@ -413,7 +402,7 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     /**
-    * @dev Approves another address to transfer the given token ID
+    * dev Approves another address to transfer the given token ID
     * The zero address indicates there is no approved address.
     * There can only be one approved address per token at a given time.
     * Can only be called by the token owner or an approved operator.
@@ -430,7 +419,7 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     /**
-    * @dev Gets the approved address for a token ID, or zero if no address set
+    * dev Gets the approved address for a token ID, or zero if no address set
     * Reverts if the token ID does not exist.
     * @param tokenId uint256 ID of the token to query the approval of
     * @return address currently approved for the given token ID
@@ -441,7 +430,7 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     /**
-    * @dev Sets or unsets the approval of a given operator
+    * dev Sets or unsets the approval of a given operator
     * An operator is allowed to transfer all tokens of the sender on their behalf
     * @param to operator address to set the approval
     * @param approved representing the status of the approval to be set
@@ -453,7 +442,7 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     /**
-    * @dev Tells whether an operator is approved by a given owner
+    * dev Tells whether an operator is approved by a given owner
     * @param owner owner address which you want to query the approval of
     * @param operator operator address which you want to query the approval of
     * @return bool whether the given operator is approved by the given owner
@@ -470,16 +459,16 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     /**
-    * @dev Transfers the ownership of a given token ID to another address
+    * dev Transfers the ownership of a given token ID to another address
     * Usage of this method is discouraged, use `safeTransferFrom` whenever possible
     * Requires the msg sender to be the owner, approved, or operator
     * @param from current owner of the token
     * @param to address to receive the ownership of the given token ID
     * @param tokenId uint256 ID of the token to be transferred
     */
-    // @custom:consol
-    //  transferFrom(from, to, tokenId)
-    //  requires _isApprovedOrOwner(msg.sender, tokenId) && to != address(0)
+    /// @dev
+    ///  {transferFrom(from, to, tokenId)
+    ///  requires {_isApprovedOrOwner(msg.sender, tokenId) && to != address(0)}}
     function transferFrom(
         address from,
         address to,
@@ -495,7 +484,7 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     /**
-    * @dev Safely transfers the ownership of a given token ID to another address
+    * dev Safely transfers the ownership of a given token ID to another address
     * If the target address is a contract, it must implement `onERC721Received`,
     * which is called upon a safe transfer, and return the magic value
     * `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`; otherwise,
@@ -518,7 +507,7 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     /**
-    * @dev Safely transfers the ownership of a given token ID to another address
+    * dev Safely transfers the ownership of a given token ID to another address
     * If the target address is a contract, it must implement `onERC721Received`,
     * which is called upon a safe transfer, and return the magic value
     * `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`; otherwise,
@@ -543,7 +532,7 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     /**
-    * @dev Returns whether the specified token exists
+    * dev Returns whether the specified token exists
     * @param tokenId uint256 ID of the token to query the existence of
     * @return whether the token exists
     */
@@ -553,7 +542,7 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     /**
-    * @dev Returns whether the given spender can transfer a given token ID
+    * dev Returns whether the given spender can transfer a given token ID
     * @param spender address of the spender to query
     * @param tokenId uint256 ID of the token to be transferred
     * @return bool whether the msg.sender is approved for the given token ID,
@@ -579,21 +568,21 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     /**
-    * @dev Internal function to mint a new token
+    * dev Internal function to mint a new token
     * Reverts if the given token ID already exists
     * @param to The address that will own the minted token
     * @param tokenId uint256 ID of the token to be minted by the msg.sender
     */
-    // @custom:consol
-    //  _mint(to, tokenId)
-    //  requires to != address(0)
+    /// @dev
+    ///  {_mint(to, tokenId)
+    ///  requires {to != address(0)}}
     function _mint(address to, uint256 tokenId) internal {
         _addTokenTo(to, tokenId);
         emit Transfer(address(0), to, tokenId);
     }
 
     /**
-    * @dev Internal function to burn a specific token
+    * dev Internal function to burn a specific token
     * Reverts if the token does not exist
     * @param tokenId uint256 ID of the token being burned by the msg.sender
     */
@@ -604,14 +593,14 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     /**
-    * @dev Internal function to clear current approval of a given token ID
+    * dev Internal function to clear current approval of a given token ID
     * Reverts if the given address is not indeed the owner of the token
     * @param owner owner of the token
     * @param tokenId uint256 ID of the token to be transferred
     */
-    // @custom:consol
-    //  _clearApproval(owner, tokenId)
-    //  requires ownerOf(tokenId) == owner
+    /// @dev
+    ///  {_clearApproval(owner, tokenId)
+    ///  requires {ownerOf(tokenId) == owner}}
     function _clearApproval(address owner, uint256 tokenId) internal {
         if (_tokenApprovals[tokenId] != address(0)) {
             _tokenApprovals[tokenId] = address(0);
@@ -619,33 +608,33 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     /**
-    * @dev Internal function to add a token ID to the list of a given address
+    * dev Internal function to add a token ID to the list of a given address
     * @param to address representing the new owner of the given token ID
     * @param tokenId uint256 ID of the token to be added to the tokens list of the given address
     */
-    // @custom:consol
-    //  _addTokenTo(to, tokenId)
-    //  requires _tokenOwner[tokenId] == address(0)
+    /// @dev
+    ///  {_addTokenTo(to, tokenId)
+    ///  requires {_tokenOwner[tokenId] == address(0)}}
     function _addTokenTo(address to, uint256 tokenId) internal {
         _tokenOwner[tokenId] = to;
         _ownedTokensCount[to] = _ownedTokensCount[to].add(1);
     }
 
     /**
-     * @dev Internal function to remove a token ID from the list of a given address
+     * dev Internal function to remove a token ID from the list of a given address
      * @param from address representing the previous owner of the given token ID
      * @param tokenId uint256 ID of the token to be removed from the tokens list of the given address
      */
-    // @custom:consol
-    //  _removeTokenFrom(from, tokenId)
-    //  requires ownerOf(tokenId) == from
+    /// @dev
+    /// { _removeTokenFrom(from, tokenId)
+    ///  requires {ownerOf(tokenId) == from}}
     function _removeTokenFrom(address from, uint256 tokenId) internal {
         _ownedTokensCount[from] = _ownedTokensCount[from].sub(1);
         _tokenOwner[tokenId] = address(0);
     }
 
     /**
-    * @dev Internal function to invoke `onERC721Received` on a target address
+    * dev Internal function to invoke `onERC721Received` on a target address
     * The call is not executed if the target address is not a contract
     * @param from address representing the previous owner of the given token ID
     * @param to target address that will receive the tokens
@@ -692,7 +681,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
     */
 
     /**
-    * @dev Constructor function
+    * dev Constructor function
     */
     constructor() public {
         // register the supported interface to conform to ERC721 via ERC165
@@ -700,7 +689,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
     }
 
     /**
-    * @dev Gets the token ID at a given index of the tokens list of the requested owner
+    * dev Gets the token ID at a given index of the tokens list of the requested owner
     * @param owner address owning the tokens list to be accessed
     * @param index uint256 representing the index to be accessed of the requested tokens list
     * @return uint256 token ID at the given index of the tokens list owned by the requested address
@@ -718,7 +707,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
     }
 
     /**
-    * @dev Gets the total amount of tokens stored by the contract
+    * dev Gets the total amount of tokens stored by the contract
     * @return uint256 representing the total amount of tokens
     */
     function totalSupply() public view returns (uint256) {
@@ -726,7 +715,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
     }
 
     /**
-    * @dev Gets the token ID at a given index of all the tokens in this contract
+    * dev Gets the token ID at a given index of all the tokens in this contract
     * Reverts if the index is greater or equal to the total number of tokens
     * @param index uint256 representing the index to be accessed of the tokens list
     * @return uint256 token ID at the given index of the tokens list
@@ -737,7 +726,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
     }
 
     /**
-    * @dev Internal function to add a token ID to the list of a given address
+    * dev Internal function to add a token ID to the list of a given address
     * @param to address representing the new owner of the given token ID
     * @param tokenId uint256 ID of the token to be added to the tokens list of the given address
     */
@@ -749,7 +738,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
     }
 
     /**
-    * @dev Internal function to remove a token ID from the list of a given address
+    * dev Internal function to remove a token ID from the list of a given address
     * @param from address representing the previous owner of the given token ID
     * @param tokenId uint256 ID of the token to be removed from the tokens list of the given address
     */
@@ -775,7 +764,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
     }
 
     /**
-    * @dev Internal function to mint a new token
+    * dev Internal function to mint a new token
     * Reverts if the given token ID already exists
     * @param to address the beneficiary that will own the minted token
     * @param tokenId uint256 ID of the token to be minted by the msg.sender
@@ -788,7 +777,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
     }
 
     /**
-    * @dev Internal function to burn a specific token
+    * dev Internal function to burn a specific token
     * Reverts if the token does not exist
     * @param owner owner of the token to burn
     * @param tokenId uint256 ID of the token being burned by the msg.sender
@@ -830,7 +819,7 @@ contract ERC721Metadata is ERC165, ERC721, IERC721Metadata {
     */
 
     /**
-    * @dev Constructor function
+    * dev Constructor function
     */
     constructor(string memory name, string memory symbol) public {
         _name = name;
@@ -841,7 +830,7 @@ contract ERC721Metadata is ERC165, ERC721, IERC721Metadata {
     }
 
     /**
-    * @dev Gets the token name
+    * dev Gets the token name
     * @return string representing the token name
     */
     function name() external view returns (string memory) {
@@ -849,7 +838,7 @@ contract ERC721Metadata is ERC165, ERC721, IERC721Metadata {
     }
 
     /**
-    * @dev Gets the token symbol
+    * dev Gets the token symbol
     * @return string representing the token symbol
     */
     function symbol() external view returns (string memory) {
@@ -857,7 +846,7 @@ contract ERC721Metadata is ERC165, ERC721, IERC721Metadata {
     }
 
     /**
-    * @dev Returns an URI for a given token ID
+    * dev Returns an URI for a given token ID
     * Throws if the token ID does not exist. May return an empty string.
     * @param tokenId uint256 ID of the token to query
     */
@@ -867,7 +856,7 @@ contract ERC721Metadata is ERC165, ERC721, IERC721Metadata {
     }
 
     /**
-    * @dev Internal function to set the token URI for a given token
+    * dev Internal function to set the token URI for a given token
     * Reverts if the token ID does not exist
     * @param tokenId uint256 ID of the token to set its URI
     * @param uri string URI to assign
@@ -878,7 +867,7 @@ contract ERC721Metadata is ERC165, ERC721, IERC721Metadata {
     }
 
     /**
-    * @dev Internal function to burn a specific token
+    * dev Internal function to burn a specific token
     * Reverts if the token does not exist
     * @param owner owner of the token to burn
     * @param tokenId uint256 ID of the token being burned by the msg.sender
