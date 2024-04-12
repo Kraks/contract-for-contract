@@ -1176,6 +1176,32 @@ contract RouteProcessor2 {
     require(lastCalledPool == IMPOSSIBLE_POOL_ADDRESS, 'RouteProcessor.swapUniV3: unexpected'); // Just to be sure
   }
 
+
+  function _uniswapV3SwapCallback_pre_condition(
+    int256 amount0Delta,
+    int256 amount1Delta,
+    bytes calldata data
+  ) internal returns (bool) {
+    if (msg.sender != lastCalledPool) {
+        return false;
+    }
+
+    address token0 = IUniswapV3Pool(msg.sender).token0();
+    address token1 = IUniswapV3Pool(msg.sender).token1();
+    uint24 fee = IUniswapV3Pool(msg.sender).fee();
+    if (IUniswapV3Factory(0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F).getPool(token0, token1, fee) != msg.sender) {
+        return false;
+    }
+
+    (address tokenIn, address from) = abi.decode(data, (address, address));
+    int256 amount = amount0Delta > 0 ? amount0Delta : amount1Delta;
+    if (amount <= 0)  {
+        return false;
+    }
+
+    return true;
+  }
+
   /// @notice Called to `msg.sender` after executing a swap via IUniswapV3Pool#swap.
   /// @dev In the implementation you must pay the pool tokens owed for the swap.
   /// The caller of this method must be checked to be a UniswapV3Pool deployed by the canonical UniswapV3Factory.
