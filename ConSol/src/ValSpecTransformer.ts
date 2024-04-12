@@ -214,8 +214,9 @@ export class ValSpecTransformer<T> {
       node.vExpression.vExpression.vArguments[0] instanceof Identifier &&
       node.vExpression.vExpression.vArguments[0].name == tgtAddr
     ) {
-      // Iface(addr).f(args, ...) -> dispatch_IFace_f(addr, 0, 0 args, ...)
-      node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
+      // Iface(addr).f(args, ...) -> dispatch_IFace_f(addr, 0, 0, args, ...)
+      const gasLeft = this.factory.makeFunctionCall('uint256', FunctionCallKind.FunctionCall, this.factory.makeIdentifier('msg', 'gasleft', -1), []);
+      node.vArguments.unshift(gasLeft);
       node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
       node.vArguments.unshift(node.vExpression.vExpression.vArguments[0]);
       node.vExpression = this.factory.makeIdentifier('function', this.dispatchFunName(tgtInterface, tgtFun), -1);
