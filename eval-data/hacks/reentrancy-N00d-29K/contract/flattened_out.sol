@@ -240,14 +240,6 @@ contract ERC20 is Context, IERC20 {
 contract SushiBar is ERC20("n00d with X", "Xn00d") {
     using SafeMath for uint256;
 
-    error preViolation(string funcName);
-
-    error postViolation(string funcName);
-
-    error preViolationAddr(uint256 specId);
-
-    error postViolationAddr(uint256 specId);
-
     IERC20 public sushi;
 
     constructor(IERC20 _sushi) public {
@@ -278,7 +270,7 @@ contract SushiBar is ERC20("n00d with X", "Xn00d") {
     }
 
     function _enter_post(uint256 _amount) private {
-        if (!(totalSupply()<=sushi.balanceOf(address(this)))) revert postViolation("enter");
+        if (!(totalSupply()<=sushi.balanceOf(address(this)))) revert();
     }
 
     function enter(uint256 _amount) public {
@@ -287,7 +279,7 @@ contract SushiBar is ERC20("n00d with X", "Xn00d") {
     }
 
     function _leave_post(uint256 _share) private {
-        if (!(totalSupply()<=sushi.balanceOf(address(this)))) revert postViolation("leave");
+        if (!(totalSupply()<=sushi.balanceOf(address(this)))) revert();
     }
 
     function leave(uint256 _share) public {

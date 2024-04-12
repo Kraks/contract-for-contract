@@ -649,14 +649,6 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
 
 ///  @dev Oracle contract for BALWSTETHWETH LP Token
 contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
-    error preViolation(string funcName);
-
-    error postViolation(string funcName);
-
-    error preViolationAddr(uint256 specId);
-
-    error postViolationAddr(uint256 specId);
-
     IBalancerStablePool private constant BALWSTETHWETH = IBalancerStablePool(0x32296969Ef14EB0c6d29669C550D4a0449130230);
     /// @custom:consol {IChainlinkAggregator(STETH).latestRoundData{value: v, gas: g}() returns (roundId, answer, startedAt, updatedAt, answeredInRound) ensures {(updatedAt > block.timestamp - 1 days) && (answer > 0)}}
     uint256 private constant STETH = _wrap_STETH(0x86392dC19c0b719886221c78AB11eb8Cf5c52812);
@@ -704,7 +696,7 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
     }
 
     function _IChainlinkAggregator_latestRoundData_20_post(address STETH, uint256 v, uint256 g, uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound) private {
-        if (!((updatedAt>block.timestamp-1days)&&(answer>0))) revert postViolationAddr(20);
+        if (!((updatedAt>block.timestamp-1days)&&(answer>0))) revert();
     }
 
     function dispatch_IChainlinkAggregator_latestRoundData(uint256 addr, uint256 value, uint256 gas) private returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound) {
@@ -715,7 +707,7 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
     }
 
     function __get_post(uint256 ret) private {
-        if (!((ret*95/100<BALWSTETHWETH.getLatest(1))&&(ret*105/100>BALWSTETHWETH.getLatest(1)))) revert postViolation("_get");
+        if (!((ret*95/100<BALWSTETHWETH.getLatest(1))&&(ret*105/100>BALWSTETHWETH.getLatest(1)))) revert();
     }
 
     function _get() internal view returns (uint256) {

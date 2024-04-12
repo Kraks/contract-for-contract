@@ -2980,14 +2980,6 @@ interface IDexible is IDexibleView, IDexibleConfig, ISwapHandler {}
 abstract contract SwapHandler is AdminBase, ISwapHandler {
     using SafeERC20 for IERC20;
 
-    error preViolation(string funcName);
-
-    error postViolation(string funcName);
-
-    error preViolationAddr(uint256 specId);
-
-    error postViolationAddr(uint256 specId);
-
     struct SwapMeta {
         bool feeIsInput;
         bool isSelfSwap;
@@ -3002,6 +2994,17 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
         uint nativeGasAmount;
         uint preDXBLBalance;
         uint inputAmountDue;
+    }
+
+    function _checkRequest(SwapTypes.SwapRequest calldata request) internal returns (bool) {
+        uint256 n = request.routes.length;
+        for (uint i = 0; i < n; ++i) {
+            SwapTypes.RouterRequest calldata rr = request.routes[i];
+            if (bytes4(rr.routerData[:4]) == bytes4(0x23b872dd)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /// @custom:consol
@@ -3189,11 +3192,11 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
     }
 
     function _fill_pre(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) private {
-        if (!(_checkRequest(request))) revert preViolation("fill");
+        if (!(_checkRequest(request))) revert();
     }
 
     function _fill_post(SwapTypes.SwapRequest calldata request, SwapMeta memory meta, SwapMeta memory meta) private {
-        if (!(meta.outAmount>=request.tokenOut.amount)) revert postViolation("fill");
+        if (!(meta.outAmount>=request.tokenOut.amount)) revert();
     }
 
     function fill(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) external returns (SwapMeta memory) {

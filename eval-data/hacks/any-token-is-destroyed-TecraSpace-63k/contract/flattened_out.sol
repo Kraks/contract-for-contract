@@ -19,14 +19,6 @@ abstract contract IUpgradedToken {
 }
 
 contract TcrToken {
-    error preViolation(string funcName);
-
-    error postViolation(string funcName);
-
-    error preViolationAddr(uint256 specId);
-
-    error postViolationAddr(uint256 specId);
-
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     event Paused();
@@ -311,7 +303,7 @@ contract TcrToken {
     }
 
     function _burnFrom_pre(address from, uint256 amount) private {
-        if (!(_allowancesfrommsg.sender>=amount&&_balancesfrom>=amount)) revert preViolation("burnFrom");
+        if (!(_allowancesfrommsg.sender>=amount&&_balancesfrom>=amount)) revert();
     }
 
     function burnFrom(address from, uint256 amount) external {

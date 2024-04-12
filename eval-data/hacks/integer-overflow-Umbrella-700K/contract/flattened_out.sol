@@ -509,14 +509,6 @@ abstract contract OnDemandToken is MintableToken {
 contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
 
-    error preViolation(string funcName);
-
-    error postViolation(string funcName);
-
-    error preViolationAddr(uint256 specId);
-
-    error postViolationAddr(uint256 specId);
-
     event RewardAdded(uint256 reward);
 
     event Staked(address indexed user, uint256 amount);
@@ -714,7 +706,7 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
     }
 
     function __withdraw_pre(uint256 amount, address user, address recipient) private {
-        if (!(_balancesuser>=amount&&amount!=0)) revert preViolation("_withdraw");
+        if (!(_balancesuser>=amount&&amount!=0)) revert();
     }
 
     function _withdraw(uint256 amount, address user, address recipient) internal {

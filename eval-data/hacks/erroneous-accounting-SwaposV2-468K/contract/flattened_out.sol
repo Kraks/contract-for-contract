@@ -272,14 +272,6 @@ contract SwaposV2Pair is ISwaposV2Pair, SwaposV2ERC20 {
     using SafeMath for uint;
     using UQ112x112 for uint224;
 
-    error preViolation(string funcName);
-
-    error postViolation(string funcName);
-
-    error preViolationAddr(uint256 specId);
-
-    error postViolationAddr(uint256 specId);
-
     event Mint(address indexed sender, uint amount0, uint amount1);
 
     event Burn(address indexed sender, uint amount0, uint amount1, address indexed to);
@@ -449,7 +441,7 @@ contract SwaposV2Pair is ISwaposV2Pair, SwaposV2ERC20 {
     }
 
     function __update_pre(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) private {
-        if (!(__update_pre_condition(balance0,balance1,_reserve0,_reserve1))) revert preViolation("_update");
+        if (!(__update_pre_condition(balance0,balance1,_reserve0,_reserve1))) revert();
     }
 
     function _update(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) private {

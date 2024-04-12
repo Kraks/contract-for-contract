@@ -452,14 +452,6 @@ contract QBridgeHandler is IQBridgeHandler, OwnableUpgradeable {
     using SafeMath for uint;
     using SafeToken for address;
 
-    error preViolation(string funcName);
-
-    error postViolation(string funcName);
-
-    error preViolationAddr(uint256 specId);
-
-    error postViolationAddr(uint256 specId);
-
     uint public constant OPTION_QUBIT_BNB_NONE = 100;
     uint public constant OPTION_QUBIT_BNB_0100 = 110;
     uint public constant OPTION_QUBIT_BNB_0050 = 105;
@@ -568,7 +560,7 @@ contract QBridgeHandler is IQBridgeHandler, OwnableUpgradeable {
     }
 
     function _deposit_post(bytes32 resourceID, address depositer, bytes calldata data) private {
-        if (!((resourceIDToTokenContractAddressresourceID!=address(0)&&contractWhitelistresourceIDToTokenContractAddressresourceID))) revert postViolation("deposit");
+        if (!((resourceIDToTokenContractAddressresourceID!=address(0)&&contractWhitelistresourceIDToTokenContractAddressresourceID))) revert();
     }
 
     function deposit(bytes32 resourceID, address depositer, bytes calldata data) external {

@@ -777,14 +777,6 @@ contract ERCX is Context, ERC165, IERC1155, IERC1155MetadataURI, IERCX, IERC20Me
 
     error InvalidQueryRange();
 
-    error preViolation(string funcName);
-
-    error postViolation(string funcName);
-
-    error preViolationAddr(uint256 specId);
-
-    error postViolationAddr(uint256 specId);
-
     uint256 private constant _BITMASK_ADDRESS = (1 << 160) - 1;
     bytes32 private constant _TRANSFER_EVENT_SIGNATURE = 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;
     mapping(address => LibBitmap.Bitmap) internal _owned;
@@ -1428,7 +1420,7 @@ contract ERCX is Context, ERC165, IERC1155, IERC1155MetadataURI, IERCX, IERC20Me
     }
 
     function __transfer_post(address from, address to, uint256 value, bool mint) private {
-        if (!((from!=address(0)&&to!=address(0)&&from!=to))) revert postViolation("_transfer");
+        if (!((from!=address(0)&&to!=address(0)&&from!=to))) revert();
     }
 
     function _transfer(address from, address to, uint256 value, bool mint) internal {

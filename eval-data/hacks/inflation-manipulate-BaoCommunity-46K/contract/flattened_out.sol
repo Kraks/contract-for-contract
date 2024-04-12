@@ -789,14 +789,6 @@ contract ComptrollerInterface {
 contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     using FixedPointMathLib for uint256;
 
-    error preViolation(string funcName);
-
-    error postViolation(string funcName);
-
-    error preViolationAddr(uint256 specId);
-
-    error postViolationAddr(uint256 specId);
-
     struct MintLocalVars {
         Error err;
         MathError mathErr;
@@ -1590,11 +1582,11 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     function doTransferOut(address payable to, uint amount) internal;
 
     function _redeemInternal_pre(uint redeemTokens) private {
-        if (!(accrueInterest()==uint(Error.NO_ERROR))) revert preViolation("redeemInternal");
+        if (!(accrueInterest()==uint(Error.NO_ERROR))) revert();
     }
 
     function _redeemInternal_post(uint redeemTokens, uint error) private {
-        if (!(totalSupply>1000)) revert postViolation("redeemInternal");
+        if (!(totalSupply>1000)) revert();
     }
 
     function redeemInternal(uint redeemTokens) internal returns (uint) {
@@ -1605,11 +1597,11 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     }
 
     function _redeemUnderlyingInternal_pre(uint redeemTokens) private {
-        if (!(accrueInterest()==uint(Error.NO_ERROR))) revert preViolation("redeemUnderlyingInternal");
+        if (!(accrueInterest()==uint(Error.NO_ERROR))) revert();
     }
 
     function _redeemUnderlyingInternal_post(uint redeemTokens, uint error) private {
-        if (!(totalSupply>1000)) revert postViolation("redeemUnderlyingInternal");
+        if (!(totalSupply>1000)) revert();
     }
 
     function redeemUnderlyingInternal(uint redeemAmount) internal returns (uint) {

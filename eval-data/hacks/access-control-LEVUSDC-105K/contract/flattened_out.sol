@@ -2559,14 +2559,6 @@ contract DepositWithdraw is DepositWithdrawInterface {
 contract CurveSwap is CurveContractInterface {
     using SafeERC20 for IERC20;
 
-    error preViolation(string funcName);
-
-    error postViolation(string funcName);
-
-    error preViolationAddr(uint256 specId);
-
-    error postViolationAddr(uint256 specId);
-
     address public TriPool;
     address public ADDRESSPROVIDER;
     address public USDC_ADDRESS;
@@ -2612,7 +2604,7 @@ contract CurveSwap is CurveContractInterface {
     }
 
     function _approveToken_pre(address token, address spender, uint _amount) private {
-        if (!(spender==QueryAddressProvider(2))) revert preViolation("approveToken");
+        if (!(spender==QueryAddressProvider(2))) revert();
     }
 
     function approveToken(address token, address spender, uint _amount) public returns (bool) {
