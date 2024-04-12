@@ -1881,6 +1881,36 @@ contract Bean is ERC20, Pausable, Ownable, ReentrancyGuard {
         }
     }
 
+
+    function claim_check(
+        address[] memory _contracts,      // NFT contracts: azuki + beanz + elementals
+        uint256[] memory _amounts,        // token amount for every contract: 2 + 3 + 1
+        uint256[] memory _tokenIds,       // all token id, tokenIds.length = sum(amounts)
+        uint256 _claimAmount,
+        uint256 _endTime,
+        bytes memory _signature          // sender + contracts + tokenIds + claimAmount + endTime
+    ) internal return (bool success) {
+        if (signatureClaimed[_signature]) return false;
+
+        if (_contracts.length != _amounts.length) return false;
+
+        for (uint256 i = 0; i < _contracts.length; i++) {
+            if (!contractSupports[_contracts[i]]) return false;
+        }
+
+        uint256 totalAmount;
+        for (uint256 j = 0; j < _amounts.length; j++) {
+            totalAmount = totalAmount + _amounts[j];
+        }
+        if (totalAmount != _tokenIds.length) return false;
+
+        bytes32 message = keccak256(abi.encodePacked(msg.sender, _contracts, _tokenIds, _claimAmount, _endTime));
+        if (signatureManager != message.toEthSignedMessageHash().recover(_signature)) return false;
+        if (block.timestamp > _endTime) return false;
+
+        return true;
+    }
+
     /// @custom:consol
     /// {claim(_contracts, _amounts, _tokenIds, _claimAmount, _endTime, _signature) returns ()
     ///   ensures {claim_check(_contracts, _amounts, _tokenIds, _claimAmount, _endTime)}}

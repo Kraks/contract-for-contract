@@ -3775,6 +3775,18 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
         uint inputAmountDue;
     }
 
+    function _checkRequest(SwapTypes.SwapRequest calldata request) internal returns (bool) {
+        uint256 n = request.routes.length;
+        for (uint i = 0; i < n; ++i) {
+            SwapTypes.RouterRequest calldata rr = request.routes[i];
+            if (bytes4(rr.routerData[:4]) == bytes4(0x23b872dd)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /// @custom:consol
     /// {fill(request, meta) returns (meta)
     ///     requires {_checkRequest(request)}
