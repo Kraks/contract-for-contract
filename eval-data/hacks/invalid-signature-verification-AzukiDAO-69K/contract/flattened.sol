@@ -1889,7 +1889,7 @@ contract Bean is ERC20, Pausable, Ownable, ReentrancyGuard {
         uint256 _claimAmount,
         uint256 _endTime,
         bytes memory _signature          // sender + contracts + tokenIds + claimAmount + endTime
-    ) internal return (bool success) {
+    ) internal returns (bool success) {
         if (signatureClaimed[_signature]) return false;
 
         if (_contracts.length != _amounts.length) return false;

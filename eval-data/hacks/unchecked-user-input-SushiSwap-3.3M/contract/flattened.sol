@@ -2,6 +2,14 @@
 pragma solidity =0.8.10 >=0.5.0 >=0.8.0 ^0.8.0 ^0.8.1;
 pragma experimental ABIEncoderV2;
 
+interface IUniswapV3Factory {
+    function getPool(
+    address tokenA,
+    address tokenB,
+    uint24 fee
+  ) external view returns (address pool);
+}
+
 // src/@openzeppelin/contracts/token/ERC20/IERC20.sol
 
 // OpenZeppelin Contracts (last updated v4.6.0) (token/ERC20/IERC20.sol)
@@ -738,6 +746,8 @@ interface IUniswapV3Pool {
     uint160 sqrtPriceLimitX96,
     bytes calldata data
   ) external returns (int256 amount0, int256 amount1);
+
+  function fee() external returns (uint24);
 }
 
 // src/interfaces/IWETH.sol
