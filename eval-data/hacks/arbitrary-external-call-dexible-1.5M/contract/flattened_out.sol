@@ -3007,10 +3007,11 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
         return true;
     }
 
-    /// @custom:consol
-    ///  {fill(request, meta1) returns (meta2)
-    ///      requires {_checkRequest(request)}
-    ///      ensures {meta2.outAmount >= request.tokenOut.amount}}
+    /// @custom:consol {
+    ///    fill(request, meta1) returns (meta2)
+    ///    requires { _checkRequest(request) }
+    ///    ensures { meta2.outAmount >= request.tokenOut.amount }
+    ///  }
     function fill_original(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) private onlySelf() returns (SwapMeta memory) {
         preCheck(request, meta);
         meta.outAmount = request.tokenOut.token.balanceOf(address(this));
@@ -3029,7 +3030,6 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
             meta.outAmount = 0;
         }
         console.log("Expected", request.tokenOut.amount, "Received", meta.outAmount);
-        require(meta.outAmount >= request.tokenOut.amount, "Insufficient output generated");
         return meta;
     }
 

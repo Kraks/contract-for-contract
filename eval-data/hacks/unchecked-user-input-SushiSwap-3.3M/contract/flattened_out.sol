@@ -721,7 +721,7 @@ contract RouteProcessor2 {
     ///  @param stream Streamed process program
     ///  @param from Where to take liquidity for swap
     ///  @param tokenIn Input token
-    ///  @param amountTotal Total amount of tokenIn for swaps 
+    ///  @param amountTotal Total amount of tokenIn for swaps
     function distributeAndSwap(uint256 stream, address from, address tokenIn, uint256 amountTotal) private {
         uint8 num = stream.readUint8();
         unchecked {
@@ -743,7 +743,7 @@ contract RouteProcessor2 {
         swap(stream, address(this), token, 0);
     }
 
-    /// @notice Processes Bento tokens 
+    /// @notice Processes Bento tokens
     ///  @notice Call swap for all pools that swap from this token
     ///  @param stream Streamed process program
     function processInsideBento(uint256 stream) private {
@@ -885,11 +885,9 @@ contract RouteProcessor2 {
     /// @custom:consol {uniswapV3SwapCallback(amount0Delta, amount1Delta, data) returns ()
     ///     requires {_uniswapV3SwapCallback_pre_condition(amount0Delta, amount1Delta, data)}}
     function uniswapV3SwapCallback_original(int256 amount0Delta, int256 amount1Delta, bytes calldata data) private {
-        require(msg.sender == lastCalledPool, "RouteProcessor.uniswapV3SwapCallback: call from unknown source");
         lastCalledPool = IMPOSSIBLE_POOL_ADDRESS;
         (address tokenIn, address from) = abi.decode(data, (address, address));
         int256 amount = (amount0Delta > 0) ? amount0Delta : amount1Delta;
-        require(amount > 0, "RouteProcessor.uniswapV3SwapCallback: not positive amount");
         if (from == address(this)) IERC20(tokenIn).safeTransfer(msg.sender, uint256(amount)); else IERC20(tokenIn).safeTransferFrom(from, msg.sender, uint256(amount));
     }
 

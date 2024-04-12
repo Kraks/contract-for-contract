@@ -143,7 +143,7 @@ library Address {
         require(success, "Address: unable to send value, recipient may have reverted");
     }
 
-   
+
     function functionCall(address target, bytes memory data) internal returns (bytes memory) {
       return functionCall(target, data, "Address: low-level call failed");
     }
@@ -671,7 +671,7 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
 
     uint256 public rewardRate = 0;
     uint256 public rewardPerTokenStored;
-    
+
     mapping(address => uint256) public userRewardPerTokenPaid;
     mapping(address => uint256) public rewards;
 
@@ -890,7 +890,7 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
         emit Staked(user, amount);
     }
 
-    /// @dev {_withdraw(amount, user, recipient) 
+    /// @dev {_withdraw(amount, user, recipient)
     ///      requires {_balances[user] >= amount && amount != 0}}
     function _withdraw(uint256 amount, address user, address recipient) internal nonReentrant updateReward(user) {
         // not using safe math, because there is no way to overflow if stake tokens not overflow

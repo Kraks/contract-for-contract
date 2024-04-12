@@ -190,8 +190,6 @@ contract ExchangeBetweenPools is Ownable {
     ///    requires { amount >= minimum_amount && amount <= ERC20TokenBankInterface(from_bank).balance() }
     ///  }
     function doExchange_original(uint256 amount) private returns (bool) {
-        require(amount >= minimum_amount, "invalid amount");
-        require(amount <= ERC20TokenBankInterface(from_bank).balance(), "too much amount");
         ERC20TokenBankInterface(from_bank).issue(address(this), amount);
         uint256 camount = usdc.balanceOf(address(this));
         usdc.safeApprove(address(curve), camount);

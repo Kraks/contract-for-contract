@@ -3787,10 +3787,11 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
         return true;
     }
 
-    /// @custom:consol
-    /// {fill(request, meta1) returns (meta2)
-    ///     requires {_checkRequest(request)}
-    ///     ensures {meta2.outAmount >= request.tokenOut.amount}}
+    /// @custom:consol {
+    ///   fill(request, meta1) returns (meta2)
+    ///   requires { _checkRequest(request) }
+    ///   ensures { meta2.outAmount >= request.tokenOut.amount }
+    /// }
     function fill(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) external onlySelf returns (SwapMeta memory)  {
 
         preCheck(request, meta);

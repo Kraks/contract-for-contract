@@ -684,10 +684,9 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
         emit Staked(user, amount);
     }
 
-    /// @dev {_withdraw(amount, user, recipient) 
+    /// @dev {_withdraw(amount, user, recipient)
     ///       requires {_balances[user] >= amount && amount != 0}}
     function _withdraw_original(uint256 amount, address user, address recipient) private nonReentrant() updateReward(user) {
-        require(amount != 0, "Cannot withdraw 0");
         _totalSupply = _totalSupply - amount;
         _balances[user] = _balances[user] - amount;
         require(stakingToken.transfer(recipient, amount), "token transfer failed");

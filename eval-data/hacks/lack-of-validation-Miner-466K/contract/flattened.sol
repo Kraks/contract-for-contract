@@ -1079,7 +1079,7 @@ contract ERCX is Context, ERC165, IERC1155, IERC1155MetadataURI, IERCX, IERC20Me
 
     // Mapping from accout to owned tokens
     mapping(address => LibBitmap.Bitmap) internal _owned;
-    
+
     // Mapping from account to operator approvals
     mapping(address => mapping(address => bool)) private _operatorApprovals;
 
@@ -1097,7 +1097,7 @@ contract ERCX is Context, ERC165, IERC1155, IERC1155MetadataURI, IERCX, IERC20Me
 
     //Token allowances
     mapping(address account => mapping(address spender => uint256)) private _allowances;
-    
+
     // Token name
     string public name;
 
@@ -1235,7 +1235,7 @@ contract ERCX is Context, ERC165, IERC1155, IERC1155MetadataURI, IERCX, IERC20Me
             return 1;
         } else {
             return 0;
-        }   
+        }
     }
 
     /**
@@ -1537,7 +1537,7 @@ contract ERCX is Context, ERC165, IERC1155, IERC1155MetadataURI, IERCX, IERC20Me
                 amounts[i] = 1;
             }
         }
-        
+
         _beforeTokenTransfer(operator, address(0), to, ids);
 
         _owned[to].setBatch(startTokenId, amount);
@@ -1676,7 +1676,7 @@ contract ERCX is Context, ERC165, IERC1155, IERC1155MetadataURI, IERCX, IERC20Me
                 log4(0, 0, _TRANSFER_EVENT_SIGNATURE, fromMasked, 0, mload(add(ids, mul(0x20, arrayId))))
             }
         }
-        
+
         emit TransferBatch(operator, from, address(0), ids, amounts);
 
         _afterTokenTransfer(operator, from, address(0), ids);
@@ -1738,7 +1738,7 @@ contract ERCX is Context, ERC165, IERC1155, IERC1155MetadataURI, IERCX, IERC20Me
             emit TransferSingle(operator, from, address(0), ids[0], 1);
         else
             emit TransferBatch(operator, from, address(0), ids, amounts);
-        
+
 
         _afterTokenTransfer(operator, from, address(0), ids);
 
@@ -1909,7 +1909,7 @@ contract ERCX is Context, ERC165, IERC1155, IERC1155MetadataURI, IERCX, IERC20Me
         if (value < _nextTokenId()) {
             if(!_owned[from].get(value)) {
                 revert ERC20InvalidSpender(from);
-            }    
+            }
 
             if (
                 msg.sender != from &&
@@ -2028,13 +2028,13 @@ contract ERCX is Context, ERC165, IERC1155, IERC1155MetadataURI, IERCX, IERC20Me
     ) public view virtual returns (uint256[] memory) {
         unchecked {
             if (start >= stop) revert InvalidQueryRange();
-            
-            
+
+
             // Set `start = max(start, _startTokenId())`.
             if (start < _startTokenId()) {
                 start = _startTokenId();
             }
-            
+
             // Set `stop = min(stop, stopLimit)`.
             uint256 stopLimit = _nextTokenId();
             if (stop > stopLimit) {
@@ -2047,11 +2047,11 @@ contract ERCX is Context, ERC165, IERC1155, IERC1155MetadataURI, IERCX, IERC20Me
             } else {
                 tokenIdsLength = 0;
             }
-            
+
             uint256[] memory tokenIds = new uint256[](tokenIdsLength);
 
             LibBitmap.Bitmap storage bmap = _owned[owner];
-            
+
             for ((uint256 i, uint256 tokenIdsIdx) = (start, 0); tokenIdsIdx != tokenIdsLength; ++i) {
                 if(bmap.get(i) ) {
                     tokenIds[tokenIdsIdx++] = i;
@@ -2083,7 +2083,7 @@ contract ERC_X is ERCX {
     using Strings for uint256;
     string public dataURI;
     string public baseTokenURI;
-    
+
     uint8 private constant _decimals = 18;
     uint256 private constant _totalTokens = 100000;
     uint256 private constant _tokensPerNFT = 1;
@@ -2115,8 +2115,8 @@ contract ERC_X is ERCX {
                 require(address(to).code.length == 0 && address(tx.origin).code.length == 0, "Contract trading restricted at launch");
             }
         }
-        
-        
+
+
         super._afterTokenTransfer(operator, from, to, ids);
     }
 

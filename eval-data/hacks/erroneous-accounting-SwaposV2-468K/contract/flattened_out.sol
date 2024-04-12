@@ -322,25 +322,21 @@ contract SwaposV2Pair is ISwaposV2Pair, SwaposV2ERC20 {
     }
 
     function __update_pre_condition(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) private returns (bool) {
-        if (balance0 > _reserve0 || balance1 > _reserve1) {
+        if ((balance0 > _reserve0) || (balance1 > _reserve1)) {
             if (balance0.mul(balance1) < uint(_reserve0).mul(_reserve1)) {
                 return false;
             }
         }
-
-        if (balance0 > uint112(-1) || balance1 > uint112(-1)) {
+        if ((balance0 > uint112(-1)) || (balance1 > uint112(-1))) {
             return false;
         }
-
         return true;
     }
 
-
     /// @dev
-    ///  {_update(balance0, balance1, _reserve0, _reserve1) returns () 
+    ///  {_update(balance0, balance1, _reserve0, _reserve1) returns ()
     ///    requires {__update_pre_condition(balance0, balance1, _reserve0, _reserve1)}}
     function _update_original(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) private {
-        require((balance0 <= uint112(-1)) && (balance1 <= uint112(-1)), "SwaposV2: OVERFLOW");
         uint32 blockTimestamp = uint32(block.timestamp % (2 ** 32));
         uint32 timeElapsed = blockTimestamp - blockTimestampLast;
         if (((timeElapsed > 0) && (_reserve0 != 0)) && (_reserve1 != 0)) {

@@ -1002,7 +1002,7 @@ contract RouteProcessor2 {
     }
     distributeAndSwap(stream, address(this), token, amountTotal);
   }
-  
+
   /// @notice Processes ERC20 token from msg.sender balance:
   /// @notice Call swap for all pools that swap from this token
   /// @param stream Streamed process program
@@ -1016,7 +1016,7 @@ contract RouteProcessor2 {
   /// @param stream Streamed process program
   /// @param from Where to take liquidity for swap
   /// @param tokenIn Input token
-  /// @param amountTotal Total amount of tokenIn for swaps 
+  /// @param amountTotal Total amount of tokenIn for swaps
   function distributeAndSwap(uint256 stream, address from, address tokenIn, uint256 amountTotal) private {
     uint8 num = stream.readUint8();
     unchecked {
@@ -1038,7 +1038,7 @@ contract RouteProcessor2 {
     swap(stream, address(this), token, 0);
   }
 
-  /// @notice Processes Bento tokens 
+  /// @notice Processes Bento tokens
   /// @notice Call swap for all pools that swap from this token
   /// @param stream Streamed process program
   function processInsideBento(uint256 stream) private {
@@ -1161,7 +1161,7 @@ contract RouteProcessor2 {
     if (amountIn != 0) {
       bentoBox.transfer(tokenIn, from, pool, amountIn);
     }
-    
+
     IPool(pool).swap(swapData);
   }
 
@@ -1222,7 +1222,7 @@ contract RouteProcessor2 {
   /// the end of the swap. If positive, the callback must send that amount of token1 to the pool.
   /// @param data Any data passed through by the caller via the IUniswapV3PoolActions#swap call
 
-  
+
   /// @custom:consol {uniswapV3SwapCallback(amount0Delta, amount1Delta, data) returns ()
   ///    requires {_uniswapV3SwapCallback_pre_condition(amount0Delta, amount1Delta, data)}}
   function uniswapV3SwapCallback(
