@@ -3008,7 +3008,7 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
     ///  {fill(request, meta) returns (meta)
     ///      requires {_checkRequest(request)}
     ///      ensures {meta.outAmount >= request.tokenOut.amount}}
-    function fill_original(struct SwapTypes.SwapRequest calldata request, struct SwapHandler.SwapMeta memory meta) external onlySelf() returns (SwapMeta memory) {
+    function fill_original(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) private onlySelf() returns (SwapMeta memory) {
         preCheck(request, meta);
         meta.outAmount = request.tokenOut.token.balanceOf(address(this));
         for (uint i = 0; i < request.routes.length; ++i) {
@@ -3196,16 +3196,11 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
         if (!(meta.outAmount>=request.tokenOut.amount)) revert postViolation("fill");
     }
 
-    function fill_guard(struct SwapTypes.SwapRequest calldata request, struct SwapHandler.SwapMeta memory meta) private onlySelf() returns (SwapMeta memory) {
+    function fill(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) external returns (SwapMeta memory) {
         _fill_pre(request, meta);
         SwapMeta meta = fill_original(request, meta);
         _fill_post(request, meta, meta);
         return (meta);
-    }
-
-    function fill(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) external onlySelf() returns (SwapMeta memory) {
-        struct SwapHandler.SwapMeta _cs_0 = fill_guard(request, meta);
-        return (_cs_0);
     }
 }
 

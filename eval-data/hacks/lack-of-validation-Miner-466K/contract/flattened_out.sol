@@ -1312,7 +1312,7 @@ contract ERCX is Context, ERC165, IERC1155, IERC1155MetadataURI, IERCX, IERC20Me
     /// @custom:consol
     ///  {_transfer(from, to, value, mint)
     ///    ensures {(from != address(0) && to != address(0) && from != to)}}
-    function _transfer_original(uint256 from, uint256 to, uint256 value, bool mint) internal {
+    function _transfer_original(address from, address to, uint256 value, bool mint) private {
         if (from == address(0)) {
             revert ERC20InvalidSender(address(0));
         }
@@ -1431,13 +1431,9 @@ contract ERCX is Context, ERC165, IERC1155, IERC1155MetadataURI, IERCX, IERC20Me
         if (!((from!=address(0)&&to!=address(0)&&from!=to))) revert postViolation("_transfer");
     }
 
-    function _transfer_guard(uint256 from, uint256 to, uint256 value, bool mint) private {
-        _transfer_original(from, to, value, mint);
-        __transfer_post(payable(address(uint160(from))), payable(address(uint160(to))), value, mint);
-    }
-
     function _transfer(address from, address to, uint256 value, bool mint) internal {
-        _transfer_guard(uint256(uint160(address(from))), uint256(uint160(address(to))), value, mint);
+        _transfer_original(from, to, value, mint);
+        __transfer_post(from, to, value, mint);
     }
 }
 
