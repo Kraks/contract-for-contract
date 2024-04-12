@@ -52,6 +52,8 @@ export class ValSpecTransformer<T> {
     ifaceName: string,
     funName: string,
     oldFun: FunctionDefinition,
+    preCheckFun: FunctionDefinition | undefined,
+    postCheckFun: FunctionDefinition | undefined,
   ): FunctionDefinition {
     const newFun = this.factory.copy(oldFun);
     newFun.documentation = undefined;
@@ -94,14 +96,16 @@ export class ValSpecTransformer<T> {
     const args = [this.unwrap(addrId), valueId, gasId].concat(
       this.factory.makeIdsFromVarDecs(oldFun.vParameters.vParameters),
     );
-    const preCheck = this.factory.makeFunctionCall(
-      'void',
-      FunctionCallKind.FunctionCall,
-      this.factory.makeIdentifier('function', `_${ifaceName}_${funName}_${rawSpecId}_pre`, -1),
-      args,
-    );
-    const ifPreCheck = this.factory.makeIfStatement(cond, this.factory.makeExpressionStatement(preCheck));
-    bodyStmts.push(ifPreCheck);
+    if (preCheckFun != undefined) {
+      const preCheck = this.factory.makeFunctionCall(
+        'void',
+        FunctionCallKind.FunctionCall,
+        this.factory.makeIdentifier('function', `_${ifaceName}_${funName}_${rawSpecId}_pre`, -1),
+        args,
+      );
+      const ifPreCheck = this.factory.makeIfStatement(cond, this.factory.makeExpressionStatement(preCheck));
+      bodyStmts.push(ifPreCheck);
+    }
 
     // Generate addr call
     // type freshVar = interface(unwrap(addr)).f{value: value, gas: gas}(args ...);
@@ -159,14 +163,16 @@ export class ValSpecTransformer<T> {
     if (retVars.length > 0) {
       argsWithRet.push(...retVars);
     }
-    const postCheck = this.factory.makeFunctionCall(
-      'void',
-      FunctionCallKind.FunctionCall,
-      this.factory.makeIdentifier('function', `_${ifaceName}_${funName}_${rawSpecId}_post`, -1),
-      argsWithRet,
-    );
-    const ifPostCheck = this.factory.makeIfStatement(cond, this.factory.makeExpressionStatement(postCheck));
-    bodyStmts.push(ifPostCheck);
+    if (postCheckFun != undefined) {
+      const postCheck = this.factory.makeFunctionCall(
+        'void',
+        FunctionCallKind.FunctionCall,
+        this.factory.makeIdentifier('function', `_${ifaceName}_${funName}_${rawSpecId}_post`, -1),
+        argsWithRet,
+      );
+      const ifPostCheck = this.factory.makeIfStatement(cond, this.factory.makeExpressionStatement(postCheck));
+      bodyStmts.push(ifPostCheck);
+    }
 
     newFun.vBody = this.factory.makeBlock(bodyStmts.concat(lastStmts));
     return newFun;
@@ -179,8 +185,26 @@ export class ValSpecTransformer<T> {
     tgtAddr: string | undefined,
   ) {
     // DX: what if tgtInterface/tgtAddr is undefined?
-    // Iface(addr).f(args, ...) -> dispatch_IFace_f(addr, 0, 0 args, ...)
+
     if (
+      node instanceof FunctionCall &&
+      node.vFunctionName === tgtFun &&
+      node.vExpression instanceof MemberAccess &&
+      node.vArguments.length == 0 &&
+      node.vFunctionName == tgtFun &&
+      node.vIdentifier == tgtAddr &&
+      node.vExpression.vExpression instanceof Identifier
+    ) {
+      if (tgtInterface == undefined) {
+        console.log('Address interface undefined. Skip.');
+        return;
+      }
+      // addr.fun() -> dispatch_IFace_f(addr, 0, 0)
+      node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
+      node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
+      node.vArguments.unshift(node.vExpression.vExpression);
+      node.vExpression = this.factory.makeIdentifier('function', this.dispatchFunName(tgtInterface, tgtFun), -1);
+    } else if (
       node instanceof FunctionCall &&
       node.vFunctionName === tgtFun &&
       node.vExpression instanceof MemberAccess &&
@@ -190,13 +214,14 @@ export class ValSpecTransformer<T> {
       node.vExpression.vExpression.vArguments[0] instanceof Identifier &&
       node.vExpression.vExpression.vArguments[0].name == tgtAddr
     ) {
+      // Iface(addr).f(args, ...) -> dispatch_IFace_f(addr, 0, 0 args, ...)
       node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
       node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
       node.vArguments.unshift(node.vExpression.vExpression.vArguments[0]);
       node.vExpression = this.factory.makeIdentifier('function', this.dispatchFunName(tgtInterface, tgtFun), -1);
     }
     // Iface(addr).f{value: v, gas: g}(args, ...) -> dispatch_IFace_f(addr, v, g, args, ...)
-    if (
+    else if (
       node instanceof FunctionCall &&
       node.vFunctionName === tgtFun &&
       node.vExpression instanceof FunctionCallOptions &&
@@ -219,6 +244,7 @@ export class ValSpecTransformer<T> {
 
   dispatchFunName(ifaceName: string, funName: string): string {
     const dispatchFunName = 'dispatch_' + ifaceName + '_' + funName;
+
     return dispatchFunName;
   }
 

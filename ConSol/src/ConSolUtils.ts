@@ -193,6 +193,7 @@ export function needAbiEncoding(member: string): boolean {
 export function usesAddr(type: string): boolean {
   if (type === 'address') return true;
   if (type === 'address payable') return true;
+  if (type.startsWith('contract ')) return true; // DX: not sure if it is always correct
   if (globalThis.structMap.has(type)) {
     const b = globalThis.structMap.get(type)?.vMembers.some((m) => usesAddr(m.typeString));
     if (b) return true;

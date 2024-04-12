@@ -8,6 +8,7 @@ import {
   FunctionKind,
   FunctionCallKind,
   LiteralKind,
+  FunctionCall,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -17,7 +18,7 @@ import { ValSpecTransformer } from './ValSpecTransformer.js';
 import { findContract } from './Global.js';
 import { CheckFunFactory } from './CheckFunFactory.js';
 
-const HARDCODE_SPECID = 1; // hard coded for now
+const HARDCODE_SPECID = 20; // hard coded for now
 
 export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   contract: ContractDefinition;
@@ -101,8 +102,13 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   updateVarDeclaration(): void {
     let expr;
     if (this.varDef.vValue == undefined) {
+      // no init value assigned.
       expr = this.factory.makeLiteral('uint160', LiteralKind.Number, '', '0');
+    } else if (this.varDef.vValue instanceof FunctionCall && this.varDef.vValue.kind == 'typeConversion') {
+      // addr = Interface(0x....);
+      expr = this.varDef.vValue.vArguments[0];
     } else {
+      // addr = 0x....;
       expr = this.varDef.vValue;
     }
 
@@ -160,12 +166,19 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
       // console.log(tgtFuncRetParams);
       const addrCallPreFun = checkFunFactory.preCondCheckFun(this.preAddrError, specid);
       if (addrCallPreFun) this.contract.appendChild(addrCallPreFun);
-      const postFun = checkFunFactory.postCondCheckFun(this.postAddrError, specid);
-      if (postFun) this.contract.appendChild(postFun);
+      const addrCallPostFun = checkFunFactory.postCondCheckFun(this.postAddrError, specid);
+      if (addrCallPostFun) this.contract.appendChild(addrCallPostFun);
 
       // Generate dispatch_Iface_f
 
-      const dispatchingFun = this.dispatchingFunction(specid, tgtInterface, tgtFun, addrCallFun);
+      const dispatchingFun = this.dispatchingFunction(
+        specid,
+        tgtInterface,
+        tgtFun,
+        addrCallFun,
+        addrCallPreFun,
+        addrCallPostFun,
+      );
       this.contract.appendChild(dispatchingFun);
     }
 

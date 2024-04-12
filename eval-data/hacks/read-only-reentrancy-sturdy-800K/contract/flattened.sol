@@ -1351,9 +1351,7 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
 contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
   IBalancerStablePool private constant BALWSTETHWETH =
     IBalancerStablePool(0x32296969Ef14EB0c6d29669C550D4a0449130230);
-  /// @custom:consol
-  /// {STETH.latestRoundData() returns (roundId, answer, startedAt, updatedAt, answeredInRound)
-  ///   ensures {(updatedAt > block.timestamp - 1 days) && (answer > 0)}}
+  /// @custom:consol {IChainlinkAggregator(STETH).latestRoundData{value: v, gas: g}() returns (roundId, answer, startedAt, updatedAt, answeredInRound) ensures {(updatedAt > block.timestamp - 1 days) && (answer > 0)}}
   IChainlinkAggregator private constant STETH =
     IChainlinkAggregator(0x86392dC19c0b719886221c78AB11eb8Cf5c52812);
   address private constant BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;

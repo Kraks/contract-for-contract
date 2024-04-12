@@ -18,7 +18,7 @@ contract Caller {
   /// @custom:consol {non_addr_var{value: v, gas: g}(mymsg, x) returns (y) requires { v==100 } ensures { data == true }}
   uint160 non_addr_var;
   /// @custom:consol {IReceiver(testaddr).foo{value: v, gas: g}(mymsg, x) returns (y) requires { v==100 } ensures { v==200 }}
-  address testaddr = 0x86392dC19c0b719886221c78AB11eb8Cf5c52812;
+  IReceiver public testaddr = IReceiver(0x86392dC19c0b719886221c78AB11eb8Cf5c52812);
 
   //custom:consol {IReceiver(testaddr2).bar{value: v, gas: g}(mymsg, x) returns (y) requires { v==200 }}
   address testaddr2;

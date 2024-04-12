@@ -193,24 +193,26 @@ consol ../eval-data/hacks/missing-slippage-check-UnknownVictim-111K/contract/fla
 
 ## read-only-reentrancy-sturdy-800K (TODO)
 ```
-consol ../eval-data/hacks/read-only-reentrancy-sturdy-800K/lib/BALWSTETHWETHOracle.sol
+consol ../eval-data/hacks/read-only-reentrancy-sturdy-800K/contract/flattened.sol
 ```
 
 ```solidity
- /// {STETH.latestRoundData() returns (roundId, answer, startedAt, updatedAt, answeredInRound)
-  ///   ensures {(updatedAt > block.timestamp - 1 days) && (answer > 0)}}
+ /// @custom:consol {IChainlinkAggregator(STETH).latestRoundData{value: v, gas: g}() returns (roundId, answer, startedAt, updatedAt, answeredInRound) ensures {(updatedAt > block.timestamp - 1 days) && (answer > 0)}}
   IChainlinkAggregator private constant STETH =
     IChainlinkAggregator(0x86392dC19c0b719886221c78AB11eb8Cf5c52812);
 
 ...
-/// @custom:consol
-  /// _get() returns (ret)
-  ///   ensures (ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) &&
-  ///       (ret * 105 / 100 > BALWSTETHWETH.getLatest(1))
+//custom:consol
+  /// {_get() returns (ret)
+  ///   ensures {(ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) && 
+  ///       (ret * 105 / 100 > BALWSTETHWETH.getLatest(1))}}
   function _get() internal view returns (uint256) {...}
 
 
 ```
+
+output: `eval-data/hacks/read-only-reentrancy-sturdy-800K/contract/flattened_out.sol`
+
 
 - storage spec : TODO
 

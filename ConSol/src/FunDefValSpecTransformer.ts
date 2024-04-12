@@ -492,11 +492,18 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
         const factory = new CheckFunFactory(s, allFuncParams, tgtFuncRetParams, this.factory, tgtVarNameInSpec);
         const addrCallPreFun = factory.preCondCheckFun(this.preAddrError, s.id);
         if (addrCallPreFun) this.funDef.vScope.appendChild(addrCallPreFun);
-        const postFun = factory.postCondCheckFun(this.postAddrError, s.id);
-        if (postFun) this.funDef.vScope.appendChild(postFun);
+        const addrCallPostFun = factory.postCondCheckFun(this.postAddrError, s.id);
+        if (addrCallPostFun) this.funDef.vScope.appendChild(addrCallPostFun);
 
         // Generate dispatch_Iface_f
-        const dispatchingFun = this.dispatchingFunction(s.id, ifaceName, funName, tgtFunc);
+        const dispatchingFun = this.dispatchingFunction(
+          s.id,
+          ifaceName,
+          funName,
+          tgtFunc,
+          addrCallPreFun,
+          addrCallPostFun,
+        );
         this.funDef.vScope.appendChild(dispatchingFun);
 
         // Rewrite the address calls in the function body
