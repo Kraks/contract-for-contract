@@ -97,8 +97,8 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
   // setCustomError();
 
   // Allowing using @dev prefix for specification
-  setIncludeDevSpec();
-  // disableIncludeDevSpec();
+  // setIncludeDevSpec();
+  disableIncludeDevSpec();
 
   // Note: assume there is only one source unit/file
   // const sourceUnit = sourceUnits[0];

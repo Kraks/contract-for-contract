@@ -70,7 +70,8 @@ output: `eval-data/hacks/bridge-address-issue-Qubit-80M/contract/flattened_out.s
 
 ## erroneous-accounting-SwaposV2-468K
 
-```consol ../eval-data/hacks/erroneous-accounting-SwaposV2-468K/contract/flattened.sol
+```
+consol ../eval-data/hacks/erroneous-accounting-SwaposV2-468K/contract/flattened.sol
 ```
 
 ```solidity
@@ -220,7 +221,7 @@ output: `eval-data/hacks/read-only-reentrancy-sturdy-800K/contract/flattened_out
 
 ## reentrancy-N00d-29K
 ```
-consol ../eval-data/hacks/reentrancy-N00d-29K/lib/SushiBar.sol
+consol ../eval-data/hacks/reentrancy-N00d-29K/contract/flattened.sol
 ```
 
 ```solidity
@@ -235,7 +236,7 @@ consol ../eval-data/hacks/reentrancy-N00d-29K/lib/SushiBar.sol
     function leave(uint256 _share) public {...}
 ```
 
-output: `eval-data/hacks/reentrancy-N00d-29K/lib/SushiBar_out.sol`
+output: `eval-data/hacks/reentrancy-N00d-29K/contract/flattened_out.sol`
 
 
 ## unchecked-flashloan-callback-EFLeverVault-1M
@@ -264,7 +265,7 @@ consol ../eval-data/hacks/unchecked-user-input-SushiSwap-3.3M/contract/flattened
 ```
 
 ```solidity
- /// {uniswapV3SwapCallback(amount0Delta, amount1Delta, data) returns ()
+ /// @custom:consol {uniswapV3SwapCallback(amount0Delta, amount1Delta, data) returns ()
   ///    requires {_uniswapV3SwapCallback_pre_condition(amount0Delta, amount1Delta, data)}}
   function uniswapV3SwapCallback(
     int256 amount0Delta,
