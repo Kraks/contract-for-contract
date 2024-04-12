@@ -31,7 +31,7 @@ contract Caller {
     }
 
     function _callFoo_pre(address payable _addr, uint x) private {
-        if (!(x>0)) revert preViolation("callFoo");
+        if (!(x>0)) revert(); // preViolation("callFoo");
     }
 
     function callFoo_guard(uint256 _addr, uint256 x) private returns (uint) {

@@ -7,6 +7,7 @@ import {
   ParameterList,
   VariableDeclaration,
   ErrorDefinition,
+  FunctionCallKind,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -79,7 +80,13 @@ export class CheckFunFactory<T> {
     const errorCall = this.factory.makeFunCall(this.factory.makeIdentifierFor(errorDef), [errorParam], 'void');
 
     // Create the revert statement with the error call
-    const revertStmt = this.factory.makeRevertStatement(errorCall);
+    let revertStmt;
+    if (globalThis.customError) {
+      revertStmt = this.factory.makeRevertStatement(errorCall);
+    } else {
+      const call = this.factory.makeFunctionCall('void', FunctionCallKind.FunctionCall, this.factory.makeIdentifier('this', 'revert', -1), []);
+      revertStmt = this.factory.makeExpressionStatement(call);
+    }
     // Make the if-statement
     const ifStmt = this.factory.makeIfStatement(cnd, revertStmt);
     const funBody = this.factory.makeBlock([ifStmt]);

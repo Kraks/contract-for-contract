@@ -15,9 +15,9 @@ import { ValSpec } from './spec/index.js';
 import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
 
 import * as fs from 'fs';
-import { ConSolTransformer, INCLUDE_DEV_SPEC } from './ConSolTransformer.js';
+import { ConSolTransformer} from './ConSolTransformer.js';
 import { ConSolFactory } from './ConSolFactory.js';
-import { setSourceUnits } from './Global.js';
+import { disableCustomError, disableIncludeDevSpec, setIncludeDevSpec, setSourceUnits } from './Global.js';
 
 export const SPEC_PREFIX = '@custom:consol';
 const DEV_PREFIX = '@dev';
@@ -91,6 +91,13 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
   const reader = new ASTReader();
   const sourceUnits = reader.read(compileResult.data);
   setSourceUnits(sourceUnits);
+
+  // Not generating custom error message (must used for Solidity <= 0.8.4)
+  disableCustomError();
+  // setCustomError();
+
+  // Allowing using @dev prefix for specification
+  setIncludeDevSpec();
 
   // Note: assume there is only one source unit/file
   // const sourceUnit = sourceUnits[0];

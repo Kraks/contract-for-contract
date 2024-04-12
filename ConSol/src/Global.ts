@@ -8,6 +8,22 @@ declare global {
   var structMap: Map<string, StructDefinition>;
   var csVarId: number;
   var sourceUnits: Array<SourceUnit>;
+  var customError: boolean;
+  var INCLUDE_DEV_SPEC: boolean;
+}
+
+export function setIncludeDevSpec(): void {
+  globalThis.INCLUDE_DEV_SPEC = true;
+}
+export function disableIncludeDevSpec(): void {
+  globalThis.INCLUDE_DEV_SPEC = false;
+}
+
+export function setCustomError(): void {
+  globalThis.customError = true;
+}
+export function disableCustomError(): void {
+  globalThis.customError = false;
 }
 
 export function setSourceUnits(units: Array<SourceUnit>): void {

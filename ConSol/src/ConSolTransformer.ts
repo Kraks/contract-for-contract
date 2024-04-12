@@ -20,7 +20,6 @@ import { resetCSVarId, resetStructMap } from './Global.js';
 
 // AST node kinds that allow ConSol spec attachments
 type ConSolCheckNodes = FunctionDefinition | EventDefinition | VariableDeclaration;
-export const INCLUDE_DEV_SPEC = false;
 
 export class ConSolTransformer<T> {
   factory: ConSolFactory;
@@ -100,7 +99,7 @@ export class ConSolTransformer<T> {
       if (!astNodeDoc) return;
 
       let specStr;
-      if (INCLUDE_DEV_SPEC && typeof astNodeDoc === 'string') {
+      if (globalThis.INCLUDE_DEV_SPEC && typeof astNodeDoc === 'string') {
         specStr = astNodeDoc;
       } else {
         // @custom:consol
