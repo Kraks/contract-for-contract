@@ -1137,7 +1137,7 @@ contract Bad_Guys_by_RPF is ERC721A, Ownable {
     string public _baseURI1;
     bytes32 private rootHash;
     // revealed uri variables
-    
+
     bool public revealed = false;
     string public notRevealedUri;
 
@@ -1162,7 +1162,7 @@ contract Bad_Guys_by_RPF is ERC721A, Ownable {
         require(_reserve <= maxsupply, "the quantity exceeds");
         reserve = _reserve;
     }
-        
+
     // set reaveal uri just in case
 
     function setNotRevealedURI(string memory _notRevealedURI) public onlyOwner {
@@ -1204,8 +1204,9 @@ contract Bad_Guys_by_RPF is ERC721A, Ownable {
         return true;
     }
 
-    /// @dev WhiteListMint(_merkleProof, chosenAmount)
-    ///      requires WhiteListMint_check(_merkleProof, chosenAmount)
+    /// @dev { WhiteListMint(_merkleProof, chosenAmount)
+    ///      requires { WhiteListMint_check(_merkleProof, chosenAmount) }
+    /// }
     function WhiteListMint(bytes32[] calldata _merkleProof, uint256 chosenAmount)
         public
     {
