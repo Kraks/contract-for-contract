@@ -30,7 +30,7 @@ library Strings {
     }
 
     /**
-     * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation.
+     * dev: Converts a `uint256` to its ASCII `string` hexadecimal representation.
      */
     function toHexString(uint256 value) internal pure returns (string memory) {
         if (value == 0) {
@@ -212,9 +212,6 @@ interface IERC165 {
 }
 
 abstract contract ERC165 is IERC165 {
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
     function supportsInterface(bytes4 interfaceId)
         public
         view
@@ -230,9 +227,6 @@ abstract contract ERC165 is IERC165 {
 //IERC721
 
 interface IERC721 is IERC165 {
-    /**
-     * @dev Emitted when `tokenId` token is transferred from `from` to `to`.
-     */
     event Transfer(
         address indexed from,
         address indexed to,
@@ -240,7 +234,7 @@ interface IERC721 is IERC165 {
     );
 
     /**
-     * @dev Emitted when `owner` enables `approved` to manage the `tokenId` token.
+     * dev: Emitted when `owner` enables `approved` to manage the `tokenId` token.
      */
     event Approval(
         address indexed owner,
@@ -249,7 +243,7 @@ interface IERC721 is IERC165 {
     );
 
     /**
-     * @dev Emitted when `owner` enables or disables (`approved`) `operator` to manage all of its assets.
+     * dev: Emitted when `owner` enables or disables (`approved`) `operator` to manage all of its assets.
      */
     event ApprovalForAll(
         address indexed owner,
@@ -258,12 +252,12 @@ interface IERC721 is IERC165 {
     );
 
     /**
-     * @dev Returns the number of tokens in ``owner``'s account.
+     * dev: Returns the number of tokens in ``owner``'s account.
      */
     function balanceOf(address owner) external view returns (uint256 balance);
 
     /**
-     * @dev Returns the owner of the `tokenId` token.
+     * dev: Returns the owner of the `tokenId` token.
      *
      * Requirements:
      *
@@ -272,7 +266,7 @@ interface IERC721 is IERC165 {
     function ownerOf(uint256 tokenId) external view returns (address owner);
 
     /**
-     * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients
+     * dev: Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients
      * are aware of the ERC721 protocol to prevent tokens from being forever locked.
      *
      * Requirements:
@@ -292,7 +286,7 @@ interface IERC721 is IERC165 {
     ) external;
 
     /**
-     * @dev Transfers `tokenId` token from `from` to `to`.
+     * dev: Transfers `tokenId` token from `from` to `to`.
      *
      * WARNING: Usage of this method is discouraged, use {safeTransferFrom} whenever possible.
      *
@@ -312,7 +306,7 @@ interface IERC721 is IERC165 {
     ) external;
 
     /**
-     * @dev Gives permission to `to` to transfer `tokenId` token to another account.
+     * dev: Gives permission to `to` to transfer `tokenId` token to another account.
      * The approval is cleared when the token is transferred.
      *
      * Only a single account can be approved at a time, so approving the zero address clears previous approvals.
@@ -327,7 +321,7 @@ interface IERC721 is IERC165 {
     function approve(address to, uint256 tokenId) external;
 
     /**
-     * @dev Returns the account approved for `tokenId` token.
+     * dev: Returns the account approved for `tokenId` token.
      *
      * Requirements:
      *
@@ -339,7 +333,7 @@ interface IERC721 is IERC165 {
         returns (address operator);
 
     /**
-     * @dev Approve or remove `operator` as an operator for the caller.
+     * dev: Approve or remove `operator` as an operator for the caller.
      * Operators can call {transferFrom} or {safeTransferFrom} for any token owned by the caller.
      *
      * Requirements:
@@ -351,7 +345,7 @@ interface IERC721 is IERC165 {
     function setApprovalForAll(address operator, bool _approved) external;
 
     /**
-     * @dev Returns if the `operator` is allowed to manage all of the assets of `owner`.
+     * dev: Returns if the `operator` is allowed to manage all of the assets of `owner`.
      *
      * See {setApprovalForAll}
      */
@@ -361,7 +355,7 @@ interface IERC721 is IERC165 {
         returns (bool);
 
     /**
-     * @dev Safely transfers `tokenId` token from `from` to `to`.
+     * dev: Safely transfers `tokenId` token from `from` to `to`.
      *
      * Requirements:
      *
@@ -385,12 +379,12 @@ interface IERC721 is IERC165 {
 
 interface IERC721Enumerable is IERC721 {
     /**
-     * @dev Returns the total amount of tokens stored by the contract.
+     * dev: Returns the total amount of tokens stored by the contract.
      */
     function totalSupply() external view returns (uint256);
 
     /**
-     * @dev Returns a token ID owned by `owner` at a given `index` of its token list.
+     * dev: Returns a token ID owned by `owner` at a given `index` of its token list.
      * Use along with {balanceOf} to enumerate all of ``owner``'s tokens.
      */
     function tokenOfOwnerByIndex(address owner, uint256 index)
@@ -399,7 +393,7 @@ interface IERC721Enumerable is IERC721 {
         returns (uint256);
 
     /**
-     * @dev Returns a token ID at a given `index` of all the tokens stored by the contract.
+     * dev: Returns a token ID at a given `index` of all the tokens stored by the contract.
      * Use along with {totalSupply} to enumerate all tokens.
      */
     function tokenByIndex(uint256 index) external view returns (uint256);
@@ -407,21 +401,21 @@ interface IERC721Enumerable is IERC721 {
 
 /**
  * @title ERC-721 Non-Fungible Token Standard, optional metadata extension
- * @dev See https://eips.ethereum.org/EIPS/eip-721
+ * dev: See https://eips.ethereum.org/EIPS/eip-721
  */
 interface IERC721Metadata is IERC721 {
     /**
-     * @dev Returns the token collection name.
+     * dev: Returns the token collection name.
      */
     function name() external view returns (string memory);
 
     /**
-     * @dev Returns the token collection symbol.
+     * dev: Returns the token collection symbol.
      */
     function symbol() external view returns (string memory);
 
     /**
-     * @dev Returns the Uniform Resource Identifier (URI) for `tokenId` token.
+     * dev: Returns the Uniform Resource Identifier (URI) for `tokenId` token.
      */
     function tokenURI(uint256 tokenId) external view returns (string memory);
 }
@@ -429,12 +423,12 @@ interface IERC721Metadata is IERC721 {
 // IERC721Reciver.sol
 /**
  * @title ERC721 token receiver interface
- * @dev Interface for any contract that wants to support safeTransfers
+ * dev: Interface for any contract that wants to support safeTransfers
  * from ERC721 asset contracts.
  */
 interface IERC721Receiver {
     /**
-     * @dev Whenever an {IERC721} `tokenId` token is transferred to this contract via {IERC721-safeTransferFrom}
+     * dev: Whenever an {IERC721} `tokenId` token is transferred to this contract via {IERC721-safeTransferFrom}
      * by `operator` from `from`, this function is called.
      *
      * It must return its Solidity selector to confirm the token transfer.
@@ -469,7 +463,7 @@ error UnableDetermineTokenOwner();
 error URIQueryForNonexistentToken();
 
 /**
- * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
+ * dev: Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
  * the Metadata and Enumerable extension. Built to optimize for lower gas during batch mints.
  *
  * Assumes serials are sequentially minted starting at 0 (e.g. 0, 1, 2, 3..).
@@ -525,14 +519,14 @@ contract ERC721A is
     }
 
     /**
-     * @dev See {IERC721Enumerable-totalSupply}.
+     * dev: See {IERC721Enumerable-totalSupply}.
      */
     function totalSupply() public view override returns (uint256) {
         return _currentIndex;
     }
 
     /**
-     * @dev See {IERC721Enumerable-tokenByIndex}.
+     * dev: See {IERC721Enumerable-tokenByIndex}.
      */
     function tokenByIndex(uint256 index)
         public
@@ -545,7 +539,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev See {IERC721Enumerable-tokenOfOwnerByIndex}.
+     * dev: See {IERC721Enumerable-tokenOfOwnerByIndex}.
      * This read function is O(totalSupply). If calling from a separate contract, be sure to test gas first.
      * It may also degrade with extremely large collection sizes (e.g >> 10000), test for your use case.
      */
@@ -581,7 +575,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev See {IERC165-supportsInterface}.
+     * dev: See {IERC165-supportsInterface}.
      */
     function supportsInterface(bytes4 interfaceId)
         public
@@ -598,7 +592,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev See {IERC721-balanceOf}.
+     * dev: See {IERC721-balanceOf}.
      */
     function balanceOf(address owner) public view override returns (uint256) {
         if (owner == address(0)) revert BalanceQueryForZeroAddress();
@@ -634,28 +628,28 @@ contract ERC721A is
     }
 
     /**
-     * @dev See {IERC721-ownerOf}.
+     * dev: See {IERC721-ownerOf}.
      */
     function ownerOf(uint256 tokenId) public view override returns (address) {
         return ownershipOf(tokenId).addr;
     }
 
     /**
-     * @dev See {IERC721Metadata-name}.
+     * dev: See {IERC721Metadata-name}.
      */
     function name() public view virtual override returns (string memory) {
         return _name;
     }
 
     /**
-     * @dev See {IERC721Metadata-symbol}.
+     * dev: See {IERC721Metadata-symbol}.
      */
     function symbol() public view virtual override returns (string memory) {
         return _symbol;
     }
 
     /**
-     * @dev See {IERC721Metadata-tokenURI}.
+     * dev: See {IERC721Metadata-tokenURI}.
      */
     function tokenURI(uint256 tokenId)
         public
@@ -674,7 +668,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev Base URI for computing {tokenURI}. If set, the resulting URI for each
+     * dev: Base URI for computing {tokenURI}. If set, the resulting URI for each
      * token will be the concatenation of the `baseURI` and the `tokenId`. Empty
      * by default, can be overriden in child contracts.
      */
@@ -683,7 +677,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev See {IERC721-approve}.
+     * dev: See {IERC721-approve}.
      */
     function approve(address to, uint256 tokenId) public override {
         address owner = ERC721A.ownerOf(tokenId);
@@ -696,7 +690,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev See {IERC721-getApproved}.
+     * dev: See {IERC721-getApproved}.
      */
     function getApproved(uint256 tokenId)
         public
@@ -710,7 +704,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev See {IERC721-setApprovalForAll}.
+     * dev: See {IERC721-setApprovalForAll}.
      */
     function setApprovalForAll(address operator, bool approved)
         public
@@ -723,7 +717,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev See {IERC721-isApprovedForAll}.
+     * dev: See {IERC721-isApprovedForAll}.
      */
     function isApprovedForAll(address owner, address operator)
         public
@@ -736,7 +730,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev See {IERC721-transferFrom}.
+     * dev: See {IERC721-transferFrom}.
      */
     function transferFrom(
         address from,
@@ -747,7 +741,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev See {IERC721-safeTransferFrom}.
+     * dev: See {IERC721-safeTransferFrom}.
      */
     function safeTransferFrom(
         address from,
@@ -758,7 +752,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev See {IERC721-safeTransferFrom}.
+     * dev: See {IERC721-safeTransferFrom}.
      */
     function safeTransferFrom(
         address from,
@@ -772,7 +766,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev Returns whether `tokenId` exists.
+     * dev: Returns whether `tokenId` exists.
      *
      * Tokens can be managed by their owner or approved accounts via {approve} or {setApprovalForAll}.
      *
@@ -787,7 +781,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev Safely mints `quantity` tokens and transfers them to `to`.
+     * dev: Safely mints `quantity` tokens and transfers them to `to`.
      *
      * Requirements:
      *
@@ -805,7 +799,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev Mints `quantity` tokens and transfers them to `to`.
+     * dev: Mints `quantity` tokens and transfers them to `to`.
      *
      * Requirements:
      *
@@ -857,7 +851,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev Transfers `tokenId` from `from` to `to`.
+     * dev: Transfers `tokenId` from `from` to `to`.
      *
      * Requirements:
      *
@@ -913,7 +907,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev Approve `to` to operate on `tokenId`
+     * dev: Approve `to` to operate on `tokenId`
      *
      * Emits a {Approval} event.
      */
@@ -927,7 +921,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev Internal function to invoke {IERC721Receiver-onERC721Received} on a target address.
+     * dev: Internal function to invoke {IERC721Receiver-onERC721Received} on a target address.
      * The call is not executed if the target address is not a contract.
      *
      * @param from address representing the previous owner of the given token ID
@@ -967,7 +961,7 @@ contract ERC721A is
     }
 
     /**
-     * @dev Hook that is called before a set of serially-ordered token ids are about to be transferred. This includes minting.
+     * dev: Hook that is called before a set of serially-ordered token ids are about to be transferred. This includes minting.
      *
      * startTokenId - the first token id to be transferred
      * quantity - the amount to be transferred
@@ -986,7 +980,7 @@ contract ERC721A is
     ) internal virtual {}
 
     /**
-     * @dev Hook that is called after a set of serially-ordered token ids have been transferred. This includes
+     * dev: Hook that is called after a set of serially-ordered token ids have been transferred. This includes
      * minting.
      *
      * startTokenId - the first token id to be transferred
@@ -1014,21 +1008,21 @@ abstract contract Ownable is Context {
     );
 
     /**
-     * @dev Initializes the contract setting the deployer as the initial owner.
+     * dev: Initializes the contract setting the deployer as the initial owner.
      */
     constructor() {
         _transferOwnership(_msgSender());
     }
 
     /**
-     * @dev Returns the address of the current owner.
+     * dev: Returns the address of the current owner.
      */
     function owner() public view virtual returns (address) {
         return _owner;
     }
 
     /**
-     * @dev Throws if called by any account other than the owner.
+     * dev: Throws if called by any account other than the owner.
      */
     modifier onlyOwner() {
         require(owner() == _msgSender(), "Ownable: caller is not the owner");
@@ -1036,7 +1030,7 @@ abstract contract Ownable is Context {
     }
 
     /**
-     * @dev Leaves the contract without owner. It will not be possible to call
+     * dev: Leaves the contract without owner. It will not be possible to call
      * `onlyOwner` functions anymore. Can only be called by the current owner.
      *
      * NOTE: Renouncing ownership will leave the contract without an owner,
@@ -1047,7 +1041,7 @@ abstract contract Ownable is Context {
     }
 
     /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * dev: Transfers ownership of the contract to a new account (`newOwner`).
      * Can only be called by the current owner.
      */
     function transferOwnership(address newOwner) public virtual onlyOwner {
@@ -1059,7 +1053,7 @@ abstract contract Ownable is Context {
     }
 
     /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * dev: Transfers ownership of the contract to a new account (`newOwner`).
      * Internal function without access restriction.
      */
     function _transferOwnership(address newOwner) internal virtual {
@@ -1071,7 +1065,7 @@ abstract contract Ownable is Context {
 
 library MerkleProof {
     /**
-     * @dev Returns true if a `leaf` can be proved to be a part of a Merkle tree
+     * dev: Returns true if a `leaf` can be proved to be a part of a Merkle tree
      * defined by `root`. For this, a `proof` must be provided, containing
      * sibling hashes on the branch from the leaf to the root of the tree. Each
      * pair of leaves and each pair of pre-images are assumed to be sorted.
@@ -1085,7 +1079,7 @@ library MerkleProof {
     }
 
     /**
-     * @dev Returns the rebuilt hash obtained by traversing a Merkle tree up
+     * dev: Returns the rebuilt hash obtained by traversing a Merkle tree up
      * from `leaf` using `proof`. A `proof` is valid if and only if the rebuilt
      * hash matches the root of the tree. When processing the proof, the pairs
      * of leafs & pre-images are assumed to be sorted.
@@ -1187,10 +1181,12 @@ contract Bad_Guys_by_RPF is ERC721A, Ownable {
         _safeMint(msg.sender, quantity);
     }
 
-    function WhiteListMint(bytes32[] calldata _merkleProof, uint256 chosenAmount)
+    function WhiteListMint_check(bytes32[] calldata _merkleProof, uint256 chosenAmount)
         public
+        view
+        returns (bool)
     {
-        require(_numberMinted(msg.sender)<1, "Already Claimed");
+        require(_numberMinted(msg.sender) + chosenAmount <= 1, "Already Claimed");
         require(isPaused == false, "turn on minting");
         require(
             chosenAmount > 0,
@@ -1205,6 +1201,14 @@ contract Bad_Guys_by_RPF is ERC721A, Ownable {
             MerkleProof.verify(_merkleProof, rootHash, leaf),
             "Invalid Proof"
         );
+        return true;
+    }
+
+    /// @dev WhiteListMint(_merkleProof, chosenAmount)
+    ///      requires WhiteListMint_check(_merkleProof, chosenAmount)
+    function WhiteListMint(bytes32[] calldata _merkleProof, uint256 chosenAmount)
+        public
+    {
         _safeMint(msg.sender, chosenAmount);
     }
 
