@@ -36,6 +36,7 @@ export class ConSolTransformer<T> {
     this.contract = contract;
     this.interfaces = ifs;
 
+    // TODO(DX): use revert(); instead. customized error is not supported in some versions
     this.preCondError = factory.makeError('preViolation', 'funcName', 'string');
     this.postCondError = factory.makeError('postViolation', 'funcName', 'string');
     this.preAddrError = factory.makeError('preViolationAddr', 'specId', 'uint256');

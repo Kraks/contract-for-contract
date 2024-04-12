@@ -185,7 +185,7 @@ export class ValSpecTransformer<T> {
     tgtAddr: string | undefined,
   ) {
     // DX: what if tgtInterface/tgtAddr is undefined?
-
+    // TODO(DX): gas shouldn't be zero
     if (
       node instanceof FunctionCall &&
       node.vFunctionName === tgtFun &&
