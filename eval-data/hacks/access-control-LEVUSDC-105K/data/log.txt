@@ -1,19 +1,14 @@
 original:
     Total Transactions: 45
-    Total Gas Usage: 17251698
-    Total Gas Usage in USD: 968.5003783699999
+    Total Gas Usage: 17251712
+    Total Gas Usage in USD: 968.5010715300003
 
 assertion-fix:
     Total Transactions: 45
-    Total Gas Usage: 17258936
-    Total Gas Usage in USD: 968.8587420900001
-
-spec-fix:
-    Total Transactions: 45
-    Total Gas Usage: 17259377
-    Total Gas Usage in USD: 968.88057663
+    Total Gas Usage: 17258950
+    Total Gas Usage in USD: 968.8594352500003
 
 consol-fix:
     Total Transactions: 45
-    Total Gas Usage: 17259377
-    Total Gas Usage in USD: 968.8805766300004
+    Total Gas Usage: 17259328
+    Total Gas Usage in USD: 968.8781505700001
