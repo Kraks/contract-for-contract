@@ -227,6 +227,14 @@ interface IP2Controller {
 }
 
 interface IXNFT {
+    struct Order{
+        address pledger;
+        address collection;
+        uint256 tokenId;
+        uint256 nftType;
+        bool isWithdraw;
+    }
+
     function pledge(address collection, uint256 tokenId, uint256 nftType) external;
 
     function pledge721(address _collection, uint256 _tokenId) external;
@@ -234,6 +242,8 @@ interface IXNFT {
     function pledge1155(address _collection, uint256 _tokenId) external;
 
     function getOrderDetail(uint256 orderId) external view returns (address collection, uint256 tokenId, address pledger);
+
+    function allOrders(uint256) external view returns(Order memory);
 
     function isOrderLiquidated(uint256 orderId) external view returns (bool);
 
@@ -621,6 +631,7 @@ contract P2Controller is P2ControllerStorage, Exponential, Initializable {
 
     function _checkBorrowAllowed(address xToken, uint256 orderId, address borrower, uint256 borrowAmount) internal returns (bool) {
         require(poolStates[xToken].isListed, "token not listed");
+        require(!xNFT.allOrders(orderId).isWithdraw);
         orderAllowed(orderId, borrower);
         (address _collection, , ) = xNFT.getOrderDetail(orderId);
         CollateralState storage _collateralState = collateralStates[_collection];
