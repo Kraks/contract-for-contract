@@ -1,3 +1,6 @@
+pragma solidity =0.6.12 ^0.6.0 ^0.6.2;
+
+// src/Contract.sol
 /**
  *Submitted for verification at Etherscan.io on 2022-10-08
 */
@@ -12,7 +15,7 @@
 
 
 
-pragma solidity ^0.6.0;
+
 
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
@@ -92,7 +95,7 @@ interface IERC20 {
 
 
 
-pragma solidity ^0.6.0;
+
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -119,7 +122,7 @@ abstract contract Context {
 
 
 
-pragma solidity ^0.6.0;
+
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -281,7 +284,7 @@ library SafeMath {
 
 
 
-pragma solidity ^0.6.2;
+
 
 /**
  * @dev Collection of functions related to the address type
@@ -425,7 +428,7 @@ library Address {
 
 
 
-pragma solidity ^0.6.0;
+
 
 
 
@@ -732,7 +735,7 @@ contract ERC20 is Context, IERC20 {
 
 // File: contracts/SushiBar.sol
 
-pragma solidity 0.6.12;
+
 
 
 
