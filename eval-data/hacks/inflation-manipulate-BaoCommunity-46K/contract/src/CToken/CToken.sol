@@ -1534,10 +1534,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
      * @param redeemTokens The number of cTokens to redeem into underlying
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    /// @custom:consol
-    /// redeemInternal(redeemTokens) returns (error)
-    ///     requires accrueInterest() == uint(Error.NO_ERROR)
-    ///     ensures totalSupply > 1000
+     // vulnerable
     function redeemInternal(uint redeemTokens) internal nonReentrant returns (uint) {
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
@@ -1554,10 +1551,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
      * @param redeemAmount The amount of underlying to receive from redeeming cTokens
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    /// @custom:consol
-    /// redeemUnderlyingInternal(redeemTokens) returns (error)
-    ///     requires accrueInterest() == uint(Error.NO_ERROR)
-    ///     ensures totalSupply > 1000
+     // vulnerable
     function redeemUnderlyingInternal(uint redeemAmount) internal nonReentrant returns (uint) {
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {

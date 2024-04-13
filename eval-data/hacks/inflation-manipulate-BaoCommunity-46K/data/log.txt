@@ -1,14 +1,14 @@
 original:
     Total Transactions: 118
     Total Gas Usage: 39978821
-    Total Gas Usage in USD: 2000.2390921699998
+    Total Gas Usage in USD: 2000.23909217
 
-assertion-fix:
+assert-fix:
     Total Transactions: 118
-    Total Gas Usage: 39980726
-    Total Gas Usage in USD: 2000.29849261
+    Total Gas Usage: 39980966
+    Total Gas Usage in USD: 2000.30597613
 
-spec-fix:
+consol-fix:
     Total Transactions: 118
-    Total Gas Usage: 39982421
-    Total Gas Usage in USD: 2000.3513449699992
+    Total Gas Usage: 39985961
+    Total Gas Usage in USD: 2000.46172689
