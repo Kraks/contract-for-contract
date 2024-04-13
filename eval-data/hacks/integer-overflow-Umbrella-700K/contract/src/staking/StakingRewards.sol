@@ -255,9 +255,7 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
     /// @param amount tokens to withdraw
     /// @param user address
     /// @param recipient address, where to send tokens, if we migrating token address can be zero
-    /// @custom:consol 
-    /// _withdraw(amount, user, recipient) 
-    ///      requires _balances[user] >= amount && amount != 0
+    // vulnerable
     function _withdraw(uint256 amount, address user, address recipient) internal nonReentrant updateReward(user) {
         require(amount != 0, "Cannot withdraw 0");
 
