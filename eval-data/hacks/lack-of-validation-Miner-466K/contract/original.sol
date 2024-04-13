@@ -1,12 +1,16 @@
+// SPDX-License-Identifier: MIT
+pragma solidity =0.8.24;
+
+// src/Contract.sol
 /**
  *Submitted for verification at Etherscan.io on 2024-02-11
 */
 
 //Inspired by all the great work out there from ERC20, 404, 721, 721a, 721Psi, 1155, 1155Delta
 
-// SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.24;
+
+
 
 abstract contract Context {
     function _msgSender() internal view virtual returns (address) {
