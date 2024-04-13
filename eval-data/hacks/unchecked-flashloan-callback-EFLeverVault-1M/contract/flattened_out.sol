@@ -82,17 +82,21 @@ library Address {
 }
 
 contract ReentrancyGuard {
-    uint256 private _guardCounter;
+    uint128 private _guardCounter;
+    uint128 internal _entered;
+
+    constructor () internal {
+        _guardCounter = 1;
+        _entered = 0;
+    }
 
     modifier nonReentrant() {
         _guardCounter += 1;
+        _entered = 1;
         uint256 localCounter = _guardCounter;
         _;
+        _entered = 0;
         require(localCounter == _guardCounter, "ReentrancyGuard: reentrant call");
-    }
-
-    constructor() internal {
-        _guardCounter = 1;
     }
 }
 

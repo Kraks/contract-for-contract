@@ -9,6 +9,11 @@ solc_version = "0.5.10"
 evm_version = "petersburg"
 optimizer = true
 optimizer_runs = 200
-libraries = []
+libraries = [
+    "src/Contract.sol:SafeMath:0x071108ad85d7a766b41e0f5e5195537a8fc8e74d",
+    "original.sol:SafeMath:0x071108ad85d7a766b41e0f5e5195537a8fc8e74d",
+    "assert-fix.sol:SafeMath:0x071108ad85d7a766b41e0f5e5195537a8fc8e74d",
+    "flattened_out.sol:SafeMath:0x071108ad85d7a766b41e0f5e5195537a8fc8e74d",
+]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

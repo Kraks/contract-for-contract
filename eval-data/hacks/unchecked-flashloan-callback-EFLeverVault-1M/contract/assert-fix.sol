@@ -105,16 +105,20 @@ library Address {
 pragma solidity >=0.4.21 <0.6.0;
 
 contract ReentrancyGuard {
-    uint256 private _guardCounter;
+    uint128 private _guardCounter;
+    uint128 internal _entered;
 
     constructor () internal {
         _guardCounter = 1;
+        _entered = 0;
     }
 
     modifier nonReentrant() {
         _guardCounter += 1;
+        _entered = 1;
         uint256 localCounter = _guardCounter;
         _;
+        _entered = 0;
         require(localCounter == _guardCounter, "ReentrancyGuard: reentrant call");
     }
 }
@@ -307,13 +311,14 @@ contract EFLeverVault is Ownable, ReentrancyGuard{
     last_earn_block = block.number;
   }
 
-// vulnerable
   function receiveFlashLoan(
         IERC20[] memory tokens,
         uint256[] memory amounts,
         uint256[] memory feeAmounts,
         bytes memory userData
     ) public payable {
+        // XXX: assert fix
+        require(_entered == 1);
         require(msg.sender == balancer, "only flashloan vault");
 
         uint256 loan_amount = amounts[0];
