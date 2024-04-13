@@ -119,9 +119,7 @@ contract QBridgeHandler is IQBridgeHandler, OwnableUpgradeable {
         option                                 uint256     bytes  0 - 32
         amount                                 uint256     bytes  32 - 64
      */
-    /// @custom:consol
-    /// function deposit(resourceID, depositer, data) returns ()
-    ///     ensures (resourceIDToTokenContractAddress[resourceID] != address(0) && contractWhitelist[resourceIDToTokenContractAddress[resourceID]]) 
+     // vulnerable
     function deposit(bytes32 resourceID, address depositer, bytes calldata data) external override onlyBridge {
         uint option;
         uint amount;

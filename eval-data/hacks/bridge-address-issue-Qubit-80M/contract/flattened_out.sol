@@ -502,13 +502,12 @@ contract QBridgeHandler is IQBridgeHandler, OwnableUpgradeable {
     }
 
     /// @dev {deposit(resourceID, depositer, data) returns ()
-    ///      ensures {(resourceIDToTokenContractAddress[resourceID] != address(0) && contractWhitelist[resourceIDToTokenContractAddress[resourceID]])} }
+    ///      requires {(resourceIDToTokenContractAddress[resourceID] != address(0) && contractWhitelist[resourceIDToTokenContractAddress[resourceID]])} }
     function deposit_original(bytes32 resourceID, address depositer, bytes calldata data) private onlyBridge() {
         uint option;
         uint amount;
         (option, amount) = abi.decode(data, (uint, uint));
         address tokenAddress = resourceIDToTokenContractAddress[resourceID];
-        require(contractWhitelist[tokenAddress], "provided tokenAddress is not whitelisted");
         if (burnList[tokenAddress]) {
             require(amount >= withdrawalFees[resourceID], "less than withdrawal fee");
             QBridgeToken(tokenAddress).burnFrom(depositer, amount);
@@ -559,12 +558,12 @@ contract QBridgeHandler is IQBridgeHandler, OwnableUpgradeable {
         if (tokenAddress == ETH) SafeToken.safeTransferETH(recipient, amount); else tokenAddress.safeTransfer(recipient, amount);
     }
 
-    function _deposit_post(bytes32 resourceID, address depositer, bytes calldata data) private {
+    function _deposit_pre(bytes32 resourceID, address depositer, bytes calldata data) private {
         if (!((resourceIDToTokenContractAddress[resourceID]!=address(0)&&contractWhitelist[resourceIDToTokenContractAddress[resourceID]]))) revert();
     }
 
     function deposit(bytes32 resourceID, address depositer, bytes calldata data) override external {
+        _deposit_pre(resourceID, depositer, data);
         deposit_original(resourceID, depositer, data);
-        _deposit_post(resourceID, depositer, data);
     }
 }
