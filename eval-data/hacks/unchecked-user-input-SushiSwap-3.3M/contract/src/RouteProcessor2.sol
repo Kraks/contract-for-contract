@@ -332,9 +332,7 @@ contract RouteProcessor2 {
   /// @param amount1Delta The amount of token1 that was sent (negative) or must be received (positive) by the pool by
   /// the end of the swap. If positive, the callback must send that amount of token1 to the pool.
   /// @param data Any data passed through by the caller via the IUniswapV3PoolActions#swap call
-  /// @custom:consol
-  /// uniswapV3SwapCallback(amount0Delta, amount1Delta, data) returns ()
-  ///    requires _uniswapV3SwapCallback_pre_condition(amount0Delta, amount1Delta, data)
+  // vulnerable
   function uniswapV3SwapCallback(
     int256 amount0Delta,
     int256 amount1Delta,
