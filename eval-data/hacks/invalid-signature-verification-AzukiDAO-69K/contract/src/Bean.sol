@@ -46,9 +46,7 @@ contract Bean is ERC20, Pausable, Ownable, ReentrancyGuard {
         }
     }
 
-    /// @custom:consol
-    /// claim(_contracts, _amounts, _tokenIds, _claimAmount, _endTime) returns ()
-    ///   ensures claim_check(_contracts, _amounts, _tokenIds, _claimAmount, _endTime)
+    // vulnerable
     function claim(
         address[] memory _contracts,      // NFT contracts: azuki + beanz + elementals
         uint256[] memory _amounts,        // token amount for every contract: 2 + 3 + 1
