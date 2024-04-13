@@ -660,7 +660,7 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
     ///    ensures {(ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) && 
     ///        (ret * 105 / 100 > BALWSTETHWETH.getLatest(1))}}
     function _get_original() private returns (uint256) {
-        (, int256 stETHPrice, , uint256 updatedAt, ) = dispatch_IChainlinkAggregator_latestRoundData(STETH, 0, 0);
+        (, int256 stETHPrice, , uint256 updatedAt, ) = dispatch_IChainlinkAggregator_latestRoundData(STETH, 0, gasleft());
         require(updatedAt > (block.timestamp - 1 days), Errors.O_WRONG_PRICE);
         require(stETHPrice > 0, Errors.O_WRONG_PRICE);
         uint256 minValue = Math.min(uint256(stETHPrice), 1e18);
