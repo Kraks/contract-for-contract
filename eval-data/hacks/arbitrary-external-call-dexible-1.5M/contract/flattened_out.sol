@@ -3201,7 +3201,7 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
 
     function fill(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) external returns (SwapMeta memory) {
         _fill_pre(request, meta);
-        SwapMeta meta2 = fill_original(request, meta);
+        SwapMeta memory meta2 = fill_original(request, meta);
         _fill_post(request, meta, meta2);
         return (meta2);
     }

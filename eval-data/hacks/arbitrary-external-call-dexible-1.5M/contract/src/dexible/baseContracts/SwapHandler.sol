@@ -34,10 +34,8 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
         uint inputAmountDue;
     }
 
-    /// @custom:consol
-    /// fill(request, meta) returns (meta)
-    ///     requires _checkRequest(request)
-    ///     ensures meta.outAmount >= request.tokenOut.amount
+
+    // vulnerable
     function fill(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) external onlySelf returns (SwapMeta memory)  {
 
         preCheck(request, meta);
