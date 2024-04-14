@@ -39,6 +39,7 @@ library SafeMath {
   /**
   * dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
   */
+
   /// @dev
   ///    {sub(a, b) returns (c)
   ///    requires {b <= a}}
@@ -49,6 +50,7 @@ library SafeMath {
   /**
   * dev Adds two numbers, throws on overflow.
   */
+
   /// @dev
   ///    {add(a, b) returns (c)
   ///    ensures {c >= a}}
@@ -403,6 +405,8 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
    * @param _to address to receive the ownership of the given token ID
    * @param _tokenId uint256 ID of the token to be transferred
   */
+
+
   /// @dev
   ///    {transferFrom(_from, _to, _tokenId)
   ///    requires {_from != address(0) && _to != address(0)}}
@@ -504,6 +508,8 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
    * @param _to The address that will own the minted token
    * @param _tokenId uint256 ID of the token to be minted by the msg.sender
    */
+
+
   /// @dev
   ///   { _mint(_to, _tokenId)
   ///    requires {_to != address(0)}}
@@ -529,8 +535,10 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
    * @param _owner owner of the token
    * @param _tokenId uint256 ID of the token to be transferred
    */
+
+
   /// @dev
-  ///   { _clearApproval(_owner, _tokenId)
+  ///   { clearApproval(_owner, _tokenId)
   ///    requires {ownerOf(_tokenId) == _owner}}
   function clearApproval(address _owner, uint256 _tokenId) internal {
     if (tokenApprovals[_tokenId] != address(0)) {
@@ -543,8 +551,11 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
    * @param _to address representing the new owner of the given token ID
    * @param _tokenId uint256 ID of the token to be added to the tokens list of the given address
    */
+
+
+
   /// @dev
-  ///    {_addTokenTo(_to, _tokenId)
+  ///    {addTokenTo(_to, _tokenId)
   ///    requires {tokenOwner[_tokenId] == address(0)}}
   function addTokenTo(address _to, uint256 _tokenId) internal {
     tokenOwner[_tokenId] = _to;
@@ -556,8 +567,11 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
    * @param _from address representing the previous owner of the given token ID
    * @param _tokenId uint256 ID of the token to be removed from the tokens list of the given address
    */
+
+
+
   /// @dev
-  ///    {_removTokenFrom(_from, _tokenId)
+  ///    {removeTokenFrom(_from, _tokenId)
   ///    requires { ownerOf(_tokenId) == _from }}
   function removeTokenFrom(address _from, uint256 _tokenId) internal {
     ownedTokensCount[_from] = ownedTokensCount[_from].sub(1);

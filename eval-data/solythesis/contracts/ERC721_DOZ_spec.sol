@@ -226,7 +226,7 @@ contract ERC165 is IERC165 {
      * dev internal method for registering an interface
      */
     /// @dev
-    ///  {registerInterface(interfaceId)
+    ///  {_registerInterface(interfaceId)
     ///  requires {interfaceId != 0xffffffff}}
     function _registerInterface(bytes4 interfaceId) internal {
         _supportedInterfaces[interfaceId] = true;
@@ -614,8 +614,10 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
      * @param index uint256 representing the index to be accessed of the tokens list
      * @return uint256 token ID at the given index of the tokens list
      */
+
+
     /// @dev
-    ///  {tokenByIndex(index)
+    ///  {tokenByIndex(index) returns (x)
     ///  requires {index < totalSupply()}}
     function tokenByIndex(uint256 index) public view returns (uint256) {
         return _allTokens[index];
@@ -1110,7 +1112,7 @@ contract Ownable {
      * @param newOwner The address to transfer ownership to.
      */
     /// @dev
-    ///  {transferOwnership(newOwner)
+    ///  {_transferOwnership(newOwner)
     ///  requires{ newOwner != address(0)}}
     function _transferOwnership(address newOwner) internal {
         emit OwnershipTransferred(_owner, newOwner);
