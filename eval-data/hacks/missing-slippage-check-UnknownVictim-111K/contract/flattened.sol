@@ -205,6 +205,11 @@ contract ExchangeBetweenPools is Ownable{
 
   event MinimumAmountChanged(uint256 old, uint256 _new);
 
+  function _exchange_underlying_post_condition(uint256 camount) view internal returns (bool) {
+      uint256 namount = usdt.balanceOf(address(this));
+      return camount * 95 / 100 < namount && camount * 100 / 95 > namount;
+  }
+
   function changeMinimumAmount(uint256 _new_amount) public onlyOwner{
     require(_new_amount > 0, "invalid amount");
     uint256 old = minimum_amount;
