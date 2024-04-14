@@ -183,10 +183,6 @@ contract ExchangeBetweenPools is Ownable{
 
   uint256 public minimum_amount;
 
-    /// @dev {non_addr_var{value: v, gas: g}(mymsg, x) returns (y) requires { v==100 } ensures { data == true }}
-  uint160 non_addr_var;
-
-  
   /// @dev { 
   /// PriceInterface(curve).exchange_underlying{value: v, gas: g}(x, y, camount, n) returns ()
   ///   ensures { _exchange_underlying_post_condition(camount) }
