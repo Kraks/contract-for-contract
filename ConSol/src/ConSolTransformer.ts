@@ -7,7 +7,6 @@ import {
   ContractDefinition,
   ErrorDefinition,
   StructDefinition,
-  VariableDeclarationStatement,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -93,17 +92,19 @@ export class ConSolTransformer<T> {
         globalThis.structMap.set(astNode.canonicalName, astNode);
       }
 
-      if (astNode instanceof VariableDeclaration
-        && astNode.name === 'curve'
-        && contract.name === 'ExchangeBetweenPools') {
+      if (
+        astNode instanceof VariableDeclaration &&
+        astNode.name === 'curve' &&
+        contract.name === 'ExchangeBetweenPools'
+      ) {
         // Note: for missing-slippage-check-UnknownVictim-111K, there seems a
         // bug in solc-typed-ast that does not parse the documentation correctly.
         // So we patch the spec to the variable declaration directly.
-        console.log(astNode.name)
+        console.log(astNode.name);
         astNode.documentation = `@dev {
           PriceInterface(curve).exchange_underlying{value: v, gas: g}(x, y, camount, n)
           ensures { _exchange_underlying_post_condition(camount) } }
-        `
+        `;
       }
     });
 
@@ -112,10 +113,10 @@ export class ConSolTransformer<T> {
       const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation | string;
       //if (!astNodeDoc) return;
 
-      let specStr : string;
+      let specStr: string;
       if (typeof astNodeDoc === 'string') {
         specStr = astNodeDoc;
-      } else if (astNodeDoc instanceof StructuredDocumentation){
+      } else if (astNodeDoc instanceof StructuredDocumentation) {
         // @custom:consol
         specStr = astNodeDoc.text;
       } else {
