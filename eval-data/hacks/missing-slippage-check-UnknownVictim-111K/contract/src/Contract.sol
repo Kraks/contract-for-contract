@@ -1,3 +1,7 @@
+/**
+ *Submitted for verification at Etherscan.io on 2021-01-27
+*/
+
 // File: contracts/erc20/IERC20.sol
 
 pragma solidity >=0.4.21 <0.6.0;
@@ -198,10 +202,7 @@ contract ExchangeBetweenPools is Ownable{
 
   uint256 public minimum_amount;
 
-  /// @custom:consol
-  /// curve.exchange_underlying(x, y, camount, n)
-  ///   ensures _exchange_underlying_post_condition(camount)
-  PriceInterface public curve = PriceInterface(CurveInterface(0xbBC81d23Ea2c3ec7e56D39296F0cbB648873a5d3).curve());
+  PriceInterface public curve;
 
   constructor(address _from_bank, address _to_bank, uint256 _min_amount) public{
     note = "Only for USDC to USDT";
@@ -216,6 +217,9 @@ contract ExchangeBetweenPools is Ownable{
     usdt = IERC20(u1);
 
     minimum_amount = _min_amount;
+
+    CurveInterface pool_deposit = CurveInterface(0xbBC81d23Ea2c3ec7e56D39296F0cbB648873a5d3);
+    curve = PriceInterface(pool_deposit.curve());
   }
 
   event MinimumAmountChanged(uint256 old, uint256 _new);
@@ -227,9 +231,7 @@ contract ExchangeBetweenPools is Ownable{
     emit MinimumAmountChanged(old, minimum_amount);
   }
 
-  /// @custom:consol
-  /// doExchange(amount) public returns (success)
-  ///   requires amount >= minimum_amount && amount <= ERC20TokenBankInterface(from_bank).balance()
+    // vulnerable
   function doExchange(uint256 amount) public returns(bool){
     require(amount >= minimum_amount, "invalid amount");
     require(amount <= ERC20TokenBankInterface(from_bank).balance(), "too much amount");
