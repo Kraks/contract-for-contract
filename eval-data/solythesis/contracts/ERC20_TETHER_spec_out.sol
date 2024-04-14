@@ -6,7 +6,7 @@ library SafeMath {
     /// 	mul(a, b) returns (c)
     ///  	ensures { a == 0 && c == 0 || c / a == b }
     ///  }
-    function mul_original(uint256 a, uint256 b) private returns (uint256) {
+    function mul_original(uint256 a, uint256 b) pure private returns (uint256) {
         if (a == 0) {
             return 0;
         }
@@ -23,7 +23,7 @@ library SafeMath {
     /// 	sub(a, b) returns (c)
     /// 	requires { b <= a }
     ///  }
-    function sub_original(uint256 a, uint256 b) private returns (uint256) {
+    function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
         return a - b;
     }
 
@@ -31,13 +31,13 @@ library SafeMath {
     /// 	  add(a, b) returns (c)
     /// 	  ensures { c >= a }
     ///  }
-    function add_original(uint256 a, uint256 b) private returns (uint256) {
+    function add_original(uint256 a, uint256 b) pure private returns (uint256) {
         uint256 c = a + b;
         assert(c >= a);
         return c;
     }
 
-    function _mul_post(uint256 a, uint256 b, uint256 c) private {
+    function _mul_post(uint256 a, uint256 b, uint256 c) pure private {
         if (!(a==0&&c==0||c/a==b)) revert();
     }
 
@@ -47,7 +47,7 @@ library SafeMath {
         return (c);
     }
 
-    function _sub_pre(uint256 a, uint256 b) private {
+    function _sub_pre(uint256 a, uint256 b) pure private {
         if (!(b<=a)) revert();
     }
 
@@ -57,7 +57,7 @@ library SafeMath {
         return (c);
     }
 
-    function _add_post(uint256 a, uint256 b, uint256 c) private {
+    function _add_post(uint256 a, uint256 b, uint256 c) pure private {
         if (!(c>=a)) revert();
     }
 
@@ -153,7 +153,6 @@ contract BasicToken is Ownable, ERC20Basic {
 }
 
 /// @title Standard ERC20 token
-///
 contract StandardToken is BasicToken, ERC20 {
     mapping(address => mapping(address => uint)) public allowed;
     uint public constant MAX_UINT = (2 ** 256) - 1;

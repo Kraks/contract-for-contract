@@ -5,7 +5,7 @@ library SafeMath {
     /// 	add(a, b) returns (c)
     /// 	ensures { c >= a }
     ///  }
-    function add_original(uint a, uint b) private returns (uint c) {
+    function add_original(uint a, uint b) pure private returns (uint c) {
         c = a + b;
     }
 
@@ -13,7 +13,7 @@ library SafeMath {
     /// 	sub(a, b) returns (c)
     /// 	requires { b <= a }
     ///  }
-    function sub_original(uint a, uint b) private returns (uint c) {
+    function sub_original(uint a, uint b) pure private returns (uint c) {
         c = a - b;
     }
 
@@ -27,7 +27,7 @@ library SafeMath {
         c = a / b;
     }
 
-    function _add_post(uint a, uint b, uint c) private {
+    function _add_post(uint a, uint b, uint c) pure private {
         if (!(c>=a)) revert();
     }
 
@@ -37,7 +37,7 @@ library SafeMath {
         return (c);
     }
 
-    function _sub_pre(uint a, uint b) private {
+    function _sub_pre(uint a, uint b) pure private {
         if (!(b<=a)) revert();
     }
 

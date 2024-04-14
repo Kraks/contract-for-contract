@@ -5,7 +5,7 @@ library SafeMath {
     /// @dev {
     ///  	mul(a, b) returns (c) ensures { a == 0 || c / a == b }
     ///  }
-    function mul_original(uint256 a, uint256 b) private returns (uint256) {
+    function mul_original(uint256 a, uint256 b) pure private returns (uint256) {
         uint256 c = a * b;
         return c;
     }
@@ -19,7 +19,7 @@ library SafeMath {
     /// 	sub(a, b) returns (c)
     ///  requires { b <= a }
     ///  }
-    function sub_original(uint256 a, uint256 b) private returns (uint256) {
+    function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
         return a - b;
     }
 
@@ -27,12 +27,12 @@ library SafeMath {
     /// 	add(a, b) returns (c)
     /// 	  ensures { c >= a }
     ///  }
-    function add_original(uint256 a, uint256 b) private returns (uint256) {
+    function add_original(uint256 a, uint256 b) pure private returns (uint256) {
         uint256 c = a + b;
         return c;
     }
 
-    function _mul_post(uint256 a, uint256 b, uint256 c) private {
+    function _mul_post(uint256 a, uint256 b, uint256 c) pure private {
         if (!(a==0||c/a==b)) revert();
     }
 
@@ -42,7 +42,7 @@ library SafeMath {
         return (c);
     }
 
-    function _sub_pre(uint256 a, uint256 b) private {
+    function _sub_pre(uint256 a, uint256 b) pure private {
         if (!(b<=a)) revert();
     }
 
@@ -52,7 +52,7 @@ library SafeMath {
         return (c);
     }
 
-    function _add_post(uint256 a, uint256 b, uint256 c) private {
+    function _add_post(uint256 a, uint256 b, uint256 c) pure private {
         if (!(c>=a)) revert();
     }
 
@@ -110,7 +110,6 @@ contract ERC20 is ERC20Basic {
 }
 
 /// @title Standard ERC20 token
-///
 contract StandardToken is ERC20, BasicToken {
     mapping(address => mapping(address => uint256)) internal allowed;
 
@@ -146,7 +145,7 @@ contract StandardToken is ERC20, BasicToken {
     }
 
     function _transferFrom_pre(address _from, address _to, uint256 _value) private {
-        if (!(_to!=address(0)&&_value>0&&_value<=balances_from&&_value<=allowed[_from][msg.sender])) revert();
+        if (!(_to!=address(0)&&_value>0&&_value<=balances[_from]&&_value<=allowed[_from][msg.sender])) revert();
     }
 
     function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
@@ -222,7 +221,6 @@ contract Pausable is Ownable {
 }
 
 /// @title Pausable token
-///  *
 contract PausableToken is StandardToken, Pausable {
     function transfer(address _to, uint256 _value) public whenNotPaused() returns (bool) {
         return super.transfer(_to, _value);
@@ -238,7 +236,7 @@ contract PausableToken is StandardToken, Pausable {
 
     /// @dev {
     /// 	batchTransfer(_receivers, _value) returns (b)
-    /// 	 requires { _receivers.length > 0 && _receivers.length <= 20 && _value > 0 && balances[msg.sender] >= uint256(cnt) * _value }
+    /// 	 requires { _receivers.length > 0 && _receivers.length <= 20 && _value > 0 && balances[msg.sender] >= uint256(_receivers.length) * _value }
     ///  }
     function batchTransfer_original(address[] memory _receivers, uint256 _value) private whenNotPaused() returns (bool) {
         uint cnt = _receivers.length;
@@ -252,7 +250,7 @@ contract PausableToken is StandardToken, Pausable {
     }
 
     function _batchTransfer_pre(address[] memory _receivers, uint256 _value) private {
-        if (!(_receivers.length>0&&_receivers.length<=20&&_value>0&&balances[msg.sender]>=uint256(cnt)*_value)) revert();
+        if (!(_receivers.length>0&&_receivers.length<=20&&_value>0&&balances[msg.sender]>=uint256(_receivers.length)*_value)) revert();
     }
 
     function batchTransfer(address[] memory _receivers, uint256 _value) public returns (bool) {
@@ -263,7 +261,6 @@ contract PausableToken is StandardToken, Pausable {
 }
 
 /// @title Bec Token
-///
 contract BecToken is PausableToken {
     string public name = "BeautyChain";
     string public symbol = "BEC";

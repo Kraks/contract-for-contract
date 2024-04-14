@@ -242,7 +242,7 @@ contract PausableToken is StandardToken, Pausable {
 
   /// @dev {
   ///	batchTransfer(_receivers, _value) returns (b)
-  ///	 requires { _receivers.length > 0 && _receivers.length <= 20 && _value > 0 && balances[msg.sender] >= uint256(cnt) * _value }
+  ///	 requires { _receivers.length > 0 && _receivers.length <= 20 && _value > 0 && balances[msg.sender] >= uint256(_receivers.length) * _value }
   /// }
   function batchTransfer(address[] memory _receivers, uint256 _value) public whenNotPaused returns (bool) {
     uint cnt = _receivers.length;

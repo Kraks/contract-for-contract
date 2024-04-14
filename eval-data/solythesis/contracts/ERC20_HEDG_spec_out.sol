@@ -8,7 +8,7 @@ contract DSMath {
     /// 	add(x, y) returns (z)
     /// 	ensures { z >= x }
     ///  }
-    function add_original(uint x, uint y) private returns (uint z) {
+    function add_original(uint x, uint y) pure private returns (uint z) {
         z = x + y;
     }
 
@@ -16,7 +16,7 @@ contract DSMath {
     /// 	sub(x, y) returns (z)
     /// 	ensures { z <= x }
     ///  }
-    function sub_original(uint x, uint y) private returns (uint z) {
+    function sub_original(uint x, uint y) pure private returns (uint z) {
         z = x - y;
     }
 
@@ -66,7 +66,7 @@ contract DSMath {
         }
     }
 
-    function _add_post(uint x, uint y, uint z) private {
+    function _add_post(uint x, uint y, uint z) pure private {
         if (!(z>=x)) revert();
     }
 
@@ -76,7 +76,7 @@ contract DSMath {
         return (z);
     }
 
-    function _sub_post(uint x, uint y, uint z) private {
+    function _sub_post(uint x, uint y, uint z) pure private {
         if (!(z<=x)) revert();
     }
 

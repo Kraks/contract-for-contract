@@ -82,7 +82,7 @@ library SafeMath {
     /// @dev
     ///     {sub(a, b) returns (c)
     ///     requires {b <= a}}
-    function sub_original(uint256 a, uint256 b) private returns (uint256) {
+    function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
         uint256 c = a - b;
         return c;
     }
@@ -90,7 +90,7 @@ library SafeMath {
     /// @dev
     ///    { add(a, b) returns (c)
     ///     ensures {c >= a}}
-    function add_original(uint256 a, uint256 b) private returns (uint256) {
+    function add_original(uint256 a, uint256 b) pure private returns (uint256) {
         uint256 c = a + b;
         return c;
     }
@@ -102,7 +102,7 @@ library SafeMath {
         return a % b;
     }
 
-    function _sub_pre(uint256 a, uint256 b) private {
+    function _sub_pre(uint256 a, uint256 b) pure private {
         if (!(b<=a)) revert();
     }
 
@@ -112,7 +112,7 @@ library SafeMath {
         return (c);
     }
 
-    function _add_post(uint256 a, uint256 b, uint256 c) private {
+    function _add_post(uint256 a, uint256 b, uint256 c) pure private {
         if (!(c>=a)) revert();
     }
 
@@ -369,7 +369,7 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     function __addTokenTo_pre(address to, uint256 tokenId) private {
-        if (!(_tokenOwnertokenId==address(0))) revert();
+        if (!(_tokenOwner[tokenId]==address(0))) revert();
     }
 
     function _addTokenTo(address to, uint256 tokenId) internal {

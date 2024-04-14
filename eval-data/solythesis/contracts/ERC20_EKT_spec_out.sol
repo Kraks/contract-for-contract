@@ -18,7 +18,7 @@ contract SafeMath {
     /// 	safeSub(a, b) returns (c)
     /// 	  requires { b <= a }
     ///  }
-    function safeSub_original(uint256 a, uint256 b) private returns (uint256) {
+    function safeSub_original(uint256 a, uint256 b) pure private returns (uint256) {
         _assert(b <= a);
         return a - b;
     }
@@ -27,7 +27,7 @@ contract SafeMath {
     /// 	safeAdd(a, b) returns (c)
     /// 	ensures { c >= a && c >= b }
     ///  }
-    function safeAdd_original(uint256 a, uint256 b) private returns (uint256) {
+    function safeAdd_original(uint256 a, uint256 b) pure private returns (uint256) {
         uint256 c = a + b;
         _assert((c >= a) && (c >= b));
         return c;
@@ -39,7 +39,7 @@ contract SafeMath {
         }
     }
 
-    function _safeSub_pre(uint256 a, uint256 b) private {
+    function _safeSub_pre(uint256 a, uint256 b) pure private {
         if (!(b<=a)) revert();
     }
 
@@ -49,7 +49,7 @@ contract SafeMath {
         return (c);
     }
 
-    function _safeAdd_post(uint256 a, uint256 b, uint256 c) private {
+    function _safeAdd_post(uint256 a, uint256 b, uint256 c) pure private {
         if (!(c>=a&&c>=b)) revert();
     }
 
