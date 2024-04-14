@@ -7,6 +7,7 @@ import {
   ContractDefinition,
   ErrorDefinition,
   StructDefinition,
+  VariableDeclarationStatement,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -35,7 +36,6 @@ export class ConSolTransformer<T> {
     this.contract = contract;
     this.interfaces = ifs;
 
-    // TODO(DX): use revert(); instead. customized error is not supported in some versions
     this.preCondError = factory.makeError('preViolation', 'funcName', 'string');
     this.postCondError = factory.makeError('postViolation', 'funcName', 'string');
     this.preAddrError = factory.makeError('preViolationAddr', 'specId', 'uint256');
@@ -85,25 +85,41 @@ export class ConSolTransformer<T> {
 
     resetStructMap();
     resetCSVarId();
+
     contract.walkChildren((astNode) => {
       // TODO: handle mapping and array types
       if (astNode instanceof StructDefinition) {
         console.log(`Found struct ${astNode.canonicalName} with ${astNode.vMembers.length} members`);
         globalThis.structMap.set(astNode.canonicalName, astNode);
       }
+
+      if (astNode instanceof VariableDeclaration
+        && astNode.name === 'curve'
+        && contract.name === 'ExchangeBetweenPools') {
+        // Note: for missing-slippage-check-UnknownVictim-111K, there seems a
+        // bug in solc-typed-ast that does not parse the documentation correctly.
+        // So we patch the spec to the variable declaration directly.
+        console.log(astNode.name)
+        astNode.documentation = `@dev {
+          PriceInterface(curve).exchange_underlying{value: v, gas: g}(x, y, camount, n)
+          ensures { _exchange_underlying_post_condition(camount) } }
+        `
+      }
     });
 
     let hasConSolSpec = false;
     contract.walkChildren((astNode: ASTNode) => {
-      const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation;
-      if (!astNodeDoc) return;
+      const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation | string;
+      //if (!astNodeDoc) return;
 
-      let specStr;
-      if (globalThis.INCLUDE_DEV_SPEC && typeof astNodeDoc === 'string') {
+      let specStr : string;
+      if (typeof astNodeDoc === 'string') {
         specStr = astNodeDoc;
-      } else {
+      } else if (astNodeDoc instanceof StructuredDocumentation){
         // @custom:consol
         specStr = astNodeDoc.text;
+      } else {
+        return;
       }
 
       if (!isConSolSpec(specStr)) return;
@@ -122,6 +138,7 @@ export class ConSolTransformer<T> {
         console.assert(false);
       }
     });
+
     if (hasConSolSpec) {
       if (globalThis.customError) {
         contract.appendChild(this.preCondError);

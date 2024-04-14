@@ -133,6 +133,8 @@ export class CheckFunFactory<T> {
     if (this.spec.postCond === undefined) return undefined;
     const postFunName = postCheckFunName(this.tgtName);
     const rets = [...this.guardedParamNames, ...this.guardedRetParamNames];
+    //console.log(rets);
+    //console.log(this.paramVarDecs.map((v) => v.name))
     const retVarDecs = this.factory.makeVarDecs(rets, [...this.paramVarDecs, ...this.retVarDecs]);
     const allParams = this.factory.makeParameterList([...retVarDecs]);
     const postCondFunc = this.makeCheckFun(postFunName, this.spec.postCond, allParams, errorDef, errorParamVal);

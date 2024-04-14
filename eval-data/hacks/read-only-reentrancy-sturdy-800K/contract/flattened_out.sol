@@ -657,7 +657,7 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
 
     /// @custom:consol
     ///  {_get() returns (ret)
-    ///    ensures {(ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) && 
+    ///    ensures {(ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) &&
     ///        (ret * 105 / 100 > BALWSTETHWETH.getLatest(1))}}
     function _get_original() private returns (uint256) {
         (, int256 stETHPrice, , uint256 updatedAt, ) = dispatch_IChainlinkAggregator_latestRoundData(STETH, 0, gasleft());

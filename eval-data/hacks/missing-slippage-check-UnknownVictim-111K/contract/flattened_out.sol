@@ -165,7 +165,11 @@ contract ExchangeBetweenPools is Ownable {
     address public from_bank;
     address public to_bank;
     uint256 public minimum_amount;
-    PriceInterface public curve = PriceInterface(CurveInterface(0xbBC81d23Ea2c3ec7e56D39296F0cbB648873a5d3).curve());
+    /// @dev {
+    ///           PriceInterface(curve).exchange_underlying{value: v, gas: g}(x, y, camount, n)
+    ///           ensures { _exchange_underlying_post_condition(camount) } }
+    ///
+    uint256 public curve = _wrap_curve(CurveInterface(0xbBC81d23Ea2c3ec7e56D39296F0cbB648873a5d3).curve());
 
     constructor(address _from_bank, address _to_bank, uint256 _min_amount) public {
         note = "Only for USDC to USDT";
@@ -193,10 +197,26 @@ contract ExchangeBetweenPools is Ownable {
         ERC20TokenBankInterface(from_bank).issue(address(this), amount);
         uint256 camount = usdc.balanceOf(address(this));
         usdc.safeApprove(address(curve), camount);
-        curve.exchange_underlying(1, 2, camount, 0);
+        dispatch_PriceInterface_exchange_underlying(curve, 0, gasleft(), 1, 2, camount, 0);
         uint256 namount = usdt.balanceOf(address(this));
         usdt.safeTransfer(to_bank, namount);
         return true;
+    }
+
+    function _wrap_curve(address addr) private pure returns (uint256) {
+        uint256 _addr = uint256(uint160(addr));
+        _addr = _addr | (uint96(1 << 20) << 160);
+        return _addr;
+    }
+
+    function _PriceInterface_exchange_underlying_20_post(address curve, uint256 v, uint256 g, int128 x, int128 y, uint256 camount, uint256 n) private {
+        if (!(_exchange_underlying_post_condition(camount))) revert();
+    }
+
+    function dispatch_PriceInterface_exchange_underlying(uint256 addr, uint256 value, uint256 gas, int128 i, int128 j, uint256 dx, uint256 min_dy) private {
+        uint96 specId = uint96(addr >> 160);
+        PriceInterface(payable(address(uint160(addr)))).exchange_underlying{value: value, gas: gas}(i, j, dx, min_dy);
+        if ((specId & uint96(1 << 20)) != 0) _PriceInterface_exchange_underlying_20_post(payable(address(uint160(addr))), value, gas, i, j, dx, min_dy);
     }
 
     function _doExchange_pre(uint256 amount) private {

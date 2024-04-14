@@ -169,7 +169,6 @@ contract PriceInterface{
   function exchange(int128 i, int128 j, uint256 dx, uint256 min_dy) public;
 }
 
-
 contract ExchangeBetweenPools is Ownable{
 
   using SafeERC20 for IERC20;
@@ -183,15 +182,11 @@ contract ExchangeBetweenPools is Ownable{
 
   uint256 public minimum_amount;
 
-  /// @dev { 
+  /// @dev {
   /// PriceInterface(curve).exchange_underlying{value: v, gas: g}(x, y, camount, n) returns ()
   ///   ensures { _exchange_underlying_post_condition(camount) }
   /// }
   PriceInterface public curve = PriceInterface(CurveInterface(0xbBC81d23Ea2c3ec7e56D39296F0cbB648873a5d3).curve());
-
-
-
-
 
   constructor(address _from_bank, address _to_bank, uint256 _min_amount) public{
     note = "Only for USDC to USDT";
