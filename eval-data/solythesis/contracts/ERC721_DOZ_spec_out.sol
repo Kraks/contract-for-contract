@@ -83,7 +83,7 @@ library SafeMath {
     /// @dev
     ///   {mul(a, b) returns (c)
     ///   ensures {c / a == b}}
-    function mul_original(uint256 a, uint256 b) private returns (uint256) {
+    function mul_original(uint256 a, uint256 b) pure private returns (uint256) {
         if (a == 0) {
             return 0;
         }
@@ -94,7 +94,7 @@ library SafeMath {
     /// @dev
     ///   {div(a, b) returns (c)
     ///   requires{ b > 0}}
-    function div_original(uint256 a, uint256 b) private returns (uint256) {
+    function div_original(uint256 a, uint256 b) pure private returns (uint256) {
         uint256 c = a / b;
         return c;
     }
@@ -102,7 +102,7 @@ library SafeMath {
     /// @dev
     ///   {sub(a, b) returns (c)
     ///   requires {b <= a}}
-    function sub_original(uint256 a, uint256 b) private returns (uint256) {
+    function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
         uint256 c = a - b;
         return c;
     }
@@ -110,7 +110,7 @@ library SafeMath {
     /// @dev
     ///   {add(a, b) returns (c)
     ///   ensures {c >= a}}
-    function add_original(uint256 a, uint256 b) private returns (uint256) {
+    function add_original(uint256 a, uint256 b) pure private returns (uint256) {
         uint256 c = a + b;
         return c;
     }
@@ -118,11 +118,11 @@ library SafeMath {
     /// @dev
     ///   {mod(a, b) returns (c)
     ///   requires {b != 0}}
-    function mod_original(uint256 a, uint256 b) private returns (uint256) {
+    function mod_original(uint256 a, uint256 b) pure private returns (uint256) {
         return a % b;
     }
 
-    function _mul_post(uint256 a, uint256 b, uint256 c) private {
+    function _mul_post(uint256 a, uint256 b, uint256 c) pure private {
         if (!(c/a==b)) revert();
     }
 
@@ -132,7 +132,7 @@ library SafeMath {
         return (c);
     }
 
-    function _div_pre(uint256 a, uint256 b) private {
+    function _div_pre(uint256 a, uint256 b) pure private {
         if (!(b>0)) revert();
     }
 
@@ -142,7 +142,7 @@ library SafeMath {
         return (c);
     }
 
-    function _sub_pre(uint256 a, uint256 b) private {
+    function _sub_pre(uint256 a, uint256 b) pure private {
         if (!(b<=a)) revert();
     }
 
@@ -152,7 +152,7 @@ library SafeMath {
         return (c);
     }
 
-    function _add_post(uint256 a, uint256 b, uint256 c) private {
+    function _add_post(uint256 a, uint256 b, uint256 c) pure private {
         if (!(c>=a)) revert();
     }
 
@@ -162,7 +162,7 @@ library SafeMath {
         return (c);
     }
 
-    function _mod_pre(uint256 a, uint256 b) private {
+    function _mod_pre(uint256 a, uint256 b) pure private {
         if (!(b!=0)) revert();
     }
 
@@ -242,14 +242,14 @@ contract ERC721 is ERC165, IERC721 {
     /// @dev
     ///   {balanceOf(owner) returns (c)
     ///   requires {owner != address(0)}}
-    function balanceOf_original(address owner) private returns (uint256) {
+    function balanceOf_original(address owner) view private returns (uint256) {
         return _ownedTokensCount[owner];
     }
 
     /// @dev
     ///   {ownerOf(tokenId) returns (owner)
     ///   ensures {owner != address(0)}}
-    function ownerOf_original(uint256 tokenId) private returns (address) {
+    function ownerOf_original(uint256 tokenId) view private returns (address) {
         address owner = _tokenOwner[tokenId];
         return owner;
     }
@@ -266,7 +266,7 @@ contract ERC721 is ERC165, IERC721 {
     /// @dev
     ///   {getApproved(tokenId) returns (approved)
     ///   requires {_exists(tokenId)}}
-    function getApproved_original(uint256 tokenId) private returns (address) {
+    function getApproved_original(uint256 tokenId) view private returns (address) {
         return _tokenApprovals[tokenId];
     }
 
@@ -399,7 +399,7 @@ contract ERC721 is ERC165, IERC721 {
         }
     }
 
-    function _balanceOf_pre(address owner) private {
+    function _balanceOf_pre(address owner) view private {
         if (!(owner!=address(0))) revert();
     }
 
@@ -409,7 +409,7 @@ contract ERC721 is ERC165, IERC721 {
         return (c);
     }
 
-    function _ownerOf_post(uint256 tokenId, address owner) private {
+    function _ownerOf_post(uint256 tokenId, address owner) view private {
         if (!(owner!=address(0))) revert();
     }
 
@@ -428,7 +428,7 @@ contract ERC721 is ERC165, IERC721 {
         approve_original(to, tokenId);
     }
 
-    function _getApproved_pre(uint256 tokenId) private {
+    function _getApproved_pre(uint256 tokenId) view private {
         if (!(_exists(tokenId))) revert();
     }
 
@@ -510,7 +510,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
     /// @dev
     ///   {tokenOfOwnerByIndex(owner, index) returns (tokenId)
     ///   requires {index < balanceOf(owner)}}
-    function tokenOfOwnerByIndex_original(address owner, uint256 index) private returns (uint256) {
+    function tokenOfOwnerByIndex_original(address owner, uint256 index) view private returns (uint256) {
         return _ownedTokens[owner][index];
     }
 
@@ -523,7 +523,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
     /// @dev
     ///   {tokenByIndex(index) returns (x)
     ///   requires {index < totalSupply()}}
-    function tokenByIndex_original(uint256 index) private returns (uint256) {
+    function tokenByIndex_original(uint256 index) view private returns (uint256) {
         return _allTokens[index];
     }
 
@@ -612,7 +612,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
         _allTokensIndex[tokenId] = 0;
     }
 
-    function _tokenOfOwnerByIndex_pre(address owner, uint256 index) private {
+    function _tokenOfOwnerByIndex_pre(address owner, uint256 index) view private {
         if (!(index<balanceOf(owner))) revert();
     }
 
@@ -622,7 +622,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
         return (tokenId);
     }
 
-    function _tokenByIndex_pre(uint256 index) private {
+    function _tokenByIndex_pre(uint256 index) view private {
         if (!(index<totalSupply())) revert();
     }
 
@@ -671,7 +671,7 @@ contract ERC721Metadata is ERC165, ERC721, IERC721Metadata {
     /// @dev
     ///   {tokenURI(tokenId) returns (uri)
     ///   requires {_exists(tokenId)}}
-    function tokenURI_original(uint256 tokenId) private returns (string memory) {
+    function tokenURI_original(uint256 tokenId) view private returns (string memory) {
         return _tokenURIs[tokenId];
     }
 
@@ -694,13 +694,13 @@ contract ERC721Metadata is ERC165, ERC721, IERC721Metadata {
         }
     }
 
-    function _tokenURI_pre(uint256 tokenId) private {
+    function _tokenURI_pre(uint256 tokenId) view private {
         if (!(_exists(tokenId))) revert();
     }
 
     function tokenURI(uint256 tokenId) external view returns (string memory) {
         _tokenURI_pre(tokenId);
-        string uri = tokenURI_original(tokenId);
+        string memory uri = tokenURI_original(tokenId);
         return (uri);
     }
 
@@ -746,11 +746,11 @@ library Roles {
     /// @dev
     ///   {has(role, account) returns (bool)
     ///   requires {account != address(0)}}
-    function has_original(Role storage role, address account) private returns (bool) {
+    function has_original(Role storage role, address account) view private returns (bool) {
         return role.bearer[account];
     }
 
-    function _add_pre(Role storage role, address account) private {
+    function _add_pre(Role storage role, address account) view private {
         if (!(account!=address(0)&&!has(role,account))) revert();
     }
 
@@ -768,14 +768,14 @@ library Roles {
         remove_original(role, account);
     }
 
-    function _has_pre(Role storage role, address account) private {
+    function _has_pre(Role storage role, address account) view private {
         if (!(account!=address(0))) revert();
     }
 
-    function has(Role storage role, address account) internal view returns (bool) {
+    function has(Role storage role, address account) internal view returns (bool b) {
         _has_pre(role, account);
-        bool bool = has_original(role, account);
-        return (bool);
+        bool b = has_original(role, account);
+        return (b);
     }
 }
 

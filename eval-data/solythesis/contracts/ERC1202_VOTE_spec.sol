@@ -22,7 +22,7 @@ contract AdvancedTokenVote1202 {
 
   /// @dev {
   /// createIssue(issueId, _tokenAddr, options_, qualifiedVoters_, issueDesc_)
-  /// 	requires { options[issueId].length >= 2 && options[issueId].length == 0 }
+  /// 	requires { options_.length >= 2 && options[issueId].length == 0 }
   /// }
   function createIssue(uint issueId, address _tokenAddr, uint[] memory options_, address[] memory qualifiedVoters_, string memory issueDesc_) public {
     // Should not replace existing issues.

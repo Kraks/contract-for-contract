@@ -23,7 +23,7 @@ contract AdvancedTokenVote1202 {
 
     /// @dev {
     ///  createIssue(issueId, _tokenAddr, options_, qualifiedVoters_, issueDesc_)
-    ///  	requires { options.length >= 2 && options[issudId].length == 0 }
+    ///  	requires { options_.length >= 2 && options[issudId].length == 0 }
     ///  }
     function createIssue_original(uint issueId, address _tokenAddr, uint[] memory options_, address[] memory qualifiedVoters_, string memory issueDesc_) private {
         options[issueId] = options_;
@@ -94,7 +94,7 @@ contract AdvancedTokenVote1202 {
     }
 
     function _createIssue_pre(uint issueId, address _tokenAddr, uint[] memory options_, address[] memory qualifiedVoters_, string memory issueDesc_) private {
-        if (!(options[issueId].length>=2&&options[issueId].length==0)) revert();
+        if (!(options_.length>=2&&options[issueId].length==0)) revert();
     }
 
     function createIssue(uint issueId, address _tokenAddr, uint[] memory options_, address[] memory qualifiedVoters_, string memory issueDesc_) public {
