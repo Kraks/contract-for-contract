@@ -58,6 +58,7 @@ export class CheckFunFactory<T> {
     condExpr: T,
     params: ParameterList,
     errorDef: ErrorDefinition,
+    mutability: FunctionStateMutability,
     errorParamVal: string | number,
   ): FunctionDefinition {
     const condNode = this.factory.makePhantomExpression('bool', (('(' + condExpr) as string) + ')');
@@ -101,7 +102,7 @@ export class CheckFunFactory<T> {
       funName,
       false, // virtual
       FunctionVisibility.Private,
-      FunctionStateMutability.NonPayable,
+      mutability,
       false, // funKind == FunctionKind.Constructor,
       params,
       this.factory.makeParameterList([]), // returnParameters
@@ -120,16 +121,16 @@ export class CheckFunFactory<T> {
   }
   */
 
-  preCondCheckFun(errorDef: ErrorDefinition, errorParamVal: string | number): FunctionDefinition | undefined {
+  preCondCheckFun(errorDef: ErrorDefinition, mutability:FunctionStateMutability, errorParamVal: string | number): FunctionDefinition | undefined {
     if (this.spec.preCond === undefined) return undefined;
     const preFunName = preCheckFunName(this.tgtName);
     const varDecs = this.factory.makeVarDecs(this.guardedParamNames, this.paramVarDecs);
     const allParams = this.factory.makeParameterList([...varDecs]);
-    const preFunDef = this.makeCheckFun(preFunName, this.spec.preCond, allParams, errorDef, errorParamVal);
+    const preFunDef = this.makeCheckFun(preFunName, this.spec.preCond, allParams, errorDef, mutability, errorParamVal);
     return preFunDef;
   }
 
-  postCondCheckFun(errorDef: ErrorDefinition, errorParamVal: string | number): FunctionDefinition | undefined {
+  postCondCheckFun(errorDef: ErrorDefinition, mutability:FunctionStateMutability, errorParamVal: string | number): FunctionDefinition | undefined {
     if (this.spec.postCond === undefined) return undefined;
     const postFunName = postCheckFunName(this.tgtName);
     const rets = [...this.guardedParamNames, ...this.guardedRetParamNames];
@@ -137,7 +138,7 @@ export class CheckFunFactory<T> {
     //console.log(this.paramVarDecs.map((v) => v.name))
     const retVarDecs = this.factory.makeVarDecs(rets, [...this.paramVarDecs, ...this.retVarDecs]);
     const allParams = this.factory.makeParameterList([...retVarDecs]);
-    const postCondFunc = this.makeCheckFun(postFunName, this.spec.postCond, allParams, errorDef, errorParamVal);
+    const postCondFunc = this.makeCheckFun(postFunName, this.spec.postCond, allParams, errorDef, mutability, errorParamVal);
     return postCondFunc;
   }
 }

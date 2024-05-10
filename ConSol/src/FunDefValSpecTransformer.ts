@@ -382,9 +382,9 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     const addrTrans = this.spec.preFunSpec.map((s) => this.addrTransformers(s));
     addrTrans.forEach((tr) => tr.apply());
     */
-    const preFun = this.cfFactory.preCondCheckFun(this.preCondError, this.tgtName);
+    const preFun = this.cfFactory.preCondCheckFun(this.preCondError, this.funDef.stateMutability, this.tgtName);
     if (preFun) this.funDef.vScope.appendChild(preFun);
-    const postFun = this.cfFactory.postCondCheckFun(this.postCondError, this.tgtName);
+    const postFun = this.cfFactory.postCondCheckFun(this.postCondError, this.funDef.stateMutability, this.tgtName);
     if (postFun) this.funDef.vScope.appendChild(postFun);
 
     /**
@@ -490,9 +490,9 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
         const allFuncParams = addrParam.concat(valGasParams.concat(tgtFuncParams));
         const tgtFuncRetParams = tgtFunc.vReturnParameters.vParameters;
         const factory = new CheckFunFactory(s, allFuncParams, tgtFuncRetParams, this.factory, tgtVarNameInSpec);
-        const addrCallPreFun = factory.preCondCheckFun(this.preAddrError, s.id);
+        const addrCallPreFun = factory.preCondCheckFun(this.preAddrError,  FunctionStateMutability.NonPayable, s.id);
         if (addrCallPreFun) this.funDef.vScope.appendChild(addrCallPreFun);
-        const addrCallPostFun = factory.postCondCheckFun(this.postAddrError, s.id);
+        const addrCallPostFun = factory.postCondCheckFun(this.postAddrError, FunctionStateMutability.NonPayable, s.id);
         if (addrCallPostFun) this.funDef.vScope.appendChild(addrCallPostFun);
 
         // Generate dispatch_Iface_f
@@ -523,7 +523,7 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
         this.funDef.vScope.appendChild(wrapper);
         this.funDef.name = uncheckedFunName(this.tgtName);
         this.funDef.visibility = FunctionVisibility.Private;
-        this.funDef.stateMutability = FunctionStateMutability.NonPayable;
+        this.funDef.stateMutability = this.funDef.stateMutability;
         if (this.funDef.isConstructor) {
           // If the spec is attached on a constructor, we generate a new constructor,
           // and the original constructor becomes an ordinary function.

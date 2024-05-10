@@ -1,116 +1,5 @@
 pragma solidity ^0.5.0;
 
-/// @title ERC20Basic
-/// dev Simpler version of ERC20 interface
-/// See https://github.com/ethereum/EIPs/issues/179
-contract ERC20Basic {
-    event Transfer(address indexed from, address indexed to, uint256 value);
-
-    function totalSupply() public view returns (uint256);
-
-    function balanceOf(address who) public view returns (uint256);
-
-    function transfer(address to, uint256 value) public returns (bool);
-}
-
-/// @title ERC20 interface
-/// dev see https://github.com/ethereum/EIPs/issues/20
-contract ERC20 is ERC20Basic {
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-
-    function allowance(address owner, address spender) public view returns (uint256);
-
-    function transferFrom(address from, address to, uint256 value) public returns (bool);
-
-    function approve(address spender, uint256 value) public returns (bool);
-}
-
-/// @title ERC165
-/// dev https://github.com/ethereum/EIPs/blob/master/EIPS/eip-165.md
-interface ERC165 {
-    /// @notice Query if a contract implements an interface
-    /// @param _interfaceId The interface identifier, as specified in ERC-165
-    /// dev Interface identification is specified in ERC-165. This function
-    /// uses less than 30,000 gas.
-    function supportsInterface(bytes4 _interfaceId) external view returns (bool);
-}
-
-/// @title ERC721 Non-Fungible Token Standard basic interface
-/// dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
-contract ERC721Basic is ERC165 {
-    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
-
-    event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
-
-    event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
-
-    uint256[] internal allTokens;
-
-    function balanceOf(address _owner) public view returns (uint256 _balance);
-
-    function ownerOf(uint256 _tokenId) public view returns (address _owner);
-
-    function exists(uint256 _tokenId) public view returns (bool _exists);
-
-    function approve(address _to, uint256 _tokenId) public;
-
-    function getApproved(uint256 _tokenId) public view returns (address _operator);
-
-    function setApprovalForAll(address _operator, bool _approved) public;
-
-    function isApprovedForAll(address _owner, address _operator) public view returns (bool);
-
-    function transferFrom(address _from, address _to, uint256 _tokenId) public;
-
-    function safeTransferFrom(address _from, address _to, uint256 _tokenId) public;
-
-    function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes memory _data) public;
-}
-
-/// @title ERC-721 Non-Fungible Token Standard, optional enumeration extension
-/// dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
-contract ERC721Enumerable is ERC721Basic {
-    function totalSupply() public view returns (uint256);
-
-    function tokenOfOwnerByIndex(address _owner, uint256 _index) public view returns (uint256 _tokenId);
-
-    function tokenByIndex(uint256 _index) public view returns (uint256);
-}
-
-/// @title ERC-721 Non-Fungible Token Standard, optional metadata extension
-/// dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
-contract ERC721Metadata is ERC721Basic {
-    function name() external view returns (string memory _name);
-
-    function symbol() external view returns (string memory _symbol);
-
-    function tokenURI(uint256 _tokenId) public view returns (string memory);
-}
-
-/// @title ERC-721 Non-Fungible Token Standard, full implementation interface
-/// dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
-contract ERC721 is ERC721Basic, ERC721Enumerable, ERC721Metadata {}
-
-/// @title ERC721 token receiver interface
-/// dev Interface for any contract that wants to support safeTransfers
-/// from ERC721 asset contracts.
-contract ERC721Receiver {
-    bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
-
-    /// @notice Handle the receipt of an NFT
-    /// dev The ERC721 smart contract calls this function on the recipient
-    /// after a `safetransfer`. This function MAY throw to revert and reject the
-    /// transfer. Return of other than the magic value MUST result in the
-    /// transaction being reverted.
-    /// Note: the contract address is always the message sender.
-    /// @param _operator The address which called `safeTransferFrom` function
-    /// @param _from The address which previously owned the token
-    /// @param _tokenId The NFT identifier which is being transfered
-    /// @param _data Additional data with no specified format
-    /// @return `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
-    function onERC721Received(address _operator, address _from, uint256 _tokenId, bytes memory _data) public returns (bytes4);
-}
-
 /// @title SafeMath
 /// dev Math operations with safety checks that throw on error
 library SafeMath {
@@ -130,7 +19,7 @@ library SafeMath {
     }
 
     /// @dev
-    ///    { sub(a, b) returns (c)
+    ///     {sub(a, b) returns (c)
     ///     requires {b <= a}}
     function sub_original(uint256 a, uint256 b) private pure returns (uint256) {
         return a - b;
@@ -179,6 +68,16 @@ library AddressUtils {
     }
 }
 
+/// @title ERC165
+/// dev https://github.com/ethereum/EIPs/blob/master/EIPS/eip-165.md
+interface ERC165 {
+    /// @notice Query if a contract implements an interface
+    /// @param _interfaceId The interface identifier, as specified in ERC-165
+    /// dev Interface identification is specified in ERC-165. This function
+    /// uses less than 30,000 gas.
+    function supportsInterface(bytes4 _interfaceId) external view returns (bool);
+}
+
 /// @title SupportsInterfaceWithLookup
 /// @author Matt Condon (@shrugs)
 /// dev Implements ERC165 using a lookup table.
@@ -204,6 +103,56 @@ contract SupportsInterfaceWithLookup is ERC165 {
     }
 }
 
+/// @title ERC721 token receiver interface
+/// dev Interface for any contract that wants to support safeTransfers
+/// from ERC721 asset contracts.
+contract ERC721Receiver {
+    bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
+
+    /// @notice Handle the receipt of an NFT
+    /// dev The ERC721 smart contract calls this function on the recipient
+    /// after a `safetransfer`. This function MAY throw to revert and reject the
+    /// transfer. Return of other than the magic value MUST result in the
+    /// transaction being reverted.
+    /// Note: the contract address is always the message sender.
+    /// @param _operator The address which called `safeTransferFrom` function
+    /// @param _from The address which previously owned the token
+    /// @param _tokenId The NFT identifier which is being transfered
+    /// @param _data Additional data with no specified format
+    /// @return `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
+    function onERC721Received(address _operator, address _from, uint256 _tokenId, bytes memory _data) public returns (bytes4);
+}
+
+/// @title ERC721 Non-Fungible Token Standard basic interface
+/// dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
+contract ERC721Basic is ERC165 {
+    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
+
+    event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
+
+    event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
+
+    function balanceOf(address _owner) public view returns (uint256 _balance);
+
+    function ownerOf(uint256 _tokenId) public view returns (address _owner);
+
+    function exists(uint256 _tokenId) public view returns (bool _exists);
+
+    function approve(address _to, uint256 _tokenId) public;
+
+    function getApproved(uint256 _tokenId) public view returns (address _operator);
+
+    function setApprovalForAll(address _operator, bool _approved) public;
+
+    function isApprovedForAll(address _owner, address _operator) public view returns (bool);
+
+    function transferFrom(address _from, address _to, uint256 _tokenId) public;
+
+    function safeTransferFrom(address _from, address _to, uint256 _tokenId) public;
+
+    function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes memory _data) public;
+}
+
 /// @title ERC721 Non-Fungible Token Standard basic implementation
 /// dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
 contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
@@ -216,6 +165,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
     mapping(uint256 => address) internal tokenOwner;
     mapping(uint256 => address) internal tokenApprovals;
     mapping(address => uint256) internal ownedTokensCount;
+    uint256[] internal allTokens;
     mapping(address => mapping(address => bool)) internal operatorApprovals;
 
     /// dev Guarantees msg.sender is owner of the given token
@@ -350,7 +300,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
     }
 
     /// @dev
-    ///     {_mint(_to, _tokenId)
+    ///    { _mint(_to, _tokenId)
     ///     requires {_to != address(0)}}
     function _mint_original(address _to, uint256 _tokenId) private {
         addTokenTo(_to, _tokenId);
@@ -367,7 +317,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
     }
 
     /// @dev
-    ///     {clearApproval(_owner, _tokenId)
+    ///    { clearApproval(_owner, _tokenId)
     ///     requires {ownerOf(_tokenId) == _owner}}
     function clearApproval_original(address _owner, uint256 _tokenId) private {
         if (tokenApprovals[_tokenId] != address(0)) {
@@ -377,7 +327,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
 
     /// @dev
     ///     {addTokenTo(_to, _tokenId)
-    ///     requires {tokenOwner[_tokenId] == address(0)]} }
+    ///     requires {tokenOwner[_tokenId] == address(0)}}
     function addTokenTo_original(address _to, uint256 _tokenId) private {
         tokenOwner[_tokenId] = _to;
         ownedTokensCount[_to] = ownedTokensCount[_to].add(1);
@@ -385,7 +335,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
 
     /// @dev
     ///     {removeTokenFrom(_from, _tokenId)
-    ///     requires {ownerOf(_tokenId) == _from}}
+    ///     requires { ownerOf(_tokenId) == _from }}
     function removeTokenFrom_original(address _from, uint256 _tokenId) private {
         ownedTokensCount[_from] = ownedTokensCount[_from].sub(1);
         tokenOwner[_tokenId] = address(0);
@@ -434,7 +384,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
     }
 
     function _addTokenTo_pre(address _to, uint256 _tokenId) private {
-        if (!(tokenOwner[_tokenId]==address(0))) revert();
+        if (!(tokenOwner_tokenId==address(0))) revert();
     }
 
     function addTokenTo(address _to, uint256 _tokenId) internal {
@@ -451,6 +401,30 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
         removeTokenFrom_original(_from, _tokenId);
     }
 }
+
+/// @title ERC-721 Non-Fungible Token Standard, optional enumeration extension
+/// dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
+contract ERC721Enumerable is ERC721Basic {
+    function totalSupply() public view returns (uint256);
+
+    function tokenOfOwnerByIndex(address _owner, uint256 _index) public view returns (uint256 _tokenId);
+
+    function tokenByIndex(uint256 _index) public view returns (uint256);
+}
+
+/// @title ERC-721 Non-Fungible Token Standard, optional metadata extension
+/// dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
+contract ERC721Metadata is ERC721Basic {
+    function name() external view returns (string memory _name);
+
+    function symbol() external view returns (string memory _symbol);
+
+    function tokenURI(uint256 _tokenId) public view returns (string memory);
+}
+
+/// @title ERC-721 Non-Fungible Token Standard, full implementation interface
+/// dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
+contract ERC721 is ERC721Basic, ERC721Enumerable, ERC721Metadata {}
 
 /// @title Full ERC721 Token
 /// This implementation includes all the required and some optional functionality of the ERC721 standard
@@ -628,212 +602,359 @@ contract Ownable {
     }
 }
 
-/// @title Ownable
-/// dev The Ownable contract has an admin address, and provides basic authorization control
-/// functions, this simplifies the implementation of "user permissions".
-contract Admin {
-    event AdminshipRenounced(address indexed previousAdmin);
-
-    event AdminshipTransferred(address indexed previousAdmin, address indexed newAdmin);
-
-    mapping(address => bool) public admins;
-
-    /// dev Throws if called by any account other than the admin.
-    modifier onlyAdmin() {
-        require(admins[msg.sender]);
-        _;
+/// @title Roles
+/// @author Francisco Giordano (@frangio)
+/// dev Library for managing addresses assigned to a Role.
+/// See RBAC.sol for example usage.
+library Roles {
+    struct Role {
+        mapping(address => bool) bearer;
     }
 
-    /// dev The Ownable constructor sets the original `admin` of the contract to the sender
-    /// account.
-    constructor() public {
-        admins[msg.sender] = true;
+    /// dev give an address access to this role
+    function add(Role storage role, address addr) internal {
+        role.bearer[addr] = true;
     }
 
-    function isAdmin(address _admin) public view returns (bool) {
-        return admins[_admin];
+    /// dev remove an address' access to this role
+    function remove(Role storage role, address addr) internal {
+        role.bearer[addr] = false;
     }
 
-    /// dev Allows the current admin to relinquish control of the contract.
-    /// @notice Renouncing to adminship will leave the contract without an admin.
-    /// It will not be possible to call the functions with the `onlyAdmin`
-    /// modifier anymore.
-    function renounceAdminship(address _previousAdmin) public onlyAdmin() {
-        emit AdminshipRenounced(_previousAdmin);
-        admins[_previousAdmin] = false;
+    /// dev check if an address has this role
+    /// // reverts
+    function check(Role storage role, address addr) internal view {
+        require(has(role, addr));
     }
 
-    /// dev Allows the current admin to transfer control of the contract to a newAdmin.
-    /// @param _newAdmin The address to transfer adminship to.
-    function transferAdminship(address _newAdmin) public onlyAdmin() {
-        _transferAdminship(_newAdmin);
-    }
-
-    /// dev Transfers control of the contract to a newAdmin.
-    /// @param _newAdmin The address to transfer adminship to.
-    function _transferAdminship(address _newAdmin) internal {
-        require(_newAdmin != address(0));
-        emit AdminshipTransferred(msg.sender, _newAdmin);
-        admins[_newAdmin] = true;
+    /// dev check if an address has this role
+    /// @return bool
+    function has(Role storage role, address addr) internal view returns (bool) {
+        return role.bearer[addr];
     }
 }
 
-/// Digital Asset Registry for the Non Fungible Token Clover
-/// with upgradeable contract reference for returning metadata.
-contract Clovers is ERC721Token, Admin, Ownable {
-    struct Clover {
-        bool keep;
-        uint256 symmetries;
-        bytes28[2] cloverMoves;
-        uint256 blockMinted;
-        uint256 rewards;
-    }
+/// @title RBAC (Role-Based Access Control)
+/// @author Matt Condon (@Shrugs)
+/// dev Stores and provides setters and getters for roles and addresses.
+/// Supports unlimited numbers of roles and addresses.
+/// See //contracts/mocks/RBACMock.sol for an example of usage.
+/// This RBAC method uses strings to key roles. It may be beneficial
+/// for you to write your own implementation of this interface using Enums or similar.
+/// It's also recommended that you define constants in the contract, like ROLE_ADMIN below,
+/// to avoid typos.
+contract RBAC {
+    using Roles for Roles.Role;
 
-    address public cloversMetadata;
-    uint256 public totalSymmetries;
-    uint256[5] internal symmetries;
-    address public cloversController;
-    address public clubTokenController;
-    mapping(uint256 => Clover) public clovers;
+    event RoleAdded(address indexed operator, string role);
 
-    modifier onlyOwnerOrController() {
-        require(((msg.sender == cloversController) || (owner == msg.sender)) || admins[msg.sender]);
+    event RoleRemoved(address indexed operator, string role);
+
+    mapping(string => Roles.Role) private roles;
+
+    /// dev modifier to scope access to a single role (uses msg.sender as addr)
+    /// @param _role the name of the role
+    /// // reverts
+    modifier onlyRole(string memory _role) {
+        checkRole(msg.sender, _role);
         _;
     }
 
-    /// dev Checks msg.sender can transfer a token, by being owner, approved, operator or cloversController
-    /// @param _tokenId uint256 ID of the token to validate
-    modifier canTransfer(uint256 _tokenId) {
-        require(isApprovedOrOwner(msg.sender, _tokenId) || (msg.sender == cloversController));
+    /// dev reverts if addr does not have role
+    /// @param _operator address
+    /// @param _role the name of the role
+    /// // reverts
+    function checkRole(address _operator, string memory _role) public view {
+        roles[_role].check(_operator);
+    }
+
+    /// dev determine if addr has role
+    /// @param _operator address
+    /// @param _role the name of the role
+    /// @return bool
+    function hasRole(address _operator, string memory _role) public view returns (bool) {
+        return roles[_role].has(_operator);
+    }
+
+    /// dev add a role to an address
+    /// @param _operator address
+    /// @param _role the name of the role
+    function addRole(address _operator, string memory _role) internal {
+        roles[_role].add(_operator);
+        emit RoleAdded(_operator, _role);
+    }
+
+    /// dev remove a role from an address
+    /// @param _operator address
+    /// @param _role the name of the role
+    function removeRole(address _operator, string memory _role) internal {
+        roles[_role].remove(_operator);
+        emit RoleRemoved(_operator, _role);
+    }
+}
+
+/// @title Whitelist
+/// dev The Whitelist contract has a whitelist of addresses, and provides basic authorization control functions.
+/// This simplifies the implementation of "user permissions".
+contract Whitelist is Ownable, RBAC {
+    string public constant ROLE_WHITELISTED = "whitelist";
+
+    /// dev Throws if operator is not whitelisted.
+    /// @param _operator address
+    modifier onlyIfWhitelisted(address _operator) {
+        checkRole(_operator, ROLE_WHITELISTED);
         _;
     }
 
-    function transfer(address _to, uint256 _tokenId) public {
-        safeTransferFrom(msg.sender, _to, _tokenId);
+    /// dev add an address to the whitelist
+    /// @param _operator address
+    /// @return true if the address was added to the whitelist, false if the address was already in the whitelist
+    function addAddressToWhitelist(address _operator) public onlyOwner() {
+        addRole(_operator, ROLE_WHITELISTED);
     }
 
-    constructor(string memory name, string memory symbol) public ERC721Token(name,symbol) {}
-
-    function () external payable {}
-
-    function implementation() public view returns (address) {
-        return cloversMetadata;
+    /// dev getter to determine if address is in whitelist
+    function whitelist(address _operator) public view returns (bool) {
+        return hasRole(_operator, ROLE_WHITELISTED);
     }
 
-    function getKeep(uint256 _tokenId) public view returns (bool) {
-        return clovers[_tokenId].keep;
-    }
-
-    function getBlockMinted(uint256 _tokenId) public view returns (uint256) {
-        return clovers[_tokenId].blockMinted;
-    }
-
-    function getCloverMoves(uint256 _tokenId) public view returns (bytes28[2] memory) {
-        return clovers[_tokenId].cloverMoves;
-    }
-
-    function getReward(uint256 _tokenId) public view returns (uint256) {
-        return clovers[_tokenId].rewards;
-    }
-
-    function getSymmetries(uint256 _tokenId) public view returns (uint256) {
-        return clovers[_tokenId].symmetries;
-    }
-
-    function getAllSymmetries() public view returns (uint256, uint256, uint256, uint256, uint256, uint256) {
-        return (totalSymmetries, symmetries[0], symmetries[1], symmetries[2], symmetries[3], symmetries[4]);
-    }
-
-    /// dev Moves Token to a certain address for use in the CloversController
-    /// @param _to The address to receive the Token.
-    /// @param _amount The amount of Token to be transferred.
-    /// @param _token The address of the Token to be transferred.
-    function moveToken(address _to, uint256 _amount, address _token) public onlyOwnerOrController() returns (bool) {
-        require(_amount <= ERC20(_token).balanceOf(address(this)));
-        return ERC20(_token).transfer(_to, _amount);
-    }
-
-    /// dev Approves Tokens to a certain address for use in the CloversController
-    /// @param _to The address to receive the Token approval.
-    /// @param _amount The amount of Token to be approved.
-    /// @param _token The address of the Token to be approved.
-    function approveToken(address _to, uint256 _amount, address _token) public onlyOwnerOrController() returns (bool) {
-        return ERC20(_token).approve(_to, _amount);
-    }
-
-    /// dev Sets whether the minter will keep the clover
-    /// @param _tokenId The token Id.
-    /// @param value Whether the clover will be kept.
-    function setKeep(uint256 _tokenId, bool value) public onlyOwnerOrController() {
-        clovers[_tokenId].keep = value;
-    }
-
-    function setBlockMinted(uint256 _tokenId, uint256 value) public onlyOwnerOrController() {
-        clovers[_tokenId].blockMinted = value;
-    }
-
-    function setCloverMoves(uint256 _tokenId, bytes28[2] memory moves) public onlyOwnerOrController() {
-        clovers[_tokenId].cloverMoves = moves;
-    }
-
-    function setReward(uint256 _tokenId, uint256 _amount) public onlyOwnerOrController() {
-        clovers[_tokenId].rewards = _amount;
-    }
-
-    function setSymmetries(uint256 _tokenId, uint256 _symmetries) public onlyOwnerOrController() {
-        clovers[_tokenId].symmetries = _symmetries;
-    }
-
-    /// dev Sets total tallies of symmetry counts. For use by the controller to correct for invalid Clovers.
-    /// @param _totalSymmetries The total number of Symmetries.
-    /// @param RotSym The total number of RotSym Symmetries.
-    /// @param Y0Sym The total number of Y0Sym Symmetries.
-    /// @param X0Sym The total number of X0Sym Symmetries.
-    /// @param XYSym The total number of XYSym Symmetries.
-    /// @param XnYSym The total number of XnYSym Symmetries.
-    function setAllSymmetries(uint256 _totalSymmetries, uint256 RotSym, uint256 Y0Sym, uint256 X0Sym, uint256 XYSym, uint256 XnYSym) public onlyOwnerOrController() {
-        totalSymmetries = _totalSymmetries;
-        symmetries[0] = RotSym;
-        symmetries[1] = Y0Sym;
-        symmetries[2] = X0Sym;
-        symmetries[3] = XYSym;
-        symmetries[4] = XnYSym;
-    }
-
-    /// dev Deletes data about a Clover.
-    /// @param _tokenId The Id of the clover token to be deleted.
-    function deleteClover(uint256 _tokenId) public onlyOwnerOrController() {
-        delete (clovers[_tokenId]);
-        unmint(_tokenId);
-    }
-
-    /// dev Mints new Clovers.
-    /// @param _to The address of the new clover owner.
-    /// @param _tokenId The Id of the new clover token.
-    function mint(address _to, uint256 _tokenId) public onlyOwnerOrController() {
-        super._mint(_to, _tokenId);
-        setApprovalForAll(clubTokenController, true);
-    }
-
-    function mintMany(address[] memory _tos, uint256[] memory _tokenIds, bytes28[2][] memory _movess, uint256[] memory _symmetries) public onlyAdmin() {
-        require(((_tos.length == _tokenIds.length) && (_tokenIds.length == _movess.length)) && (_movess.length == _symmetries.length));
-        for (uint256 i = 0; i < _tos.length; i++) {
-            address _to = _tos[i];
-            uint256 _tokenId = _tokenIds[i];
-            bytes28[2] memory _moves = _movess[i];
-            uint256 _symmetry = _symmetries[i];
-            setCloverMoves(_tokenId, _moves);
-            if (_symmetry > 0) {
-                setSymmetries(_tokenId, _symmetry);
-            }
-            super._mint(_to, _tokenId);
-            setApprovalForAll(clubTokenController, true);
+    /// dev add addresses to the whitelist
+    /// @param _operators addresses
+    /// @return true if at least one address was added to the whitelist,
+    /// false if all addresses were already in the whitelist
+    function addAddressesToWhitelist(address[] memory _operators) public onlyOwner() {
+        for (uint256 i = 0; i < _operators.length; i++) {
+            addAddressToWhitelist(_operators[i]);
         }
     }
 
-    /// dev Unmints Clovers.
-    /// @param _tokenId The Id of the clover token to be destroyed.
-    function unmint(uint256 _tokenId) public onlyOwnerOrController() {
-        super._burn(ownerOf(_tokenId), _tokenId);
+    /// dev remove an address from the whitelist
+    /// @param _operator address
+    /// @return true if the address was removed from the whitelist,
+    /// false if the address wasn't in the whitelist in the first place
+    function removeAddressFromWhitelist(address _operator) public onlyOwner() {
+        removeRole(_operator, ROLE_WHITELISTED);
+    }
+
+    /// dev remove addresses from the whitelist
+    /// @param _operators addresses
+    /// @return true if at least one address was removed from the whitelist,
+    /// false if all addresses weren't in the whitelist in the first place
+    function removeAddressesFromWhitelist(address[] memory _operators) public onlyOwner() {
+        for (uint256 i = 0; i < _operators.length; i++) {
+            removeAddressFromWhitelist(_operators[i]);
+        }
+    }
+}
+
+contract CrabData {
+    struct CrabPartData {
+        uint256 hp;
+        uint256 dps;
+        uint256 blockRate;
+        uint256 resistanceBonus;
+        uint256 hpBonus;
+        uint256 dpsBonus;
+        uint256 blockBonus;
+        uint256 mutiplierBonus;
+    }
+
+    modifier crabDataLength(uint256[] memory _crabData) {
+        require(_crabData.length == 8);
+        _;
+    }
+
+    function arrayToCrabPartData(uint256[] memory _partData) internal pure crabDataLength(_partData) returns (CrabPartData memory _parsedData) {
+        _parsedData = CrabPartData(_partData[0], _partData[1], _partData[2], _partData[3], _partData[4], _partData[5], _partData[6], _partData[7]);
+    }
+
+    function crabPartDataToArray(CrabPartData memory _crabPartData) internal pure returns (uint256[] memory _resultData) {
+        _resultData = new uint256[](8);
+        _resultData[0] = _crabPartData.hp;
+        _resultData[1] = _crabPartData.dps;
+        _resultData[2] = _crabPartData.blockRate;
+        _resultData[3] = _crabPartData.resistanceBonus;
+        _resultData[4] = _crabPartData.hpBonus;
+        _resultData[5] = _crabPartData.dpsBonus;
+        _resultData[6] = _crabPartData.blockBonus;
+        _resultData[7] = _crabPartData.mutiplierBonus;
+    }
+}
+
+contract GeneSurgeon {
+    uint256[] internal crabPartMultiplier = [0, 10 ** 9, 10 ** 6, 10 ** 3, 1];
+
+    function extractElementsFromGene(uint256 _gene) internal view returns (uint256[] memory _elements) {
+        _elements = new uint256[](4);
+        _elements[0] = ((_gene / crabPartMultiplier[1]) / 100) % 10;
+        _elements[1] = ((_gene / crabPartMultiplier[2]) / 100) % 10;
+        _elements[2] = ((_gene / crabPartMultiplier[3]) / 100) % 10;
+        _elements[3] = ((_gene / crabPartMultiplier[4]) / 100) % 10;
+    }
+
+    function extractPartsFromGene(uint256 _gene) internal view returns (uint256[] memory _parts) {
+        _parts = new uint256[](4);
+        _parts[0] = (_gene / crabPartMultiplier[1]) % 100;
+        _parts[1] = (_gene / crabPartMultiplier[2]) % 100;
+        _parts[2] = (_gene / crabPartMultiplier[3]) % 100;
+        _parts[3] = (_gene / crabPartMultiplier[4]) % 100;
+    }
+}
+
+contract CryptantCrabNFT is ERC721Token, Whitelist, CrabData, GeneSurgeon {
+    event CrabPartAdded(uint256 hp, uint256 dps, uint256 blockAmount);
+
+    event GiftTransfered(address indexed _from, address indexed _to, uint256 indexed _tokenId);
+
+    event DefaultMetadataURIChanged(string newUri);
+
+    bytes4 internal constant CRAB_BODY = 0xc398430e;
+    bytes4 internal constant CRAB_LEG = 0x889063b1;
+    bytes4 internal constant CRAB_LEFT_CLAW = 0xdb6290a2;
+    bytes4 internal constant CRAB_RIGHT_CLAW = 0x13453f89;
+    mapping(bytes4 => mapping(uint256 => CrabPartData[])) internal crabPartData;
+    mapping(uint256 => uint256) internal crabSpecialSkins;
+    string public defaultMetadataURI = "https://www.cryptantcrab.io/md/";
+
+    constructor(string memory _name, string memory _symbol) public ERC721Token(_name,_symbol) {
+        initiateCrabPartData();
+    }
+
+    /// dev Returns an URI for a given token ID
+    /// Throws if the token ID does not exist.
+    /// Will return the token's metadata URL if it has one,
+    /// otherwise will just return base on the default metadata URI
+    /// @param _tokenId uint256 ID of the token to query
+    function tokenURI(uint256 _tokenId) public view returns (string memory) {
+        require(exists(_tokenId));
+        string memory _uri = tokenURIs[_tokenId];
+        if (bytes(_uri).length == 0) {}
+        return _uri;
+    }
+
+    /// dev Returns the data of a specific parts
+    /// @param _partIndex the part to retrieve. 1 = Body, 2 = Legs, 3 = Left Claw, 4 = Right Claw
+    /// @param _element the element of part to retrieve. 1 = Fire, 2 = Earth, 3 = Metal, 4 = Spirit, 5 = Water
+    /// @param _setIndex the set index of for the specified part. This will starts from 1.
+    function dataOfPart(uint256 _partIndex, uint256 _element, uint256 _setIndex) public view returns (uint256[] memory _resultData) {
+        bytes4 _key;
+        if (_partIndex == 1) {
+            _key = CRAB_BODY;
+        } else if (_partIndex == 2) {
+            _key = CRAB_LEG;
+        } else if (_partIndex == 3) {
+            _key = CRAB_LEFT_CLAW;
+        } else if (_partIndex == 4) {
+            _key = CRAB_RIGHT_CLAW;
+        } else {
+            revert();
+        }
+        CrabPartData storage _crabPartData = crabPartData[_key][_element][_setIndex];
+        _resultData = crabPartDataToArray(_crabPartData);
+    }
+
+    /// dev Gift(Transfer) a token to another address. Caller must be token owner
+    /// @param _from current owner of the token
+    /// @param _to address to receive the ownership of the given token ID
+    /// @param _tokenId uint256 ID of the token to be transferred
+    function giftToken(address _from, address _to, uint256 _tokenId) external {
+        safeTransferFrom(_from, _to, _tokenId);
+        emit GiftTransfered(_from, _to, _tokenId);
+    }
+
+    /// dev External function to mint a new token, for whitelisted address only.
+    /// Reverts if the given token ID already exists
+    /// @param _tokenOwner address the beneficiary that will own the minted token
+    /// @param _tokenId uint256 ID of the token to be minted by the msg.sender
+    function mintToken(address _tokenOwner, uint256 _tokenId) external {
+        super._mint(_tokenOwner, _tokenId);
+    }
+
+    /// dev Returns crab data base on the gene provided
+    /// @param _gene the gene info where crab data will be retrieved base on it
+    /// @return 4 uint arrays:
+    /// 1st Array = Body's Data
+    /// 2nd Array = Leg's Data
+    /// 3rd Array = Left Claw's Data
+    /// 4th Array = Right Claw's Data
+    function crabPartDataFromGene(uint256 _gene) external view returns (uint256[] memory _bodyData, uint256[] memory _legData, uint256[] memory _leftClawData, uint256[] memory _rightClawData) {
+        uint256[] memory _parts = extractPartsFromGene(_gene);
+        uint256[] memory _elements = extractElementsFromGene(_gene);
+        _bodyData = dataOfPart(1, _elements[0], _parts[0]);
+        _legData = dataOfPart(2, _elements[1], _parts[1]);
+        _leftClawData = dataOfPart(3, _elements[2], _parts[2]);
+        _rightClawData = dataOfPart(4, _elements[3], _parts[3]);
+    }
+
+    /// dev For developer to add new parts, notice that this is the only method to add crab data
+    /// so that developer can add extra content. there's no other method for developer to modify
+    /// the data. This is to assure token owner actually owns their data.
+    /// @param _partIndex the part to add. 1 = Body, 2 = Legs, 3 = Left Claw, 4 = Right Claw
+    /// @param _element the element of part to add. 1 = Fire, 2 = Earth, 3 = Metal, 4 = Spirit, 5 = Water
+    /// @param _partDataArray data of the parts.
+    function setPartData(uint256 _partIndex, uint256 _element, uint256[] calldata _partDataArray) external onlyOwner() {
+        CrabPartData memory _partData = arrayToCrabPartData(_partDataArray);
+        bytes4 _key;
+        if (_partIndex == 1) {
+            _key = CRAB_BODY;
+        } else if (_partIndex == 2) {
+            _key = CRAB_LEG;
+        } else if (_partIndex == 3) {
+            _key = CRAB_LEFT_CLAW;
+        } else if (_partIndex == 4) {
+            _key = CRAB_RIGHT_CLAW;
+        }
+        if ((crabPartData[_key][_element][1].hp == 0) && (crabPartData[_key][_element][1].dps == 0)) {
+            crabPartData[_key][_element][1] = _partData;
+        } else {
+            crabPartData[_key][_element].push(_partData);
+        }
+        emit CrabPartAdded(_partDataArray[0], _partDataArray[1], _partDataArray[2]);
+    }
+
+    /// dev Updates the default metadata URI
+    /// @param _defaultUri the new metadata URI
+    function setDefaultMetadataURI(string calldata _defaultUri) external onlyOwner() {
+        defaultMetadataURI = _defaultUri;
+        emit DefaultMetadataURIChanged(_defaultUri);
+    }
+
+    /// dev Updates the metadata URI for existing token
+    /// @param _tokenId the tokenID that metadata URI to be changed
+    /// @param _uri the new metadata URI for the specified token
+    function setTokenURI(uint256 _tokenId, string calldata _uri) external onlyIfWhitelisted(msg.sender) {
+        _setTokenURI(_tokenId, _uri);
+    }
+
+    /// dev Returns the special skin of the provided tokenId
+    /// @param _tokenId cryptant crab's tokenId
+    /// @return Special skin belongs to the _tokenId provided.
+    /// 0 will be returned if no special skin found.
+    function specialSkinOfTokenId(uint256 _tokenId) external view returns (uint256) {
+        return crabSpecialSkins[_tokenId];
+    }
+
+    /// dev This functions will adjust the length of crabPartData
+    /// so that when adding data the index can start with 1.
+    /// Reason of doing this is because gene cannot have parts with index 0.
+    function initiateCrabPartData() internal {
+        require(crabPartData[CRAB_BODY][1].length == 0);
+        for (uint256 i = 1; i <= 5; i++) {
+            crabPartData[CRAB_BODY][i].length = 2;
+            crabPartData[CRAB_LEG][i].length = 2;
+            crabPartData[CRAB_LEFT_CLAW][i].length = 2;
+            crabPartData[CRAB_RIGHT_CLAW][i].length = 2;
+        }
+    }
+
+    /// dev Returns whether the given spender can transfer a given token ID
+    /// @param _spender address of the spender to query
+    /// @param _tokenId uint256 ID of the token to be transferred
+    /// @return bool whether the msg.sender is approved for the given token ID,
+    ///  is an operator of the owner, or is the owner of the token,
+    ///  or has been whitelisted by contract owner
+    function isApprovedOrOwner(address _spender, uint256 _tokenId) internal view returns (bool) {
+        address owner = ownerOf(_tokenId);
+        return (((_spender == owner) || (getApproved(_tokenId) == _spender)) || isApprovedForAll(owner, _spender)) || whitelist(_spender);
     }
 }

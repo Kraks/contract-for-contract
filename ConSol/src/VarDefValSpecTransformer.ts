@@ -164,9 +164,9 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
       const checkFunFactory = new CheckFunFactory(this.spec, allFuncParams, tgtFuncRetParams, this.factory, tgtAddr);
       // console.log(allFuncParams);
       // console.log(tgtFuncRetParams);
-      const addrCallPreFun = checkFunFactory.preCondCheckFun(this.preAddrError, specid);
+      const addrCallPreFun = checkFunFactory.preCondCheckFun(this.preAddrError, FunctionStateMutability.NonPayable, specid);
       if (addrCallPreFun) this.contract.appendChild(addrCallPreFun);
-      const addrCallPostFun = checkFunFactory.postCondCheckFun(this.postAddrError, specid);
+      const addrCallPostFun = checkFunFactory.postCondCheckFun(this.postAddrError, FunctionStateMutability.NonPayable, specid);
       if (addrCallPostFun) this.contract.appendChild(addrCallPostFun);
 
       // Generate dispatch_Iface_f

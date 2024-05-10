@@ -192,7 +192,7 @@ contract ThetaToken is StandardToken, Controlled {
     }
 
     function _transfer_pre(address _to, uint _value) private {
-        if (!(balances[msg.sender]>=_value&&_value>0)) revert();
+        if (!(balancesmsg.sender>=_value&&_value>0)) revert();
     }
 
     function transfer(address _to, uint _value) public returns (bool success) {

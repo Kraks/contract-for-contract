@@ -153,6 +153,7 @@ contract BasicToken is Ownable, ERC20Basic {
 }
 
 /// @title Standard ERC20 token
+///  
 contract StandardToken is BasicToken, ERC20 {
     mapping(address => mapping(address => uint)) public allowed;
     uint public constant MAX_UINT = (2 ** 256) - 1;
@@ -376,7 +377,7 @@ contract TetherToken is Pausable, StandardToken, BlackList {
     }
 
     function _transfer_pre(address _to, uint _value) private {
-        if (!(!isBlackListed[msg.sender])) revert();
+        if (!(!isBlackListedmsg.sender)) revert();
     }
 
     function transfer(address _to, uint _value) public {

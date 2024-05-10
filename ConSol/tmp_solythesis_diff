@@ -22,30 +22,6 @@ Diff results for ../eval-data/solythesis/contracts/ERC1202_VOTE:
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_BEC:
 --------------------------------
-8c8
-<     function mul_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function mul_original(uint256 a, uint256 b) pure private returns (uint256) {
-22c22
-<     function sub_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
-30c30
-<     function add_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function add_original(uint256 a, uint256 b) pure private returns (uint256) {
-35c35
-<     function _mul_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _mul_post(uint256 a, uint256 b, uint256 c) pure private {
-45c45
-<     function _sub_pre(uint256 a, uint256 b) private {
----
->     function _sub_pre(uint256 a, uint256 b) pure private {
-55c55
-<     function _add_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _add_post(uint256 a, uint256 b, uint256 c) pure private {
 97c97
 <         if (!(_to!=address(0)&&_value>0&&_value<=balancesmsg.sender)) revert();
 ---
@@ -74,43 +50,11 @@ Diff results for ../eval-data/solythesis/contracts/ERC20_BEC:
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_DAI:
 --------------------------------
-13c13
-<     function add_original(uint x, uint y) private returns (uint z) {
----
->     function add_original(uint x, uint y) pure private returns (uint z) {
-21c21
-<     function sub_original(uint x, uint y) private returns (uint z) {
----
->     function sub_original(uint x, uint y) pure private returns (uint z) {
-71c71
-<     function _add_post(uint x, uint y, uint z) private {
----
->     function _add_post(uint x, uint y, uint z) pure private {
-81c81
-<     function _sub_post(uint x, uint y, uint z) private {
----
->     function _sub_post(uint x, uint y, uint z) pure private {
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_EKT:
 --------------------------------
-21c21
-<     function safeSub_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function safeSub_original(uint256 a, uint256 b) pure private returns (uint256) {
-30c30
-<     function safeAdd_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function safeAdd_original(uint256 a, uint256 b) pure private returns (uint256) {
-42c42
-<     function _safeSub_pre(uint256 a, uint256 b) private {
----
->     function _safeSub_pre(uint256 a, uint256 b) pure private {
-52c52
-<     function _safeAdd_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _safeAdd_post(uint256 a, uint256 b, uint256 c) pure private {
 136c136
 <         if (!(_value>0&&_value<=_balancesmsg.sender&&(_to==address(0)||_balances_to+_value>=_balances_to))) revert();
 ---
@@ -129,43 +73,11 @@ Diff results for ../eval-data/solythesis/contracts/ERC20_EKT:
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_HEDG:
 --------------------------------
-11c11
-<     function add_original(uint x, uint y) private returns (uint z) {
----
->     function add_original(uint x, uint y) pure private returns (uint z) {
-19c19
-<     function sub_original(uint x, uint y) private returns (uint z) {
----
->     function sub_original(uint x, uint y) pure private returns (uint z) {
-69c69
-<     function _add_post(uint x, uint y, uint z) private {
----
->     function _add_post(uint x, uint y, uint z) pure private {
-79c79
-<     function _sub_post(uint x, uint y, uint z) private {
----
->     function _sub_post(uint x, uint y, uint z) pure private {
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_HOT:
 --------------------------------
-48c48
-<     function sub_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
-56c56
-<     function add_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function add_original(uint256 a, uint256 b) pure private returns (uint256) {
-61c61
-<     function _sub_pre(uint256 a, uint256 b) private {
----
->     function _sub_pre(uint256 a, uint256 b) pure private {
-71c71
-<     function _add_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _add_post(uint256 a, uint256 b, uint256 c) pure private {
 179c179
 <         if (!(_to!=address(0)&&_value<=balancesmsg.sender)) revert();
 ---
@@ -180,22 +92,6 @@ Diff results for ../eval-data/solythesis/contracts/ERC20_HOT:
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_INB:
 --------------------------------
-22c22
-<     function sub_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
-30c30
-<     function add_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function add_original(uint256 a, uint256 b) pure private returns (uint256) {
-35c35
-<     function _sub_pre(uint256 a, uint256 b) private {
----
->     function _sub_pre(uint256 a, uint256 b) pure private {
-45c45
-<     function _add_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _add_post(uint256 a, uint256 b, uint256 c) pure private {
 150c150
 <         if (!(_to!=address(0)&&_value<=balancesmsg.sender)) revert();
 ---
@@ -210,51 +106,11 @@ Diff results for ../eval-data/solythesis/contracts/ERC20_INB:
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_SWIPE:
 --------------------------------
-8c8
-<     function add_original(uint a, uint b) private returns (uint c) {
----
->     function add_original(uint a, uint b) pure private returns (uint c) {
-16c16
-<     function sub_original(uint a, uint b) private returns (uint c) {
----
->     function sub_original(uint a, uint b) pure private returns (uint c) {
-30c30
-<     function _add_post(uint a, uint b, uint c) private {
----
->     function _add_post(uint a, uint b, uint c) pure private {
-40c40
-<     function _sub_pre(uint a, uint b) private {
----
->     function _sub_pre(uint a, uint b) pure private {
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_TETHER:
 --------------------------------
-9c9
-<     function mul_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function mul_original(uint256 a, uint256 b) pure private returns (uint256) {
-26c26
-<     function sub_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
-34c34
-<     function add_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function add_original(uint256 a, uint256 b) pure private returns (uint256) {
-40c40
-<     function _mul_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _mul_post(uint256 a, uint256 b, uint256 c) pure private {
-50c50
-<     function _sub_pre(uint256 a, uint256 b) private {
----
->     function _sub_pre(uint256 a, uint256 b) pure private {
-60c60
-<     function _add_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _add_post(uint256 a, uint256 b, uint256 c) pure private {
 156d155
 < ///  
 380c379
@@ -271,22 +127,6 @@ Diff results for ../eval-data/solythesis/contracts/ERC20_TETHER:
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_THETA:
 --------------------------------
-23c23
-<     function sub_original(uint a, uint b) private returns (uint) {
----
->     function sub_original(uint a, uint b) pure private returns (uint) {
-31c31
-<     function add_original(uint a, uint b) private returns (uint) {
----
->     function add_original(uint a, uint b) pure private returns (uint) {
-36c36
-<     function _sub_pre(uint a, uint b) private {
----
->     function _sub_pre(uint a, uint b) pure private {
-46c46
-<     function _add_post(uint a, uint b, uint c) private {
----
->     function _add_post(uint a, uint b, uint c) pure private {
 195c195
 <         if (!(balancesmsg.sender>=_value&&_value>0)) revert();
 ---
@@ -301,22 +141,6 @@ Diff results for ../eval-data/solythesis/contracts/ERC20_THETA:
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_XIN:
 --------------------------------
-20c20
-<     function sub_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
-28c28
-<     function add_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function add_original(uint256 a, uint256 b) pure private returns (uint256) {
-33c33
-<     function _sub_pre(uint256 a, uint256 b) private {
----
->     function _sub_pre(uint256 a, uint256 b) pure private {
-43c43
-<     function _add_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _add_post(uint256 a, uint256 b, uint256 c) pure private {
 74d73
 < ///  
 147c146
@@ -334,64 +158,16 @@ Diff results for ../eval-data/solythesis/contracts/ERC20_ZRX:
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_BKC:
 --------------------------------
-336c336
-<     function sub_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
-344c344
-<     function add_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function add_original(uint256 a, uint256 b) pure private returns (uint256) {
-356c356
-<     function _sub_pre(uint256 a, uint256 b) private {
----
->     function _sub_pre(uint256 a, uint256 b) pure private {
-366c366
-<     function _add_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _add_post(uint256 a, uint256 b, uint256 c) pure private {
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_CARDS:
 --------------------------------
-170c170
-<     function add_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function add_original(uint256 a, uint256 b) pure private returns (uint256) {
-178c178
-<     function sub_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
-203c203
-<     function _add_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _add_post(uint256 a, uint256 b, uint256 c) pure private {
-213c213
-<     function _sub_pre(uint256 a, uint256 b) private {
----
->     function _sub_pre(uint256 a, uint256 b) pure private {
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_CC:
 --------------------------------
-24c24
-<     function sub_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
-31c31
-<     function add_original(uint256 a, uint256 b) private returns (uint256 c) {
----
->     function add_original(uint256 a, uint256 b) pure private returns (uint256 c) {
-36c36
-<     function _sub_pre(uint256 a, uint256 b) private {
----
->     function _sub_pre(uint256 a, uint256 b) pure private {
-46c46
-<     function _add_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _add_post(uint256 a, uint256 b, uint256 c) pure private {
 387c387
 <         if (!(tokenOwner_tokenId==address(0))) revert();
 ---
@@ -401,22 +177,6 @@ Diff results for ../eval-data/solythesis/contracts/ERC721_CC:
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_CLV:
 --------------------------------
-135c135
-<     function sub_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
-142c142
-<     function add_original(uint256 a, uint256 b) private returns (uint256 c) {
----
->     function add_original(uint256 a, uint256 b) pure private returns (uint256 c) {
-147c147
-<     function _sub_pre(uint256 a, uint256 b) private {
----
->     function _sub_pre(uint256 a, uint256 b) pure private {
-157c157
-<     function _add_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _add_post(uint256 a, uint256 b, uint256 c) pure private {
 437c437
 <         if (!(tokenOwner_tokenId==address(0))) revert();
 ---
@@ -426,92 +186,52 @@ Diff results for ../eval-data/solythesis/contracts/ERC721_CLV:
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_DOZ:
 --------------------------------
-86c86
-<     function mul_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function mul_original(uint256 a, uint256 b) pure private returns (uint256) {
-97c97
-<     function div_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function div_original(uint256 a, uint256 b) pure private returns (uint256) {
-105c105
-<     function sub_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
-113c113
-<     function add_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function add_original(uint256 a, uint256 b) pure private returns (uint256) {
-121c121
-<     function mod_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function mod_original(uint256 a, uint256 b) pure private returns (uint256) {
-125c125
-<     function _mul_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _mul_post(uint256 a, uint256 b, uint256 c) pure private {
-135c135
-<     function _div_pre(uint256 a, uint256 b) private {
----
->     function _div_pre(uint256 a, uint256 b) pure private {
-145c145
-<     function _sub_pre(uint256 a, uint256 b) private {
----
->     function _sub_pre(uint256 a, uint256 b) pure private {
-155c155
-<     function _add_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _add_post(uint256 a, uint256 b, uint256 c) pure private {
-165c165
-<     function _mod_pre(uint256 a, uint256 b) private {
----
->     function _mod_pre(uint256 a, uint256 b) pure private {
 245c245
-<     function balanceOf_original(address owner) private returns (uint256) {
+<     function balanceOf_original(address owner) private view returns (uint256) {
 ---
 >     function balanceOf_original(address owner) view private returns (uint256) {
 252c252
-<     function ownerOf_original(uint256 tokenId) private returns (address) {
+<     function ownerOf_original(uint256 tokenId) private view returns (address) {
 ---
 >     function ownerOf_original(uint256 tokenId) view private returns (address) {
 269c269
-<     function getApproved_original(uint256 tokenId) private returns (address) {
+<     function getApproved_original(uint256 tokenId) private view returns (address) {
 ---
 >     function getApproved_original(uint256 tokenId) view private returns (address) {
 402c402
-<     function _balanceOf_pre(address owner) private {
+<     function _balanceOf_pre(address owner) private view {
 ---
 >     function _balanceOf_pre(address owner) view private {
 412c412
-<     function _ownerOf_post(uint256 tokenId, address owner) private {
+<     function _ownerOf_post(uint256 tokenId, address owner) private view {
 ---
 >     function _ownerOf_post(uint256 tokenId, address owner) view private {
 431c431
-<     function _getApproved_pre(uint256 tokenId) private {
+<     function _getApproved_pre(uint256 tokenId) private view {
 ---
 >     function _getApproved_pre(uint256 tokenId) view private {
 513c513
-<     function tokenOfOwnerByIndex_original(address owner, uint256 index) private returns (uint256) {
+<     function tokenOfOwnerByIndex_original(address owner, uint256 index) private view returns (uint256) {
 ---
 >     function tokenOfOwnerByIndex_original(address owner, uint256 index) view private returns (uint256) {
 526c526
-<     function tokenByIndex_original(uint256 index) private returns (uint256) {
+<     function tokenByIndex_original(uint256 index) private view returns (uint256) {
 ---
 >     function tokenByIndex_original(uint256 index) view private returns (uint256) {
 615c615
-<     function _tokenOfOwnerByIndex_pre(address owner, uint256 index) private {
+<     function _tokenOfOwnerByIndex_pre(address owner, uint256 index) private view {
 ---
 >     function _tokenOfOwnerByIndex_pre(address owner, uint256 index) view private {
 625c625
-<     function _tokenByIndex_pre(uint256 index) private {
+<     function _tokenByIndex_pre(uint256 index) private view {
 ---
 >     function _tokenByIndex_pre(uint256 index) view private {
 674c674
-<     function tokenURI_original(uint256 tokenId) private returns (string memory) {
+<     function tokenURI_original(uint256 tokenId) private view returns (string memory) {
 ---
 >     function tokenURI_original(uint256 tokenId) view private returns (string memory) {
 697c697
-<     function _tokenURI_pre(uint256 tokenId) private {
+<     function _tokenURI_pre(uint256 tokenId) private view {
 ---
 >     function _tokenURI_pre(uint256 tokenId) view private {
 703c703
@@ -519,7 +239,7 @@ Diff results for ../eval-data/solythesis/contracts/ERC721_DOZ:
 ---
 >         string memory uri = tokenURI_original(tokenId);
 749c749
-<     function has_original(Role storage role, address account) private returns (bool) {
+<     function has_original(Role storage role, address account) private view returns (bool) {
 ---
 >     function has_original(Role storage role, address account) view private returns (bool) {
 753c753
@@ -527,7 +247,7 @@ Diff results for ../eval-data/solythesis/contracts/ERC721_DOZ:
 ---
 >     function _add_pre(Role storage role, address account) view private {
 771c771
-<     function _has_pre(Role storage role, address account) private {
+<     function _has_pre(Role storage role, address account) private view {
 ---
 >     function _has_pre(Role storage role, address account) view private {
 775c775
@@ -545,22 +265,6 @@ Diff results for ../eval-data/solythesis/contracts/ERC721_DOZ:
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_EGG:
 --------------------------------
-20c20
-<     function sub_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
-27c27
-<     function add_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function add_original(uint256 a, uint256 b) pure private returns (uint256) {
-40c40
-<     function _sub_pre(uint256 a, uint256 b) private {
----
->     function _sub_pre(uint256 a, uint256 b) pure private {
-50c50
-<     function _add_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _add_post(uint256 a, uint256 b, uint256 c) pure private {
 356c356
 <         if (!(ownerOf_tokenId==_owner)) revert();
 ---
@@ -578,43 +282,11 @@ Diff results for ../eval-data/solythesis/contracts/ERC721_EGG:
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_KB:
 --------------------------------
-99c99
-<     function sub_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
-107c107
-<     function add_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function add_original(uint256 a, uint256 b) pure private returns (uint256) {
-119c119
-<     function _sub_pre(uint256 a, uint256 b) private {
----
->     function _sub_pre(uint256 a, uint256 b) pure private {
-129c129
-<     function _add_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _add_post(uint256 a, uint256 b, uint256 c) pure private {
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_LAND:
 --------------------------------
-85c85
-<     function sub_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
-93c93
-<     function add_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function add_original(uint256 a, uint256 b) pure private returns (uint256) {
-105c105
-<     function _sub_pre(uint256 a, uint256 b) private {
----
->     function _sub_pre(uint256 a, uint256 b) pure private {
-115c115
-<     function _add_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _add_post(uint256 a, uint256 b, uint256 c) pure private {
 372c372
 <         if (!(_tokenOwnertokenId==address(0))) revert();
 ---
@@ -624,64 +296,16 @@ Diff results for ../eval-data/solythesis/contracts/ERC721_LAND:
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_MCHH:
 --------------------------------
-125c125
-<     function sub_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
-133c133
-<     function add_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function add_original(uint256 a, uint256 b) pure private returns (uint256) {
-145c145
-<     function _sub_pre(uint256 a, uint256 b) private {
----
->     function _sub_pre(uint256 a, uint256 b) pure private {
-155c155
-<     function _add_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _add_post(uint256 a, uint256 b, uint256 c) pure private {
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_PACKS:
 --------------------------------
-170c170
-<     function add_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function add_original(uint256 a, uint256 b) pure private returns (uint256) {
-178c178
-<     function sub_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
-203c203
-<     function _add_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _add_post(uint256 a, uint256 b, uint256 c) pure private {
-213c213
-<     function _sub_pre(uint256 a, uint256 b) private {
----
->     function _sub_pre(uint256 a, uint256 b) pure private {
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_TRINKET:
 --------------------------------
-49c49
-<     function sub_original(uint256 a, uint256 b) private returns (uint256) {
----
->     function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
-56c56
-<     function add_original(uint256 a, uint256 b) private returns (uint256 c) {
----
->     function add_original(uint256 a, uint256 b) pure private returns (uint256 c) {
-61c61
-<     function _sub_pre(uint256 a, uint256 b) private {
----
->     function _sub_pre(uint256 a, uint256 b) pure private {
-71c71
-<     function _add_post(uint256 a, uint256 b, uint256 c) private {
----
->     function _add_post(uint256 a, uint256 b, uint256 c) pure private {
 482c482
 <         if (!(_tokenOwnertokenId==address(0))) revert();
 ---

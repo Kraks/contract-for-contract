@@ -45,7 +45,7 @@ library SafeMath {
     /// 	sub(a, b) returns (c)
     /// 	requires { b <= a }
     ///  }
-    function sub_original(uint256 a, uint256 b) pure private returns (uint256) {
+    function sub_original(uint256 a, uint256 b) private pure returns (uint256) {
         return a - b;
     }
 
@@ -53,12 +53,12 @@ library SafeMath {
     /// 	add(a, b) returns (c)
     /// 	ensures { c >= a }
     ///  }
-    function add_original(uint256 a, uint256 b) pure private returns (uint256) {
+    function add_original(uint256 a, uint256 b) private pure returns (uint256) {
         uint256 c = a + b;
         return c;
     }
 
-    function _sub_pre(uint256 a, uint256 b) pure private {
+    function _sub_pre(uint256 a, uint256 b) private pure {
         if (!(b<=a)) revert();
     }
 
@@ -68,7 +68,7 @@ library SafeMath {
         return (c);
     }
 
-    function _add_post(uint256 a, uint256 b, uint256 c) pure private {
+    function _add_post(uint256 a, uint256 b, uint256 c) private pure {
         if (!(c>=a)) revert();
     }
 

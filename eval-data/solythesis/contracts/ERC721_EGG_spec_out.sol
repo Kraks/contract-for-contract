@@ -353,7 +353,7 @@ contract ERC721BasicToken is ERC721Basic, Upgradable {
     }
 
     function _clearApproval_pre(address _owner, uint256 _tokenId) private {
-        if (!(ownerOf(_tokenId)==_owner)) revert();
+        if (!(ownerOf_tokenId==_owner)) revert();
     }
 
     function clearApproval(address _owner, uint256 _tokenId) internal {
@@ -362,7 +362,7 @@ contract ERC721BasicToken is ERC721Basic, Upgradable {
     }
 
     function _addTokenTo_pre(address _to, uint256 _tokenId) private {
-        if (!(tokenOwner[_tokenId]==address(0))) revert();
+        if (!(tokenOwner_tokenId==address(0))) revert();
     }
 
     function addTokenTo(address _to, uint256 _tokenId) internal {
@@ -371,7 +371,7 @@ contract ERC721BasicToken is ERC721Basic, Upgradable {
     }
 
     function _removeTokenFrom_pre(address _from, uint256 _tokenId) private {
-        if (!(ownerOf(_tokenId)==_from&&ownedTokensCount[_from]>0)) revert();
+        if (!(ownerOf(_tokenId)==_from&&ownedTokensCount_from>0)) revert();
     }
 
     function removeTokenFrom(address _from, uint256 _tokenId) internal {

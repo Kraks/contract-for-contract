@@ -1,145 +1,61 @@
 pragma solidity ^0.5.0;
 
-/// @title Roles
-/// dev Library for managing addresses assigned to a Role.
-library Roles {
-    struct Role {
-        mapping(address => bool) bearer;
-    }
-
-    /// dev give an account access to this role
-    function add(Role storage role, address account) internal {
-        require(account != address(0));
-        role.bearer[account] = true;
-    }
-
-    /// dev remove an account's access to this role
-    function remove(Role storage role, address account) internal {
-        require(account != address(0));
-        role.bearer[account] = false;
-    }
-
-    /// dev check if an account has this role
-    /// @return bool
-    function has(Role storage role, address account) internal view returns (bool) {
-        require(account != address(0));
-        return role.bearer[account];
+library Address {
+    function isContract(address addr) internal view returns (bool) {
+        uint256 size;
+        assembly { size := extcodesize(addr) }
+        return size > 0;
     }
 }
 
-contract MinterRole {
-    using Roles for Roles.Role;
+contract Ownable {
+    address public owner;
 
-    event MinterAdded(address indexed account);
-
-    event MinterRemoved(address indexed account);
-
-    Roles.Role private minters;
-
-    modifier onlyMinter() {
-        require(isMinter(msg.sender));
+    modifier onlyOwner() {
+        require(msg.sender == owner);
         _;
     }
 
     constructor() public {
-        minters.add(msg.sender);
+        owner = msg.sender;
     }
 
-    function isMinter(address account) public view returns (bool) {
-        return minters.has(account);
+    function setOwner(address _owner) public onlyOwner() {
+        owner = _owner;
     }
 
-    function addMinter(address account) public onlyMinter() {
-        minters.add(account);
-        emit MinterAdded(account);
-    }
-
-    function renounceMinter() public {
-        minters.remove(msg.sender);
-    }
-
-    function _removeMinter(address account) internal {
-        minters.remove(account);
-        emit MinterRemoved(account);
+    function getOwner() public view returns (address) {
+        return owner;
     }
 }
 
-/// @title IERC165
-/// dev https://github.com/ethereum/EIPs/blob/master/EIPS/eip-165.md
-interface IERC165 {
-    /// @notice Query if a contract implements an interface
-    /// @param interfaceId The interface identifier, as specified in ERC-165
-    /// dev Interface identification is specified in ERC-165. This function
-    /// uses less than 30,000 gas.
-    function supportsInterface(bytes4 interfaceId) external view returns (bool);
-}
-
-/// @title ERC165
-/// @author Matt Condon (@shrugs)
-/// dev Implements ERC165 using a lookup table.
-contract ERC165 is IERC165 {
-    bytes4 private constant _InterfaceId_ERC165 = 0x01ffc9a7;
-    mapping(bytes4 => bool) internal _supportedInterfaces;
-
-    /// dev A contract implementing SupportsInterfaceWithLookup
-    /// implement ERC165 itself
-    constructor() public {
-        _registerInterface(_InterfaceId_ERC165);
-    }
-
-    /// dev implement supportsInterface(bytes4) using a lookup table
-    function supportsInterface(bytes4 interfaceId) external view returns (bool) {
-        return _supportedInterfaces[interfaceId];
-    }
-
-    /// dev private method for registering an interface
-    function _registerInterface(bytes4 interfaceId) internal {
-        require(interfaceId != 0xffffffff);
-        _supportedInterfaces[interfaceId] = true;
-    }
-}
-
-/// @title SafeMath
-/// dev Math operations with safety checks that revert on error
 library SafeMath {
-    /// dev Multiplies two numbers, reverts on overflow.
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+    function mul(uint256 a, uint256 b) internal pure returns (uint256 c) {
         if (a == 0) {
             return 0;
         }
-        uint256 c = a * b;
-        require((c / a) == b);
+        c = a * b;
+        assert((c / a) == b);
         return c;
     }
 
-    /// dev Integer division of two numbers truncating the quotient, reverts on division by zero.
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b > 0);
-        uint256 c = a / b;
-        return c;
+        return a / b;
     }
 
-    /// @dev
-    ///     {sub(a, b) returns (c)
-    ///     requires {b <= a}}
+    /// @dev 
+    ///   {sub(a, b) returns (c)
+    ///   requires {b <= a}}
     function sub_original(uint256 a, uint256 b) private pure returns (uint256) {
-        uint256 c = a - b;
-        return c;
+        return a - b;
     }
 
     /// @dev
-    ///     {add(a, b) returns (c)
-    ///     ensures {c >= a}}
-    function add_original(uint256 a, uint256 b) private pure returns (uint256) {
-        uint256 c = a + b;
+    ///   {add(a, b) returns (c)
+    ///   ensures {c >= a}}
+    function add_original(uint256 a, uint256 b) private pure returns (uint256 c) {
+        c = a + b;
         return c;
-    }
-
-    /// dev Divides two numbers and returns the remainder (unsigned integer modulo),
-    /// reverts when dividing by zero.
-    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b != 0);
-        return a % b;
     }
 
     function _sub_pre(uint256 a, uint256 b) private pure {
@@ -156,29 +72,94 @@ library SafeMath {
         if (!(c>=a)) revert();
     }
 
-    function add(uint256 a, uint256 b) internal pure returns (uint256) {
+    function add(uint256 a, uint256 b) internal pure returns (uint256 c) {
         uint256 c = add_original(a, b);
         _add_post(a, b, c);
         return (c);
     }
 }
 
-/// Utility library of inline functions on addresses
-library Address {
-    /// Returns whether the target address is a contract
-    /// dev This function will return false if invoked during the constructor of a contract,
-    /// as the code is not actually created until after the constructor finishes.
-    /// @param account address of the account to check
-    /// @return whether the target address is a contract
-    function isContract(address account) internal view returns (bool) {
-        uint256 size;
-        assembly { size := extcodesize(account) }
-        return size > 0;
+library Strings {
+    function strConcat(string memory _a, string memory _b, string memory _c, string memory _d, string memory _e) internal pure returns (string memory) {
+        bytes memory _ba = bytes(_a);
+        bytes memory _bb = bytes(_b);
+        bytes memory _bc = bytes(_c);
+        bytes memory _bd = bytes(_d);
+        bytes memory _be = bytes(_e);
+        string memory abcde = new string((((_ba.length + _bb.length) + _bc.length) + _bd.length) + _be.length);
+        bytes memory babcde = bytes(abcde);
+        uint k = 0;
+        for (uint i = 0; i < _ba.length; i++) babcde[k++] = _ba[i];
+        for (uint i = 0; i < _bb.length; i++) babcde[k++] = _bb[i];
+        for (uint i = 0; i < _bc.length; i++) babcde[k++] = _bc[i];
+        for (uint i = 0; i < _bd.length; i++) babcde[k++] = _bd[i];
+        for (uint i = 0; i < _be.length; i++) babcde[k++] = _be[i];
+        return string(babcde);
+    }
+
+    function strConcat(string memory _a, string memory _b, string memory _c, string memory _d) internal pure returns (string memory) {
+        return strConcat(_a, _b, _c, _d, "");
+    }
+
+    function strConcat(string memory _a, string memory _b, string memory _c) internal pure returns (string memory) {
+        return strConcat(_a, _b, _c, "", "");
+    }
+
+    function strConcat(string memory _a, string memory _b) internal pure returns (string memory) {
+        return strConcat(_a, _b, "", "", "");
+    }
+
+    function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint j = _i;
+        uint len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint k = len - 1;
+        while (_i != 0) {
+            bstr[k--] = byte(uint8(48 + (_i % 10)));
+            _i /= 10;
+        }
+        return string(bstr);
     }
 }
 
-/// @title ERC721 Non-Fungible Token Standard basic interface
-/// dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
+interface IERC165 {
+    /// @notice Query if a contract implements an interface
+    /// @param _interfaceId The interface identifier, as specified in ERC-165
+    /// dev Interface identification is specified in ERC-165. This function
+    /// uses less than 30,000 gas.
+    function supportsInterface(bytes4 _interfaceId) external view returns (bool);
+}
+
+contract IERC721Receiver {
+    bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
+
+    /// @notice Handle the receipt of an NFT
+    /// dev The ERC721 smart contract calls this function on the recipient
+    /// after a `safetransfer`. This function MAY throw to revert and reject the
+    /// transfer. Return of other than the magic value MUST result in the
+    /// transaction being reverted.
+    /// Note: the contract address is always the message sender.
+    /// @param _operator The address which called `safeTransferFrom` function
+    /// @param _from The address which previously owned the token
+    /// @param _tokenId The NFT identifier which is being transfered
+    /// @param _data Additional data with no specified format
+    /// @return `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
+    function onERC721Received(address _operator, address _from, uint256 _tokenId, bytes memory _data) public returns (bytes4);
+}
+
+contract IERC721Holder is IERC721Receiver {
+    function onERC721Received(address, address, uint256, bytes memory) public returns (bytes4) {
+        return ERC721_RECEIVED;
+    }
+}
+
 contract IERC721 is IERC165 {
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
 
@@ -207,27 +188,83 @@ contract IERC721 is IERC165 {
     function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public;
 }
 
-/// @title ERC721 token receiver interface
-/// dev Interface for any contract that wants to support safeTransfers
-/// from ERC721 asset contracts.
-contract IERC721Receiver {
-    /// @notice Handle the receipt of an NFT
-    /// dev The ERC721 smart contract calls this function on the recipient
-    /// after a `safeTransfer`. This function MUST return the function selector,
-    /// otherwise the caller will revert the transaction. The selector to be
-    /// returned can be obtained as `this.onERC721Received.selector`. This
-    /// function MAY throw to revert and reject the transfer.
-    /// Note: the ERC721 contract address is always the message sender.
-    /// @param operator The address which called `safeTransferFrom` function
-    /// @param from The address which previously owned the token
-    /// @param tokenId The NFT identifier which is being transferred
-    /// @param data Additional data with no specified format
-    /// @return `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
-    function onERC721Received(address operator, address from, uint256 tokenId, bytes memory data) public returns (bytes4);
+contract IERC721Enumerable is IERC721 {
+    function totalSupply() public view returns (uint256);
+
+    function tokenOfOwnerByIndex(address _owner, uint256 _index) public view returns (uint256 _tokenId);
+
+    function tokenByIndex(uint256 _index) public view returns (uint256);
 }
 
-/// @title ERC721 Non-Fungible Token Standard basic implementation
-/// dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
+contract IERC721Metadata is IERC721 {
+    function name() external view returns (string memory _name);
+
+    function symbol() external view returns (string memory _symbol);
+
+    function tokenURI(uint256 _tokenId) public view returns (string memory);
+}
+
+contract SupportsInterfaceWithLookup is IERC165 {
+    bytes4 public constant InterfaceId_ERC165 = 0x01ffc9a7;
+    mapping(bytes4 => bool) internal supportedInterfaces;
+
+    /// dev A contract implementing SupportsInterfaceWithLookup
+    /// implement ERC165 itself
+    constructor() public {
+        _registerInterface(InterfaceId_ERC165);
+    }
+
+    /// dev implement supportsInterface(bytes4) using a lookup table
+    function supportsInterface(bytes4 _interfaceId) external view returns (bool) {
+        return supportedInterfaces[_interfaceId];
+    }
+
+    /// dev private method for registering an interface
+    function _registerInterface(bytes4 _interfaceId) internal {
+        require(_interfaceId != 0xffffffff);
+        supportedInterfaces[_interfaceId] = true;
+    }
+}
+
+contract Delegate {
+    function mint(address _sender, address _to) public returns (bool);
+
+    function approve(address _sender, address _to, uint256 _tokenId) public returns (bool);
+
+    function setApprovalForAll(address _sender, address _operator, bool _approved) public returns (bool);
+
+    function transferFrom(address _sender, address _from, address _to, uint256 _tokenId) public returns (bool);
+
+    function safeTransferFrom(address _sender, address _from, address _to, uint256 _tokenId) public returns (bool);
+
+    function safeTransferFrom(address _sender, address _from, address _to, uint256 _tokenId, bytes memory _data) public returns (bool);
+}
+
+/// @title ERC165
+/// @author Matt Condon (@shrugs)
+/// dev Implements ERC165 using a lookup table.
+contract ERC165 is IERC165 {
+    bytes4 private constant _InterfaceId_ERC165 = 0x01ffc9a7;
+    mapping(bytes4 => bool) private _supportedInterfaces;
+
+    /// dev A contract implementing SupportsInterfaceWithLookup
+    /// implement ERC165 itself
+    constructor() internal {
+        _registerInterface(_InterfaceId_ERC165);
+    }
+
+    /// dev implement supportsInterface(bytes4) using a lookup table
+    function supportsInterface(bytes4 interfaceId) external view returns (bool) {
+        return _supportedInterfaces[interfaceId];
+    }
+
+    /// dev internal method for registering an interface
+    function _registerInterface(bytes4 interfaceId) internal {
+        require(interfaceId != 0xffffffff);
+        _supportedInterfaces[interfaceId] = true;
+    }
+}
+
 contract ERC721 is ERC165, IERC721 {
     using SafeMath for uint256;
     using Address for address;
@@ -302,8 +339,8 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     /// @dev
-    ///     {transferFrom(from, to, tokenId)
-    ///     requires {_isApprovedOrOwner(msg.sender, tokenId) && to != address(0)}}
+    ///   {transferFrom(from, to, tokenId)
+    ///   requires {_isApprovedOrOwner(msg.sender, tokenId) && to != address(0)}}
     function transferFrom_original(address from, address to, uint256 tokenId) private {
         _clearApproval(from, tokenId);
         _removeTokenFrom(from, tokenId);
@@ -316,7 +353,7 @@ contract ERC721 is ERC165, IERC721 {
     /// which is called upon a safe transfer, and return the magic value
     /// `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`; otherwise,
     /// the transfer is reverted.
-    ///    * Requires the msg sender to be the owner, approved, or operator
+    ///     * Requires the msg sender to be the owner, approved, or operator
     /// @param from current owner of the token
     /// @param to address to receive the ownership of the given token ID
     /// @param tokenId uint256 ID of the token to be transferred
@@ -358,8 +395,8 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     /// @dev
-    ///     {_mint(to, tokenId)
-    ///     requires {to != address(0)}}
+    ///   {_mint(to, tokenId)
+    ///   requires {to != address(0)}}
     function _mint_original(address to, uint256 tokenId) private {
         _addTokenTo(to, tokenId);
         emit Transfer(address(0), to, tokenId);
@@ -375,26 +412,26 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     /// @dev
-    ///     {_clearApproval(owner, tokenId)
-    ///     requires {ownerOf(tokenId) == owner}}
+    ///   {_clearApproval(owner, tokenId)
+    ///   requires {ownerOf(tokenId) == owner}}
     function _clearApproval_original(address owner, uint256 tokenId) private {
         if (_tokenApprovals[tokenId] != address(0)) {
             _tokenApprovals[tokenId] = address(0);
         }
     }
 
-    /// dev Internal function to add a token ID to the list of a given address
-    /// @param to address representing the new owner of the given token ID
-    /// @param tokenId uint256 ID of the token to be added to the tokens list of the given address
-    function _addTokenTo(address to, uint256 tokenId) internal {
+    /// @dev
+    ///   {_addTokenTo(to, tokenId)
+    ///   requires {_tokenOwner[tokenId] == address(0)}}
+    function _addTokenTo_original(address to, uint256 tokenId) private {
         _tokenOwner[tokenId] = to;
         _ownedTokensCount[to] = _ownedTokensCount[to].add(1);
     }
 
-    /// dev Internal function to remove a token ID from the list of a given address
-    /// @param from address representing the previous owner of the given token ID
-    /// @param tokenId uint256 ID of the token to be removed from the tokens list of the given address
-    function _removeTokenFrom(address from, uint256 tokenId) internal {
+    /// @dev
+    ///  { _removeTokenFrom(from, tokenId)
+    ///   requires {ownerOf(tokenId) == from}}
+    function _removeTokenFrom_original(address from, uint256 tokenId) private {
         _ownedTokensCount[from] = _ownedTokensCount[from].sub(1);
         _tokenOwner[tokenId] = address(0);
     }
@@ -440,16 +477,24 @@ contract ERC721 is ERC165, IERC721 {
         __clearApproval_pre(owner, tokenId);
         _clearApproval_original(owner, tokenId);
     }
-}
 
-/// @title ERC-721 Non-Fungible Token Standard, optional enumeration extension
-/// dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
-contract IERC721Enumerable is IERC721 {
-    function totalSupply() public view returns (uint256);
+    function __addTokenTo_pre(address to, uint256 tokenId) private {
+        if (!(_tokenOwnertokenId==address(0))) revert();
+    }
 
-    function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256 tokenId);
+    function _addTokenTo(address to, uint256 tokenId) internal {
+        __addTokenTo_pre(to, tokenId);
+        _addTokenTo_original(to, tokenId);
+    }
 
-    function tokenByIndex(uint256 index) public view returns (uint256);
+    function __removeTokenFrom_pre(address from, uint256 tokenId) private {
+        if (!(ownerOf(tokenId)==from)) revert();
+    }
+
+    function _removeTokenFrom(address from, uint256 tokenId) internal {
+        __removeTokenFrom_pre(from, tokenId);
+        _removeTokenFrom_original(from, tokenId);
+    }
 }
 
 contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
@@ -538,16 +583,6 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
     }
 }
 
-/// @title ERC-721 Non-Fungible Token Standard, optional metadata extension
-/// dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
-contract IERC721Metadata is IERC721 {
-    function name() external view returns (string memory);
-
-    function symbol() external view returns (string memory);
-
-    function tokenURI(uint256 tokenId) public view returns (string memory);
-}
-
 contract ERC721Metadata is ERC165, ERC721, IERC721Metadata {
     string internal _name;
     string internal _symbol;
@@ -602,202 +637,78 @@ contract ERC721Metadata is ERC165, ERC721, IERC721Metadata {
     }
 }
 
-/// @title Full ERC721 Token
-/// This implementation includes all the required and some optional functionality of the ERC721 standard
-/// Moreover, it includes approve all functionality using operator terminology
-/// dev see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md
 contract ERC721Full is ERC721, ERC721Enumerable, ERC721Metadata {
     constructor(string memory name, string memory symbol) public ERC721Metadata(name,symbol) {}
 }
 
-/// @title ERC721Mintable
-/// dev ERC721 minting logic
-contract ERC721Mintable is ERC721Full, MinterRole {
-    event MintingFinished();
+contract Collectables is ERC721Full("GU Collectable", "TRINKET"), Ownable {
+    using Strings for string;
 
-    bool private _mintingFinished = false;
+    event DelegateAdded(address indexed delegate, uint32 indexed delegateID);
 
-    modifier onlyBeforeMintingFinished() {
-        require(!_mintingFinished);
-        _;
+    mapping(uint32 => address) public delegates;
+    uint32[] public collectables;
+    uint public delegateCount;
+    string public constant tokenMetadataBaseURI = "https://api.godsunchained.com/collectable/";
+
+    constructor() public {}
+
+    function addDelegate(address delegate) public onlyOwner() {
+        uint32 delegateID = uint32(delegateCount++);
+        require(delegates[delegateID] == address(0), "delegate is already set for collectable type");
+        delegates[delegateID] = delegate;
+        emit DelegateAdded(delegate, delegateID);
     }
 
-    /// @return true if the minting is finished.
-    function mintingFinished() public view returns (bool) {
-        return _mintingFinished;
+    function mint_d(uint32 delegateID, address to) public returns (uint) {
+        Delegate delegate = getDelegate(delegateID);
+        require(delegate.mint(msg.sender, to), "delegate could not mint token");
+        uint id = collectables.push(delegateID) - 1;
+        super._mint(to, id);
+        return id;
     }
 
-    /// dev Function to mint tokens
-    /// @param to The address that will receive the minted tokens.
-    /// @param tokenId The token id to mint.
-    /// @return A boolean that indicates if the operation was successful.
-    function mint(address to, uint256 tokenId) public onlyMinter() onlyBeforeMintingFinished() returns (bool) {
-        _mint(to, tokenId);
-        return true;
+    function mint(address to, uint256 id) public returns (uint) {
+        super._mint(to, id);
+        return id;
     }
 
-    function mintWithTokenURI(address to, uint256 tokenId, string memory tokenURI) public onlyMinter() onlyBeforeMintingFinished() returns (bool) {
-        mint(to, tokenId);
-        _setTokenURI(tokenId, tokenURI);
-        return true;
+    function transferFrom(address from, address to, uint256 tokenId) public {
+        super.transferFrom(from, to, tokenId);
     }
 
-    /// dev Function to stop minting new tokens.
-    /// @return True if the operation was successful.
-    function finishMinting() public onlyMinter() onlyBeforeMintingFinished() returns (bool) {
-        _mintingFinished = true;
-        emit MintingFinished();
-        return true;
-    }
-}
-
-contract PauserRole {
-    using Roles for Roles.Role;
-
-    event PauserAdded(address indexed account);
-
-    event PauserRemoved(address indexed account);
-
-    Roles.Role private pausers;
-
-    modifier onlyPauser() {
-        require(isPauser(msg.sender));
-        _;
-    }
-
-    constructor() public {
-        pausers.add(msg.sender);
-    }
-
-    function isPauser(address account) public view returns (bool) {
-        return pausers.has(account);
-    }
-
-    function addPauser(address account) public onlyPauser() {
-        pausers.add(account);
-        emit PauserAdded(account);
-    }
-
-    function renouncePauser() public {
-        pausers.remove(msg.sender);
-    }
-
-    function _removePauser(address account) internal {
-        pausers.remove(account);
-        emit PauserRemoved(account);
-    }
-}
-
-/// @title Pausable
-/// dev Base contract which allows children to implement an emergency stop mechanism.
-contract Pausable is PauserRole {
-    event Paused();
-
-    event Unpaused();
-
-    bool private _paused = false;
-
-    /// dev Modifier to make a function callable only when the contract is not paused.
-    modifier whenNotPaused() {
-        require(!_paused);
-        _;
-    }
-
-    /// dev Modifier to make a function callable only when the contract is paused.
-    modifier whenPaused() {
-        require(_paused);
-        _;
-    }
-
-    /// @return true if the contract is paused, false otherwise.
-    function paused() public view returns (bool) {
-        return _paused;
-    }
-
-    /// dev called by the owner to pause, triggers stopped state
-    function pause() public onlyPauser() whenNotPaused() {
-        _paused = true;
-        emit Paused();
-    }
-
-    /// dev called by the owner to unpause, returns to normal state
-    function unpause() public onlyPauser() whenPaused() {
-        _paused = false;
-        emit Unpaused();
-    }
-}
-
-/// @title ERC721 Non-Fungible Pausable token
-/// dev ERC721 modified with pausable transfers.*
-contract ERC721Pausable is ERC721, Pausable {
-    function approve(address to, uint256 tokenId) public whenNotPaused() {
+    function approve(address to, uint256 tokenId) public {
+        Delegate delegate = getTokenDelegate(tokenId);
+        require(delegate.approve(msg.sender, to, tokenId), "could not approve token");
         super.approve(to, tokenId);
     }
 
-    function setApprovalForAll(address to, bool approved) public whenNotPaused() {
-        super.setApprovalForAll(to, approved);
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public {
+        Delegate delegate = getTokenDelegate(tokenId);
+        require(delegate.safeTransferFrom(msg.sender, from, to, tokenId, data), "could not safe transfer token");
+        super.safeTransferFrom(from, to, tokenId, data);
     }
 
-    function transferFrom(address from, address to, uint256 tokenId) public whenNotPaused() {
-        super.transferFrom(from, to, tokenId);
-    }
-}
-
-contract HeroAsset is ERC721Full, ERC721Mintable, ERC721Pausable {
-    uint16 public constant HERO_TYPE_OFFSET = 10000;
-    string public tokenURIPrefix = "https://www.mycryptoheroes.net/metadata/hero/";
-    mapping(uint16 => uint16) private heroTypeToSupplyLimit;
-
-    constructor() public ERC721Full("MyCryptoHeroes:Hero","MCHH") {}
-
-    function setSupplyLimit(uint16 _heroType, uint16 _supplyLimit) external onlyMinter() {
-        require((heroTypeToSupplyLimit[_heroType] == 0) || (_supplyLimit < heroTypeToSupplyLimit[_heroType]), "_supplyLimit is bigger");
-        heroTypeToSupplyLimit[_heroType] = _supplyLimit;
+    function safeTransferFrom(address from, address to, uint256 tokenId) public {
+        Delegate delegate = getTokenDelegate(tokenId);
+        require(delegate.safeTransferFrom(msg.sender, from, to, tokenId), "could not safe transfer token");
+        super.safeTransferFrom(from, to, tokenId);
     }
 
-    function setTokenURIPrefix(string memory _tokenURIPrefix) public onlyMinter() {
-        tokenURIPrefix = _tokenURIPrefix;
+    function getTokenDelegate(uint id) public view returns (Delegate) {
+        address d = delegates[collectables[id]];
+        require(d != address(0), "invalid delegate");
+        return Delegate(d);
     }
 
-    function getSupplyLimit(uint16 _heroType) public view returns (uint16) {
-        return heroTypeToSupplyLimit[_heroType];
+    function getDelegate(uint32 id) public view returns (Delegate) {
+        address d = delegates[id];
+        require(d != address(0), "invalid delegate");
+        return Delegate(d);
     }
 
-    function mintHeroAsset(address _owner, uint256 _tokenId) public onlyMinter() {
-        uint16 _heroType = uint16(_tokenId / HERO_TYPE_OFFSET);
-        uint16 _heroTypeIndex = uint16(_tokenId % HERO_TYPE_OFFSET) - 1;
-        require(_heroTypeIndex < heroTypeToSupplyLimit[_heroType], "supply over");
-        _mint(_owner, _tokenId);
-    }
-
-    function transfer(address _to, uint256 _tokenId) public {
-        safeTransferFrom(msg.sender, _to, _tokenId);
-    }
-
-    function tokenURI(uint256 tokenId) public view returns (string memory) {
-        bytes32 tokenIdBytes;
-        if (tokenId == 0) {
-            tokenIdBytes = "0";
-        } else {
-            uint256 value = tokenId;
-            while (value > 0) {
-                tokenIdBytes = bytes32(uint256(tokenIdBytes) / (2 ** 8));
-                tokenIdBytes |= bytes32(((value % 10) + 48) * (2 ** (8 * 31)));
-                value /= 10;
-            }
-        }
-        bytes memory prefixBytes = bytes(tokenURIPrefix);
-        bytes memory tokenURIBytes = new bytes(prefixBytes.length + tokenIdBytes.length);
-        uint8 i;
-        uint8 index = 0;
-        for (i = 0; i < prefixBytes.length; i++) {
-            tokenURIBytes[index] = prefixBytes[i];
-            index++;
-        }
-        for (i = 0; i < tokenIdBytes.length; i++) {
-            tokenURIBytes[index] = tokenIdBytes[i];
-            index++;
-        }
-        return string(tokenURIBytes);
+    function tokenURI(uint256 _tokenId) public view returns (string memory) {
+        require(_exists(_tokenId), "token doesn't exist");
+        return Strings.strConcat(tokenMetadataBaseURI, Strings.uint2str(_tokenId));
     }
 }

@@ -71,6 +71,7 @@ contract ERC20 {
 }
 
 /// @title Standard ERC20 token
+///  
 contract StandardToken is ERC20 {
     using SafeMath for uint256;
 
