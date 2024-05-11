@@ -750,7 +750,7 @@ library Roles {
         return role.bearer[account];
     }
 
-    function _add_pre(Role storage role, address account) private view {
+    function _add_pre(Role storage role, address account) private pure {
         if (!(account!=address(0)&&!has(role,account))) revert();
     }
 

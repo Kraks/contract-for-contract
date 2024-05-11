@@ -495,9 +495,9 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
         const allFuncParams = addrParam.concat(valGasParams.concat(tgtFuncParams));
         const tgtFuncRetParams = tgtFunc.vReturnParameters.vParameters;
         const factory = new CheckFunFactory(s, allFuncParams, tgtFuncRetParams, this.factory, tgtVarNameInSpec);
-        const addrCallPreFun = factory.preCondCheckFun(this.preAddrError, FunctionStateMutability.NonPayable, s.id);
+        const addrCallPreFun = factory.preCondCheckFun(this.preAddrError, this.funDef.stateMutability, s.id);
         if (addrCallPreFun) this.funDef.vScope.appendChild(addrCallPreFun);
-        const addrCallPostFun = factory.postCondCheckFun(this.postAddrError, FunctionStateMutability.NonPayable, s.id);
+        const addrCallPostFun = factory.postCondCheckFun(this.postAddrError, this.funDef.stateMutability, s.id);
         if (addrCallPostFun) this.funDef.vScope.appendChild(addrCallPostFun);
 
         // Generate dispatch_Iface_f
@@ -536,7 +536,5 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
         }
       }
     }
-    // TODO(DX): stateMutability: pure/payable/nonpayable ...
-    // TODO(DX): data location
   }
 }
