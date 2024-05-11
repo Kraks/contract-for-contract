@@ -9,6 +9,7 @@ import {
   ErrorDefinition,
   Expression,
   FunctionStateMutability,
+  DataLocation,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -22,6 +23,7 @@ import { ValSpecTransformer } from './ValSpecTransformer.js';
 export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   funDef: FunctionDefinition;
   retTypes: TypeName[];
+  retLocations: DataLocation[];
   declaredParams: VariableDeclaration[];
   declaredRetParams: VariableDeclaration[];
   preCondError: ErrorDefinition;
@@ -55,8 +57,10 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     this.declaredRetParams = declaredRetParams;
     this.funDef = funDef;
     this.retTypes = this.declaredRetParams
-      .map((param) => param.vType)
+    .map((param) => param.vType)
       .filter((vType): vType is TypeName => vType !== undefined); // filter out the undefined object
+    this.retLocations = this.declaredRetParams
+      .map((param) => param.storageLocation);
     this.preCondError = preCondError;
     this.postCondError = postCondError;
     this.preAddrError = preAddrError;
@@ -73,9 +77,14 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
 
     assert(this.retTypes.length === this.spec.call.rets.length, 'some return parameters are missing type');
 
+   
     const retTypeStr =
       this.retTypes.length > 0 ? '(' + this.retTypes.map((t) => t.typeString).toString() + ')' : 'void';
     const retTypeDecls = this.factory.makeTypedVarDecls(this.retTypes, this.spec.call.rets, this.funDef.scope);
+    retTypeDecls.forEach((retTypeDecl, index) => {
+      // Update the storageLocation of each retTypeDecl based on this.retLocations
+      retTypeDecl.storageLocation = this.retLocations[index];
+    });
     const stmts = [];
 
     // Generate function call to check pre-condition (if any)
@@ -427,8 +436,6 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
           }
         }
       });
-      console.log(argSpecIdMaps);
-
       const guard = this.guardedFunAddr(argSpecIdMaps, this.funDef, preFun, postFun);
       if (guard) this.funDef.vScope.appendChild(guard);
 

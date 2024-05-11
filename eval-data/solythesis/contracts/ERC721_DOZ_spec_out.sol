@@ -700,7 +700,7 @@ contract ERC721Metadata is ERC165, ERC721, IERC721Metadata {
 
     function tokenURI(uint256 tokenId) external view returns (string memory) {
         _tokenURI_pre(tokenId);
-        string uri = tokenURI_original(tokenId);
+        string memory uri = tokenURI_original(tokenId);
         return (uri);
     }
 

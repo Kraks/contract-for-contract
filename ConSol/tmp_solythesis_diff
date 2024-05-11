@@ -131,11 +131,6 @@ Diff results for ../eval-data/solythesis/contracts/ERC20_THETA:
 <         if (!(balancesmsg.sender>=_value&&_value>0)) revert();
 ---
 >         if (!(balances[msg.sender]>=_value&&_value>0)) revert();
-203c203
-< }
-\ No newline at end of file
----
-> }
 
 
 
@@ -143,11 +138,6 @@ Diff results for ../eval-data/solythesis/contracts/ERC20_XIN:
 --------------------------------
 74d73
 < ///  
-147c146
-< }
-\ No newline at end of file
----
-> }
 
 
 
@@ -186,70 +176,10 @@ Diff results for ../eval-data/solythesis/contracts/ERC721_CLV:
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_DOZ:
 --------------------------------
-245c245
-<     function balanceOf_original(address owner) private view returns (uint256) {
----
->     function balanceOf_original(address owner) view private returns (uint256) {
-252c252
-<     function ownerOf_original(uint256 tokenId) private view returns (address) {
----
->     function ownerOf_original(uint256 tokenId) view private returns (address) {
-269c269
-<     function getApproved_original(uint256 tokenId) private view returns (address) {
----
->     function getApproved_original(uint256 tokenId) view private returns (address) {
-402c402
-<     function _balanceOf_pre(address owner) private view {
----
->     function _balanceOf_pre(address owner) view private {
-412c412
-<     function _ownerOf_post(uint256 tokenId, address owner) private view {
----
->     function _ownerOf_post(uint256 tokenId, address owner) view private {
-431c431
-<     function _getApproved_pre(uint256 tokenId) private view {
----
->     function _getApproved_pre(uint256 tokenId) view private {
-513c513
-<     function tokenOfOwnerByIndex_original(address owner, uint256 index) private view returns (uint256) {
----
->     function tokenOfOwnerByIndex_original(address owner, uint256 index) view private returns (uint256) {
-526c526
-<     function tokenByIndex_original(uint256 index) private view returns (uint256) {
----
->     function tokenByIndex_original(uint256 index) view private returns (uint256) {
-615c615
-<     function _tokenOfOwnerByIndex_pre(address owner, uint256 index) private view {
----
->     function _tokenOfOwnerByIndex_pre(address owner, uint256 index) view private {
-625c625
-<     function _tokenByIndex_pre(uint256 index) private view {
----
->     function _tokenByIndex_pre(uint256 index) view private {
-674c674
-<     function tokenURI_original(uint256 tokenId) private view returns (string memory) {
----
->     function tokenURI_original(uint256 tokenId) view private returns (string memory) {
-697c697
-<     function _tokenURI_pre(uint256 tokenId) private view {
----
->     function _tokenURI_pre(uint256 tokenId) view private {
-703c703
-<         string uri = tokenURI_original(tokenId);
----
->         string memory uri = tokenURI_original(tokenId);
-749c749
-<     function has_original(Role storage role, address account) private view returns (bool) {
----
->     function has_original(Role storage role, address account) view private returns (bool) {
 753c753
 <     function _add_pre(Role storage role, address account) private {
 ---
->     function _add_pre(Role storage role, address account) view private {
-771c771
-<     function _has_pre(Role storage role, address account) private view {
----
->     function _has_pre(Role storage role, address account) view private {
+>     function _add_pre(Role storage role, address account) private view {
 775c775
 <     function has(Role storage role, address account) internal view returns (bool) {
 ---

@@ -242,14 +242,14 @@ contract ERC721 is ERC165, IERC721 {
     /// @dev
     ///   {balanceOf(owner) returns (c)
     ///   requires {owner != address(0)}}
-    function balanceOf_original(address owner) view private returns (uint256) {
+    function balanceOf_original(address owner) private view returns (uint256) {
         return _ownedTokensCount[owner];
     }
 
     /// @dev
     ///   {ownerOf(tokenId) returns (owner)
     ///   ensures {owner != address(0)}}
-    function ownerOf_original(uint256 tokenId) view private returns (address) {
+    function ownerOf_original(uint256 tokenId) private view returns (address) {
         address owner = _tokenOwner[tokenId];
         return owner;
     }
@@ -266,7 +266,7 @@ contract ERC721 is ERC165, IERC721 {
     /// @dev
     ///   {getApproved(tokenId) returns (approved)
     ///   requires {_exists(tokenId)}}
-    function getApproved_original(uint256 tokenId) view private returns (address) {
+    function getApproved_original(uint256 tokenId) private view returns (address) {
         return _tokenApprovals[tokenId];
     }
 
@@ -399,7 +399,7 @@ contract ERC721 is ERC165, IERC721 {
         }
     }
 
-    function _balanceOf_pre(address owner) view private {
+    function _balanceOf_pre(address owner) private view {
         if (!(owner!=address(0))) revert();
     }
 
@@ -409,7 +409,7 @@ contract ERC721 is ERC165, IERC721 {
         return (c);
     }
 
-    function _ownerOf_post(uint256 tokenId, address owner) view private {
+    function _ownerOf_post(uint256 tokenId, address owner) private view {
         if (!(owner!=address(0))) revert();
     }
 
@@ -428,7 +428,7 @@ contract ERC721 is ERC165, IERC721 {
         approve_original(to, tokenId);
     }
 
-    function _getApproved_pre(uint256 tokenId) view private {
+    function _getApproved_pre(uint256 tokenId) private view {
         if (!(_exists(tokenId))) revert();
     }
 
@@ -510,7 +510,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
     /// @dev
     ///   {tokenOfOwnerByIndex(owner, index) returns (tokenId)
     ///   requires {index < balanceOf(owner)}}
-    function tokenOfOwnerByIndex_original(address owner, uint256 index) view private returns (uint256) {
+    function tokenOfOwnerByIndex_original(address owner, uint256 index) private view returns (uint256) {
         return _ownedTokens[owner][index];
     }
 
@@ -523,7 +523,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
     /// @dev
     ///   {tokenByIndex(index) returns (x)
     ///   requires {index < totalSupply()}}
-    function tokenByIndex_original(uint256 index) view private returns (uint256) {
+    function tokenByIndex_original(uint256 index) private view returns (uint256) {
         return _allTokens[index];
     }
 
@@ -612,7 +612,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
         _allTokensIndex[tokenId] = 0;
     }
 
-    function _tokenOfOwnerByIndex_pre(address owner, uint256 index) view private {
+    function _tokenOfOwnerByIndex_pre(address owner, uint256 index) private view {
         if (!(index<balanceOf(owner))) revert();
     }
 
@@ -622,7 +622,7 @@ contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
         return (tokenId);
     }
 
-    function _tokenByIndex_pre(uint256 index) view private {
+    function _tokenByIndex_pre(uint256 index) private view {
         if (!(index<totalSupply())) revert();
     }
 
@@ -671,7 +671,7 @@ contract ERC721Metadata is ERC165, ERC721, IERC721Metadata {
     /// @dev
     ///   {tokenURI(tokenId) returns (uri)
     ///   requires {_exists(tokenId)}}
-    function tokenURI_original(uint256 tokenId) view private returns (string memory) {
+    function tokenURI_original(uint256 tokenId) private view returns (string memory) {
         return _tokenURIs[tokenId];
     }
 
@@ -694,7 +694,7 @@ contract ERC721Metadata is ERC165, ERC721, IERC721Metadata {
         }
     }
 
-    function _tokenURI_pre(uint256 tokenId) view private {
+    function _tokenURI_pre(uint256 tokenId) private view {
         if (!(_exists(tokenId))) revert();
     }
 
@@ -746,11 +746,11 @@ library Roles {
     /// @dev
     ///   {has(role, account) returns (bool)
     ///   requires {account != address(0)}}
-    function has_original(Role storage role, address account) view private returns (bool) {
+    function has_original(Role storage role, address account) private view returns (bool) {
         return role.bearer[account];
     }
 
-    function _add_pre(Role storage role, address account) view private {
+    function _add_pre(Role storage role, address account) private view {
         if (!(account!=address(0)&&!has(role,account))) revert();
     }
 
@@ -768,7 +768,7 @@ library Roles {
         remove_original(role, account);
     }
 
-    function _has_pre(Role storage role, address account) view private {
+    function _has_pre(Role storage role, address account) private view {
         if (!(account!=address(0))) revert();
     }
 
