@@ -121,7 +121,11 @@ export class CheckFunFactory<T> {
   }
   */
 
-  preCondCheckFun(errorDef: ErrorDefinition, mutability:FunctionStateMutability, errorParamVal: string | number): FunctionDefinition | undefined {
+  preCondCheckFun(
+    errorDef: ErrorDefinition,
+    mutability: FunctionStateMutability,
+    errorParamVal: string | number,
+  ): FunctionDefinition | undefined {
     if (this.spec.preCond === undefined) return undefined;
     const preFunName = preCheckFunName(this.tgtName);
     const varDecs = this.factory.makeVarDecs(this.guardedParamNames, this.paramVarDecs);
@@ -130,7 +134,11 @@ export class CheckFunFactory<T> {
     return preFunDef;
   }
 
-  postCondCheckFun(errorDef: ErrorDefinition, mutability:FunctionStateMutability, errorParamVal: string | number): FunctionDefinition | undefined {
+  postCondCheckFun(
+    errorDef: ErrorDefinition,
+    mutability: FunctionStateMutability,
+    errorParamVal: string | number,
+  ): FunctionDefinition | undefined {
     if (this.spec.postCond === undefined) return undefined;
     const postFunName = postCheckFunName(this.tgtName);
     const rets = [...this.guardedParamNames, ...this.guardedRetParamNames];
@@ -138,7 +146,14 @@ export class CheckFunFactory<T> {
     //console.log(this.paramVarDecs.map((v) => v.name))
     const retVarDecs = this.factory.makeVarDecs(rets, [...this.paramVarDecs, ...this.retVarDecs]);
     const allParams = this.factory.makeParameterList([...retVarDecs]);
-    const postCondFunc = this.makeCheckFun(postFunName, this.spec.postCond, allParams, errorDef, mutability, errorParamVal);
+    const postCondFunc = this.makeCheckFun(
+      postFunName,
+      this.spec.postCond,
+      allParams,
+      errorDef,
+      mutability,
+      errorParamVal,
+    );
     return postCondFunc;
   }
 }

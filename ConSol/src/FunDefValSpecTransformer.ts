@@ -57,10 +57,9 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     this.declaredRetParams = declaredRetParams;
     this.funDef = funDef;
     this.retTypes = this.declaredRetParams
-    .map((param) => param.vType)
+      .map((param) => param.vType)
       .filter((vType): vType is TypeName => vType !== undefined); // filter out the undefined object
-    this.retLocations = this.declaredRetParams
-      .map((param) => param.storageLocation);
+    this.retLocations = this.declaredRetParams.map((param) => param.storageLocation);
     this.preCondError = preCondError;
     this.postCondError = postCondError;
     this.preAddrError = preAddrError;
@@ -77,7 +76,6 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
 
     assert(this.retTypes.length === this.spec.call.rets.length, 'some return parameters are missing type');
 
-   
     const retTypeStr =
       this.retTypes.length > 0 ? '(' + this.retTypes.map((t) => t.typeString).toString() + ')' : 'void';
     const retTypeDecls = this.factory.makeTypedVarDecls(this.retTypes, this.spec.call.rets, this.funDef.scope);
@@ -497,7 +495,7 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
         const allFuncParams = addrParam.concat(valGasParams.concat(tgtFuncParams));
         const tgtFuncRetParams = tgtFunc.vReturnParameters.vParameters;
         const factory = new CheckFunFactory(s, allFuncParams, tgtFuncRetParams, this.factory, tgtVarNameInSpec);
-        const addrCallPreFun = factory.preCondCheckFun(this.preAddrError,  FunctionStateMutability.NonPayable, s.id);
+        const addrCallPreFun = factory.preCondCheckFun(this.preAddrError, FunctionStateMutability.NonPayable, s.id);
         if (addrCallPreFun) this.funDef.vScope.appendChild(addrCallPreFun);
         const addrCallPostFun = factory.postCondCheckFun(this.postAddrError, FunctionStateMutability.NonPayable, s.id);
         if (addrCallPostFun) this.funDef.vScope.appendChild(addrCallPostFun);
@@ -530,7 +528,6 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
         this.funDef.vScope.appendChild(wrapper);
         this.funDef.name = uncheckedFunName(this.tgtName);
         this.funDef.visibility = FunctionVisibility.Private;
-        this.funDef.stateMutability = this.funDef.stateMutability;
         if (this.funDef.isConstructor) {
           // If the spec is attached on a constructor, we generate a new constructor,
           // and the original constructor becomes an ordinary function.
