@@ -744,7 +744,7 @@ library Roles {
     }
 
     /// @dev
-    ///   {has(role, account) returns (bool)
+    ///   {has(role, account) returns (b)
     ///   requires {account != address(0)}}
     function has_original(Role storage role, address account) private view returns (bool) {
         return role.bearer[account];
@@ -774,8 +774,8 @@ library Roles {
 
     function has(Role storage role, address account) internal view returns (bool) {
         _has_pre(role, account);
-        bool bool = has_original(role, account);
-        return (bool);
+        bool b = has_original(role, account);
+        return (b);
     }
 }
 

@@ -744,13 +744,13 @@ library Roles {
     }
 
     /// @dev
-    ///   {has(role, account) returns (bool)
+    ///   {has(role, account) returns (b)
     ///   requires {account != address(0)}}
     function has_original(Role storage role, address account) private view returns (bool) {
         return role.bearer[account];
     }
 
-    function _add_pre(Role storage role, address account) private pure {
+    function _add_pre(Role storage role, address account) private {
         if (!(account!=address(0)&&!has(role,account))) revert();
     }
 
@@ -772,7 +772,7 @@ library Roles {
         if (!(account!=address(0))) revert();
     }
 
-    function has(Role storage role, address account) internal view returns (bool b) {
+    function has(Role storage role, address account) internal view returns (bool) {
         _has_pre(role, account);
         bool b = has_original(role, account);
         return (b);

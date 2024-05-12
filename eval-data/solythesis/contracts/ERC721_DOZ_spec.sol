@@ -920,7 +920,7 @@ library Roles {
      * @return bool
      */
     /// @dev
-    ///  {has(role, account) returns (bool)
+    ///  {has(role, account) returns (b)
     ///  requires {account != address(0)}}
     function has(Role storage role, address account) internal view returns (bool) {
         return role.bearer[account];
