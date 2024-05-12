@@ -1,5 +1,6 @@
 Diff results for ../eval-data/solythesis/contracts/ERC1202_VOTE:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC1202_VOTE_spec_out.sol ../eval-data/solythesis/contracts/ERC1202_VOTE_spec_gt.sol >> tmp_solythesis_diff
 26c26
 <     ///  	requires { options_.length >= 2 && options[issueId].length == 0 }
 ---
@@ -22,6 +23,7 @@ Diff results for ../eval-data/solythesis/contracts/ERC1202_VOTE:
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_BEC:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC20_BEC_spec_out.sol ../eval-data/solythesis/contracts/ERC20_BEC_spec_gt.sol >> tmp_solythesis_diff
 97c97
 <         if (!(_to!=address(0)&&_value>0&&_value<=balancesmsg.sender)) revert();
 ---
@@ -50,11 +52,13 @@ Diff results for ../eval-data/solythesis/contracts/ERC20_BEC:
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_DAI:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC20_DAI_spec_out.sol ../eval-data/solythesis/contracts/ERC20_DAI_spec_gt.sol >> tmp_solythesis_diff
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_EKT:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC20_EKT_spec_out.sol ../eval-data/solythesis/contracts/ERC20_EKT_spec_gt.sol >> tmp_solythesis_diff
 136c136
 <         if (!(_value>0&&_value<=_balancesmsg.sender&&(_to==address(0)||_balances_to+_value>=_balances_to))) revert();
 ---
@@ -73,11 +77,13 @@ Diff results for ../eval-data/solythesis/contracts/ERC20_EKT:
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_HEDG:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC20_HEDG_spec_out.sol ../eval-data/solythesis/contracts/ERC20_HEDG_spec_gt.sol >> tmp_solythesis_diff
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_HOT:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC20_HOT_spec_out.sol ../eval-data/solythesis/contracts/ERC20_HOT_spec_gt.sol >> tmp_solythesis_diff
 179c179
 <         if (!(_to!=address(0)&&_value<=balancesmsg.sender)) revert();
 ---
@@ -92,41 +98,35 @@ Diff results for ../eval-data/solythesis/contracts/ERC20_HOT:
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_INB:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC20_INB_spec_out.sol ../eval-data/solythesis/contracts/ERC20_INB_spec_gt.sol >> tmp_solythesis_diff
 150c150
 <         if (!(_to!=address(0)&&_value<=balancesmsg.sender)) revert();
 ---
 >         if (!(_to!=address(0)&&_value<=balances[msg.sender])) revert();
-258c258
-< }
-\ No newline at end of file
----
-> }
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_SWIPE:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC20_SWIPE_spec_out.sol ../eval-data/solythesis/contracts/ERC20_SWIPE_spec_gt.sol >> tmp_solythesis_diff
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_TETHER:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC20_TETHER_spec_out.sol ../eval-data/solythesis/contracts/ERC20_TETHER_spec_gt.sol >> tmp_solythesis_diff
 156d155
 < ///  
 380c379
 <         if (!(!isBlackListedmsg.sender)) revert();
 ---
 >         if (!(!isBlackListed[msg.sender])) revert();
-387c386
-< }
-\ No newline at end of file
----
-> }
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_THETA:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC20_THETA_spec_out.sol ../eval-data/solythesis/contracts/ERC20_THETA_spec_gt.sol >> tmp_solythesis_diff
 195c195
 <         if (!(balancesmsg.sender>=_value&&_value>0)) revert();
 ---
@@ -136,6 +136,7 @@ Diff results for ../eval-data/solythesis/contracts/ERC20_THETA:
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_XIN:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC20_XIN_spec_out.sol ../eval-data/solythesis/contracts/ERC20_XIN_spec_gt.sol >> tmp_solythesis_diff
 74d73
 < ///  
 
@@ -143,21 +144,25 @@ Diff results for ../eval-data/solythesis/contracts/ERC20_XIN:
 
 Diff results for ../eval-data/solythesis/contracts/ERC20_ZRX:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC20_ZRX_spec_out.sol ../eval-data/solythesis/contracts/ERC20_ZRX_spec_gt.sol >> tmp_solythesis_diff
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_BKC:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC721_BKC_spec_out.sol ../eval-data/solythesis/contracts/ERC721_BKC_spec_gt.sol >> tmp_solythesis_diff
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_CARDS:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC721_CARDS_spec_out.sol ../eval-data/solythesis/contracts/ERC721_CARDS_spec_gt.sol >> tmp_solythesis_diff
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_CC:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC721_CC_spec_out.sol ../eval-data/solythesis/contracts/ERC721_CC_spec_gt.sol >> tmp_solythesis_diff
 387c387
 <         if (!(tokenOwner_tokenId==address(0))) revert();
 ---
@@ -167,6 +172,7 @@ Diff results for ../eval-data/solythesis/contracts/ERC721_CC:
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_CLV:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC721_CLV_spec_out.sol ../eval-data/solythesis/contracts/ERC721_CLV_spec_gt.sol >> tmp_solythesis_diff
 437c437
 <         if (!(tokenOwner_tokenId==address(0))) revert();
 ---
@@ -176,25 +182,13 @@ Diff results for ../eval-data/solythesis/contracts/ERC721_CLV:
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_DOZ:
 --------------------------------
-753c753
-<     function _add_pre(Role storage role, address account) private {
----
->     function _add_pre(Role storage role, address account) private view {
-775c775
-<     function has(Role storage role, address account) internal view returns (bool) {
----
->     function has(Role storage role, address account) internal view returns (bool b) {
-777,778c777,778
-<         bool bool = has_original(role, account);
-<         return (bool);
----
->         bool b = has_original(role, account);
->         return (b);
+diff ../eval-data/solythesis/contracts/ERC721_DOZ_spec_out.sol ../eval-data/solythesis/contracts/ERC721_DOZ_spec_gt.sol >> tmp_solythesis_diff
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_EGG:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC721_EGG_spec_out.sol ../eval-data/solythesis/contracts/ERC721_EGG_spec_gt.sol >> tmp_solythesis_diff
 356c356
 <         if (!(ownerOf_tokenId==_owner)) revert();
 ---
@@ -212,11 +206,13 @@ Diff results for ../eval-data/solythesis/contracts/ERC721_EGG:
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_KB:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC721_KB_spec_out.sol ../eval-data/solythesis/contracts/ERC721_KB_spec_gt.sol >> tmp_solythesis_diff
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_LAND:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC721_LAND_spec_out.sol ../eval-data/solythesis/contracts/ERC721_LAND_spec_gt.sol >> tmp_solythesis_diff
 372c372
 <         if (!(_tokenOwnertokenId==address(0))) revert();
 ---
@@ -226,16 +222,19 @@ Diff results for ../eval-data/solythesis/contracts/ERC721_LAND:
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_MCHH:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC721_MCHH_spec_out.sol ../eval-data/solythesis/contracts/ERC721_MCHH_spec_gt.sol >> tmp_solythesis_diff
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_PACKS:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC721_PACKS_spec_out.sol ../eval-data/solythesis/contracts/ERC721_PACKS_spec_gt.sol >> tmp_solythesis_diff
 
 
 
 Diff results for ../eval-data/solythesis/contracts/ERC721_TRINKET:
 --------------------------------
+diff ../eval-data/solythesis/contracts/ERC721_TRINKET_spec_out.sol ../eval-data/solythesis/contracts/ERC721_TRINKET_spec_gt.sol >> tmp_solythesis_diff
 482c482
 <         if (!(_tokenOwnertokenId==address(0))) revert();
 ---
