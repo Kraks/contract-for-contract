@@ -8,7 +8,7 @@ output_file="tmp_hack_diff"
 for f in ../eval-data/hacks/*; do
     if [ -d "$f" ]; then
         # Run the consol command
-        # consol "$f/contract/flattened.sol"
+        consol "$f/contract/flattened.sol"
         
         # Remove the JSON file
         rm "$f/contract/flattened_ast.json"

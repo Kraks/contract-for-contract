@@ -12,8 +12,8 @@ for file in ../eval-data/solythesis/contracts/*_spec.sol; do
     fname="${file%_spec.sol}"
 
     # Run consol on the file
-    # consol "$file"
-    # rm "${fname}_spec_ast.json"
+    consol "$file"
+    rm "${fname}_spec_ast.json"
 
 
     
