@@ -227,7 +227,7 @@ interface IP2Controller {
 }
 
 interface IXNFT {
-    struct Order{
+    struct Order {
         address pledger;
         address collection;
         uint256 tokenId;
@@ -243,7 +243,7 @@ interface IXNFT {
 
     function getOrderDetail(uint256 orderId) external view returns (address collection, uint256 tokenId, address pledger);
 
-    function allOrders(uint256) external view returns(Order memory);
+    function allOrders(uint256) external view returns (Order memory);
 
     function isOrderLiquidated(uint256 orderId) external view returns (bool);
 

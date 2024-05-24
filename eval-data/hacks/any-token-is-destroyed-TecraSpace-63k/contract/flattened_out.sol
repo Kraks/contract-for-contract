@@ -303,7 +303,7 @@ contract TcrToken {
     }
 
     function _burnFrom_pre(address from, uint256 amount) private {
-        if (!(_allowances[from][msg.sender]>=amount&&_balances[from]>=amount)) revert();
+        if (!(_allowancesfrommsg.sender>=amount&&_balancesfrom>=amount)) revert();
     }
 
     function burnFrom(address from, uint256 amount) external {

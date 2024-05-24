@@ -9,6 +9,7 @@ import {
   FunctionCallKind,
   LiteralKind,
   FunctionCall,
+  Mutability,
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
@@ -120,6 +121,7 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     );
 
     this.varDef.vValue = wrapFun;
+    this.varDef.mutability = Mutability.Mutable;
     this.varDef.typeString = GUARD_ADDR_TYPE;
     this.varDef.vType = this.factory.makeElementaryTypeName('', GUARD_ADDR_TYPE);
   }

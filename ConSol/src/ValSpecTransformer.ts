@@ -200,7 +200,14 @@ export class ValSpecTransformer<T> {
         return;
       }
       // addr.fun() -> dispatch_IFace_f(addr, 0, 0)
-      node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
+      // node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
+      const gasLeft = this.factory.makeFunctionCall(
+        'uint256',
+        FunctionCallKind.FunctionCall,
+        this.factory.makeIdentifier('msg', 'gasleft', -1),
+        [],
+      );
+      node.vArguments.unshift(gasLeft);
       node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
       node.vArguments.unshift(node.vExpression.vExpression);
       node.vExpression = this.factory.makeIdentifier('function', this.dispatchFunName(tgtInterface, tgtFun), -1);

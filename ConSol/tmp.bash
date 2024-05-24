@@ -12,15 +12,19 @@ for file in ../eval-data/solythesis/contracts/*_spec.sol; do
     fname="${file%_spec.sol}"
 
     # Run consol on the file
-    consol "$file"
+    # consol "$file"
+    # rm "${fname}_spec_ast.json"
 
+
+    
     # Output filename information to the output file
     echo "Diff results for $fname:" >> "$output_file"
     echo "--------------------------------" >> "$output_file"
 
     # Run diff and append the output to the file
+    echo "diff "${fname}_spec_out.sol" "${fname}_spec_gt.sol" >> "$output_file"" >> "$output_file"
     diff "${fname}_spec_out.sol" "${fname}_spec_gt.sol" >> "$output_file"
-    rm "${fname}_spec_ast.json"
+    
     # Add a blank line for readability between entries
     echo -e "\n\n" >> "$output_file"
 done

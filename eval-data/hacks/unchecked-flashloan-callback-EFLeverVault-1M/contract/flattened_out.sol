@@ -85,11 +85,6 @@ contract ReentrancyGuard {
     uint128 private _guardCounter;
     uint128 internal _entered;
 
-    constructor () internal {
-        _guardCounter = 1;
-        _entered = 0;
-    }
-
     modifier nonReentrant() {
         _guardCounter += 1;
         _entered = 1;
@@ -97,6 +92,11 @@ contract ReentrancyGuard {
         _;
         _entered = 0;
         require(localCounter == _guardCounter, "ReentrancyGuard: reentrant call");
+    }
+
+    constructor() internal {
+        _guardCounter = 1;
+        _entered = 0;
     }
 }
 
@@ -249,7 +249,7 @@ contract EFLeverVault is Ownable, ReentrancyGuard {
     /// @dev
     ///  {receiveFlashLoan(tokens, amounts, feeAmounts, userData) returns ()
     ///     requires {_entered == 1 && msg.sender == balancer}}
-    function receiveFlashLoan_original(IERC20[] memory tokens, uint256[] memory amounts, uint256[] memory feeAmounts, bytes memory userData) private {
+    function receiveFlashLoan_original(IERC20[] memory tokens, uint256[] memory amounts, uint256[] memory feeAmounts, bytes memory userData) private payable {
         uint256 loan_amount = amounts[0];
         uint256 fee_amount = feeAmounts[0];
         if (keccak256(userData) == keccak256("0x1")) {
@@ -503,7 +503,7 @@ contract EFLeverVault is Ownable, ReentrancyGuard {
 
     function () external payable {}
 
-    function _receiveFlashLoan_pre(IERC20[] memory tokens, uint256[] memory amounts, uint256[] memory feeAmounts, bytes memory userData) private {
+    function _receiveFlashLoan_pre(IERC20[] memory tokens, uint256[] memory amounts, uint256[] memory feeAmounts, bytes memory userData) private payable {
         if (!(_entered==1&&msg.sender==balancer)) revert();
     }
 
