@@ -44,6 +44,8 @@ WHERE : 'where';
 
 LCURPAR : '{';
 RCURPAR : '}';
+LBRACKET : '[';
+RBRACKET : ']';
 
 KEYWORDS : RETURNS | REQUIRES | ENSURES | WHERE ;
 
