@@ -94,7 +94,7 @@ contract BasicToken is ERC20Basic {
     }
 
     function _transfer_pre(address _to, uint256 _value) private {
-        if (!(_to!=address(0)&&_value>0&&_value<=balancesmsg.sender)) revert();
+        if (!(_to!=address(0)&&_value>0&&_value<=balances[msg.sender])) revert();
     }
 
     function transfer(address _to, uint256 _value) public returns (bool) {
@@ -146,7 +146,7 @@ contract StandardToken is ERC20, BasicToken {
     }
 
     function _transferFrom_pre(address _from, address _to, uint256 _value) private {
-        if (!(_to!=address(0)&&_value>0&&_value<=balances_from&&_value<=allowed_frommsg.sender)) revert();
+        if (!(_to!=address(0)&&_value>0&&_value<=balances[_from]&&_value<=allowed[_from][msg.sender])) revert();
     }
 
     function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
@@ -252,7 +252,7 @@ contract PausableToken is StandardToken, Pausable {
     }
 
     function _batchTransfer_pre(address[] memory _receivers, uint256 _value) private {
-        if (!(_receivers.length>0&&_receivers.length<=20&&_value>0&&balancesmsg.sender>=uint256(_receivers.length)*_value)) revert();
+        if (!(_receivers.length>0&&_receivers.length<=20&&_value>0&&balances[msg.sender]>=uint256(_receivers.length)*_value)) revert();
     }
 
     function batchTransfer(address[] memory _receivers, uint256 _value) public returns (bool) {

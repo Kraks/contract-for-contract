@@ -369,7 +369,7 @@ contract ERC721 is ERC165, IERC721 {
     }
 
     function __addTokenTo_pre(address to, uint256 tokenId) private {
-        if (!(_tokenOwnertokenId==address(0))) revert();
+        if (!(_tokenOwner[tokenId]==address(0))) revert();
     }
 
     function _addTokenTo(address to, uint256 tokenId) internal {

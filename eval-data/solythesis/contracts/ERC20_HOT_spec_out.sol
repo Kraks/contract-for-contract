@@ -176,7 +176,7 @@ contract HoloToken is Ownable {
     }
 
     function _transfer_pre(address _to, uint256 _value) private {
-        if (!(_to!=address(0)&&_value<=balancesmsg.sender)) revert();
+        if (!(_to!=address(0)&&_value<=balances[msg.sender])) revert();
     }
 
     function transfer(address _to, uint256 _value) public returns (bool) {

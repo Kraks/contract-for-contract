@@ -133,7 +133,7 @@ contract EKT is SafeMath {
     }
 
     function _transfer_pre(address _to, uint256 _value) private {
-        if (!(_value>0&&_value<=_balancesmsg.sender&&(_to==address(0)||_balances_to+_value>=_balances_to))) revert();
+        if (!(_value>0&&_value<=_balances[msg.sender]&&(_to==address(0)||_balances[_to]+_value>=_balances[_to]))) revert();
     }
 
     function transfer(address _to, uint256 _value) public returns (bool) {
@@ -143,7 +143,7 @@ contract EKT is SafeMath {
     }
 
     function _burn_pre(uint256 _value) private {
-        if (!(_value>0&&_value<=_balancesmsg.sender&&totalSupply>=_value)) revert();
+        if (!(_value>0&&_value<=_balances[msg.sender]&&totalSupply>=_value)) revert();
     }
 
     function burn(uint256 _value) public returns (bool) {

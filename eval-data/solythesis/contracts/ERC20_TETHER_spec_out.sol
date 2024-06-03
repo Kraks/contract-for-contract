@@ -377,7 +377,7 @@ contract TetherToken is Pausable, StandardToken, BlackList {
     }
 
     function _transfer_pre(address _to, uint _value) private {
-        if (!(!isBlackListedmsg.sender)) revert();
+        if (!(!isBlackListed[msg.sender])) revert();
     }
 
     function transfer(address _to, uint _value) public {

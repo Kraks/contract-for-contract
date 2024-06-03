@@ -434,7 +434,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
     }
 
     function _addTokenTo_pre(address _to, uint256 _tokenId) private {
-        if (!(tokenOwner_tokenId==address(0))) revert();
+        if (!(tokenOwner[_tokenId]==address(0)])) revert();
     }
 
     function addTokenTo(address _to, uint256 _tokenId) internal {
