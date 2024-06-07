@@ -9,8 +9,6 @@ async function main() {
   }
 
   const inputFile = args[1];
-  // const inputPath = './test/testCallFoo.sol';
-  // const inputPath = './test/Lock.sol';
   const filename = path.basename(inputFile);
   const dirname = path.dirname(inputFile);
 
