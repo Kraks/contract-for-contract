@@ -296,7 +296,7 @@ contract ERC721BasicToken is ERC721Basic, Upgradable {
 
     /// @dev
     ///  { clearApproval(_owner, _tokenId)
-    ///   requires {ownerOf[_tokenId] == _owner}}
+    ///   requires {ownerOf(_tokenId) == _owner}}
     function clearApproval_original(address _owner, uint256 _tokenId) private {
         if (tokenApprovals[_tokenId] != address(0)) {
             tokenApprovals[_tokenId] = address(0);

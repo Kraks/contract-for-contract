@@ -652,7 +652,7 @@ contract ERC721BasicToken is SupportsInterfaceWithLookup, ERC721Basic {
    */
   /// @dev
   ///    {addTokenTo(_to, _tokenId)
-  ///    requires {tokenOwner[_tokenId] == address(0)]} }
+  ///    requires {tokenOwner[_tokenId] == address(0)} }
   function addTokenTo(address _to, uint256 _tokenId) internal {
     tokenOwner[_tokenId] = _to;
     ownedTokensCount[_to] = ownedTokensCount[_to].add(1);
