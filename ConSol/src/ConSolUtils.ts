@@ -17,7 +17,7 @@ import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
 import * as fs from 'fs';
 import { ConSolTransformer } from './ConSolTransformer.js';
 import { ConSolFactory } from './ConSolFactory.js';
-import { disableCustomError, setSourceUnits, setIncludeDevSpec } from './Global.js';
+import { disableCustomError, setSourceUnits, setIncludeDevSpec, disableIncludeDevSpec } from './Global.js';
 
 export const SPEC_PREFIX = '@custom:consol';
 const DEV_PREFIX = '@dev';
@@ -96,9 +96,13 @@ export async function ConSolCompile(inputFile: string, outputFile: string, outpu
   disableCustomError();
   // setCustomError();
 
-  // Allowing using @dev prefix for specification
+  // Allowing using @dev prefix for specifications since some legacy Solidity code does not support custom doc string.
   setIncludeDevSpec();
-  //disableIncludeDevSpec();
+  // For the following attacks spec, we disable the @dev prefix:
+  //   invalid-signature-verification-AzukiDAO-69K
+  //   arbitrary-external-call-dexible-1.5M
+  //   lack-of-validation-Miner-466K
+  // disableIncludeDevSpec();
 
   // Note: assume there is only one source unit/file
   // const sourceUnit = sourceUnits[0];
