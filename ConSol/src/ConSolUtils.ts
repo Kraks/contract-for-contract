@@ -17,7 +17,13 @@ import { CSSpecParse, CSSpecVisitor, CSSpec } from './spec/index.js';
 import * as fs from 'fs';
 import { ConSolTransformer } from './ConSolTransformer.js';
 import { ConSolFactory } from './ConSolFactory.js';
-import { setCustomError, disableCustomError, setSourceUnits, setIncludeDevSpec, disableIncludeDevSpec } from './Global.js';
+import {
+  setCustomError,
+  disableCustomError,
+  setSourceUnits,
+  setIncludeDevSpec,
+  disableIncludeDevSpec,
+} from './Global.js';
 
 export const SPEC_PREFIX = '@custom:consol';
 const DEV_PREFIX = '@dev';
@@ -75,7 +81,13 @@ function convertResultToPlainObject(result: CompileResult): Record<string, unkno
   };
 }
 
-export async function ConSolCompile(inputFile: string, outputFile: string, outputJson?: string, useDev?: boolean, useCustomError?: boolean): Promise<void> {
+export async function ConSolCompile(
+  inputFile: string,
+  outputFile: string,
+  outputJson?: string,
+  useDev?: boolean,
+  useCustomError?: boolean,
+): Promise<void> {
   console.log(`inputFile: ${inputFile}`);
   const compileResult = await compileSol(inputFile, 'auto');
   // console.log(compileResult);

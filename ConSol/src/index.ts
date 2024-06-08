@@ -14,7 +14,7 @@ async function main() {
     filepath: String,
     useDev: Boolean,
     useCustomError: Boolean,
-  })
+  });
   //console.log(args)
 
   const inputFile = args.filepath;
