@@ -85,11 +85,6 @@ contract ReentrancyGuard {
     uint128 private _guardCounter;
     uint128 internal _entered;
 
-    constructor() internal {
-        _guardCounter = 1;
-        _entered = 0;
-    }
-
     modifier nonReentrant() {
         _guardCounter += 1;
         _entered = 1;
@@ -97,6 +92,11 @@ contract ReentrancyGuard {
         _;
         _entered = 0;
         require(localCounter == _guardCounter, "ReentrancyGuard: reentrant call");
+    }
+
+    constructor() internal {
+        _guardCounter = 1;
+        _entered = 0;
     }
 }
 

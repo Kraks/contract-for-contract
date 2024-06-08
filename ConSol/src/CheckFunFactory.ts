@@ -131,6 +131,7 @@ export class CheckFunFactory<T> {
     const varDecs = this.factory.makeVarDecs(this.guardedParamNames, this.paramVarDecs);
     const allParams = this.factory.makeParameterList([...varDecs]);
     const preFunDef = this.makeCheckFun(preFunName, this.spec.preCond, allParams, errorDef, mutability, errorParamVal);
+    preFunDef.stateMutability = FunctionStateMutability.NonPayable;
     return preFunDef;
   }
 
@@ -154,6 +155,7 @@ export class CheckFunFactory<T> {
       mutability,
       errorParamVal,
     );
+    postCondFunc.stateMutability = FunctionStateMutability.NonPayable;
     return postCondFunc;
   }
 }
