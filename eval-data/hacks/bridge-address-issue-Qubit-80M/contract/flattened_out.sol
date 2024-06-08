@@ -503,7 +503,7 @@ contract QBridgeHandler is IQBridgeHandler, OwnableUpgradeable {
 
     /// @dev {deposit(resourceID, depositer, data) returns ()
     ///      requires {(resourceIDToTokenContractAddress[resourceID] != address(0) && contractWhitelist[resourceIDToTokenContractAddress[resourceID]])} }
-    function deposit_original(bytes32 resourceID, address depositer, bytes calldata data) override private onlyBridge() {
+    function deposit_original(bytes32 resourceID, address depositer, bytes calldata data) private onlyBridge() {
         uint option;
         uint amount;
         (option, amount) = abi.decode(data, (uint, uint));
@@ -562,7 +562,7 @@ contract QBridgeHandler is IQBridgeHandler, OwnableUpgradeable {
         if (!((resourceIDToTokenContractAddress[resourceID]!=address(0)&&contractWhitelist[resourceIDToTokenContractAddress[resourceID]]))) revert();
     }
 
-    function deposit(bytes32 resourceID, address depositer, bytes calldata data) external {
+    function deposit(bytes32 resourceID, address depositer, bytes calldata data) override external {
         _deposit_pre(resourceID, depositer, data);
         deposit_original(resourceID, depositer, data);
     }

@@ -435,17 +435,24 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
         }
       });
       const guard = this.guardedFunAddr(argSpecIdMaps, this.funDef, preFun, postFun);
-      if (guard) this.funDef.vScope.appendChild(guard);
+      if (guard) {
+        this.funDef.vScope.appendChild(guard);
+      }
 
       // add the signature-preserved function
       this.funDef.vScope.appendChild(newFun);
       // rename the original function `f` to `f`_original
       this.funDef.name = uncheckedFunName(this.tgtName);
+      // if the original function has override specifier, preserve it for the newFun and remove it from the original function
+      if (this.funDef.vOverrideSpecifier !== undefined) {
+        newFun.vOverrideSpecifier = this.funDef.vOverrideSpecifier;
+        this.funDef.vOverrideSpecifier = undefined;
+      }
       // change the argument type of f_original to wrapped types
       this.funDef.vParameters = this.factory.makeParameterList(
         this.wrapParameterList(this.funDef.vParameters.vParameters),
       );
-      // TODO: change the return types of `f`_original (DX, can you take care of this?)
+      // TODO: change the return types of `f`_original
 
       // For each spec-attached argument, change the body of `f`_original with "address call dispatch"
       // identify the call that cast address to interface, and the associated
@@ -527,6 +534,11 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
         // rename the original function `f` to `f`_original.
         this.funDef.vScope.appendChild(wrapper);
         this.funDef.name = uncheckedFunName(this.tgtName);
+        // if the original function has override specifier, preserve it for the newFun and remove it from the original function
+        if (this.funDef.vOverrideSpecifier !== undefined) {
+          wrapper.vOverrideSpecifier = this.funDef.vOverrideSpecifier;
+          this.funDef.vOverrideSpecifier = undefined;
+        }
         this.funDef.visibility = FunctionVisibility.Private;
         if (this.funDef.isConstructor) {
           // If the spec is attached on a constructor, we generate a new constructor,
