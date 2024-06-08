@@ -44,6 +44,7 @@
   "dependencies": {
     "antlr4": "^4.12.0",
     "solc-typed-ast": "file:../solc-typed-ast",
-    "type-fest": "^3.10.0"
+    "type-fest": "^3.10.0",
+    "ts-command-line-args": "2.5.1"
   }
 }

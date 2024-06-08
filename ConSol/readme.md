@@ -52,12 +52,12 @@ $ npm link          # required only for the initial run.
 The `consol` command takes the file path of the input Solidity program
 and generates output files under its same folder.
 ```
-$ consol <input-file>
+$ consol --filepath=<input-file> [--useDev] [--useCustomError]
 ```
 
 For example, running the following command with `Lock.sol` as input
 ```
-$ consol test/Lock.sol
+$ consol --filepath=test/Lock.sol
 ```
 generates two files:
 ```
