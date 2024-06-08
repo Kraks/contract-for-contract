@@ -110,6 +110,7 @@ library Math {
 
 interface IBalancerStablePool {
     function getRate() external view returns (uint256);
+
     function getLatest(uint x) external view returns (uint256);
 }
 
