@@ -5,12 +5,12 @@ for file in ../eval-data/solythesis/contracts/*_spec.sol; do
     # Extract the filename without the suffix for later use
     fname="${file%_spec.sol}"
     # Specify the output file for all diff results
-    output_file="$file.solythesis_diff"
+    output_file="$file.diff"
     # Clear the output file or create it if it doesn't exist
     > "$output_file"
 
     # Run consol on the file
-    consol "$file"
+    consol --filepath="$file" --useDev=true
     rm "${fname}_spec_ast.json"
     # Output filename information to the output file
     echo "Diff results for $fname:" >> "$output_file"

@@ -705,7 +705,7 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
     }
 
     function __withdraw_pre(uint256 amount, address user, address recipient) private {
-        if (!(_balancesuser>=amount&&amount!=0)) revert();
+        if (!(_balances[user]>=amount&&amount!=0)) revert();
     }
 
     function _withdraw(uint256 amount, address user, address recipient) internal {

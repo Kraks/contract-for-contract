@@ -134,3 +134,6 @@ ConSol/grammar/
 # test
 Lock.json
 Lock_out.sol
+
+*.json
+*.diff

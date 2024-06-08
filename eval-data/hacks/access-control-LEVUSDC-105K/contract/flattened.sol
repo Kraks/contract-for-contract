@@ -3045,7 +3045,7 @@ contract DepositWithdraw is DepositWithdrawInterface {
      */
     function withdrawUSDCfromCmp(uint amount) internal {
         ICompoundV2(compoundV2cUSDCAddress).redeemUnderlying(amount);
-    }   
+    }
 
     /*
      * Supply USDT that this contract holds to Compound V2
@@ -3060,14 +3060,14 @@ contract DepositWithdraw is DepositWithdrawInterface {
      */
     function withdrawcUSDT(uint amount) internal {
         ICompoundV2(compoundV2cUSDTAddress).redeem(amount);
-    }   
+    }
 
     /*
      * Withdraws USDT from Compound V2 to this contract
      */
     function withdrawUSDTfromCmp(uint amount) internal {
         ICompoundV2(compoundV2cUSDTAddress).redeemUnderlying(amount);
-    }    
+    }
 }
 
 // src/CurveSwap.sol
@@ -3599,7 +3599,7 @@ abstract contract LevTokenInterface is LevTokenStorage {
     function getCompoundBalance() virtual external view returns (uint);
     function getLevReserve() virtual external view returns (uint);
     function getHisHighNav() virtual external view returns (uint);
-    
+
     /*** Admin Functions ***/
 
     function _setPendingAdmin(address payable newPendingAdmin) virtual external returns (uint);
@@ -3921,7 +3921,7 @@ abstract contract DepToken is DepTokenInterface, DepositWithdraw, CurveSwap, Exp
         // a, unused cash - no interest
         // b, borrowed cash - earn loan interest
         // c, cash in compound - earn compound interest
-        
+
         // our supplyRate function takes care of a+b
         uint iur = idealUtilizationRate();
         uint ownSupplyRatePerBlock = interestRateModel.getSupplyRate(iur, getCmpUSDTSupplyRate());   // for borrowed portion
@@ -3987,7 +3987,7 @@ abstract contract DepToken is DepTokenInterface, DepositWithdraw, CurveSwap, Exp
     function borrowBalanceStoredInternal(address account) internal view returns (uint) {
         /* Get borrowBalance and borrowIndex */
         BorrowSnapshot storage borrowSnapshot = accountBorrows[account];
-        
+
         // console.log("borrow bal snapshot principal ", borrowSnapshot.principal);
         // console.log("borrow bal snapshot interestIndex ", borrowSnapshot.interestIndex);
         // console.log("borrow bal borrow index ", borrowIndex);
@@ -4043,7 +4043,7 @@ abstract contract DepToken is DepTokenInterface, DepositWithdraw, CurveSwap, Exp
              * Otherwise:
              *  exchangeRate = (totalCash + totalBorrows - totalReserves) / totalSupply
              */
-            
+
             uint totalCashMinusReserves = getCashExReserves() + getCmpBalanceInternal();  // 1e6
             uint cashPlusBorrowsMinusReserves = totalCashMinusReserves + totalBorrows;   // 1e6
 //            console.log("exchangeRateStoredInternal - totalCashMinusReserves:", totalCashMinusReserves);
@@ -4139,7 +4139,7 @@ abstract contract DepToken is DepTokenInterface, DepositWithdraw, CurveSwap, Exp
 //        console.log("borrowRateMantissa=", borrowRateMantissa);
 //        console.log("blockDelta=", blockDelta);
 //        console.log("interestAccumulated=",interestAccumulated);
-        
+
         // persist the new values
         accrualBlockNumber = currentBlockNumber;
         borrowIndex = borrowIndexNew;
@@ -4206,8 +4206,8 @@ abstract contract DepToken is DepTokenInterface, DepositWithdraw, CurveSwap, Exp
         /*
          *  We call `doTransferIn` for the minter and the mintAmount.
          *  Note: The DepToken can only handle USDT!
-         *  `doTransferIn` reverts if anything goes wrong, since we can't be sure if side-effects occurred. 
-         *  The function returns the amount actually transferred, after gas. 
+         *  `doTransferIn` reverts if anything goes wrong, since we can't be sure if side-effects occurred.
+         *  The function returns the amount actually transferred, after gas.
          *  On success, the DepToken holds an additional `actualMintAmount` of cash.
          */
         uint actualMintAmount = doTransferIn(minter, mintAmount);
@@ -4258,9 +4258,9 @@ abstract contract DepToken is DepTokenInterface, DepositWithdraw, CurveSwap, Exp
         /*
         uint redeemTokens;
         uint redeemAmount;
-        
+
         if (redeemTokensIn > 0) {
-            
+
             // We calculate the exchange rate and the amount of underlying to be redeemed:
             //  redeemTokens = redeemTokensIn
             //  redeemAmount = redeemTokensIn x exchangeRateCurrent
@@ -4347,7 +4347,7 @@ abstract contract DepToken is DepTokenInterface, DepositWithdraw, CurveSwap, Exp
          *  On success, the DepToken has redeemAmount less of cash.
          *  doTransferOut reverts if anything goes wrong, since we can't be sure if side effects occurred.
          */
-        // deptoken and levtoken pay for the gases of all the transactions. msg.sender pay for the final transfer 
+        // deptoken and levtoken pay for the gases of all the transactions. msg.sender pay for the final transfer
         doTransferOut(redeemer, redeemAmount);
 
         /* We emit a Transfer event, and a Redeem event */
@@ -4443,9 +4443,9 @@ abstract contract DepToken is DepTokenInterface, DepositWithdraw, CurveSwap, Exp
      */
     function repayBorrowInternal(uint repayAmount, bool liquidate) internal nonReentrant {
         if(!liquidate){  // levToken returns all it has
-            accrueInterest();  
+            accrueInterest();
         }
-        
+
         updateBorrowLedger(repayAmount, liquidate, false);
 
         // repayBorrowFresh emits repay-borrow-specific logs on errors, so we don't need to
@@ -4874,7 +4874,7 @@ contract DepErc20 is DepToken, DepErc20Interface {
     //string public prologue;
 
     /**
-     * @notice set levErc20 
+     * @notice set levErc20
      * @param levErc20_ The address of the associated levErc20
      *
     function setLevErc20(LevErc20Interface levErc20_) public override{
