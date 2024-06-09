@@ -135,6 +135,18 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     return this.visit(ctx.children[0]) as CSSpec<T>;
   };
 
+  extractRawCond: (ctx: SexprContext) => string = (ctx) => {
+    if (ctx.stop !== undefined) {
+      const start = ctx.start.start;
+      const stop0 = ctx.stop;
+      if (stop0 != undefined) {
+        const stop = stop0.stop;
+        return ctx.start.getInputStream().getText(start, stop);
+      }
+    }
+    return "";
+  }
+
   /*
     vspec : '{' call
             ('requires' '{' sexpr '}')?
@@ -151,11 +163,11 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     for (let i = 2; i < ctx.children.length - 1; i += 4) {
       const prompt = this.extractTermText(ctx.children[i]);
       if (prompt == 'requires') {
-        assert(ctx.children[i + 2] instanceof SexprContext);
-        vspec.preCond = this.parseSexpr(ctx.children[i + 2].getText());
+        // Note: here we cast string to T, since so far we only have string as T
+        vspec.preCond = this.extractRawCond(ctx.sexpr(0)) as T;
       } else if (prompt == 'ensures') {
-        assert(ctx.children[i + 2] instanceof SexprContext);
-        vspec.postCond = this.parseSexpr(ctx.children[i + 2].getText());
+        // Note: here we cast string to T, since so far we only have string as T
+        vspec.postCond = this.extractRawCond(ctx.sexpr(0)) as T;
       } else if (prompt == 'where') {
         ctx
           .vspec_list()

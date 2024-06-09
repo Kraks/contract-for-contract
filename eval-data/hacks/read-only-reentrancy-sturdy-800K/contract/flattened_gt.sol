@@ -698,7 +698,7 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
     }
 
     function _IChainlinkAggregator_latestRoundData_20_post(address STETH, uint256 v, uint256 g, uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound) private {
-        if (!((updatedAt>block.timestamp-1 days)&&(answer>0))) revert();
+        if (!((updatedAt > block.timestamp - 1 days) && (answer > 0))) revert();
     }
 
     function dispatch_IChainlinkAggregator_latestRoundData(uint256 addr, uint256 value, uint256 gas) private returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound) {
@@ -709,7 +709,8 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
     }
 
     function __get_post(uint256 ret) private {
-        if (!((ret*95/100<BALWSTETHWETH.getLatest(1))&&(ret*105/100>BALWSTETHWETH.getLatest(1)))) revert();
+        if (!((ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) &&
+       (ret * 105 / 100 > BALWSTETHWETH.getLatest(1)))) revert();
     }
 
     function _get() internal returns (uint256) {
