@@ -17,7 +17,7 @@ import { GUARD_ADDR_TYPE, extractFunName, uncheckedFunName, guardedFunName, uses
 
 import { CheckFunFactory } from './CheckFunFactory.js';
 import { ConSolFactory } from './ConSolFactory.js';
-import { findContract, findFunctionFromContract, freshName } from './Global.js';
+import { findFunctionFromContract, freshName } from './Global.js';
 import { ValSpecTransformer } from './ValSpecTransformer.js';
 
 export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {

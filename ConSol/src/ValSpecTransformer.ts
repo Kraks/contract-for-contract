@@ -16,8 +16,7 @@ import {
 import { usesAddr } from './ConSolUtils.js';
 
 import { ConSolFactory } from './ConSolFactory.js';
-import { findContract, findFunctionFromContract, freshName } from './Global.js';
-import { error } from 'console';
+import { findFunctionFromContract, freshName } from './Global.js';
 
 export class ValSpecTransformer<T> {
   factory: ConSolFactory;
