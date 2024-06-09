@@ -1,4 +1,4 @@
-import { ContractDefinition, SourceUnit, StructDefinition } from 'solc-typed-ast';
+import { ContractDefinition, FunctionDefinition, SourceUnit, StructDefinition } from 'solc-typed-ast';
 
 /* eslint no-var: 0 */
 declare global {
@@ -33,6 +33,12 @@ export function setSourceUnits(units: Array<SourceUnit>): void {
 export function findContract(name: string): ContractDefinition | undefined {
   // XXX: assume there is only one source unit
   return globalThis.sourceUnits[0].vContracts.find((contract) => contract.name === name);
+}
+
+export function findFunctionFromContract(con: string, fun: string): FunctionDefinition | undefined {
+  const iface = findContract(con);
+  if (iface == undefined) return undefined;
+  return iface.vFunctions.find((f) => f.name === fun);
 }
 
 export function resetAddrSpecId(): void {

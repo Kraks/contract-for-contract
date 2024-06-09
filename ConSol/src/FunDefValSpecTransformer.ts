@@ -17,7 +17,7 @@ import { GUARD_ADDR_TYPE, extractFunName, uncheckedFunName, guardedFunName, uses
 
 import { CheckFunFactory } from './CheckFunFactory.js';
 import { ConSolFactory } from './ConSolFactory.js';
-import { findContract, freshName } from './Global.js';
+import { findContract, findFunctionFromContract, freshName } from './Global.js';
 import { ValSpecTransformer } from './ValSpecTransformer.js';
 
 export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
@@ -477,12 +477,7 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
 
         // Generate the pre/post condition check function for each spec
         // i.e., Iface_f_spec_id_pre, Iface_f_spec_id_post
-        const iface = findContract(ifaceName);
-        if (iface == undefined) {
-          console.error(`Error: interface ${ifaceName} not found. Abort.`);
-          process.exit(-1);
-        }
-        const tgtFunc = iface.vFunctions.find((f) => f.name === funName);
+        const tgtFunc = findFunctionFromContract(ifaceName, funName);
         if (tgtFunc == undefined) {
           console.error(`Error: function ${funName} not found in ${ifaceName}. Abort.`);
           process.exit(-1);

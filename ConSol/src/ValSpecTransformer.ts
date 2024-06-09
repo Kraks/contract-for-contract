@@ -16,7 +16,8 @@ import {
 import { usesAddr } from './ConSolUtils.js';
 
 import { ConSolFactory } from './ConSolFactory.js';
-import { freshName } from './Global.js';
+import { findContract, findFunctionFromContract, freshName } from './Global.js';
+import { error } from 'console';
 
 export class ValSpecTransformer<T> {
   factory: ConSolFactory;
@@ -115,10 +116,14 @@ export class ValSpecTransformer<T> {
       this.factory.makeElementaryTypeNameExpression(ifaceName, ifaceName),
       [this.unwrap(addrId)],
     );
-    const options = new Map<string, Expression>([
-      ['value', this.factory.makeIdentifierFor(valueVarDec)],
-      ['gas', this.factory.makeIdentifierFor(gasVarDec)],
-    ]);
+
+    const options = new Map<string, Expression>();
+    const tgtFunc = findFunctionFromContract(ifaceName, funName);
+    if (tgtFunc?.stateMutability == FunctionStateMutability.Payable) {
+      options.set('value', this.factory.makeIdentifierFor(valueVarDec));
+    }
+    options.set('gas', this.factory.makeIdentifierFor(gasVarDec));
+
     const f = this.factory.makeMemberAccess('function', castedAddr, funName, -1);
     const callOpt = this.factory.makeFunctionCallOptions(oldFun.vReturnParameters.type, f, options);
     const call = this.factory.makeFunctionCall(
@@ -185,7 +190,6 @@ export class ValSpecTransformer<T> {
     tgtAddr: string | undefined,
   ) {
     // DX: what if tgtInterface/tgtAddr is undefined?
-    // TODO(DX): gas shouldn't be zero
     if (
       node instanceof FunctionCall &&
       node.vFunctionName === tgtFun &&
