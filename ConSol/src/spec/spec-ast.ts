@@ -144,8 +144,8 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
         return ctx.start.getInputStream().getText(start, stop);
       }
     }
-    return "";
-  }
+    return '';
+  };
 
   /*
     vspec : '{' call
