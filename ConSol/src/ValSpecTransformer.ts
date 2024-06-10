@@ -26,16 +26,19 @@ export class ValSpecTransformer<T> {
   }
 
   // uint256 -> payable(address(uint160(...)))
-  unwrap(x: Expression): Expression {
+  unwrap(x: Expression, payable?: boolean): Expression {
     // TODO: so far only handles flat types
     const cast1 = this.factory.makeFunctionCall('uint160', FunctionCallKind.TypeConversion, this.factory.uint160, [x]);
     const cast2 = this.factory.makeFunctionCall('address', FunctionCallKind.TypeConversion, this.factory.address, [
       cast1,
     ]);
-    const cast3 = this.factory.makeFunctionCall('payable', FunctionCallKind.TypeConversion, this.factory.payable, [
-      cast2,
-    ]);
-    return cast3;
+    if (payable) {
+      const cast3 = this.factory.makeFunctionCall('payable', FunctionCallKind.TypeConversion, this.factory.payable, [
+        cast2,
+      ]);
+      return cast3;
+    }
+    return cast2;
   }
 
   extractSpecId(addr: Expression): Expression {
@@ -51,14 +54,14 @@ export class ValSpecTransformer<T> {
     rawSpecId: number,
     ifaceName: string,
     funName: string,
-    oldFun: FunctionDefinition,
+    tgtFun: FunctionDefinition,
     preCheckFun: FunctionDefinition | undefined,
     postCheckFun: FunctionDefinition | undefined,
   ): FunctionDefinition {
-    const newFun = this.factory.copy(oldFun);
+    const newFun = this.factory.copy(tgtFun);
     newFun.documentation = undefined;
     newFun.visibility = FunctionVisibility.Private;
-    newFun.stateMutability = oldFun.stateMutability; //FunctionStateMutability.NonPayable;
+    newFun.stateMutability = tgtFun.stateMutability; //FunctionStateMutability.NonPayable;
     newFun.name = this.dispatchFunName(ifaceName, funName);
 
     const bodyStmts: Array<Statement> = [];
@@ -94,7 +97,7 @@ export class ValSpecTransformer<T> {
       this.factory.makeLiteral('uint', LiteralKind.Number, '0', '0'),
     );
     const args = [this.unwrap(addrId), valueId, gasId].concat(
-      this.factory.makeIdsFromVarDecs(oldFun.vParameters.vParameters),
+      this.factory.makeIdsFromVarDecs(tgtFun.vParameters.vParameters),
     );
     if (preCheckFun != undefined) {
       const preCheck = this.factory.makeFunctionCall(
@@ -113,35 +116,34 @@ export class ValSpecTransformer<T> {
       ifaceName,
       FunctionCallKind.TypeConversion,
       this.factory.makeElementaryTypeNameExpression(ifaceName, ifaceName),
-      [this.unwrap(addrId)],
+      [this.unwrap(addrId, tgtFun.stateMutability == FunctionStateMutability.Payable)],
     );
 
     const options = new Map<string, Expression>();
-    const tgtFunc = findFunctionFromContract(ifaceName, funName);
-    if (tgtFunc?.stateMutability == FunctionStateMutability.Payable) {
+    if (tgtFun.stateMutability == FunctionStateMutability.Payable) {
       options.set('value', this.factory.makeIdentifierFor(valueVarDec));
     }
     options.set('gas', this.factory.makeIdentifierFor(gasVarDec));
 
     const f = this.factory.makeMemberAccess('function', castedAddr, funName, -1);
-    const callOpt = this.factory.makeFunctionCallOptions(oldFun.vReturnParameters.type, f, options);
+    const callOpt = this.factory.makeFunctionCallOptions(tgtFun.vReturnParameters.type, f, options);
     const call = this.factory.makeFunctionCall(
-      oldFun.vReturnParameters.type,
+      tgtFun.vReturnParameters.type,
       FunctionCallKind.FunctionCall,
       callOpt,
-      this.factory.makeIdsFromVarDecs(oldFun.vParameters.vParameters),
+      this.factory.makeIdsFromVarDecs(tgtFun.vParameters.vParameters),
     );
     let retTypeStr = 'void';
     let retVars: Expression[] = [];
-    if (oldFun.vReturnParameters.vParameters.length > 0) {
-      const retTypes = oldFun.vReturnParameters.vParameters.map((p) =>
+    if (tgtFun.vReturnParameters.vParameters.length > 0) {
+      const retTypes = tgtFun.vReturnParameters.vParameters.map((p) =>
         this.factory.makeElementaryTypeName(p.typeString, p.typeString),
       );
       retTypeStr = '(' + retTypes.toString() + ')';
       const retTypeDecls = this.factory.makeTypedVarDecls(
         retTypes,
         retTypes.map((x) => freshName()),
-        oldFun.scope,
+        tgtFun.scope,
       );
       const retIds = retTypeDecls.map((r) => r.id);
       const callAndAssignStmt = this.factory.makeVariableDeclarationStatement(retIds, retTypeDecls, call);
