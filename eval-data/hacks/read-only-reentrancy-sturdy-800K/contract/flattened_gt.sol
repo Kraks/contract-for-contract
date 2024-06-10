@@ -121,7 +121,7 @@ interface IChainlinkAggregator {
 
     function decimals() external view returns (uint8);
 
-    function latestAnswer() external returns (int256);
+    function latestAnswer() external view returns (int256);
 
     function latestTimestamp() external view returns (uint256);
 
@@ -143,11 +143,11 @@ interface IOracle {
     /// @notice Check the last price without any state changes.
     ///  @return success if no valid (recent) rate is available, return false else true.
     ///  @return rate The rate of the requested asset / pair / pool.
-    function peek() external returns (bool success, int256 rate);
+    function peek() external view returns (bool success, int256 rate);
 
     /// @notice Check the current spot price without any state changes. For oracles like TWAP this will be different from peek().
     ///  @return rate The rate of the requested asset / pair / pool.
-    function latestAnswer() external returns (int256 rate);
+    function latestAnswer() external view returns (int256 rate);
 }
 
 interface IOracleValidate {
@@ -658,9 +658,9 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
 
     /// @custom:consol
     ///  {_get() returns (ret)
-    ///    ensures {(ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) &&
+    ///    ensures {(ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) && 
     ///        (ret * 105 / 100 > BALWSTETHWETH.getLatest(1))}}
-    function _get_original() private returns (uint256) {
+    function _get_original() private view returns (uint256) {
         (, int256 stETHPrice, , uint256 updatedAt, ) = dispatch_IChainlinkAggregator_latestRoundData(STETH, 0, gasleft());
         require(updatedAt > (block.timestamp - 1 days), Errors.O_WRONG_PRICE);
         require(stETHPrice > 0, Errors.O_WRONG_PRICE);
@@ -669,17 +669,17 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
     }
 
     /// @inheritdoc IOracle
-    function get() override external returns (bool, uint256) {
+    function get() override external view returns (bool, uint256) {
         return (true, _get());
     }
 
     /// @inheritdoc IOracle
-    function peek() override external returns (bool, int256) {
+    function peek() override external view returns (bool, int256) {
         return (true, int256(_get()));
     }
 
     /// @inheritdoc IOracle
-    function latestAnswer() override external returns (int256 rate) {
+    function latestAnswer() override external view returns (int256 rate) {
         return int256(_get());
     }
 
@@ -697,23 +697,23 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
         return _addr;
     }
 
-    function _IChainlinkAggregator_latestRoundData_20_post(address STETH, uint256 v, uint256 g, uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound) private {
+    function _IChainlinkAggregator_latestRoundData_20_post(address STETH, uint256 v, uint256 g, uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound) private view {
         if (!((updatedAt > block.timestamp - 1 days) && (answer > 0))) revert();
     }
 
-    function dispatch_IChainlinkAggregator_latestRoundData(uint256 addr, uint256 value, uint256 gas) private returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound) {
+    function dispatch_IChainlinkAggregator_latestRoundData(uint256 addr, uint256 value, uint256 gas) private view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound) {
         uint96 specId = uint96(addr >> 160);
         (uint80 _cs_0, int256 _cs_1, uint256 _cs_2, uint256 _cs_3, uint80 _cs_4) = IChainlinkAggregator(payable(address(uint160(addr)))).latestRoundData{gas: gas}();
         if ((specId & uint96(1 << 20)) != 0) _IChainlinkAggregator_latestRoundData_20_post(payable(address(uint160(addr))), value, gas, _cs_0, _cs_1, _cs_2, _cs_3, _cs_4);
         return (_cs_0, _cs_1, _cs_2, _cs_3, _cs_4);
     }
 
-    function __get_post(uint256 ret) private {
-        if (!((ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) &&
+    function __get_post(uint256 ret) private view {
+        if (!((ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) && 
        (ret * 105 / 100 > BALWSTETHWETH.getLatest(1)))) revert();
     }
 
-    function _get() internal returns (uint256) {
+    function _get() internal view returns (uint256) {
         uint256 ret = _get_original();
         __get_post(ret);
         return (ret);
