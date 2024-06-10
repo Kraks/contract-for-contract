@@ -184,6 +184,9 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     this.contract.appendChild(dispatchingFun);
 
     for (const func of this.contract.vFunctions) {
+      console.log(`rewrite ${func.name} for ${tgtAddr}`)
+      // GW: the f_original function is not here to be traversal.
+      // Need to exhaustively apply FunDefValSpecTransformer first, then apply VarDefValSpecTransformer.
       func.vBody?.walkChildren((node) => {
         this.rewriteAddrCallsInFunBody(node, funName, ifName, tgtAddr);
       });

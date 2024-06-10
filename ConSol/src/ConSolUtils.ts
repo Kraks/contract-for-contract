@@ -116,8 +116,6 @@ export async function ConSolCompile(
   if (useDev) setIncludeDevSpec();
   else disableIncludeDevSpec();
 
-  // Note: assume there is only one source unit/file
-  // const sourceUnit = sourceUnits[0];
   sourceUnits.forEach((sourceUnit) => {
     const ifs: Array<ContractDefinition> = sourceUnit.vContracts.filter((contract) => contract.kind === 'interface');
 
@@ -127,9 +125,7 @@ export async function ConSolCompile(
       console.log(`Processing ${contract.kind} ${contract.name}.`);
       const factory = new ConSolFactory(contract.context || new ASTContext(), contract.scope);
       const contractTransformer = new ConSolTransformer(factory, contract, ifs);
-      if (contractTransformer.process()) {
-        hasConSolSpec = true;
-      }
+      hasConSolSpec = hasConSolSpec || contractTransformer.process()
     });
 
     if (!hasConSolSpec) {

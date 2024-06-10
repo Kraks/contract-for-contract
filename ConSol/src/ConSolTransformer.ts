@@ -100,7 +100,6 @@ export class ConSolTransformer<T> {
         // Note: for missing-slippage-check-UnknownVictim-111K, there seems a
         // bug in solc-typed-ast that does not parse the documentation correctly.
         // So we patch the spec to the variable declaration directly.
-        console.log(astNode.name);
         astNode.documentation = `@dev {
           PriceInterface(curve).exchange_underlying{value: v, gas: g}(x, y, camount, n)
           ensures { _exchange_underlying_post_condition(camount) } }
@@ -122,7 +121,6 @@ export class ConSolTransformer<T> {
       } else {
         return;
       }
-
       if (!isConSolSpec(specStr)) return;
 
       const spec = parseConSolSpec(specStr);
