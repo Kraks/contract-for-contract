@@ -165,10 +165,10 @@ contract ExchangeBetweenPools is Ownable {
     address public from_bank;
     address public to_bank;
     uint256 public minimum_amount;
-
     /// @dev {
     ///           PriceInterface(curve).exchange_underlying{value: v, gas: g}(x, y, camount, n)
     ///           ensures { _exchange_underlying_post_condition(camount) } }
+    ///
     uint256 public curve = _wrap_curve(CurveInterface(0xbBC81d23Ea2c3ec7e56D39296F0cbB648873a5d3).curve());
 
     constructor(address _from_bank, address _to_bank, uint256 _min_amount) public {
@@ -182,7 +182,7 @@ contract ExchangeBetweenPools is Ownable {
         minimum_amount = _min_amount;
     }
 
-    function _exchange_underlying_post_condition(uint256 camount) view internal returns (bool) {
+    function _exchange_underlying_post_condition(uint256 camount) internal view returns (bool) {
         uint256 namount = usdt.balanceOf(address(this));
         return (((camount * 95) / 100) < namount) && (((camount * 100) / 95) > namount);
     }
@@ -225,7 +225,7 @@ contract ExchangeBetweenPools is Ownable {
     }
 
     function _doExchange_pre(uint256 amount) private {
-        if (!(amount>=minimum_amount&&amount<=ERC20TokenBankInterface(from_bank).balance())) revert();
+        if (!(amount >= minimum_amount && amount <= ERC20TokenBankInterface(from_bank).balance())) revert();
     }
 
     function doExchange(uint256 amount) public returns (bool) {
