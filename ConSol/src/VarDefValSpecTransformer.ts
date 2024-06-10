@@ -16,7 +16,7 @@ import { ValSpec } from './spec/index.js';
 import { GUARD_ADDR_TYPE } from './ConSolUtils.js';
 import { ConSolFactory } from './ConSolFactory.js';
 import { ValSpecTransformer } from './ValSpecTransformer.js';
-import { findContract, findFunctionFromContract } from './Global.js';
+import { findFunctionFromContract } from './Global.js';
 import { CheckFunFactory } from './CheckFunFactory.js';
 
 const HARDCODE_SPECID = 20; // hard coded for now
@@ -142,11 +142,7 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
 
     // Generate pre/post function for addr calls
 
-    const addrParam = this.factory.makeTypedVarDecls(
-      [this.factory.address],
-      ['seems doesnt matter'],
-      tgtFun.scope,
-    );
+    const addrParam = this.factory.makeTypedVarDecls([this.factory.address], ['seems doesnt matter'], tgtFun.scope);
     const tgtFuncParams = tgtFun.vParameters.vParameters;
     const valGasParams = this.factory.makeTypedVarDecls(
       [this.factory.uint256, this.factory.uint256],
@@ -159,32 +155,17 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     const allFuncParams = addrParam.concat(valGasParams.concat(tgtFuncParams));
     const tgtFuncRetParams = tgtFun.vReturnParameters.vParameters;
     const checkFunFactory = new CheckFunFactory(this.spec, allFuncParams, tgtFuncRetParams, this.factory, tgtAddr);
-    const addrCallPreFun = checkFunFactory.preCondCheckFun(
-      this.preAddrError,
-      tgtFun.stateMutability,
-      specid,
-    );
+    const addrCallPreFun = checkFunFactory.preCondCheckFun(this.preAddrError, tgtFun.stateMutability, specid);
     if (addrCallPreFun) this.contract.appendChild(addrCallPreFun);
-    const addrCallPostFun = checkFunFactory.postCondCheckFun(
-      this.postAddrError,
-      tgtFun.stateMutability,
-      specid,
-    );
+    const addrCallPostFun = checkFunFactory.postCondCheckFun(this.postAddrError, tgtFun.stateMutability, specid);
     if (addrCallPostFun) this.contract.appendChild(addrCallPostFun);
 
     // Generate dispatch_Iface_f
-    const dispatchingFun = this.dispatchingFunction(
-      specid,
-      ifName,
-      funName,
-      tgtFun,
-      addrCallPreFun,
-      addrCallPostFun,
-    );
+    const dispatchingFun = this.dispatchingFunction(specid, ifName, funName, tgtFun, addrCallPreFun, addrCallPostFun);
     this.contract.appendChild(dispatchingFun);
 
     for (const func of this.contract.vFunctions) {
-      console.log(`rewrite ${func.name} for ${tgtAddr}`)
+      console.log(`rewrite ${func.name} for ${tgtAddr}`);
       // GW: the f_original function is not here to be traversal.
       // Need to exhaustively apply FunDefValSpecTransformer first, then apply VarDefValSpecTransformer.
       func.vBody?.walkChildren((node) => {
