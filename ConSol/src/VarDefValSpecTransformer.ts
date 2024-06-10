@@ -16,7 +16,7 @@ import { ValSpec } from './spec/index.js';
 import { GUARD_ADDR_TYPE } from './ConSolUtils.js';
 import { ConSolFactory } from './ConSolFactory.js';
 import { ValSpecTransformer } from './ValSpecTransformer.js';
-import { findContract } from './Global.js';
+import { findContract, findFunctionFromContract } from './Global.js';
 import { CheckFunFactory } from './CheckFunFactory.js';
 
 const HARDCODE_SPECID = 20; // hard coded for now
@@ -51,11 +51,8 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     const stmts = [];
 
     const param = this.factory.makeTypedVarDecl(this.factory.address, 'addr', 0);
-
     const wrappedAddr = this.factory.makeTypedVarDecl(this.factory.uint256, '_addr', 0);
-
     const retParam = this.factory.makeTypedVarDecl(this.factory.uint256, '', 0);
-
     const initialAssignment = this.factory.makeAssignment(
       GUARD_ADDR_TYPE,
       '=',
@@ -128,80 +125,74 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
 
   iterateFunctions(): void {
     // DX: this spec only has one target function?
-    const tgtFun = this.spec.call.tgt.func;
-    const tgtInterface = this.spec.call.tgt.interface;
+    const funName = this.spec.call.tgt.func;
+    const ifName = this.spec.call.tgt.interface;
     const tgtAddr = this.spec.call.tgt.addr;
     // const tgtVarNameInSpec = this.spec.call.args[idx];
-    if (tgtInterface != undefined) {
-      const iface = findContract(tgtInterface);
-      if (iface == undefined) {
-        console.error(`Error: interface ${tgtInterface} not found. Abort.`);
-        process.exit(-1);
-      }
-      const addrCallFun = iface.vFunctions.find((f) => f.name === tgtFun);
-      if (addrCallFun == undefined) {
-        console.error(`Error: function ${tgtFun} not found in ${tgtInterface}. Abort.`);
-        process.exit(-1);
-      }
-
-      // Generate pre/post function for addr calls
-
-      const addrParam = this.factory.makeTypedVarDecls(
-        [this.factory.address],
-        ['seems doesnt matter'],
-        addrCallFun.scope,
-      );
-      const tgtFuncParams = addrCallFun.vParameters.vParameters;
-      const valGasParams = this.factory.makeTypedVarDecls(
-        [this.factory.uint256, this.factory.uint256],
-        ['value', 'gas'],
-        addrCallFun.scope,
-      );
-      // TODO(DX): hard code spec id for now. storage value spec doesn't have id now
-
-      const specid = HARDCODE_SPECID;
-
-      const allFuncParams = addrParam.concat(valGasParams.concat(tgtFuncParams));
-      const tgtFuncRetParams = addrCallFun.vReturnParameters.vParameters;
-      const checkFunFactory = new CheckFunFactory(this.spec, allFuncParams, tgtFuncRetParams, this.factory, tgtAddr);
-      // console.log(allFuncParams);
-      // console.log(tgtFuncRetParams);
-      const addrCallPreFun = checkFunFactory.preCondCheckFun(
-        this.preAddrError,
-        FunctionStateMutability.NonPayable,
-        specid,
-      );
-      if (addrCallPreFun) this.contract.appendChild(addrCallPreFun);
-      const addrCallPostFun = checkFunFactory.postCondCheckFun(
-        this.postAddrError,
-        FunctionStateMutability.NonPayable,
-        specid,
-      );
-      if (addrCallPostFun) this.contract.appendChild(addrCallPostFun);
-
-      // Generate dispatch_Iface_f
-
-      const dispatchingFun = this.dispatchingFunction(
-        specid,
-        tgtInterface,
-        tgtFun,
-        addrCallFun,
-        addrCallPreFun,
-        addrCallPostFun,
-      );
-      this.contract.appendChild(dispatchingFun);
+    if (ifName == undefined) {
+      console.log('Address interface undefined. Skip.');
+      return;
     }
+
+    const tgtFun = findFunctionFromContract(ifName, funName);
+    if (tgtFun == undefined) {
+      console.error(`Error: function ${funName} not found in ${ifName}. Abort.`);
+      process.exit(-1);
+    }
+
+    // Generate pre/post function for addr calls
+
+    const addrParam = this.factory.makeTypedVarDecls(
+      [this.factory.address],
+      ['seems doesnt matter'],
+      tgtFun.scope,
+    );
+    const tgtFuncParams = tgtFun.vParameters.vParameters;
+    const valGasParams = this.factory.makeTypedVarDecls(
+      [this.factory.uint256, this.factory.uint256],
+      ['value', 'gas'],
+      tgtFun.scope,
+    );
+    // TODO(DX): hard code spec id for now. storage value spec doesn't have id now
+    const specid = HARDCODE_SPECID;
+
+    const allFuncParams = addrParam.concat(valGasParams.concat(tgtFuncParams));
+    const tgtFuncRetParams = tgtFun.vReturnParameters.vParameters;
+    const checkFunFactory = new CheckFunFactory(this.spec, allFuncParams, tgtFuncRetParams, this.factory, tgtAddr);
+    const addrCallPreFun = checkFunFactory.preCondCheckFun(
+      this.preAddrError,
+      tgtFun.stateMutability,
+      specid,
+    );
+    if (addrCallPreFun) this.contract.appendChild(addrCallPreFun);
+    const addrCallPostFun = checkFunFactory.postCondCheckFun(
+      this.postAddrError,
+      tgtFun.stateMutability,
+      specid,
+    );
+    if (addrCallPostFun) this.contract.appendChild(addrCallPostFun);
+
+    // Generate dispatch_Iface_f
+    const dispatchingFun = this.dispatchingFunction(
+      specid,
+      ifName,
+      funName,
+      tgtFun,
+      addrCallPreFun,
+      addrCallPostFun,
+    );
+    this.contract.appendChild(dispatchingFun);
 
     for (const func of this.contract.vFunctions) {
       func.vBody?.walkChildren((node) => {
-        this.rewriteAddrCallsInFunBody(node, tgtFun, tgtInterface, tgtAddr);
+        this.rewriteAddrCallsInFunBody(node, funName, ifName, tgtAddr);
       });
     }
   }
+
   process(): void {
-    // console.log(this.spec);
     this.spec.id = HARDCODE_SPECID;
-    const wrapFun = this.createWrapFun([this.spec.id]); // fix: hard code spec id for now
+    const wrapFun = this.createWrapFun([this.spec.id]); // TODO(DX): hard code spec id for now
     this.contract.appendChild(wrapFun);
 
     this.updateVarDeclaration();

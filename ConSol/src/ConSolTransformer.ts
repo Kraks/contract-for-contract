@@ -129,10 +129,7 @@ export class ConSolTransformer<T> {
       console.log('Processing spec :  ' + trimSpec(specStr));
 
       if (isValSpec(spec)) {
-        const success = this.handleValSpec(astNode, spec);
-        if (success) {
-          hasConSolSpec = true;
-        }
+        hasConSolSpec = this.handleValSpec(astNode, spec);
       } else if (isTempSpec(spec)) {
         // TODO: handle temporal specification
       } else {
@@ -140,13 +137,11 @@ export class ConSolTransformer<T> {
       }
     });
 
-    if (hasConSolSpec) {
-      if (globalThis.customError) {
-        contract.appendChild(this.preCondError);
-        contract.appendChild(this.postCondError);
-        contract.appendChild(this.preAddrError);
-        contract.appendChild(this.postAddrError);
-      }
+    if (hasConSolSpec && globalThis.customError) {
+      contract.appendChild(this.preCondError);
+      contract.appendChild(this.postCondError);
+      contract.appendChild(this.preAddrError);
+      contract.appendChild(this.postAddrError);
     }
     return hasConSolSpec;
   }

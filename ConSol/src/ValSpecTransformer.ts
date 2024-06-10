@@ -58,7 +58,7 @@ export class ValSpecTransformer<T> {
     const newFun = this.factory.copy(oldFun);
     newFun.documentation = undefined;
     newFun.visibility = FunctionVisibility.Private;
-    newFun.stateMutability = FunctionStateMutability.NonPayable;
+    newFun.stateMutability = oldFun.stateMutability; //FunctionStateMutability.NonPayable;
     newFun.name = this.dispatchFunName(ifaceName, funName);
 
     const bodyStmts: Array<Statement> = [];
