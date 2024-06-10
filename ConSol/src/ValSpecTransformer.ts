@@ -16,7 +16,7 @@ import {
 import { usesAddr } from './ConSolUtils.js';
 
 import { ConSolFactory } from './ConSolFactory.js';
-import { findFunctionFromContract, freshName } from './Global.js';
+import { freshName } from './Global.js';
 
 export class ValSpecTransformer<T> {
   factory: ConSolFactory;
