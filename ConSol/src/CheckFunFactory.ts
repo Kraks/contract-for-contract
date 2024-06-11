@@ -113,14 +113,6 @@ export class CheckFunFactory<T> {
     return checkFunDef;
   }
 
-  /*
-  private makeCheckStmt(funName: string, args: Expression[], errorMsg: string): ExpressionStatement {
-    const f = this.makeIdentifier('function', funName, -1);
-    const call = this.makeFunCall(f, args, 'bool');
-    return this.makeRequireStmt(call, errorMsg);
-  }
-  */
-
   preCondCheckFun(
     errorDef: ErrorDefinition,
     mutability: FunctionStateMutability,
@@ -145,8 +137,6 @@ export class CheckFunFactory<T> {
     if (this.spec.postCond === undefined) return undefined;
     const postFunName = postCheckFunName(this.tgtName);
     const rets = [...this.guardedParamNames, ...this.guardedRetParamNames];
-    //console.log(rets);
-    //console.log(this.paramVarDecs.map((v) => v.name))
     const retVarDecs = this.factory.makeVarDecs(rets, [...this.paramVarDecs, ...this.retVarDecs]);
     const allParams = this.factory.makeParameterList([...retVarDecs]);
     const postCondFunc = this.makeCheckFun(

@@ -159,32 +159,31 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
     assert(ctx.children != null);
     const call = this.visitCall(ctx.call());
     const vspec: ValSpec<T> = makeValSpec({ call: call });
-
-    for (let i = 2; i < ctx.children.length - 1; i += 4) {
-      const prompt = this.extractTermText(ctx.children[i]);
-      if (prompt == 'requires') {
-        // Note: here we cast string to T, since so far we only have string as T
-        vspec.preCond = this.extractRawCond(ctx.sexpr(0)) as T;
-      } else if (prompt == 'ensures') {
-        // Note: here we cast string to T, since so far we only have string as T
-        vspec.postCond = this.extractRawCond(ctx.sexpr(0)) as T;
-      } else if (prompt == 'where') {
-        ctx
-          .vspec_list()
-          .map((vspec) => this.visitVspec(vspec))
-          .forEach((addrSpec) => {
-            addrSpec.id = nextAddrSpecId();
-            const rawAddr = addrSpec.call.tgt.addr;
-            const tgt = rawAddr === undefined ? addrSpec.call.tgt.func : rawAddr;
-            if (call.args.includes(tgt)) {
-              vspec.preFunSpec.push(addrSpec);
-            } else if (call.rets.includes(tgt)) {
-              vspec.postFunSpec.push(addrSpec);
-            } else assert(false, 'Unknown address: ' + tgt);
-          });
+    if (ctx.REQUIRES()) {
+      // Note: here we cast string to T, since so far we only have string as T
+      vspec.preCond = this.extractRawCond(ctx.sexpr(0)) as T;
+    }
+    if (ctx.ENSURES()) {
+      if (ctx.REQUIRES()) {
+        vspec.postCond = this.extractRawCond(ctx.sexpr(1)) as T;
       } else {
-        assert(false, 'invalid keyword: ' + prompt);
+       vspec.postCond = this.extractRawCond(ctx.sexpr(0)) as T;
       }
+    }
+    if (ctx.WHERE()) {
+      ctx
+        .vspec_list()
+        .map((vspec) => this.visitVspec(vspec))
+        .forEach((addrSpec) => {
+          addrSpec.id = nextAddrSpecId();
+          const rawAddr = addrSpec.call.tgt.addr;
+          const tgt = rawAddr === undefined ? addrSpec.call.tgt.func : rawAddr;
+          if (call.args.includes(tgt)) {
+            vspec.preFunSpec.push(addrSpec);
+          } else if (call.rets.includes(tgt)) {
+            vspec.postFunSpec.push(addrSpec);
+          } else assert(false, 'Unknown address: ' + tgt);
+        });
     }
     return vspec;
   };
