@@ -167,7 +167,7 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
       if (ctx.REQUIRES()) {
         vspec.postCond = this.extractRawCond(ctx.sexpr(1)) as T;
       } else {
-       vspec.postCond = this.extractRawCond(ctx.sexpr(0)) as T;
+        vspec.postCond = this.extractRawCond(ctx.sexpr(0)) as T;
       }
     }
     if (ctx.WHERE()) {
