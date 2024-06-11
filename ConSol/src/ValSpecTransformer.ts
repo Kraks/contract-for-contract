@@ -211,7 +211,7 @@ export class ValSpecTransformer<T> {
         console.error('Address interface undefined. Skip.');
         return;
       }
-      console.log("HEEE")
+      console.log('HEEE');
       node.vArguments.unshift(gasLeft);
       node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
       node.vArguments.unshift(node.vExpression.vExpression);
@@ -254,7 +254,7 @@ export class ValSpecTransformer<T> {
   }
 
   dispatchFunName(ifaceName: string, funName: string): string {
-    const dispatchFunName = DISPATCH_PREFIX + "_" + ifaceName + '_' + funName;
+    const dispatchFunName = DISPATCH_PREFIX + '_' + ifaceName + '_' + funName;
     return dispatchFunName;
   }
 

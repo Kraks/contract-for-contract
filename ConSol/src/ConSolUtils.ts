@@ -31,7 +31,7 @@ export const GUARD_ADDR_TYPE = 'uint256';
 export const PRE_CHECK_FUN = '_pre';
 export const POST_CHECK_FUN = '_post';
 export const ORG_CHECK_FUN = '_original';
-export const DISPATCH_PREFIX = "_dispatch";
+export const DISPATCH_PREFIX = '_dispatch';
 
 export function toBeImplemented(): never {
   console.error('To be implemented');

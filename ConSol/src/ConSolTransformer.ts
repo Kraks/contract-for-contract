@@ -10,7 +10,7 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
-import { isConSolSpec, parseConSolSpec, trimSpec, usesAddr } from './ConSolUtils.js';
+import { isConSolSpec, parseConSolSpec, usesAddr } from './ConSolUtils.js';
 import { isValSpec } from './spec/index.js';
 
 import { ConSolFactory } from './ConSolFactory.js';
