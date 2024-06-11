@@ -525,17 +525,18 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
        */
       const wrapper = this.guardedFun(preFun, postFun);
       if (wrapper) {
+        wrapper.stateMutability = this.funDef.stateMutability;
+        this.funDef.vScope.appendChild(wrapper);
         // if wrapper/guarded function is added, then
         // rename the original function `f` to `f`_original.
-        this.funDef.vScope.appendChild(wrapper);
         this.funDef.name = uncheckedFunName(this.tgtName);
         // if the original function has override specifier, preserve it for the newFun and remove it from the original function
         if (this.funDef.vOverrideSpecifier !== undefined) {
           wrapper.vOverrideSpecifier = this.funDef.vOverrideSpecifier;
           this.funDef.vOverrideSpecifier = undefined;
         }
-        wrapper.stateMutability = this.funDef.stateMutability;
         this.funDef.visibility = FunctionVisibility.Private;
+        this.funDef.stateMutability = FunctionStateMutability.NonPayable;
         if (this.funDef.isConstructor) {
           // If the spec is attached on a constructor, we generate a new constructor,
           // and the original constructor becomes an ordinary function.

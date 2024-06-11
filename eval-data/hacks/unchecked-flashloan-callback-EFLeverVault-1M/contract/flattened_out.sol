@@ -249,7 +249,7 @@ contract EFLeverVault is Ownable, ReentrancyGuard {
     /// @dev
     ///  {receiveFlashLoan(tokens, amounts, feeAmounts, userData) returns ()
     ///     requires {_entered == 1 && msg.sender == balancer}}
-    function receiveFlashLoan_original(IERC20[] memory tokens, uint256[] memory amounts, uint256[] memory feeAmounts, bytes memory userData) private payable {
+    function receiveFlashLoan_original(IERC20[] memory tokens, uint256[] memory amounts, uint256[] memory feeAmounts, bytes memory userData) private {
         uint256 loan_amount = amounts[0];
         uint256 fee_amount = feeAmounts[0];
         if (keccak256(userData) == keccak256("0x1")) {
