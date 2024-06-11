@@ -202,7 +202,7 @@ contract ExchangeBetweenPools is Ownable {
         ERC20TokenBankInterface(from_bank).issue(address(this), amount);
         uint256 camount = usdc.balanceOf(address(this));
         usdc.safeApprove(address(curve), camount);
-        dispatch_PriceInterface_exchange_underlying(curve, 0, gasleft(), 1, 2, camount, 0);
+        _dispatch_PriceInterface_exchange_underlying(curve, 0, gasleft(), 1, 2, camount, 0);
         uint256 namount = usdt.balanceOf(address(this));
         usdt.safeTransfer(to_bank, namount);
         return true;
@@ -228,7 +228,7 @@ contract ExchangeBetweenPools is Ownable {
         if (!(_exchange_underlying_post_condition(camount))) revert();
     }
 
-    function dispatch_PriceInterface_exchange_underlying(uint256 addr, uint256 value, uint256 gas, int128 i, int128 j, uint256 dx, uint256 min_dy) private {
+    function _dispatch_PriceInterface_exchange_underlying(uint256 addr, uint256 value, uint256 gas, int128 i, int128 j, uint256 dx, uint256 min_dy) private {
         uint96 specId = uint96(addr >> 160);
         PriceInterface(address(uint160(addr))).exchange_underlying.gas(gas)(i, j, dx, min_dy);
         if ((specId & uint96(1 << 20)) != 0) _PriceInterface_exchange_underlying_20_post(address(uint160(addr)), value, gas, i, j, dx, min_dy);

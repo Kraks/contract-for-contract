@@ -13,7 +13,7 @@ import {
 } from 'solc-typed-ast';
 
 import { ValSpec } from './spec/index.js';
-import { GUARD_ADDR_TYPE } from './ConSolUtils.js';
+import { DISPATCH_PREFIX, GUARD_ADDR_TYPE } from './ConSolUtils.js';
 import { ConSolFactory } from './ConSolFactory.js';
 import { ValSpecTransformer } from './ValSpecTransformer.js';
 import { findFunctionFromContract } from './Global.js';
@@ -165,7 +165,8 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     this.contract.appendChild(dispatchingFun);
 
     for (const func of this.contract.vFunctions) {
-      console.log(`rewrite ${func.name} for ${tgtAddr}`);
+      if (func.name.startsWith(DISPATCH_PREFIX)) continue;
+      console.log(`rewrite ${tgtAddr}.${funName} (${ifName}) in ${func.name}`);
       func.vBody?.walkChildren((node) => {
         this.rewriteAddrCallsInFunBody(node, funName, ifName, tgtAddr);
       });

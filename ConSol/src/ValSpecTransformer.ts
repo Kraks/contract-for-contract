@@ -13,7 +13,7 @@ import {
   ASTNode,
 } from 'solc-typed-ast';
 
-import { usesAddr } from './ConSolUtils.js';
+import { DISPATCH_PREFIX, usesAddr } from './ConSolUtils.js';
 
 import { ConSolFactory } from './ConSolFactory.js';
 import { freshName } from './Global.js';
@@ -190,28 +190,28 @@ export class ValSpecTransformer<T> {
     tgtInterface: string | undefined,
     tgtAddr: string | undefined,
   ) {
-    // DX: what if tgtInterface/tgtAddr is undefined?
+    const gasLeft = this.factory.makeFunctionCall(
+      'uint256',
+      FunctionCallKind.FunctionCall,
+      this.factory.makeIdentifier('msg', 'gasleft', -1),
+      [],
+    );
+
     if (
       node instanceof FunctionCall &&
       node.vFunctionName === tgtFun &&
       node.vExpression instanceof MemberAccess &&
-      node.vArguments.length == 0 &&
       node.vFunctionName == tgtFun &&
       node.vIdentifier == tgtAddr &&
       node.vExpression.vExpression instanceof Identifier
     ) {
+      // addr.fun(args, ...) -> dispatch_IFace_f(addr, 0, gasleft(), args, ...)
+      // DX: what if tgtInterface/tgtAddr is undefined?
       if (tgtInterface == undefined) {
-        console.log('Address interface undefined. Skip.');
+        console.error('Address interface undefined. Skip.');
         return;
       }
-      // addr.fun() -> dispatch_IFace_f(addr, 0, 0)
-      // node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
-      const gasLeft = this.factory.makeFunctionCall(
-        'uint256',
-        FunctionCallKind.FunctionCall,
-        this.factory.makeIdentifier('msg', 'gasleft', -1),
-        [],
-      );
+      console.log("HEEE")
       node.vArguments.unshift(gasLeft);
       node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
       node.vArguments.unshift(node.vExpression.vExpression);
@@ -226,20 +226,12 @@ export class ValSpecTransformer<T> {
       node.vExpression.vExpression.vArguments[0] instanceof Identifier &&
       node.vExpression.vExpression.vArguments[0].name == tgtAddr
     ) {
-      // Iface(addr).f(args, ...) -> dispatch_IFace_f(addr, 0, 0, args, ...)
-      const gasLeft = this.factory.makeFunctionCall(
-        'uint256',
-        FunctionCallKind.FunctionCall,
-        this.factory.makeIdentifier('msg', 'gasleft', -1),
-        [],
-      );
+      // Iface(addr).f(args, ...) -> dispatch_IFace_f(addr, 0, gasleft(), args, ...)
       node.vArguments.unshift(gasLeft);
       node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
       node.vArguments.unshift(node.vExpression.vExpression.vArguments[0]);
       node.vExpression = this.factory.makeIdentifier('function', this.dispatchFunName(tgtInterface, tgtFun), -1);
-    }
-    // Iface(addr).f{value: v, gas: g}(args, ...) -> dispatch_IFace_f(addr, v, g, args, ...)
-    else if (
+    } else if (
       node instanceof FunctionCall &&
       node.vFunctionName === tgtFun &&
       node.vExpression instanceof FunctionCallOptions &&
@@ -250,19 +242,19 @@ export class ValSpecTransformer<T> {
       node.vExpression.vExpression.vExpression.vArguments[0] instanceof Identifier &&
       node.vExpression.vExpression.vExpression.vArguments[0].name == tgtAddr
     ) {
+      // Iface(addr).f{value: v, gas: g}(args, ...) -> dispatch_IFace_f(addr, v, g, args, ...)
       // Let's assume there is only one value and one gas
       const g = node.vExpression.vOptionsMap.get('gas');
       if (g) node.vArguments.unshift(g);
       const v = node.vExpression.vOptionsMap.get('value');
       if (v) node.vArguments.unshift(v);
       node.vArguments.unshift(node.vExpression.vExpression.vExpression.vArguments[0]);
-      node.vExpression = this.factory.makeIdentifier('function', 'dispatch_' + tgtInterface + '_' + tgtFun, -1);
+      node.vExpression = this.factory.makeIdentifier('function', this.dispatchFunName(tgtInterface, tgtFun), -1);
     }
   }
 
   dispatchFunName(ifaceName: string, funName: string): string {
-    const dispatchFunName = 'dispatch_' + ifaceName + '_' + funName;
-
+    const dispatchFunName = DISPATCH_PREFIX + "_" + ifaceName + '_' + funName;
     return dispatchFunName;
   }
 
