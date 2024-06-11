@@ -11,7 +11,7 @@ import {
 
 import { ValSpec } from './spec/index.js';
 import { isConSolSpec, parseConSolSpec, trimSpec, usesAddr } from './ConSolUtils.js';
-import { isValSpec, isTempSpec } from './spec/index.js';
+import { isValSpec } from './spec/index.js';
 
 import { ConSolFactory } from './ConSolFactory.js';
 import { FunDefValSpecTransformer } from './FunDefValSpecTransformer.js';
@@ -121,14 +121,14 @@ export class ConSolTransformer<T> {
     let hasConSolSpec = false;
     contract.walkChildren((astNode: ASTNode) => {
       const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation | string;
-      let specStr = this.extractSpecStrFromDoc(astNodeDoc);
+      const specStr = this.extractSpecStrFromDoc(astNodeDoc);
       if (specStr === undefined || !isConSolSpec(specStr)) return;
       const spec = parseConSolSpec(specStr);
       console.log('Processing spec :  ' + trimSpec(specStr));
       if (isValSpec(spec)) {
         hasConSolSpec = this.handleValSpec(astNode, spec) || hasConSolSpec;
       }
-    })
+    });
 
     if (hasConSolSpec && globalThis.customError) {
       contract.appendChild(this.preCondError);
