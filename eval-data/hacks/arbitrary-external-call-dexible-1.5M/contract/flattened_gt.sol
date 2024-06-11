@@ -3196,7 +3196,7 @@ abstract contract SwapHandler is AdminBase, ISwapHandler {
     }
 
     function _fill_post(SwapTypes.SwapRequest calldata request, SwapMeta memory meta1, SwapMeta memory meta2) private {
-        if (!(meta2.outAmount>=request.tokenOut.amount)) revert();
+        if (!(meta2.outAmount >= request.tokenOut.amount)) revert();
     }
 
     function fill(SwapTypes.SwapRequest calldata request, SwapMeta memory meta) external returns (SwapMeta memory) {

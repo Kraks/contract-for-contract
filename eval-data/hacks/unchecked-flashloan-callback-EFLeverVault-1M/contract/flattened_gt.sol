@@ -504,7 +504,7 @@ contract EFLeverVault is Ownable, ReentrancyGuard {
     function () external payable {}
 
     function _receiveFlashLoan_pre(IERC20[] memory tokens, uint256[] memory amounts, uint256[] memory feeAmounts, bytes memory userData) private {
-        if (!(_entered==1&&msg.sender==balancer)) revert();
+        if (!(_entered == 1 && msg.sender == balancer)) revert();
     }
 
     function receiveFlashLoan(IERC20[] memory tokens, uint256[] memory amounts, uint256[] memory feeAmounts, bytes memory userData) public payable {

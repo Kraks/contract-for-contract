@@ -739,7 +739,7 @@ contract Bad_Guys_by_RPF is ERC721A, Ownable {
     }
 
     function _WhiteListMint_pre(bytes32[] calldata _merkleProof, uint256 chosenAmount) private {
-        if (!(WhiteListMint_check(_merkleProof,chosenAmount))) revert();
+        if (!(WhiteListMint_check(_merkleProof, chosenAmount))) revert();
     }
 
     function WhiteListMint(bytes32[] calldata _merkleProof, uint256 chosenAmount) public {

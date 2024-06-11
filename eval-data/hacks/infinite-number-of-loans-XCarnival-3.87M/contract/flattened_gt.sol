@@ -490,7 +490,7 @@ contract Exponential {
 }
 
 interface IXToken is IERC20 {
-    /// event 
+    /// event
     event Mint(address minter, uint256 mintAmount, uint256 mintTokens);
 
     event Redeem(address redeemer, uint256 redeemAmount, uint256 redeemTokens);
@@ -817,7 +817,7 @@ contract P2Controller is P2ControllerStorage, Exponential, Initializable {
     }
 
     function _borrowAllowed_pre(address xToken, uint256 orderId, address borrower, uint256 borrowAmount) private {
-        if (!(_checkBorrowAllowed(xToken,orderId,borrower,borrowAmount))) revert();
+        if (!(_checkBorrowAllowed(xToken, orderId, borrower, borrowAmount))) revert();
     }
 
     function borrowAllowed(address xToken, uint256 orderId, address borrower, uint256 borrowAmount) external {

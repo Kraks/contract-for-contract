@@ -2604,7 +2604,7 @@ contract CurveSwap is CurveContractInterface {
     }
 
     function _approveToken_pre(address token, address spender, uint _amount) private {
-        if (!(spender==QueryAddressProvider(2))) revert();
+        if (!(spender == QueryAddressProvider(2))) revert();
     }
 
     function approveToken(address token, address spender, uint _amount) public returns (bool) {

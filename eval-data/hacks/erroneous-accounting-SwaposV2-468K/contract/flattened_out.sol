@@ -452,7 +452,7 @@ contract SwaposV2Pair is ISwaposV2Pair, SwaposV2ERC20 {
     }
 
     function __update_pre(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) private {
-        if (!(__update_pre_condition(balance0,balance1,_reserve0,_reserve1))) revert();
+        if (!(__update_pre_condition(balance0, balance1, _reserve0, _reserve1))) revert();
     }
 
     function _update(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) private {

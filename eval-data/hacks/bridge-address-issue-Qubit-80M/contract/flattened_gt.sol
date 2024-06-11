@@ -559,7 +559,7 @@ contract QBridgeHandler is IQBridgeHandler, OwnableUpgradeable {
     }
 
     function _deposit_pre(bytes32 resourceID, address depositer, bytes calldata data) private {
-        if (!((resourceIDToTokenContractAddress[resourceID]!=address(0)&&contractWhitelist[resourceIDToTokenContractAddress[resourceID]]))) revert();
+        if (!((resourceIDToTokenContractAddress[resourceID] != address(0) && contractWhitelist[resourceIDToTokenContractAddress[resourceID]]))) revert();
     }
 
     function deposit(bytes32 resourceID, address depositer, bytes calldata data) override external {

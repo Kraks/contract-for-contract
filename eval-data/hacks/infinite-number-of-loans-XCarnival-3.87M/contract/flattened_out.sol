@@ -817,7 +817,7 @@ contract P2Controller is P2ControllerStorage, Exponential, Initializable {
     }
 
     function _borrowAllowed_pre(address xToken, uint256 orderId, address borrower, uint256 borrowAmount) private {
-        if (!(_checkBorrowAllowed(xToken,orderId,borrower,borrowAmount))) revert();
+        if (!(_checkBorrowAllowed(xToken, orderId, borrower, borrowAmount))) revert();
     }
 
     function borrowAllowed(address xToken, uint256 orderId, address borrower, uint256 borrowAmount) external {

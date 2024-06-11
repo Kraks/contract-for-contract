@@ -270,7 +270,7 @@ contract SushiBar is ERC20("n00d with X", "Xn00d") {
     }
 
     function _enter_post(uint256 _amount) private {
-        if (!(totalSupply()<=sushi.balanceOf(address(this)))) revert();
+        if (!(totalSupply() <= sushi.balanceOf(address(this)))) revert();
     }
 
     function enter(uint256 _amount) public {
@@ -279,7 +279,7 @@ contract SushiBar is ERC20("n00d with X", "Xn00d") {
     }
 
     function _leave_post(uint256 _share) private {
-        if (!(totalSupply()<=sushi.balanceOf(address(this)))) revert();
+        if (!(totalSupply() <= sushi.balanceOf(address(this)))) revert();
     }
 
     function leave(uint256 _share) public {

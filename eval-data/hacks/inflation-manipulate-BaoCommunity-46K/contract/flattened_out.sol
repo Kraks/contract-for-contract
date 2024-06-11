@@ -1582,11 +1582,11 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     function doTransferOut(address payable to, uint amount) internal;
 
     function _redeemInternal_pre(uint redeemTokens) private {
-        if (!(accrueInterest()==uint(Error.NO_ERROR))) revert();
+        if (!(accrueInterest() == uint(Error.NO_ERROR))) revert();
     }
 
     function _redeemInternal_post(uint redeemTokens, uint error) private {
-        if (!(totalSupply>1000)) revert();
+        if (!(totalSupply > 1000)) revert();
     }
 
     function redeemInternal(uint redeemTokens) internal returns (uint) {
@@ -1597,11 +1597,11 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     }
 
     function _redeemUnderlyingInternal_pre(uint redeemTokens) private {
-        if (!(accrueInterest()==uint(Error.NO_ERROR))) revert();
+        if (!(accrueInterest() == uint(Error.NO_ERROR))) revert();
     }
 
     function _redeemUnderlyingInternal_post(uint redeemTokens, uint error) private {
-        if (!(totalSupply>1000)) revert();
+        if (!(totalSupply > 1000)) revert();
     }
 
     function redeemUnderlyingInternal(uint redeemAmount) internal returns (uint) {

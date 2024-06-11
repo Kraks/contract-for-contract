@@ -1340,7 +1340,7 @@ contract Bean is ERC20, Pausable, Ownable, ReentrancyGuard {
     }
 
     function _claim_pre(address[] memory _contracts, uint256[] memory _amounts, uint256[] memory _tokenIds, uint256 _claimAmount, uint256 _endTime, bytes memory _signature) private {
-        if (!(claim_check(_contracts,_amounts,_tokenIds,_claimAmount,_endTime,_signature))) revert();
+        if (!(claim_check(_contracts, _amounts, _tokenIds, _claimAmount, _endTime, _signature))) revert();
     }
 
     function claim(address[] memory _contracts, uint256[] memory _amounts, uint256[] memory _tokenIds, uint256 _claimAmount, uint256 _endTime, bytes memory _signature) external {
