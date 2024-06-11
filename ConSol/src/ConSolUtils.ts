@@ -125,7 +125,7 @@ export async function ConSolCompile(
       console.log(`Processing ${contract.kind} ${contract.name}.`);
       const factory = new ConSolFactory(contract.context || new ASTContext(), contract.scope);
       const contractTransformer = new ConSolTransformer(factory, contract, ifs);
-      hasConSolSpec = hasConSolSpec || contractTransformer.process();
+      hasConSolSpec = contractTransformer.process() || hasConSolSpec;
     });
 
     if (!hasConSolSpec) {

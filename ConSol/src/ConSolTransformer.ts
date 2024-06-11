@@ -79,6 +79,17 @@ export class ConSolTransformer<T> {
     return true;
   }
 
+  extractSpecStrFromDoc(doc: StructuredDocumentation | string): string | undefined {
+    if (typeof doc === 'string') {
+      return doc;
+    } else if (doc instanceof StructuredDocumentation) {
+      // @custom:consol
+      return doc.text;
+    } else {
+      return undefined;
+    }
+  }
+
   process(): boolean {
     const contract = this.contract;
 
@@ -110,30 +121,14 @@ export class ConSolTransformer<T> {
     let hasConSolSpec = false;
     contract.walkChildren((astNode: ASTNode) => {
       const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation | string;
-      //if (!astNodeDoc) return;
-
-      let specStr: string;
-      if (typeof astNodeDoc === 'string') {
-        specStr = astNodeDoc;
-      } else if (astNodeDoc instanceof StructuredDocumentation) {
-        // @custom:consol
-        specStr = astNodeDoc.text;
-      } else {
-        return;
-      }
-      if (!isConSolSpec(specStr)) return;
-
+      let specStr = this.extractSpecStrFromDoc(astNodeDoc);
+      if (specStr === undefined || !isConSolSpec(specStr)) return;
       const spec = parseConSolSpec(specStr);
       console.log('Processing spec :  ' + trimSpec(specStr));
-
       if (isValSpec(spec)) {
-        hasConSolSpec = this.handleValSpec(astNode, spec);
-      } else if (isTempSpec(spec)) {
-        // TODO: handle temporal specification
-      } else {
-        console.assert(false);
+        hasConSolSpec = this.handleValSpec(astNode, spec) || hasConSolSpec;
       }
-    });
+    })
 
     if (hasConSolSpec && globalThis.customError) {
       contract.appendChild(this.preCondError);
