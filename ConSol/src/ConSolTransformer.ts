@@ -43,7 +43,7 @@ export class ConSolTransformer<T> {
 
   handleFunDefSpec<T>(node: ASTNode, spec: ValSpec<T>): boolean {
     if (node instanceof FunctionDefinition) {
-      (new FunDefValSpecTransformer(
+      new FunDefValSpecTransformer(
         node,
         spec,
         this.preCondError,
@@ -51,7 +51,7 @@ export class ConSolTransformer<T> {
         this.preAddrError,
         this.postAddrError,
         this.factory,
-      )).process();
+      ).process();
       return true;
     }
     return false;
@@ -66,14 +66,14 @@ export class ConSolTransformer<T> {
         console.log('ValSpec on non-address variables is not supported.');
         return false;
       }
-      (new VarDefValSpecTransformer(
+      new VarDefValSpecTransformer(
         this.contract,
         node,
         spec,
         this.preAddrError,
         this.postAddrError,
         this.factory,
-      )).process();
+      ).process();
       return true;
     }
     return false;
@@ -129,11 +129,11 @@ export class ConSolTransformer<T> {
       console.log('Parsed spec AST:');
       console.log(spec);
       hasConSolSpec = this.handleFunDefSpec(astNode, spec) || hasConSolSpec;
-    })
+    });
 
     contract.walkChildren((astNode: ASTNode) => {
       const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation | string;
-      let specStr = this.extractSpecStrFromDoc(astNodeDoc);
+      const specStr = this.extractSpecStrFromDoc(astNodeDoc);
       if (specStr === undefined || !isConSolSpec(specStr)) return;
       const spec = parseConSolSpec(specStr);
       if (!isValSpec(spec)) return;
@@ -141,7 +141,7 @@ export class ConSolTransformer<T> {
       console.log('Parsed spec AST:');
       console.log(spec);
       hasConSolSpec = this.handleValSpec(astNode, spec) || hasConSolSpec;
-    })
+    });
 
     if (hasConSolSpec && globalThis.customError) {
       contract.appendChild(this.preCondError);
