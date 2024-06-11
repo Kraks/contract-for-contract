@@ -318,8 +318,6 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
   };
 }
 
-// TODO: add error handling
-// XXX: for now, just for testing
 export function CSSpecParse<T>(s: string, visitor: CSSpecVisitor<T>): CSSpec<T> {
   resetAddrSpecId();
   const chars = new CharStream(s); // replace this with a FileStream as required

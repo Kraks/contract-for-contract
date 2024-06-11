@@ -41,11 +41,9 @@ export class ConSolTransformer<T> {
     this.postAddrError = factory.makeError('postViolationAddr', 'specId', 'uint256');
   }
 
-  handleValSpec<T>(node: ASTNode, spec: ValSpec<T>): boolean {
-    console.log('Parsed spec AST:');
-    console.log(spec);
+  handleFunDefSpec<T>(node: ASTNode, spec: ValSpec<T>): boolean {
     if (node instanceof FunctionDefinition) {
-      const trans = new FunDefValSpecTransformer(
+      (new FunDefValSpecTransformer(
         node,
         spec,
         this.preCondError,
@@ -53,30 +51,32 @@ export class ConSolTransformer<T> {
         this.preAddrError,
         this.postAddrError,
         this.factory,
-      );
-      trans.process();
-    } else if (node instanceof EventDefinition) {
-      // Note(GW): allowing to attach pre-cond to events, the pre-cond is
-      // checked before the event is emitted. Optional.
-    } else if (node instanceof VariableDeclaration) {
+      )).process();
+      return true;
+    }
+    return false;
+  }
+
+  handleValSpec<T>(node: ASTNode, spec: ValSpec<T>): boolean {
+    //if (node instanceof EventDefinition) {
+    // Note(GW): allowing to attach pre-cond to events, the pre-cond is
+    // checked before the event is emitted. Optional.
+    if (node instanceof VariableDeclaration) {
       if (!usesAddr(node.typeString)) {
         console.log('ValSpec on non-address variables is not supported.');
         return false;
       }
-      const trans = new VarDefValSpecTransformer(
+      (new VarDefValSpecTransformer(
         this.contract,
         node,
         spec,
         this.preAddrError,
         this.postAddrError,
         this.factory,
-      );
-      trans.process();
-    } else {
-      console.assert(false, 'unexpected node type: ' + node.constructor.name);
-      return false;
+      )).process();
+      return true;
     }
-    return true;
+    return false;
   }
 
   extractSpecStrFromDoc(doc: StructuredDocumentation | string): string | undefined {
@@ -124,11 +124,24 @@ export class ConSolTransformer<T> {
       const specStr = this.extractSpecStrFromDoc(astNodeDoc);
       if (specStr === undefined || !isConSolSpec(specStr)) return;
       const spec = parseConSolSpec(specStr);
+      if (!isValSpec(spec)) return;
       console.log('Processing spec :  ' + trimSpec(specStr));
-      if (isValSpec(spec)) {
-        hasConSolSpec = this.handleValSpec(astNode, spec) || hasConSolSpec;
-      }
-    });
+      console.log('Parsed spec AST:');
+      console.log(spec);
+      hasConSolSpec = this.handleFunDefSpec(astNode, spec) || hasConSolSpec;
+    })
+
+    contract.walkChildren((astNode: ASTNode) => {
+      const astNodeDoc = (astNode as ConSolCheckNodes).documentation as StructuredDocumentation | string;
+      let specStr = this.extractSpecStrFromDoc(astNodeDoc);
+      if (specStr === undefined || !isConSolSpec(specStr)) return;
+      const spec = parseConSolSpec(specStr);
+      if (!isValSpec(spec)) return;
+      console.log('Processing spec :  ' + trimSpec(specStr));
+      console.log('Parsed spec AST:');
+      console.log(spec);
+      hasConSolSpec = this.handleValSpec(astNode, spec) || hasConSolSpec;
+    })
 
     if (hasConSolSpec && globalThis.customError) {
       contract.appendChild(this.preCondError);
