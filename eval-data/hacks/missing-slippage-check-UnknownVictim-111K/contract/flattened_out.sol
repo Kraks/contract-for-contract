@@ -208,6 +208,16 @@ contract ExchangeBetweenPools is Ownable {
         return true;
     }
 
+    function _doExchange_pre(uint256 amount) private {
+        if (!(amount >= minimum_amount && amount <= ERC20TokenBankInterface(from_bank).balance())) revert();
+    }
+
+    function doExchange(uint256 amount) public returns (bool) {
+        _doExchange_pre(amount);
+        bool success = doExchange_original(amount);
+        return (success);
+    }
+
     function _wrap_curve(address addr) private pure returns (uint256) {
         uint256 _addr = uint256(uint160(addr));
         _addr = _addr | (uint96(1 << 20) << 160);
@@ -222,16 +232,6 @@ contract ExchangeBetweenPools is Ownable {
         uint96 specId = uint96(addr >> 160);
         PriceInterface(address(uint160(addr))).exchange_underlying{gas: gas}(i, j, dx, min_dy);
         if ((specId & uint96(1 << 20)) != 0) _PriceInterface_exchange_underlying_20_post(address(uint160(addr)), value, gas, i, j, dx, min_dy);
-    }
-
-    function _doExchange_pre(uint256 amount) private {
-        if (!(amount >= minimum_amount && amount <= ERC20TokenBankInterface(from_bank).balance())) revert();
-    }
-
-    function doExchange(uint256 amount) public returns (bool) {
-        _doExchange_pre(amount);
-        bool success = doExchange_original(amount);
-        return (success);
     }
 }
 

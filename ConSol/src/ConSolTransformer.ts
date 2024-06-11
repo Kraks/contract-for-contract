@@ -43,6 +43,8 @@ export class ConSolTransformer<T> {
 
   handleFunDefSpec<T>(node: ASTNode, spec: ValSpec<T>): boolean {
     if (node instanceof FunctionDefinition) {
+      console.log('Parsed function spec AST:');
+      console.log(spec);
       new FunDefValSpecTransformer(
         node,
         spec,
@@ -66,6 +68,8 @@ export class ConSolTransformer<T> {
         console.log('ValSpec on non-address variables is not supported.');
         return false;
       }
+      console.log('Parsed storage-address spec AST:');
+      console.log(spec);
       new VarDefValSpecTransformer(
         this.contract,
         node,
@@ -125,9 +129,6 @@ export class ConSolTransformer<T> {
       if (specStr === undefined || !isConSolSpec(specStr)) return;
       const spec = parseConSolSpec(specStr);
       if (!isValSpec(spec)) return;
-      console.log('Processing spec :  ' + trimSpec(specStr));
-      console.log('Parsed spec AST:');
-      console.log(spec);
       hasConSolSpec = this.handleFunDefSpec(astNode, spec) || hasConSolSpec;
     });
 
@@ -137,9 +138,6 @@ export class ConSolTransformer<T> {
       if (specStr === undefined || !isConSolSpec(specStr)) return;
       const spec = parseConSolSpec(specStr);
       if (!isValSpec(spec)) return;
-      console.log('Processing spec :  ' + trimSpec(specStr));
-      console.log('Parsed spec AST:');
-      console.log(spec);
       hasConSolSpec = this.handleValSpec(astNode, spec) || hasConSolSpec;
     });
 
