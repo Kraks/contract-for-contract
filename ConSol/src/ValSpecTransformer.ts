@@ -211,7 +211,6 @@ export class ValSpecTransformer<T> {
         console.error('Address interface undefined. Skip.');
         return;
       }
-      console.log('HEEE');
       node.vArguments.unshift(gasLeft);
       node.vArguments.unshift(this.factory.makeLiteral('uint256', LiteralKind.Number, '0', '0'));
       node.vArguments.unshift(node.vExpression.vExpression);

@@ -154,7 +154,6 @@ export class CSSpecVisitor<T> extends SpecVisitor<SpecParseResult<T>> {
             ('where' vspec*)?
             '}';
   */
-  // TODO: also attach spec id to storage addr. fix.
   visitVspec: (ctx: VspecContext) => ValSpec<T> = (ctx) => {
     assert(ctx.children != null);
     const call = this.visitCall(ctx.call());

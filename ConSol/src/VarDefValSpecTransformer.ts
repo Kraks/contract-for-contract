@@ -16,10 +16,8 @@ import { ValSpec } from './spec/index.js';
 import { DISPATCH_PREFIX, GUARD_ADDR_TYPE } from './ConSolUtils.js';
 import { ConSolFactory } from './ConSolFactory.js';
 import { ValSpecTransformer } from './ValSpecTransformer.js';
-import { findFunctionFromContract } from './Global.js';
+import { findFunctionFromContract, nextAddrSpecId } from './Global.js';
 import { CheckFunFactory } from './CheckFunFactory.js';
-
-const HARDCODE_SPECID = 20; // hard coded for now
 
 export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   contract: ContractDefinition;
@@ -123,7 +121,7 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
     this.varDef.vType = this.factory.makeElementaryTypeName('', GUARD_ADDR_TYPE);
   }
 
-  iterateFunctions(): void {
+  iterateFunctions(specId: number): void {
     // DX: this spec only has one target function?
     const funName = this.spec.call.tgt.func;
     const ifName = this.spec.call.tgt.interface;
@@ -149,19 +147,17 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
       ['value', 'gas'],
       tgtFun.scope,
     );
-    // TODO(DX): hard code spec id for now. storage value spec doesn't have id now
-    const specid = HARDCODE_SPECID;
 
     const allFuncParams = addrParam.concat(valGasParams.concat(tgtFuncParams));
     const tgtFuncRetParams = tgtFun.vReturnParameters.vParameters;
     const checkFunFactory = new CheckFunFactory(this.spec, allFuncParams, tgtFuncRetParams, this.factory, tgtAddr);
-    const addrCallPreFun = checkFunFactory.preCondCheckFun(this.preAddrError, tgtFun.stateMutability, specid);
+    const addrCallPreFun = checkFunFactory.preCondCheckFun(this.preAddrError, tgtFun.stateMutability, specId);
     if (addrCallPreFun) this.contract.appendChild(addrCallPreFun);
-    const addrCallPostFun = checkFunFactory.postCondCheckFun(this.postAddrError, tgtFun.stateMutability, specid);
+    const addrCallPostFun = checkFunFactory.postCondCheckFun(this.postAddrError, tgtFun.stateMutability, specId);
     if (addrCallPostFun) this.contract.appendChild(addrCallPostFun);
 
     // Generate dispatch_Iface_f
-    const dispatchingFun = this.dispatchingFunction(specid, ifName, funName, tgtFun, addrCallPreFun, addrCallPostFun);
+    const dispatchingFun = this.dispatchingFunction(specId, ifName, funName, tgtFun, addrCallPreFun, addrCallPostFun);
     this.contract.appendChild(dispatchingFun);
 
     for (const func of this.contract.vFunctions) {
@@ -174,11 +170,12 @@ export class VarDefValSpecTransformer<T> extends ValSpecTransformer<T> {
   }
 
   process(): void {
-    this.spec.id = HARDCODE_SPECID;
-    const wrapFun = this.createWrapFun([this.spec.id]); // TODO(DX): hard code spec id for now
+    if (this.spec.id === undefined) {
+      this.spec.id = nextAddrSpecId();
+    }
+    const wrapFun = this.createWrapFun([this.spec.id]);
     this.contract.appendChild(wrapFun);
-
     this.updateVarDeclaration();
-    this.iterateFunctions();
+    this.iterateFunctions(this.spec.id);
   }
 }

@@ -336,15 +336,38 @@ interface IProtocolFeesCollector {
 ///  @dev Full external interface for the Vault core contract - no external or public methods exist in the contract that
 ///  don't override one of these declarations.
 interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication {
-    enum UserBalanceOpKind { DEPOSIT_INTERNAL, WITHDRAW_INTERNAL, TRANSFER_INTERNAL, TRANSFER_EXTERNAL }
+    enum UserBalanceOpKind {
+        DEPOSIT_INTERNAL,
+        WITHDRAW_INTERNAL,
+        TRANSFER_INTERNAL,
+        TRANSFER_EXTERNAL
+    }
 
-    enum PoolSpecialization { GENERAL, MINIMAL_SWAP_INFO, TWO_TOKEN }
+    enum PoolSpecialization {
+        GENERAL,
+        MINIMAL_SWAP_INFO,
+        TWO_TOKEN
+    }
 
-    enum PoolBalanceChangeKind { JOIN, EXIT }
+    enum PoolBalanceChangeKind {
+        JOIN,
+        EXIT
+    }
 
-    enum SwapKind { GIVEN_IN, GIVEN_OUT }
+    enum SwapKind {
+        GIVEN_IN,
+        GIVEN_OUT
+    }
 
-    enum PoolBalanceOpKind { WITHDRAW, DEPOSIT, UPDATE }
+    ///  Withdrawals decrease the Pool's cash, but increase its managed balance, leaving the total balance unchanged.
+    ///  Deposits increase the Pool's cash, but decrease its managed balance, leaving the total balance unchanged.
+    ///  Updates don't affect the Pool's cash balance, but because the managed balance changes, it does alter the total.
+    ///  The external amount can be either increased or decreased by this call (i.e., reporting a gain or a loss).
+    enum PoolBalanceOpKind {
+        WITHDRAW,
+        DEPOSIT,
+        UPDATE
+    }
 
     ///  @dev Emitted when a new authorizer is set by `setAuthorizer`.
     event AuthorizerChanged(IAuthorizer indexed newAuthorizer);
@@ -382,6 +405,8 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
     ///  @dev Emitted when a Pool's token Asset Manager alters its balance via `managePoolBalance`.
     event PoolBalanceManaged(bytes32 indexed poolId, address indexed assetManager, IERC20 indexed token, int256 cashDelta, int256 managedDelta);
 
+    ///  @dev Data for `manageUserBalance` operations, which include the possibility for ETH to be sent and received
+    /// without manual WETH wrapping or unwrapping.
     struct UserBalanceOp {
         UserBalanceOpKind kind;
         IAsset asset;
@@ -704,18 +729,18 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
 
     function _wrap_STETH(address addr) private pure returns (uint256) {
         uint256 _addr = uint256(uint160(addr));
-        _addr = _addr | (uint96(1 << 20) << 160);
+        _addr = _addr | (uint96(1 << 0) << 160);
         return _addr;
     }
 
-    function _IChainlinkAggregator_latestRoundData_20_post(address STETH, uint256 v, uint256 g, uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound) private view {
+    function _IChainlinkAggregator_latestRoundData_0_post(address STETH, uint256 v, uint256 g, uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound) private view {
         if (!((updatedAt > block.timestamp - 1 days) && (answer > 0))) revert();
     }
 
     function _dispatch_IChainlinkAggregator_latestRoundData(uint256 addr, uint256 value, uint256 gas) private view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound) {
         uint96 specId = uint96(addr >> 160);
         (uint80 _cs_0, int256 _cs_1, uint256 _cs_2, uint256 _cs_3, uint80 _cs_4) = IChainlinkAggregator(address(uint160(addr))).latestRoundData{gas: gas}();
-        if ((specId & uint96(1 << 20)) != 0) _IChainlinkAggregator_latestRoundData_20_post(address(uint160(addr)), value, gas, _cs_0, _cs_1, _cs_2, _cs_3, _cs_4);
+        if ((specId & uint96(1 << 0)) != 0) _IChainlinkAggregator_latestRoundData_0_post(address(uint160(addr)), value, gas, _cs_0, _cs_1, _cs_2, _cs_3, _cs_4);
         return (_cs_0, _cs_1, _cs_2, _cs_3, _cs_4);
     }
 }

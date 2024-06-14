@@ -1,3 +1,4 @@
+/// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity <0.9.0>=0.7.0^0.8.0;
 pragma experimental ABIEncoderV2;
 
@@ -172,7 +173,18 @@ interface IOracleValidate {
 ///   - LPCM = LendingPoolCollateralManager
 ///   - P = Pausable
 library Errors {
-    enum CollateralManagerErrors { NO_ERROR, NO_COLLATERAL_AVAILABLE, COLLATERAL_CANNOT_BE_LIQUIDATED, CURRRENCY_NOT_BORROWED, HEALTH_FACTOR_ABOVE_THRESHOLD, NOT_ENOUGH_LIQUIDITY, NO_ACTIVE_RESERVE, HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD, INVALID_EQUAL_ASSETS_TO_SWAP, FROZEN_RESERVE }
+    enum CollateralManagerErrors {
+        NO_ERROR,
+        NO_COLLATERAL_AVAILABLE,
+        COLLATERAL_CANNOT_BE_LIQUIDATED,
+        CURRRENCY_NOT_BORROWED,
+        HEALTH_FACTOR_ABOVE_THRESHOLD,
+        NOT_ENOUGH_LIQUIDITY,
+        NO_ACTIVE_RESERVE,
+        HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD,
+        INVALID_EQUAL_ASSETS_TO_SWAP,
+        FROZEN_RESERVE
+    }
 
     string internal constant CALLER_NOT_POOL_ADMIN = "33";
     string internal constant BORROW_ALLOWANCE_NOT_ENOUGH = "59";
@@ -336,15 +348,38 @@ interface IProtocolFeesCollector {
 ///  @dev Full external interface for the Vault core contract - no external or public methods exist in the contract that
 ///  don't override one of these declarations.
 interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication {
-    enum UserBalanceOpKind { DEPOSIT_INTERNAL, WITHDRAW_INTERNAL, TRANSFER_INTERNAL, TRANSFER_EXTERNAL }
+    enum UserBalanceOpKind {
+        DEPOSIT_INTERNAL,
+        WITHDRAW_INTERNAL,
+        TRANSFER_INTERNAL,
+        TRANSFER_EXTERNAL
+    }
 
-    enum PoolSpecialization { GENERAL, MINIMAL_SWAP_INFO, TWO_TOKEN }
+    enum PoolSpecialization {
+        GENERAL,
+        MINIMAL_SWAP_INFO,
+        TWO_TOKEN
+    }
 
-    enum PoolBalanceChangeKind { JOIN, EXIT }
+    enum PoolBalanceChangeKind {
+        JOIN,
+        EXIT
+    }
 
-    enum SwapKind { GIVEN_IN, GIVEN_OUT }
+    enum SwapKind {
+        GIVEN_IN,
+        GIVEN_OUT
+    }
 
-    enum PoolBalanceOpKind { WITHDRAW, DEPOSIT, UPDATE }
+    ///  Withdrawals decrease the Pool's cash, but increase its managed balance, leaving the total balance unchanged.
+    ///  Deposits increase the Pool's cash, but decrease its managed balance, leaving the total balance unchanged.
+    ///  Updates don't affect the Pool's cash balance, but because the managed balance changes, it does alter the total.
+    ///  The external amount can be either increased or decreased by this call (i.e., reporting a gain or a loss).
+    enum PoolBalanceOpKind {
+        WITHDRAW,
+        DEPOSIT,
+        UPDATE
+    }
 
     ///  @dev Emitted when a new authorizer is set by `setAuthorizer`.
     event AuthorizerChanged(IAuthorizer indexed newAuthorizer);
@@ -382,6 +417,8 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
     ///  @dev Emitted when a Pool's token Asset Manager alters its balance via `managePoolBalance`.
     event PoolBalanceManaged(bytes32 indexed poolId, address indexed assetManager, IERC20 indexed token, int256 cashDelta, int256 managedDelta);
 
+    ///  @dev Data for `manageUserBalance` operations, which include the possibility for ETH to be sent and received
+    /// without manual WETH wrapping or unwrapping.
     struct UserBalanceOp {
         UserBalanceOpKind kind;
         IAsset asset;
@@ -404,6 +441,12 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
         bool toInternalBalance;
     }
 
+    ///  @dev Data for a single swap executed by `swap`. `amount` is either `amountIn` or `amountOut` depending on
+    ///  the `kind` value.
+    ///  `assetIn` and `assetOut` are either token addresses, or the IAsset sentinel value for ETH (the zero address).
+    ///  Note that Pools never interact with ETH directly: it will be wrapped to or unwrapped from WETH by the Vault.
+    ///  The `userData` field is ignored by the Vault, but forwarded to the Pool in the `onSwap` hook, and may be
+    ///  used to extend swap behavior.
     struct SingleSwap {
         bytes32 poolId;
         SwapKind kind;
@@ -413,6 +456,12 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
         bytes userData;
     }
 
+    ///  @dev Data for each individual swap executed by `batchSwap`. The asset in and out fields are indexes into the
+    ///  `assets` array passed to that function, and ETH assets are converted to WETH.
+    ///  If `amount` is zero, the multihop mechanism is used to determine the actual amount based on the amount in/out
+    ///  from the previous swap, depending on the swap kind.
+    ///  The `userData` field is ignored by the Vault, but forwarded to the Pool in the `onSwap` hook, and may be
+    ///  used to extend swap behavior.
     struct BatchSwapStep {
         bytes32 poolId;
         uint256 assetInIndex;
@@ -421,6 +470,17 @@ interface IVault is ISignaturesValidator, ITemporarilyPausable, IAuthentication 
         bytes userData;
     }
 
+    ///  @dev All tokens in a swap are either sent from the `sender` account to the Vault, or from the Vault to the
+    ///  `recipient` account.
+    ///  If the caller is not `sender`, it must be an authorized relayer for them.
+    ///  If `fromInternalBalance` is true, the `sender`'s Internal Balance will be preferred, performing an ERC20
+    ///  transfer for the difference between the requested amount and the User's Internal Balance (if any). The `sender`
+    ///  must have allowed the Vault to use their tokens via `IERC20.approve()`. This matches the behavior of
+    ///  `joinPool`.
+    ///  If `toInternalBalance` is true, tokens will be deposited to `recipient`'s internal balance instead of
+    ///  transferred. This matches the behavior of `exitPool`.
+    ///  Note that ETH cannot be deposited to or withdrawn from Internal Balance: attempting to do so will trigger a
+    ///  revert.
     struct FundManagement {
         address sender;
         bool fromInternalBalance;
@@ -658,9 +718,9 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
 
     /// @custom:consol
     ///  {_get() returns (ret)
-    ///    ensures {(ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) && 
+    ///    ensures {(ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) &&
     ///        (ret * 105 / 100 > BALWSTETHWETH.getLatest(1))}}
-    function _get_original() private view returns (uint256) {
+    function _get_original() private returns (uint256) {
         (, int256 stETHPrice, , uint256 updatedAt, ) = _dispatch_IChainlinkAggregator_latestRoundData(STETH, 0, gasleft());
         require(updatedAt > (block.timestamp - 1 days), Errors.O_WRONG_PRICE);
         require(stETHPrice > 0, Errors.O_WRONG_PRICE);
@@ -692,7 +752,7 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
     }
 
     function __get_post(uint256 ret) private view {
-        if (!((ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) && 
+        if (!((ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) &&
        (ret * 105 / 100 > BALWSTETHWETH.getLatest(1)))) revert();
     }
 
@@ -704,18 +764,18 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
 
     function _wrap_STETH(address addr) private pure returns (uint256) {
         uint256 _addr = uint256(uint160(addr));
-        _addr = _addr | (uint96(1 << 20) << 160);
+        _addr = _addr | (uint96(1 << 0) << 160);
         return _addr;
     }
 
-    function _IChainlinkAggregator_latestRoundData_20_post(address STETH, uint256 v, uint256 g, uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound) private view {
+    function _IChainlinkAggregator_latestRoundData_0_post(address STETH, uint256 v, uint256 g, uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound) private view {
         if (!((updatedAt > block.timestamp - 1 days) && (answer > 0))) revert();
     }
 
     function _dispatch_IChainlinkAggregator_latestRoundData(uint256 addr, uint256 value, uint256 gas) private view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound) {
         uint96 specId = uint96(addr >> 160);
         (uint80 _cs_0, int256 _cs_1, uint256 _cs_2, uint256 _cs_3, uint80 _cs_4) = IChainlinkAggregator(address(uint160(addr))).latestRoundData{gas: gas}();
-        if ((specId & uint96(1 << 20)) != 0) _IChainlinkAggregator_latestRoundData_20_post(address(uint160(addr)), value, gas, _cs_0, _cs_1, _cs_2, _cs_3, _cs_4);
+        if ((specId & uint96(1 << 0)) != 0) _IChainlinkAggregator_latestRoundData_0_post(address(uint160(addr)), value, gas, _cs_0, _cs_1, _cs_2, _cs_3, _cs_4);
         return (_cs_0, _cs_1, _cs_2, _cs_3, _cs_4);
     }
 }

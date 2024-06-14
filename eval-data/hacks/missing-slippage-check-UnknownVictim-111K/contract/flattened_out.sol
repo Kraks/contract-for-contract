@@ -220,18 +220,18 @@ contract ExchangeBetweenPools is Ownable {
 
     function _wrap_curve(address addr) private pure returns (uint256) {
         uint256 _addr = uint256(uint160(addr));
-        _addr = _addr | (uint96(1 << 20) << 160);
+        _addr = _addr | (uint96(1 << 0) << 160);
         return _addr;
     }
 
-    function _PriceInterface_exchange_underlying_20_post(address curve, uint256 v, uint256 g, int128 x, int128 y, uint256 camount, uint256 n) private {
+    function _PriceInterface_exchange_underlying_0_post(address curve, uint256 v, uint256 g, int128 x, int128 y, uint256 camount, uint256 n) private {
         if (!(_exchange_underlying_post_condition(camount))) revert();
     }
 
     function _dispatch_PriceInterface_exchange_underlying(uint256 addr, uint256 value, uint256 gas, int128 i, int128 j, uint256 dx, uint256 min_dy) private {
         uint96 specId = uint96(addr >> 160);
         PriceInterface(address(uint160(addr))).exchange_underlying{gas: gas}(i, j, dx, min_dy);
-        if ((specId & uint96(1 << 20)) != 0) _PriceInterface_exchange_underlying_20_post(address(uint160(addr)), value, gas, i, j, dx, min_dy);
+        if ((specId & uint96(1 << 0)) != 0) _PriceInterface_exchange_underlying_0_post(address(uint160(addr)), value, gas, i, j, dx, min_dy);
     }
 }
 
