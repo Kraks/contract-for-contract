@@ -536,7 +536,9 @@ export class FunDefValSpecTransformer<T> extends ValSpecTransformer<T> {
           this.funDef.vOverrideSpecifier = undefined;
         }
         this.funDef.visibility = FunctionVisibility.Private;
-        this.funDef.stateMutability = FunctionStateMutability.NonPayable;
+        if (this.funDef.stateMutability == FunctionStateMutability.Payable) {
+          this.funDef.stateMutability = FunctionStateMutability.NonPayable;
+        }
         if (this.funDef.isConstructor) {
           // If the spec is attached on a constructor, we generate a new constructor,
           // and the original constructor becomes an ordinary function.

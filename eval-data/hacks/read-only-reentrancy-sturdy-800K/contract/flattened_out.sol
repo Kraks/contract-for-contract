@@ -718,9 +718,9 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
 
     /// @custom:consol
     ///  {_get() returns (ret)
-    ///    ensures {(ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) &&
+    ///    ensures {(ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) && 
     ///        (ret * 105 / 100 > BALWSTETHWETH.getLatest(1))}}
-    function _get_original() private returns (uint256) {
+    function _get_original() private view returns (uint256) {
         (, int256 stETHPrice, , uint256 updatedAt, ) = _dispatch_IChainlinkAggregator_latestRoundData(STETH, 0, gasleft());
         require(updatedAt > (block.timestamp - 1 days), Errors.O_WRONG_PRICE);
         require(stETHPrice > 0, Errors.O_WRONG_PRICE);
@@ -752,7 +752,7 @@ contract BALWSTETHWETHOracle is IOracle, IOracleValidate {
     }
 
     function __get_post(uint256 ret) private view {
-        if (!((ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) &&
+        if (!((ret * 95 / 100 < BALWSTETHWETH.getLatest(1)) && 
        (ret * 105 / 100 > BALWSTETHWETH.getLatest(1)))) revert();
     }
 
